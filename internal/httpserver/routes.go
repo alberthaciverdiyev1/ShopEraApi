@@ -65,6 +65,10 @@ import (
 	productrepositories "shopera/internal/modules/product/repositories"
 	productroutes "shopera/internal/modules/product/routes"
 	productservices "shopera/internal/modules/product/services"
+	promocodehandlers "shopera/internal/modules/promocode/handlers"
+	promocoderepositories "shopera/internal/modules/promocode/repositories"
+	promocoderoutes "shopera/internal/modules/promocode/routes"
+	promocodeservices "shopera/internal/modules/promocode/services"
 	reviewhandlers "shopera/internal/modules/review/handlers"
 	reviewrepositories "shopera/internal/modules/review/repositories"
 	reviewroutes "shopera/internal/modules/review/routes"
@@ -190,4 +194,14 @@ func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 		deliveryrepositories.NewPickupPointRepository(db),
 	))
 	orderroutes.Register(api, orderHandler, authMiddleware)
+
+	promoHandler := promocodehandlers.NewPromoCodeHandler(promocodeservices.NewPromoCodeService(
+		promocoderepositories.NewPromoCodeRepository(db),
+		addressrepositories.NewAddressRepository(db),
+		deliveryrepositories.NewCityRepository(db),
+		deliveryrepositories.NewDeliveryPriceRepository(db),
+		basketrepositories.NewBasketRepository(db),
+		productrepositories.NewProductRepository(db),
+	))
+	promocoderoutes.Register(api, promoHandler, authMiddleware)
 }

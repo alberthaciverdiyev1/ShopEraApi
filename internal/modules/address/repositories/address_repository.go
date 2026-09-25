@@ -79,3 +79,16 @@ func (r *AddressRepository) UnsetOtherDefaults(userID, exceptID int64) error {
 func (r *AddressRepository) Delete(id int64) error {
 	return r.db.Delete(&models.Address{}, id).Error
 }
+
+// FindDefault returns the user's default address.
+func (r *AddressRepository) FindDefault(userID int64) (*models.Address, error) {
+	var a models.Address
+	err := r.db.Where("user_id = ? AND is_default = ?", userID, true).First(&a).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &a, nil
+}
