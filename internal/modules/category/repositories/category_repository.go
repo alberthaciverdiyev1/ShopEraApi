@@ -27,6 +27,9 @@ func (r *CategoryRepository) List(query helpers.Query, onlyParents bool) ([]mode
 		helpers.SearchColumn{Column: "name", Translatable: true},
 		helpers.SearchColumn{Column: "description"},
 	)
+	db = query.ApplyWhereEach(db, "is_active")
+	db = query.ApplyRange(db, "sort_order")
+	db = query.ApplyWhereIn(db, "id", "ids")
 	db = query.ApplyOrder(db, "sort_order")
 
 	var items []models.Category

@@ -24,7 +24,7 @@ func NewBrandHandler(service *brandservices.BrandService) *BrandHandler {
 
 // List handles GET /api/brand.
 func (h *BrandHandler) List(c *gin.Context) {
-	result, err := h.service.List(helpers.ParseQuery(c), helpers.QueryBoolPtr(c, "is_active"))
+	result, err := h.service.List(helpers.ParseQuery(c))
 	if err != nil {
 		helpers.FromError(c, err)
 		return

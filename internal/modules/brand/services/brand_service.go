@@ -21,8 +21,8 @@ func NewBrandService(repo *brandrepositories.BrandRepository) *BrandService {
 }
 
 // List returns a paginated brand list.
-func (s *BrandService) List(q helpers.Query, isActive *bool) (gin.H, error) {
-	items, total, err := s.repo.List(q, isActive)
+func (s *BrandService) List(q helpers.Query) (gin.H, error) {
+	items, total, err := s.repo.List(q)
 	if err != nil {
 		return nil, err
 	}

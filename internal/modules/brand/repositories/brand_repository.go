@@ -18,14 +18,15 @@ type BrandRepository struct {
 func NewBrandRepository(db *gorm.DB) *BrandRepository { return &BrandRepository{db: db} }
 
 // List returns a paginated brand list using the shared query helper.
-func (r *BrandRepository) List(q helpers.Query, isActive *bool) ([]models.Brand, int64, error) {
+func (r *BrandRepository) List(q helpers.Query) ([]models.Brand, int64, error) {
 	db := r.db.Model(&models.Brand{})
 	db = q.ApplySearch(db, helpers.SearchColumn{Column: "name"})
-	if isActive != nil {
-		db = db.Where("is_active = ?", *isActive)
-	} else {
-		db = db.Where("is_active = ?", true)
+	db = q.ApplyWhereEach(db, "is_active")
+	if _, ok := q.Params["is_active"]; !ok {
+		db = db.Where("is_active = ?", true) // Laravel varsayılanı
 	}
+	db = q.ApplyRange(db, "sort_order")
+	db = q.ApplyWhereIn(db, "id", "ids")
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
