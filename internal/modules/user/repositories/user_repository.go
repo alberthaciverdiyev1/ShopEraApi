@@ -11,6 +11,9 @@ import (
 	"shopera/internal/modules/user/models"
 )
 
+// ErrDuplicate is returned when a unique constraint is violated.
+var ErrDuplicate = errors.New("duplicate record")
+
 // UserRepository is the data access for the User model.
 type UserRepository struct {
 	db *gorm.DB
@@ -58,7 +61,13 @@ func (r *UserRepository) FindByID(id int64) (*models.User, error) {
 	return &u, nil
 }
 
-// Create inserts a new user.
+// Create inserts a new user. Returns ErrDuplicate on a unique violation.
 func (r *UserRepository) Create(u *models.User) error {
-	return r.db.Create(u).Error
+	if err := r.db.Create(u).Error; err != nil {
+		if errors.Is(err, gorm.ErrDuplicatedKey) {
+			return ErrDuplicate
+		}
+		return err
+	}
+	return nil
 }

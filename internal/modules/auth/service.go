@@ -5,8 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"gorm.io/gorm"
-
 	"shopera/internal/config"
 	"shopera/internal/helpers"
 	user "shopera/internal/modules/user"
@@ -65,7 +63,7 @@ func (s *Service) Register(in RegisterRequest) (*Result, error) {
 		EmailVerifiedAt: &now,
 	}
 	if err := s.users.Create(newUser); err != nil {
-		if errors.Is(err, gorm.ErrDuplicatedKey) {
+		if errors.Is(err, repositories.ErrDuplicate) {
 			return nil, helpers.NewAppError(422, "This record is already in use.")
 		}
 		return nil, err
