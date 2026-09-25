@@ -22,7 +22,8 @@ func (r *SizeRepository) List(q helpers.Query) ([]models.Size, int64, error) {
 	db := r.db.Model(&models.Size{})
 	db = q.ApplySearch(db, helpers.SearchColumn{Column: "name"})
 	db = q.ApplyWhereEach(db, "is_active")
-	if _, ok := q.Params["is_active"]; !ok {
+	// Default to active-only for public consumers; ?all=1 (admin) returns everything.
+	if _, ok := q.Params["is_active"]; !ok && !q.All {
 		db = db.Where("is_active = ?", true)
 	}
 	db = q.ApplyRange(db, "sort_order")

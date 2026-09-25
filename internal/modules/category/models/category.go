@@ -14,7 +14,7 @@ type Category struct {
 	Image       *string           `gorm:"column:image"`
 	Description *string           `gorm:"column:description"`
 	ParentID    *int64            `gorm:"column:parent_id"`
-	IsActive    bool              `gorm:"column:is_active;default:true"`
+	IsActive    bool              `gorm:"column:is_active"`
 	SortOrder   int               `gorm:"column:sort_order;default:0"`
 	CreatedAt   time.Time         `gorm:"column:created_at"`
 	UpdatedAt   time.Time         `gorm:"column:updated_at"`

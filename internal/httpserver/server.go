@@ -14,6 +14,11 @@ import (
 func New(cfg *config.Config, db *gorm.DB) *gin.Engine {
 	r := gin.Default()
 	r.Use(middleware.CORS(cfg.App.CORSOrigins))
+
+	// Serve uploaded files (Laravel Storage::disk('public')->url parity):
+	// /storage/categories/<file> -> ./storage/app/public/categories/<file>.
+	r.Static("/storage", "./storage/app/public")
+
 	healthroutes.Register(r)
 	registerModules(r.Group("/api"), cfg, db)
 	return r

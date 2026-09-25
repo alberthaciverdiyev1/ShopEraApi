@@ -2,8 +2,10 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -54,12 +56,11 @@ func (h *BrandHandler) Details(c *gin.Context) {
 
 // Add handles POST /api/brand.
 func (h *BrandHandler) Add(c *gin.Context) {
-	var req brandrequests.SaveRequest
-	if err := c.ShouldBind(&req); err != nil {
-		helpers.ValidationFailed(c, err)
+	req := bindBrandSave(c)
+	if req.Name == "" {
+		helpers.ValidationFailed(c, errors.New("name is required"))
 		return
 	}
-	attachImage(c, &req.Image, "brands")
 
 	brand, err := h.service.Add(req)
 	if err != nil {
@@ -77,12 +78,11 @@ func (h *BrandHandler) Update(c *gin.Context) {
 		return
 	}
 
-	var req brandrequests.SaveRequest
-	if err := c.ShouldBind(&req); err != nil {
-		helpers.ValidationFailed(c, err)
+	req := bindBrandSave(c)
+	if req.Name == "" {
+		helpers.ValidationFailed(c, errors.New("name is required"))
 		return
 	}
-	attachImage(c, &req.Image, "brands")
 
 	brand, err := h.service.Update(id, req)
 	if err != nil {
@@ -107,12 +107,31 @@ func (h *BrandHandler) Delete(c *gin.Context) {
 	helpers.Respond(c, http.StatusOK, "Brand deleted successfully.", nil)
 }
 
-// attachImage stores an uploaded "image" file (multipart) into the target path.
-func attachImage(c *gin.Context, target **string, dir string) {
-	if _, err := c.FormFile("image"); err != nil {
-		return
+// bindBrandSave binds the brand payload from JSON or multipart. Multipart is
+// needed for the image file; Gin's ShouldBind cannot bind a multipart file part
+// that shares a name with a string field, so multipart is read manually.
+func bindBrandSave(c *gin.Context) brandrequests.SaveRequest {
+	var req brandrequests.SaveRequest
+
+	if strings.HasPrefix(c.ContentType(), "multipart/form-data") {
+		if v, ok := c.GetPostForm("name"); ok {
+			req.Name = strings.TrimSpace(v)
+		}
+		if path, err := helpers.SaveUpload(c, "image", "brands"); err == nil {
+			req.Image = &path
+		}
+		if v, ok := c.GetPostForm("is_active"); ok && v != "" {
+			b := v == "1" || v == "true" || v == "on"
+			req.IsActive = &b
+		}
+		if v, ok := c.GetPostForm("sort_order"); ok && v != "" {
+			if n, err := strconv.Atoi(v); err == nil {
+				req.SortOrder = &n
+			}
+		}
+		return req
 	}
-	if path, err := helpers.SaveUpload(c, "image", dir); err == nil {
-		*target = &path
-	}
+
+	_ = c.ShouldBindJSON(&req)
+	return req
 }

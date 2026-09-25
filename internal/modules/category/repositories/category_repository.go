@@ -106,7 +106,9 @@ func (r *CategoryRepository) Update(id int64, fields map[string]any, name map[st
 			}
 		}
 		if name != nil {
-			if err := tx.Model(&c).Update("name", name).Error; err != nil {
+			// Struct updates go through the schema, so the `serializer:json` tag on
+			// Name is applied. Update("name", map) would send the raw map and fail.
+			if err := tx.Model(&c).Select("name").Updates(models.Category{Name: name}).Error; err != nil {
 				return err
 			}
 		}

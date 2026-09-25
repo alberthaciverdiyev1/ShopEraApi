@@ -22,3 +22,6 @@ Thumbs.db
 .idea/
 .vscode/
 *.log
+
+# Yüklenen dosyalar (runtime)
+storage/

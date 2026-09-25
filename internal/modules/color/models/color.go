@@ -12,7 +12,7 @@ type Color struct {
 	ID        int64          `gorm:"column:id;primaryKey"`
 	Name      string         `gorm:"column:name"`
 	Hex       *string        `gorm:"column:hex"`
-	IsActive  bool           `gorm:"column:is_active;default:true"`
+	IsActive  bool           `gorm:"column:is_active"`
 	SortOrder int            `gorm:"column:sort_order;default:0"`
 	CreatedAt time.Time      `gorm:"column:created_at"`
 	UpdatedAt time.Time      `gorm:"column:updated_at"`
