@@ -241,14 +241,24 @@ func (r *ProductRepository) Update(
 		if err := tx.First(&p, id).Error; err != nil {
 			return err
 		}
+		// Translatable fields are maps; a map passed to Updates() is encoded raw
+		// and fails, so apply them through a struct update (serializer:json).
+		changed := []string{}
 		if title != nil {
-			fields["title"] = title
+			p.Title = title
+			changed = append(changed, "title")
 		}
 		if description != nil {
-			fields["description"] = description
+			p.Description = description
+			changed = append(changed, "description")
 		}
 		if len(fields) > 0 {
 			if err := tx.Model(&p).Updates(fields).Error; err != nil {
+				return err
+			}
+		}
+		if len(changed) > 0 {
+			if err := tx.Model(&p).Select(changed).Updates(p).Error; err != nil {
 				return err
 			}
 		}
