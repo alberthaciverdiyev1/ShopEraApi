@@ -15,35 +15,36 @@ type SearchColumn struct {
 	Translatable bool
 }
 
-// ApplySearch adds a case-insensitive OR search across the given columns
-// (Laravel filterLike karşılığı).
+// ApplySearch adds an accent-insensitive OR search across the given columns
+// (Laravel filterLike karşılığı). Searches shorter than 2 chars are ignored.
 func (q Query) ApplySearch(db *gorm.DB, columns ...SearchColumn) *gorm.DB {
 	search := strings.TrimSpace(q.Search)
-	if search == "" || len(columns) == 0 {
+	if len([]rune(search)) < 2 || len(columns) == 0 {
 		return db
 	}
-	like := "%" + strings.ToLower(search) + "%"
+	like := "%" + search + "%"
 
 	return db.Where(func(d *gorm.DB) *gorm.DB {
 		tx := d.Session(&gorm.Session{NewDB: true})
-		for i, col := range columns {
-			if col.Translatable {
-				for j, locale := range SearchLocales {
-					expr := "lower(" + col.Column + "->>'" + locale + "') LIKE ?"
-					if i == 0 && j == 0 {
-						tx = tx.Where(expr, like)
-					} else {
-						tx = tx.Or(expr, like)
-					}
-				}
-				continue
-			}
-			expr := "lower(" + col.Column + ") LIKE ?"
-			if i == 0 {
+		first := true
+
+		add := func(expr string) {
+			if first {
 				tx = tx.Where(expr, like)
+				first = false
 			} else {
 				tx = tx.Or(expr, like)
 			}
+		}
+
+		for _, col := range columns {
+			if col.Translatable {
+				for _, locale := range SearchLocales {
+					add("unaccent(" + col.Column + "->>'" + locale + "') ILIKE unaccent(?)")
+				}
+				continue
+			}
+			add("unaccent(" + col.Column + "::text) ILIKE unaccent(?)")
 		}
 		return tx
 	})

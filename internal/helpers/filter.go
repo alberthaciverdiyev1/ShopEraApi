@@ -59,3 +59,14 @@ func (q Query) list(param string) []string {
 	}
 	return values
 }
+
+// ApplyWhereEach applies an exact-match filter for every column that has a
+// non-empty param with the same name (Laravel whereEach karşılığı).
+func (q Query) ApplyWhereEach(db *gorm.DB, columns ...string) *gorm.DB {
+	for _, column := range columns {
+		if v, ok := q.Params[column]; ok && v != "" {
+			db = db.Where(column+" = ?", v)
+		}
+	}
+	return db
+}
