@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,8 +22,9 @@ type Query struct {
 func ParseQuery(c *gin.Context) Query {
 	params := map[string]string{}
 	for k, v := range c.Request.URL.Query() {
+		key := strings.TrimSuffix(k, "[]")
 		if len(v) > 0 {
-			params[k] = v[0]
+			params[key] = strings.Join(v, ",")
 		}
 	}
 	return Query{
