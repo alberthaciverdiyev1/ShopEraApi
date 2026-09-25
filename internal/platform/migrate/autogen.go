@@ -22,6 +22,7 @@ import (
 	productmodels "shopera/internal/modules/product/models"
 	promocodemodels "shopera/internal/modules/promocode/models"
 	reviewmodels "shopera/internal/modules/review/models"
+	rolepermissionmodels "shopera/internal/modules/rolepermission/models"
 	settingmodels "shopera/internal/modules/setting/models"
 	sizemodels "shopera/internal/modules/size/models"
 	usermodels "shopera/internal/modules/user/models"
@@ -31,6 +32,11 @@ import (
 func AllModels() []any {
 	return []any{
 		&usermodels.User{},
+		&rolepermissionmodels.Role{},
+		&rolepermissionmodels.Permission{},
+		&rolepermissionmodels.ModelHasPermission{},
+		&rolepermissionmodels.ModelHasRole{},
+		&rolepermissionmodels.RoleHasPermission{},
 		&PersonalAccessToken{},
 		&categorymodels.Category{},
 		&brandmodels.Brand{},

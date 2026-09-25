@@ -10,6 +10,7 @@ import (
 	"shopera/internal/helpers"
 	authrequests "shopera/internal/modules/auth/requests"
 	authresponses "shopera/internal/modules/auth/responses"
+	rolepermissionrepositories "shopera/internal/modules/rolepermission/repositories"
 	userhelpers "shopera/internal/modules/user/helpers"
 	usermodels "shopera/internal/modules/user/models"
 	userrepositories "shopera/internal/modules/user/repositories"
@@ -19,11 +20,12 @@ import (
 // AuthService holds the auth business logic.
 type AuthService struct {
 	users *userrepositories.UserRepository
+	roles *rolepermissionrepositories.RoleRepository
 	cfg   *config.Config
 }
 
-func NewAuthService(users *userrepositories.UserRepository, cfg *config.Config) *AuthService {
-	return &AuthService{users: users, cfg: cfg}
+func NewAuthService(users *userrepositories.UserRepository, roles *rolepermissionrepositories.RoleRepository, cfg *config.Config) *AuthService {
+	return &AuthService{users: users, roles: roles, cfg: cfg}
 }
 
 // Register creates a user and returns a token.
@@ -72,6 +74,8 @@ func (s *AuthService) Register(in authrequests.RegisterRequest) (*authresponses.
 		}
 		return nil, err
 	}
+
+	_ = s.roles.AssignRoleToUser(newUser.ID, "user")
 
 	token, err := helpers.GenerateToken(newUser.ID, s.cfg.JWT.Secret, s.cfg.JWT.TTL)
 	if err != nil {

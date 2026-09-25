@@ -28,6 +28,7 @@ import (
 	productroutes "shopera/internal/modules/product/routes"
 	promocoderoutes "shopera/internal/modules/promocode/routes"
 	reviewroutes "shopera/internal/modules/review/routes"
+	rolepermissionroutes "shopera/internal/modules/rolepermission/routes"
 	settingroutes "shopera/internal/modules/setting/routes"
 	sizeroutes "shopera/internal/modules/size/routes"
 )
@@ -63,4 +64,5 @@ func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 	balanceroutes.Register(deps)
 	notificationroutes.Register(deps)
 	chatroutes.Register(deps)
+	rolepermissionroutes.Register(deps)
 }
