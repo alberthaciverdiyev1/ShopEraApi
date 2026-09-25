@@ -259,3 +259,8 @@ func (q Query) list(param string) []string {
 	}
 	return values
 }
+
+// PathID parses a numeric :id path parameter.
+func PathID(c *gin.Context) (int64, error) {
+	return strconv.ParseInt(c.Param("id"), 10, 64)
+}
