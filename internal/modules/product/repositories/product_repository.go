@@ -97,6 +97,16 @@ func (r *ProductRepository) preload(db *gorm.DB) *gorm.DB {
 		Preload("Videos").Preload("Category").Preload("Brand")
 }
 
+// ByIDs returns products (with relations preloaded) for the given ids.
+func (r *ProductRepository) ByIDs(ids []int64) ([]models.Product, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	var items []models.Product
+	err := r.preload(r.db.Model(&models.Product{})).Where("products.id IN ?", ids).Find(&items).Error
+	return items, err
+}
+
 // PublicByCategoryIDs returns publicly-available products in the given
 // categories, ordered by sales_count desc (relations preloaded).
 func (r *ProductRepository) PublicByCategoryIDs(categoryIDs []int64) ([]models.Product, error) {
