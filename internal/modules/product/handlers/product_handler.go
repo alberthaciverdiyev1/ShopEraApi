@@ -225,6 +225,34 @@ func (h *ProductHandler) Recommended(c *gin.Context) {
 	helpers.Respond(c, http.StatusOK, "Recommended products list fetched successfully.", result)
 }
 
+// Subscribe handles POST /api/product/subscribe.
+func (h *ProductHandler) Subscribe(c *gin.Context) {
+	var req productrequests.SubscribeRequest
+	if err := c.ShouldBind(&req); err != nil {
+		helpers.ValidationFailed(c, err)
+		return
+	}
+	if err := h.service.Subscribe(c.GetInt64("userID"), req.ProductID); err != nil {
+		helpers.FromError(c, err)
+		return
+	}
+	helpers.Respond(c, http.StatusOK, "We will notify you when product is back in stock.", nil)
+}
+
+// Unsubscribe handles POST /api/product/unsubscribe.
+func (h *ProductHandler) Unsubscribe(c *gin.Context) {
+	var req productrequests.SubscribeRequest
+	if err := c.ShouldBind(&req); err != nil {
+		helpers.ValidationFailed(c, err)
+		return
+	}
+	if err := h.service.Unsubscribe(c.GetInt64("userID"), req.ProductID); err != nil {
+		helpers.FromError(c, err)
+		return
+	}
+	helpers.Respond(c, http.StatusOK, "Unsubscribed successfully.", nil)
+}
+
 // collectUploads saves image/video files and pairs images with their color tags.
 func collectUploads(c *gin.Context, form *multipart.Form) ([]productrepositories.ImageCreate, []string) {
 	images := []productrepositories.ImageCreate{}

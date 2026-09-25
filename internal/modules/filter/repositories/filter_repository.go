@@ -21,12 +21,15 @@ func (r *FilterRepository) All() ([]models.Filter, error) {
 	return items, err
 }
 
-// ByCategory returns the filters assigned to a category.
+// ByCategory returns the distinct filters used by the products of a category
+// (TicarXCaspian: products -> filters collapsed).
 func (r *FilterRepository) ByCategory(categoryID int64) ([]models.Filter, error) {
 	var items []models.Filter
 	err := r.db.
-		Joins("JOIN category_filters cf ON cf.filter_id = filters.id").
-		Where("cf.category_id = ?", categoryID).
+		Distinct("filters.*").
+		Joins("JOIN product_filters pf ON pf.filter_id = filters.id").
+		Joins("JOIN products p ON p.id = pf.product_id").
+		Where("p.category_id = ? AND p.deleted_at IS NULL", categoryID).
 		Order("filters.id asc").
 		Find(&items).Error
 	return items, err

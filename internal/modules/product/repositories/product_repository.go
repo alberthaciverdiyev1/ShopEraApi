@@ -518,3 +518,28 @@ func (r *ProductRepository) FindAdmin(id int64) (*models.Product, error) {
 	}
 	return &p, nil
 }
+
+// ProductExists reports whether a (non-deleted) product exists.
+func (r *ProductRepository) ProductExists(id int64) (bool, error) {
+	var count int64
+	err := r.db.Model(&models.Product{}).Where("id = ?", id).Count(&count).Error
+	return count > 0, err
+}
+
+// Subscribe adds a stock subscription (idempotent).
+func (r *ProductRepository) Subscribe(userID, productID int64) error {
+	return r.db.Exec(
+		`INSERT INTO product_stock_subscriptions (product_id, user_id, created_at, updated_at)
+		 VALUES (?, ?, NOW(), NOW())
+		 ON CONFLICT (product_id, user_id) DO NOTHING`,
+		productID, userID,
+	).Error
+}
+
+// Unsubscribe removes a stock subscription.
+func (r *ProductRepository) Unsubscribe(userID, productID int64) error {
+	return r.db.Exec(
+		"DELETE FROM product_stock_subscriptions WHERE product_id = ? AND user_id = ?",
+		productID, userID,
+	).Error
+}

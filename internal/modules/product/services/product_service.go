@@ -348,3 +348,27 @@ func (s *ProductService) DetailsAdmin(id int64, lang string) (gin.H, error) {
 	out["rate"] = 0
 	return out, nil
 }
+
+// Subscribe registers a stock-back-in-stock subscription for the user.
+func (s *ProductService) Subscribe(userID, productID int64) error {
+	exists, err := s.repo.ProductExists(productID)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return helpers.NewAppError(404, "Product not found.")
+	}
+	return s.repo.Subscribe(userID, productID)
+}
+
+// Unsubscribe removes the user's stock subscription for the product.
+func (s *ProductService) Unsubscribe(userID, productID int64) error {
+	exists, err := s.repo.ProductExists(productID)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return helpers.NewAppError(404, "Product not found.")
+	}
+	return s.repo.Unsubscribe(userID, productID)
+}
