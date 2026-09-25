@@ -9,6 +9,7 @@ import (
 	basketmodels "shopera/internal/modules/basket/models"
 	brandmodels "shopera/internal/modules/brand/models"
 	categorymodels "shopera/internal/modules/category/models"
+	chatmodels "shopera/internal/modules/chat/models"
 	colormodels "shopera/internal/modules/color/models"
 	deliverymodels "shopera/internal/modules/delivery/models"
 	favoritemodels "shopera/internal/modules/favorite/models"
@@ -60,6 +61,10 @@ func AllModels() []any {
 		&notificationmodels.Notification{},
 		&notificationmodels.NotificationToken{},
 		&NotificationUser{},
+		&chatmodels.Conversation{},
+		&chatmodels.Message{},
+		&chatmodels.MessageAttachment{},
+		&chatmodels.AutoReply{},
 		&bannermodels.Banner{},
 		&popupmodels.Popup{},
 		&helpmodels.Faq{},

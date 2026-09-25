@@ -48,3 +48,11 @@ func StorageURL(path string) string {
 	}
 	return AppURL() + "/storage/" + strings.TrimLeft(path, "/")
 }
+
+// DeleteFile removes a stored file under storage/app/public.
+func DeleteFile(path string) error {
+	if path == "" {
+		return nil
+	}
+	return os.Remove(filepath.Join("storage", "app", "public", path))
+}

@@ -33,6 +33,10 @@ import (
 	categoryrepositories "shopera/internal/modules/category/repositories"
 	categoryroutes "shopera/internal/modules/category/routes"
 	categoryservices "shopera/internal/modules/category/services"
+	chathandlers "shopera/internal/modules/chat/handlers"
+	chatrepositories "shopera/internal/modules/chat/repositories"
+	chatroutes "shopera/internal/modules/chat/routes"
+	chatservices "shopera/internal/modules/chat/services"
 	colorhandlers "shopera/internal/modules/color/handlers"
 	colorrepositories "shopera/internal/modules/color/repositories"
 	colorroutes "shopera/internal/modules/color/routes"
@@ -227,4 +231,10 @@ func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 		notificationservices.NewNotificationTokenService(notificationrepositories.NewNotificationTokenRepository(db)),
 	)
 	notificationroutes.Register(api, notificationHandler, notificationTokenHandler, authMiddleware)
+
+	autoReplyService := chatservices.NewAutoReplyService(chatrepositories.NewAutoReplyRepository(db))
+	chatService := chatservices.NewChatService(chatrepositories.NewChatRepository(db), autoReplyService, userrepositories.NewUserRepository(db))
+	chatHandler := chathandlers.NewChatHandler(chatService)
+	autoReplyHandler := chathandlers.NewAutoReplyHandler(autoReplyService)
+	chatroutes.Register(api, chatHandler, autoReplyHandler, authMiddleware)
 }
