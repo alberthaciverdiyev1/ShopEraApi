@@ -8,7 +8,7 @@ import (
 )
 
 // Register mounts the size routes (all require auth) on the given group.
-func Register(group *gin.RouterGroup, handler *sizehandlers.SizeHandler, auth gin.HandlerFunc) {
+func mount(group *gin.RouterGroup, handler *sizehandlers.SizeHandler, auth gin.HandlerFunc) {
 	sizeGroup := group.Group("/size", auth)
 	sizeGroup.GET("", handler.List)
 	sizeGroup.POST("", handler.Add)

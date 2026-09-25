@@ -8,7 +8,7 @@ import (
 )
 
 // Register mounts the product routes on the given group.
-func Register(group *gin.RouterGroup, handler *producthandlers.ProductHandler, auth gin.HandlerFunc) {
+func mount(group *gin.RouterGroup, handler *producthandlers.ProductHandler, auth gin.HandlerFunc) {
 	productGroup := group.Group("/product")
 	productGroup.GET("", handler.List)
 	productGroup.GET("/details/:id", auth, handler.DetailsAdmin)

@@ -8,7 +8,7 @@ import (
 )
 
 // Register mounts the color routes (all require auth) on the given group.
-func Register(group *gin.RouterGroup, handler *colorhandlers.ColorHandler, auth gin.HandlerFunc) {
+func mount(group *gin.RouterGroup, handler *colorhandlers.ColorHandler, auth gin.HandlerFunc) {
 	colorGroup := group.Group("/color", auth)
 	colorGroup.GET("", handler.List)
 	colorGroup.POST("", handler.Add)

@@ -8,7 +8,7 @@ import (
 )
 
 // Register mounts the category routes on the given group.
-func Register(group *gin.RouterGroup, handler *categoryhandlers.CategoryHandler, auth gin.HandlerFunc) {
+func mount(group *gin.RouterGroup, handler *categoryhandlers.CategoryHandler, auth gin.HandlerFunc) {
 	categoryGroup := group.Group("/category")
 	categoryGroup.GET("", handler.List)
 	categoryGroup.GET("/admin", handler.ListAdmin)

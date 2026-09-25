@@ -8,7 +8,7 @@ import (
 )
 
 // Register mounts the popup routes on the given group.
-func Register(group *gin.RouterGroup, handler *popuphandlers.PopupHandler, auth gin.HandlerFunc) {
+func mount(group *gin.RouterGroup, handler *popuphandlers.PopupHandler, auth gin.HandlerFunc) {
 	group.GET("/popup", handler.List)
 	group.GET("/popup/show-one", handler.ShowOne)
 	group.POST("/popup", auth, handler.Add)

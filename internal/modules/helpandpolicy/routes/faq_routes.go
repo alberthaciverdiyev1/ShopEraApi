@@ -8,7 +8,7 @@ import (
 )
 
 // RegisterFaq mounts the faq routes on the given group.
-func RegisterFaq(group *gin.RouterGroup, handler *helphandlers.FaqHandler, auth gin.HandlerFunc) {
+func mountFaq(group *gin.RouterGroup, handler *helphandlers.FaqHandler, auth gin.HandlerFunc) {
 	group.GET("/faq", handler.List)
 	group.GET("/faq/admin", auth, handler.ListAdmin)
 	group.POST("/faq", auth, handler.Add)

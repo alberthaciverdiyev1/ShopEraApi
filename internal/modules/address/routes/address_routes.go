@@ -8,7 +8,7 @@ import (
 )
 
 // Register mounts the address routes (all require auth) on the given group.
-func Register(group *gin.RouterGroup, handler *addresshandlers.AddressHandler, auth gin.HandlerFunc) {
+func mount(group *gin.RouterGroup, handler *addresshandlers.AddressHandler, auth gin.HandlerFunc) {
 	addressGroup := group.Group("/user/address", auth)
 	addressGroup.GET("", handler.List)
 	addressGroup.POST("", handler.Add)

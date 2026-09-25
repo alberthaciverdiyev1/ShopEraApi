@@ -8,7 +8,7 @@ import (
 )
 
 // Register mounts the filter routes on the given group.
-func Register(group *gin.RouterGroup, handler *filterhandlers.FilterHandler) {
+func mount(group *gin.RouterGroup, handler *filterhandlers.FilterHandler) {
 	group.GET("/filters", handler.List)
 	group.GET("/category-filters", handler.CategoryFilters)
 }

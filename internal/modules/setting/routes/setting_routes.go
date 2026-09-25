@@ -8,7 +8,7 @@ import (
 )
 
 // Register mounts the setting routes on the given group.
-func Register(group *gin.RouterGroup, handler *settinghandlers.SettingHandler, auth gin.HandlerFunc) {
+func mount(group *gin.RouterGroup, handler *settinghandlers.SettingHandler, auth gin.HandlerFunc) {
 	group.GET("/setting", handler.List)
 	group.PUT("/setting", auth, handler.Update)
 	group.POST("/change-locale", handler.ChangeLocale)

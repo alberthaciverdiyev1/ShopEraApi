@@ -8,7 +8,7 @@ import (
 )
 
 // Register mounts the basket routes (all require auth) on the given group.
-func Register(group *gin.RouterGroup, handler *baskethandlers.BasketHandler, auth gin.HandlerFunc) {
+func mount(group *gin.RouterGroup, handler *baskethandlers.BasketHandler, auth gin.HandlerFunc) {
 	basketGroup := group.Group("/basket", auth)
 	basketGroup.GET("", handler.List)
 	basketGroup.POST("", handler.Add)

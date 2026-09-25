@@ -8,7 +8,7 @@ import (
 )
 
 // Register mounts the payment routes on the given group.
-func Register(group *gin.RouterGroup, handler *paymenthandlers.PaymentHandler, auth gin.HandlerFunc) {
+func mount(group *gin.RouterGroup, handler *paymenthandlers.PaymentHandler, auth gin.HandlerFunc) {
 	group.GET("/payment/providers", handler.Providers)
 	group.GET("/payment/providers/admin", auth, handler.ProvidersAdmin)
 	group.POST("/payment/providers", auth, handler.SaveProvider)

@@ -8,7 +8,7 @@ import (
 )
 
 // Register mounts the order routes (all require auth) on the given group.
-func Register(group *gin.RouterGroup, handler *orderhandlers.OrderHandler, auth gin.HandlerFunc) {
+func mount(group *gin.RouterGroup, handler *orderhandlers.OrderHandler, auth gin.HandlerFunc) {
 	// Static routes first (so they are not shadowed by /:id).
 	group.GET("/order/list-admin", auth, handler.AdminList)
 	group.GET("/order/preview", auth, handler.Preview)

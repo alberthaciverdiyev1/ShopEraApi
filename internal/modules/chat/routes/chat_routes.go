@@ -8,7 +8,7 @@ import (
 )
 
 // Register mounts the chat routes (all require auth) on the given group.
-func Register(group *gin.RouterGroup, handler *chathandlers.ChatHandler, autoReply *chathandlers.AutoReplyHandler, auth gin.HandlerFunc) {
+func mount(group *gin.RouterGroup, handler *chathandlers.ChatHandler, autoReply *chathandlers.AutoReplyHandler, auth gin.HandlerFunc) {
 	group.GET("/chat", auth, handler.List)
 	group.POST("/chat/send", auth, handler.Send)
 	group.DELETE("/chat/message/:messageId", auth, handler.Delete)

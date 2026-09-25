@@ -8,7 +8,7 @@ import (
 )
 
 // Register mounts the review routes on the given group.
-func Register(group *gin.RouterGroup, handler *reviewhandlers.ReviewHandler, auth gin.HandlerFunc) {
+func mount(group *gin.RouterGroup, handler *reviewhandlers.ReviewHandler, auth gin.HandlerFunc) {
 	group.GET("/review/list-admin", auth, handler.ListAdmin)
 	group.GET("/review/:product_id", handler.List)
 	group.POST("/review", auth, handler.Add)

@@ -8,7 +8,7 @@ import (
 )
 
 // Register mounts the promo-code routes (all require auth) on the given group.
-func Register(group *gin.RouterGroup, handler *promocodehandlers.PromoCodeHandler, auth gin.HandlerFunc) {
+func mount(group *gin.RouterGroup, handler *promocodehandlers.PromoCodeHandler, auth gin.HandlerFunc) {
 	group.GET("/promo-code", auth, handler.List)
 	group.GET("/promo-code/check/:code", auth, handler.Check)
 	group.GET("/promo-code/calculate-basket-discount-price/:code", auth, handler.CheckWithPrice)

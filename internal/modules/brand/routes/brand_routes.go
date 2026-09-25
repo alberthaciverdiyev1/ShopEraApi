@@ -8,7 +8,7 @@ import (
 )
 
 // Register mounts the brand routes on the given group.
-func Register(group *gin.RouterGroup, handler *brandhandlers.BrandHandler, auth gin.HandlerFunc) {
+func mount(group *gin.RouterGroup, handler *brandhandlers.BrandHandler, auth gin.HandlerFunc) {
 	brandGroup := group.Group("/brand")
 	brandGroup.GET("", handler.List)
 	brandGroup.GET("/:id", handler.Details)

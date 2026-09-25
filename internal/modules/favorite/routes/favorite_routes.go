@@ -8,7 +8,7 @@ import (
 )
 
 // Register mounts the favorite routes (all require auth) on the given group.
-func Register(group *gin.RouterGroup, handler *favoritehandlers.FavoriteHandler, auth gin.HandlerFunc) {
+func mount(group *gin.RouterGroup, handler *favoritehandlers.FavoriteHandler, auth gin.HandlerFunc) {
 	favoriteGroup := group.Group("/favorite", auth)
 	favoriteGroup.GET("", handler.List)
 	favoriteGroup.POST("/:id", handler.Add)

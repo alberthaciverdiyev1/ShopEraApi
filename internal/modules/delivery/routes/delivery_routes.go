@@ -8,7 +8,7 @@ import (
 )
 
 // Register mounts every delivery-related route on the given group.
-func Register(
+func mount(
 	group *gin.RouterGroup,
 	city *deliveryhandlers.CityHandler,
 	prices *deliveryhandlers.DeliveryPriceHandler,

@@ -8,7 +8,7 @@ import (
 )
 
 // Register mounts the notification routes on the given group.
-func Register(group *gin.RouterGroup, handler *notificationhandlers.NotificationHandler, tokenHandler *notificationhandlers.NotificationTokenHandler, auth gin.HandlerFunc) {
+func mount(group *gin.RouterGroup, handler *notificationhandlers.NotificationHandler, tokenHandler *notificationhandlers.NotificationTokenHandler, auth gin.HandlerFunc) {
 	group.POST("/notification", auth, handler.Send)
 	group.GET("/notification", auth, handler.List)
 	group.GET("/notification/admin", auth, handler.ListAdmin)
