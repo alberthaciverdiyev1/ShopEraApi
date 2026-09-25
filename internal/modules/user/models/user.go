@@ -1,5 +1,5 @@
-// Package user owns the User model and its data access.
-package user
+// Package models holds the User GORM model.
+package models
 
 import (
 	"time"

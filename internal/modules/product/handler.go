@@ -61,13 +61,8 @@ func (h *Handler) Create(c *gin.Context) {
 		return
 	}
 
-	product := &Product{
-		Title:      req.Title,
-		Price:      req.Price,
-		StockCount: req.StockCount,
-		IsActive:   req.IsActive,
-	}
-	if err := h.service.Create(product); err != nil {
+	product, err := h.service.Create(req)
+	if err != nil {
 		helpers.FromError(c, err)
 		return
 	}

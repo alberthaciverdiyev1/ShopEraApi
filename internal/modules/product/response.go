@@ -1,9 +1,13 @@
 package product
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+
+	"shopera/internal/modules/product/models"
+)
 
 // JSON maps a product to its API shape (localized title).
-func JSON(p Product, lang string) gin.H {
+func JSON(p models.Product, lang string) gin.H {
 	return gin.H{
 		"id":          p.ID,
 		"title":       Trans(p.Title, lang),
@@ -11,15 +15,6 @@ func JSON(p Product, lang string) gin.H {
 		"stock_count": p.StockCount,
 		"is_active":   p.IsActive,
 	}
-}
-
-// Collection maps products to their API shape.
-func Collection(products []Product, lang string) []gin.H {
-	items := make([]gin.H, 0, len(products))
-	for _, p := range products {
-		items = append(items, JSON(p, lang))
-	}
-	return items
 }
 
 // ListResult is the paginated list payload.

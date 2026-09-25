@@ -1,7 +1,9 @@
 package user
 
+import "shopera/internal/modules/user/models"
+
 // Payload returns the API representation of a user.
-func Payload(u *User, includePhone bool) map[string]any {
+func Payload(u *models.User, includePhone bool) map[string]any {
 	payload := map[string]any{
 		"id":    u.ID,
 		"name":  u.Name,

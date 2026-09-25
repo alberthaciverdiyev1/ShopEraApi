@@ -1,5 +1,5 @@
-// Package product owns the Product model, data access and endpoints.
-package product
+// Package models holds the Product GORM model.
+package models
 
 import "gorm.io/gorm"
 

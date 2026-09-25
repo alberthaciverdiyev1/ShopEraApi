@@ -8,16 +8,17 @@ import (
 	"shopera/internal/middleware"
 	"shopera/internal/modules/auth"
 	"shopera/internal/modules/product"
-	"shopera/internal/modules/user"
+	productrepositories "shopera/internal/modules/product/repositories"
+	userrepositories "shopera/internal/modules/user/repositories"
 )
 
 // registerModules wires and mounts every feature module under /api.
 func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 	authMiddleware := middleware.AuthRequired(cfg.JWT.Secret)
 
-	authHandler := auth.NewHandler(auth.NewService(user.NewRepository(db), cfg))
+	authHandler := auth.NewHandler(auth.NewService(userrepositories.NewUserRepository(db), cfg))
 	auth.Register(api, authHandler, authMiddleware)
 
-	productHandler := product.NewHandler(product.NewService(product.NewRepository(db)))
+	productHandler := product.NewHandler(product.NewService(productrepositories.NewProductRepository(db)))
 	product.Register(api, productHandler, authMiddleware)
 }

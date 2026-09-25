@@ -9,16 +9,18 @@ import (
 
 	"shopera/internal/config"
 	"shopera/internal/helpers"
-	"shopera/internal/modules/user"
+	user "shopera/internal/modules/user"
+	"shopera/internal/modules/user/models"
+	"shopera/internal/modules/user/repositories"
 )
 
 // Service holds the auth business logic.
 type Service struct {
-	users *user.Repository
+	users *repositories.UserRepository
 	cfg   *config.Config
 }
 
-func NewService(users *user.Repository, cfg *config.Config) *Service {
+func NewService(users *repositories.UserRepository, cfg *config.Config) *Service {
 	return &Service{users: users, cfg: cfg}
 }
 
@@ -53,7 +55,7 @@ func (s *Service) Register(in RegisterRequest) (*Result, error) {
 	}
 
 	now := time.Now()
-	newUser := &user.User{
+	newUser := &models.User{
 		Name:            lowerPtr(in.Name, "user"),
 		Surname:         lowerPtrPtr(in.Surname),
 		Phone:           normalized,
