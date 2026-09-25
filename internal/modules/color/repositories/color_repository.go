@@ -19,8 +19,6 @@ func NewColorRepository(db *gorm.DB) *ColorRepository { return &ColorRepository{
 
 // List returns a paginated color list.
 func (r *ColorRepository) List(q helpers.Query) ([]models.Color, int64, error) {
-	q.PerPage = q.PerPageLimit(500)
-
 	db := r.db.Model(&models.Color{})
 	db = q.ApplySearch(db, helpers.SearchColumn{Column: "name"})
 	db = q.ApplyWhereEach(db, "is_active")

@@ -15,6 +15,9 @@ import (
 // rangeDateFilter, orderBy, whereEach) + where/whereIn/whereNotIn/whereNull.
 // ============================================================================
 
+// DefaultPerPage is the fixed page size for every paginated endpoint.
+const DefaultPerPage = 20
+
 // Query bundles list/search/filter/order/pagination parameters.
 type Query struct {
 	Search    string
@@ -22,7 +25,9 @@ type Query struct {
 	PerPage   int
 	OrderBy   string
 	OrderType string
-	Params    map[string]string
+	// All disables pagination (?all) — only for endpoints that need full data.
+	All    bool
+	Params map[string]string
 }
 
 // ParseQuery reads the list parameters from the request.
@@ -37,9 +42,10 @@ func ParseQuery(c *gin.Context) Query {
 	return Query{
 		Search:    c.Query("search"),
 		Page:      QueryInt(c, "page", 1),
-		PerPage:   QueryInt(c, "per_page", 20),
+		PerPage:   DefaultPerPage,
 		OrderBy:   c.Query("order_by"),
 		OrderType: c.Query("order_type"),
+		All:       c.Query("all") != "",
 		Params:    params,
 	}
 }
@@ -216,13 +222,19 @@ func (q Query) Offset() int {
 	return (q.Page - 1) * q.PerPage
 }
 
-// ApplyPage applies limit/offset to a query.
+// ApplyPage applies limit/offset to a query; skipped when full data is requested.
 func (q Query) ApplyPage(db *gorm.DB) *gorm.DB {
+	if q.All {
+		return db
+	}
 	return db.Limit(q.PerPage).Offset(q.Offset())
 }
 
 // Meta builds a Laravel-style paginator meta block.
 func (q Query) Meta(total int64) gin.H {
+	if q.All {
+		return gin.H{"total": total}
+	}
 	lastPage := int((total + int64(q.PerPage) - 1) / int64(q.PerPage))
 	return gin.H{
 		"current_page": q.Page,
@@ -246,22 +258,4 @@ func (q Query) list(param string) []string {
 		}
 	}
 	return values
-}
-
-// PerPageLimit returns the effective per-page size, honoring ?limit and
-// clamping it to [1, max].
-func (q Query) PerPageLimit(max int) int {
-	p := q.PerPage
-	if v := q.Params["limit"]; v != "" {
-		if n, err := strconv.Atoi(v); err == nil && n > 0 {
-			p = n
-		}
-	}
-	if p < 1 {
-		p = 1
-	}
-	if p > max {
-		p = max
-	}
-	return p
 }

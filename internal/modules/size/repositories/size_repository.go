@@ -19,8 +19,6 @@ func NewSizeRepository(db *gorm.DB) *SizeRepository { return &SizeRepository{db:
 
 // List returns a paginated size list.
 func (r *SizeRepository) List(q helpers.Query) ([]models.Size, int64, error) {
-	q.PerPage = q.PerPageLimit(500)
-
 	db := r.db.Model(&models.Size{})
 	db = q.ApplySearch(db, helpers.SearchColumn{Column: "name"})
 	db = q.ApplyWhereEach(db, "is_active")
