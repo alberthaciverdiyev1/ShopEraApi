@@ -133,6 +133,56 @@ func (h *ProductHandler) UpdatePrices(c *gin.Context) {
 	helpers.Respond(c, http.StatusOK, message, nil)
 }
 
+// StoryVideos handles GET /api/product/story-videos.
+func (h *ProductHandler) StoryVideos(c *gin.Context) {
+	items, err := h.service.StoryVideos()
+	if err != nil {
+		helpers.FromError(c, err)
+		return
+	}
+	helpers.Respond(c, http.StatusOK, "Product story videos retrieved successfully.", items)
+}
+
+// StoryVideosAdmin handles GET /api/product/story-videos/admin.
+func (h *ProductHandler) StoryVideosAdmin(c *gin.Context) {
+	items, err := h.service.StoryVideosAdmin(c.Query("search"), helpers.QueryInt(c, "limit", 0))
+	if err != nil {
+		helpers.FromError(c, err)
+		return
+	}
+	helpers.Respond(c, http.StatusOK, "Product story videos retrieved successfully.", items)
+}
+
+// ActivateStoryVideo handles POST /api/product/story-videos/:id/activate.
+func (h *ProductHandler) ActivateStoryVideo(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		helpers.Respond(c, http.StatusNotFound, "Story video not found.", nil)
+		return
+	}
+	item, err := h.service.ActivateStoryVideo(id)
+	if err != nil {
+		helpers.FromError(c, err)
+		return
+	}
+	helpers.Respond(c, http.StatusOK, "Story video activated successfully.", item)
+}
+
+// DeactivateStoryVideo handles POST /api/product/story-videos/:id/deactivate.
+func (h *ProductHandler) DeactivateStoryVideo(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		helpers.Respond(c, http.StatusNotFound, "Story video not found.", nil)
+		return
+	}
+	item, err := h.service.DeactivateStoryVideo(id)
+	if err != nil {
+		helpers.FromError(c, err)
+		return
+	}
+	helpers.Respond(c, http.StatusOK, "Story video deactivated successfully.", item)
+}
+
 // collectUploads saves image/video files and pairs images with their color tags.
 func collectUploads(c *gin.Context, form *multipart.Form) ([]productrepositories.ImageCreate, []string) {
 	images := []productrepositories.ImageCreate{}

@@ -57,8 +57,10 @@ func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 	)
 	authroutes.Register(api, authHandler, authMiddleware)
 
+	settingService := settingservices.NewSettingService(settingrepositories.NewSettingRepository(db))
+
 	productHandler := producthandlers.NewProductHandler(
-		productservices.NewProductService(productrepositories.NewProductRepository(db)),
+		productservices.NewProductService(productrepositories.NewProductRepository(db), settingService),
 	)
 	productroutes.Register(api, productHandler, authMiddleware)
 
@@ -82,9 +84,7 @@ func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 	)
 	sizeroutes.Register(api, sizeHandler, authMiddleware)
 
-	settingHandler := settinghandlers.NewSettingHandler(
-		settingservices.NewSettingService(settingrepositories.NewSettingRepository(db)),
-	)
+	settingHandler := settinghandlers.NewSettingHandler(settingService)
 	settingroutes.Register(api, settingHandler, authMiddleware)
 
 	bannerHandler := bannerhandlers.NewBannerHandler(

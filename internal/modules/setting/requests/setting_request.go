@@ -16,6 +16,7 @@ type UpdateRequest struct {
 	AppVersionIOS           *string  `json:"app_version_ios" binding:"omitempty,regexp=^\\d+(\\.\\d+){1,2}$"`
 	MinimalPurchasePrice    *float64 `json:"minimal_purchase_price"`
 	PublicLowStockThreshold *int     `json:"public_low_stock_threshold" binding:"omitempty,gte=0"`
+	StoryVideosEnabled      *bool    `json:"story_videos_enabled"`
 }
 
 // ChangeLocaleRequest is the change-locale payload.

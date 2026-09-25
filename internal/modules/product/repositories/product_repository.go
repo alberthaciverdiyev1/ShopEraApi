@@ -4,7 +4,9 @@ package repositories
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
+	"time"
 
 	"gorm.io/gorm"
 
@@ -400,4 +402,66 @@ func priceExpression(column string, isPercentage, increment bool) string {
 
 func placeholders(n int) string {
 	return strings.TrimRight(strings.Repeat("?,", n), ",")
+}
+
+// StoryVideos returns public, active story videos (Laravel storyVideos).
+func (r *ProductRepository) StoryVideos() ([]models.ProductVideo, error) {
+	now := time.Now()
+	var videos []models.ProductVideo
+	err := r.db.
+		Preload("Product", func(db *gorm.DB) *gorm.DB { return db.Where("is_active = ?", true) }).
+		Preload("Product.Images").
+		Where("is_story_hidden = ?", false).
+		Where("(story_expires_at >= ? OR (story_expires_at IS NULL AND created_at >= ?))", now, now.Add(-24*time.Hour)).
+		Where("EXISTS (SELECT 1 FROM products WHERE products.id = product_videos.product_id AND products.is_active = true AND products.deleted_at IS NULL)").
+		Order("id desc").
+		Find(&videos).Error
+	return videos, err
+}
+
+// AdminStoryVideos returns all story videos for the admin list.
+func (r *ProductRepository) AdminStoryVideos(search string, limit int) ([]models.ProductVideo, error) {
+	db := r.db.Preload("Product.Images").Order("id desc")
+	if search != "" {
+		if n, err := strconv.ParseInt(search, 10, 64); err == nil {
+			db = db.Where("id = ? OR product_id = ?", n, n)
+		} else {
+			db = db.Where("video_path ILIKE ?", "%"+search+"%")
+		}
+	}
+	if limit > 0 {
+		db = db.Limit(limit)
+	}
+	var videos []models.ProductVideo
+	err := db.Find(&videos).Error
+	return videos, err
+}
+
+// FindVideo returns a story video by id.
+func (r *ProductRepository) FindVideo(id int64) (*models.ProductVideo, error) {
+	var v models.ProductVideo
+	err := r.db.Preload("Product.Images").First(&v, id).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &v, nil
+}
+
+// SetStoryState activates or deactivates a story video.
+func (r *ProductRepository) SetStoryState(id int64, hidden bool, expiresAt *time.Time) (*models.ProductVideo, error) {
+	var v models.ProductVideo
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&models.ProductVideo{}).Where("id = ?", id).
+			Updates(map[string]any{"is_story_hidden": hidden, "story_expires_at": expiresAt}).Error; err != nil {
+			return err
+		}
+		return tx.Preload("Product.Images").First(&v, id).Error
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &v, nil
 }

@@ -43,6 +43,7 @@ func (s *SettingService) Update(req settingrequests.UpdateRequest) (*settingmode
 	set("app_version_ios", req.AppVersionIOS)
 	set("minimal_purchase_price", req.MinimalPurchasePrice)
 	set("public_low_stock_threshold", req.PublicLowStockThreshold)
+	set("story_videos_enabled", req.StoryVideosEnabled)
 
 	return s.repo.UpdateFirst(fields)
 }
@@ -73,4 +74,13 @@ func (s *SettingService) ChangeLocale(locale string) (string, error) {
 	default:
 		return "", helpers.NewAppError(422, "The selected locale is invalid.")
 	}
+}
+
+// StoryVideosEnabled reports whether product story videos are enabled (default false).
+func (s *SettingService) StoryVideosEnabled() bool {
+	first, err := s.repo.First()
+	if err != nil || first == nil || first.StoryVideosEnabled == nil {
+		return false
+	}
+	return *first.StoryVideosEnabled
 }

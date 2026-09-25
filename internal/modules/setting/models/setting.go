@@ -24,6 +24,7 @@ type Setting struct {
 	AppVersionIOS           *string        `gorm:"column:app_version_ios" json:"app_version_ios"`
 	MinimalPurchasePrice    *float64       `gorm:"column:minimal_purchase_price" json:"minimal_purchase_price"`
 	PublicLowStockThreshold *int           `gorm:"column:public_low_stock_threshold" json:"public_low_stock_threshold"`
+	StoryVideosEnabled      *bool          `gorm:"column:story_videos_enabled;default:false" json:"story_videos_enabled"`
 	CreatedAt               time.Time      `gorm:"column:created_at" json:"created_at"`
 	UpdatedAt               time.Time      `gorm:"column:updated_at" json:"updated_at"`
 	DeletedAt               gorm.DeletedAt `gorm:"column:deleted_at" json:"-"`

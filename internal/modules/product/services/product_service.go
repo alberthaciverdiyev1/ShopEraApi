@@ -3,8 +3,11 @@ package services
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/gin-gonic/gin"
+
+	settingservices "shopera/internal/modules/setting/services"
 
 	"shopera/internal/helpers"
 	producthelpers "shopera/internal/modules/product/helpers"
@@ -16,11 +19,12 @@ import (
 
 // ProductService holds the product business logic.
 type ProductService struct {
-	repo *productrepositories.ProductRepository
+	repo     *productrepositories.ProductRepository
+	settings *settingservices.SettingService
 }
 
-func NewProductService(repo *productrepositories.ProductRepository) *ProductService {
-	return &ProductService{repo: repo}
+func NewProductService(repo *productrepositories.ProductRepository, settings *settingservices.SettingService) *ProductService {
+	return &ProductService{repo: repo, settings: settings}
 }
 
 // List returns the paginated product list.
@@ -236,4 +240,58 @@ func toSizePivots(sizes []productrequests.SizeInput) []productrepositories.SizeP
 		out = append(out, productrepositories.SizePivot{SizeID: s.SizeID, Price: s.Price, Discount: s.Discount})
 	}
 	return out
+}
+
+// StoryVideos returns active public story videos (empty when the feature is off).
+func (s *ProductService) StoryVideos() ([]gin.H, error) {
+	if !s.settings.StoryVideosEnabled() {
+		return []gin.H{}, nil
+	}
+	videos, err := s.repo.StoryVideos()
+	if err != nil {
+		return nil, err
+	}
+	return productresponses.StoryVideoCollection(videos), nil
+}
+
+// StoryVideosAdmin returns story videos for the admin panel.
+func (s *ProductService) StoryVideosAdmin(search string, limit int) ([]gin.H, error) {
+	videos, err := s.repo.AdminStoryVideos(search, limit)
+	if err != nil {
+		return nil, err
+	}
+	return productresponses.StoryVideoCollection(videos), nil
+}
+
+// ActivateStoryVideo unhides a story for the next 24 hours.
+func (s *ProductService) ActivateStoryVideo(id int64) (gin.H, error) {
+	video, err := s.repo.FindVideo(id)
+	if err != nil {
+		return nil, err
+	}
+	if video == nil {
+		return nil, helpers.NewAppError(404, "Story video not found.")
+	}
+	expires := time.Now().Add(24 * time.Hour)
+	updated, err := s.repo.SetStoryState(id, false, &expires)
+	if err != nil {
+		return nil, err
+	}
+	return productresponses.StoryVideoJSON(*updated), nil
+}
+
+// DeactivateStoryVideo hides a story.
+func (s *ProductService) DeactivateStoryVideo(id int64) (gin.H, error) {
+	video, err := s.repo.FindVideo(id)
+	if err != nil {
+		return nil, err
+	}
+	if video == nil {
+		return nil, helpers.NewAppError(404, "Story video not found.")
+	}
+	updated, err := s.repo.SetStoryState(id, true, nil)
+	if err != nil {
+		return nil, err
+	}
+	return productresponses.StoryVideoJSON(*updated), nil
 }
