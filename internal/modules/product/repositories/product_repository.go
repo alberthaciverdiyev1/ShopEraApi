@@ -465,3 +465,34 @@ func (r *ProductRepository) SetStoryState(id int64, hidden bool, expiresAt *time
 	}
 	return &v, nil
 }
+
+// Statistics returns totals and the most-viewed products.
+func (r *ProductRepository) Statistics() (int64, int64, []models.Product, error) {
+	var total, discounted int64
+	if err := r.db.Model(&models.Product{}).Count(&total).Error; err != nil {
+		return 0, 0, nil, err
+	}
+	if err := r.db.Model(&models.Product{}).Where("discount IS NOT NULL").Count(&discounted).Error; err != nil {
+		return 0, 0, nil, err
+	}
+
+	var top []models.Product
+	err := r.db.Preload("Images").Preload("Brand").Order("views desc").Limit(5).Find(&top).Error
+	return total, discounted, top, err
+}
+
+// Recommended returns active suggested products in random order.
+func (r *ProductRepository) Recommended(limit int) ([]models.Product, int64, error) {
+	db := r.preload(r.db.Model(&models.Product{}).
+		Where("is_active = ?", true).
+		Where("is_suggest = ?", true))
+
+	var total int64
+	if err := db.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	var items []models.Product
+	err := db.Order("RANDOM()").Limit(limit).Find(&items).Error
+	return items, total, err
+}

@@ -11,6 +11,8 @@ import (
 func Register(group *gin.RouterGroup, handler *producthandlers.ProductHandler, auth gin.HandlerFunc) {
 	productGroup := group.Group("/product")
 	productGroup.GET("", handler.List)
+	productGroup.GET("/statistics", handler.Statistics)
+	productGroup.GET("/recommend", handler.Recommended)
 	productGroup.GET("/story-videos", handler.StoryVideos)
 	productGroup.GET("/story-videos/admin", auth, handler.StoryVideosAdmin)
 	productGroup.POST("/story-videos/:id/activate", auth, handler.ActivateStoryVideo)

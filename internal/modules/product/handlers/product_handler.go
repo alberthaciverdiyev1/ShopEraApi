@@ -183,6 +183,28 @@ func (h *ProductHandler) DeactivateStoryVideo(c *gin.Context) {
 	helpers.Respond(c, http.StatusOK, "Story video deactivated successfully.", item)
 }
 
+// Statistics handles GET /api/product/statistics.
+func (h *ProductHandler) Statistics(c *gin.Context) {
+	lang := producthelpers.ResolveLocale(c.GetHeader("Accept-Language"))
+	result, err := h.service.Statistics(lang)
+	if err != nil {
+		helpers.FromError(c, err)
+		return
+	}
+	helpers.Respond(c, http.StatusOK, "Statistics retrieved successfully.", result)
+}
+
+// Recommended handles GET /api/product/recommend.
+func (h *ProductHandler) Recommended(c *gin.Context) {
+	lang := producthelpers.ResolveLocale(c.GetHeader("Accept-Language"))
+	result, err := h.service.Recommended(lang)
+	if err != nil {
+		helpers.FromError(c, err)
+		return
+	}
+	helpers.Respond(c, http.StatusOK, "Recommended products list fetched successfully.", result)
+}
+
 // collectUploads saves image/video files and pairs images with their color tags.
 func collectUploads(c *gin.Context, form *multipart.Form) ([]productrepositories.ImageCreate, []string) {
 	images := []productrepositories.ImageCreate{}

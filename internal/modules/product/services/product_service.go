@@ -295,3 +295,41 @@ func (s *ProductService) DeactivateStoryVideo(id int64) (gin.H, error) {
 	}
 	return productresponses.StoryVideoJSON(*updated), nil
 }
+
+// Statistics returns product counts and the most-viewed products.
+func (s *ProductService) Statistics(lang string) (gin.H, error) {
+	total, discounted, top, err := s.repo.Statistics()
+	if err != nil {
+		return nil, err
+	}
+	ids := make([]int64, 0, len(top))
+	for _, p := range top {
+		ids = append(ids, p.ID)
+	}
+	pivots, err := s.repo.SizePivots(ids)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{
+		"total_products":       total,
+		"discounted_products":  discounted,
+		"most_viewed_products": productresponses.Collection(top, lang, pivots),
+	}, nil
+}
+
+// Recommended returns a random list of suggested products.
+func (s *ProductService) Recommended(lang string) (gin.H, error) {
+	items, total, err := s.repo.Recommended(helpers.DefaultPerPage)
+	if err != nil {
+		return nil, err
+	}
+	ids := make([]int64, 0, len(items))
+	for _, p := range items {
+		ids = append(ids, p.ID)
+	}
+	pivots, err := s.repo.SizePivots(ids)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{"data": productresponses.Collection(items, lang, pivots), "meta": gin.H{"total": total}}, nil
+}
