@@ -13,8 +13,9 @@ import (
 // Connect opens the DB. It does not ping, so the app can boot without a DB.
 func Connect(cfg *config.Config) *gorm.DB {
 	db, err := gorm.Open(postgres.Open(cfg.DSN()), &gorm.Config{
-		TranslateError:       true,
-		DisableAutomaticPing: true,
+		TranslateError:                           true,
+		DisableAutomaticPing:                     true,
+		DisableForeignKeyConstraintWhenMigrating: true,
 	})
 	if err != nil {
 		log.Fatalf("database: %v", err)

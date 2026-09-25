@@ -13,5 +13,5 @@ CREATE TABLE IF NOT EXISTS payment_providers (
 
 -- Seed the Epoint provider (credentials filled from the admin panel).
 INSERT INTO payment_providers (key, name, is_active, sort_order, config, created_at, updated_at)
-VALUES ('epoint', 'Epoint', true, 1, '{"public_key":"","private_key":""}'::jsonb, NOW(), NOW())
-ON CONFLICT (key) DO NOTHING;
+SELECT 'epoint', 'Epoint', true, 1, '{"public_key":"","private_key":""}'::jsonb, NOW(), NOW()
+WHERE NOT EXISTS (SELECT 1 FROM payment_providers WHERE key = 'epoint');
