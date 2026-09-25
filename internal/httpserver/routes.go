@@ -6,6 +6,10 @@ import (
 
 	"shopera/internal/config"
 	"shopera/internal/middleware"
+	addresshandlers "shopera/internal/modules/address/handlers"
+	addressrepositories "shopera/internal/modules/address/repositories"
+	addressroutes "shopera/internal/modules/address/routes"
+	addressservices "shopera/internal/modules/address/services"
 	authhandlers "shopera/internal/modules/auth/handlers"
 	authroutes "shopera/internal/modules/auth/routes"
 	authservices "shopera/internal/modules/auth/services"
@@ -27,6 +31,10 @@ import (
 	colorrepositories "shopera/internal/modules/color/repositories"
 	colorroutes "shopera/internal/modules/color/routes"
 	colorservices "shopera/internal/modules/color/services"
+	deliveryhandlers "shopera/internal/modules/delivery/handlers"
+	deliveryrepositories "shopera/internal/modules/delivery/repositories"
+	deliveryroutes "shopera/internal/modules/delivery/routes"
+	deliveryservices "shopera/internal/modules/delivery/services"
 	favoritehandlers "shopera/internal/modules/favorite/handlers"
 	favoriterepositories "shopera/internal/modules/favorite/repositories"
 	favoriteroutes "shopera/internal/modules/favorite/routes"
@@ -138,4 +146,12 @@ func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 		favoriteservices.NewFavoriteService(favoriterepositories.NewFavoriteRepository(db), productrepositories.NewProductRepository(db)),
 	)
 	favoriteroutes.Register(api, favoriteHandler, authMiddleware)
+
+	cityRepo := deliveryrepositories.NewCityRepository(db)
+	deliveryroutes.Register(api, deliveryhandlers.NewCityHandler(deliveryservices.NewCityService(cityRepo)))
+
+	addressHandler := addresshandlers.NewAddressHandler(
+		addressservices.NewAddressService(addressrepositories.NewAddressRepository(db), cityRepo),
+	)
+	addressroutes.Register(api, addressHandler, authMiddleware)
 }

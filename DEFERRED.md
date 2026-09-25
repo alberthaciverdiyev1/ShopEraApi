@@ -58,6 +58,10 @@ Bu dosya, taşıma sırasında **bilinçli olarak ertelenen** veya Laravel'den *
 - [ ] Admin update **override**'ları (`add/update(..., $overrides)`).
 - [ ] Sıkıştırma + Bunny CDN.
 
+### Address / Delivery
+- [x] Address (user/address CRUD) + City & Towns (`GET /cities`) taşındı.
+- [ ] Kalan Delivery: DeliveryInfo, PickupPoint, teslimat ücretleri, city CRUD/admin.
+
 ### Category
 - [ ] `GET /category/with-products` (Product + favoriler gerekir).
 - [ ] Görsel yükleme (add/update `image` dosyası).
@@ -98,7 +102,7 @@ Bu dosya, taşıma sırasında **bilinçli olarak ertelenen** veya Laravel'den *
 
 - [ ] **Order** (+ OrderItem, OrderStatus) — Product recommend/statistics ve subscribe notify'ı da buna bağlı.
 - [ ] **Payment** (Epoint), **Balance**, **PromoCode**.
-- [ ] **Delivery** (City, DeliveryInfo, PickupPoint).
+- [ ] **Delivery** — City + Towns ✅ taşındı; **DeliveryInfo, PickupPoint, teslimat ücretleri** bekliyor.
 - [ ] **Notification** (FCM push, token, admin toplu bildirim) — subscribe notify için gerekli.
 - [ ] **Chat**, **Live**.
 - [ ] **Listing** (ilan/classifieds).
