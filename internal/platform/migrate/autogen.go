@@ -39,6 +39,7 @@ func AllModels() []any {
 		&rolepermissionmodels.RoleHasPermission{},
 		&PersonalAccessToken{},
 		&usermodels.OtpEmail{},
+		&usermodels.PasswordResetRequest{},
 		&categorymodels.Category{},
 		&brandmodels.Brand{},
 		&colormodels.Color{},

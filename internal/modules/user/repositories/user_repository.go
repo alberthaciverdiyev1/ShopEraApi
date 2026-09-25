@@ -71,3 +71,21 @@ func (r *UserRepository) Create(u *models.User) error {
 	}
 	return nil
 }
+
+// FindByEmail returns a user by e-mail (case-insensitive).
+func (r *UserRepository) FindByEmail(email string) (*models.User, error) {
+	var u models.User
+	err := r.db.Where("lower(email) = ? AND deleted_at IS NULL", strings.ToLower(email)).First(&u).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &u, nil
+}
+
+// UpdateFields applies field changes to a user.
+func (r *UserRepository) UpdateFields(id int64, fields map[string]any) error {
+	return r.db.Model(&models.User{}).Where("id = ?", id).Updates(fields).Error
+}
