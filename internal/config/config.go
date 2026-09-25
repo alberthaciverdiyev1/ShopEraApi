@@ -25,8 +25,9 @@ type DBConfig struct {
 }
 
 type JWTConfig struct {
-	Secret string
-	TTL    time.Duration
+	Secret     string
+	TTL        time.Duration
+	RefreshTTL time.Duration
 }
 
 // Load reads .env (if present) and returns the configuration.
@@ -36,6 +37,10 @@ func Load() *Config {
 	ttl, err := time.ParseDuration(getEnv("JWT_TTL", "24h"))
 	if err != nil {
 		ttl = 24 * time.Hour
+	}
+	refreshTTL, err := time.ParseDuration(getEnv("REFRESH_TTL", "720h"))
+	if err != nil {
+		refreshTTL = 720 * time.Hour
 	}
 
 	return &Config{
@@ -52,8 +57,9 @@ func Load() *Config {
 			SSLMode:  getEnv("DB_SSLMODE", "disable"),
 		},
 		JWT: JWTConfig{
-			Secret: getEnv("JWT_SECRET", "change-me-in-production"),
-			TTL:    ttl,
+			Secret:     getEnv("JWT_SECRET", "change-me-in-production"),
+			TTL:        ttl,
+			RefreshTTL: refreshTTL,
 		},
 	}
 }

@@ -12,5 +12,6 @@ func mount(group *gin.RouterGroup, handler *authhandlers.AuthHandler, auth gin.H
 	authGroup := group.Group("/auth")
 	authGroup.POST("/register", handler.Register)
 	authGroup.POST("/login", handler.Login)
+	authGroup.POST("/refresh", handler.Refresh)
 	authGroup.POST("/logout", auth, handler.Logout)
 }

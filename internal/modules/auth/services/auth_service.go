@@ -19,13 +19,14 @@ import (
 
 // AuthService holds the auth business logic.
 type AuthService struct {
-	users *userrepositories.UserRepository
-	roles *rolepermissionrepositories.RoleRepository
-	cfg   *config.Config
+	users         *userrepositories.UserRepository
+	roles         *rolepermissionrepositories.RoleRepository
+	refreshtokens *userrepositories.RefreshTokenRepository
+	cfg           *config.Config
 }
 
-func NewAuthService(users *userrepositories.UserRepository, roles *rolepermissionrepositories.RoleRepository, cfg *config.Config) *AuthService {
-	return &AuthService{users: users, roles: roles, cfg: cfg}
+func NewAuthService(users *userrepositories.UserRepository, roles *rolepermissionrepositories.RoleRepository, refreshtokens *userrepositories.RefreshTokenRepository, cfg *config.Config) *AuthService {
+	return &AuthService{users: users, roles: roles, refreshtokens: refreshtokens, cfg: cfg}
 }
 
 // Register creates a user and returns a token.
@@ -81,7 +82,11 @@ func (s *AuthService) Register(in authrequests.RegisterRequest) (*authresponses.
 	if err != nil {
 		return nil, err
 	}
-	return &authresponses.Result{Token: token, User: userresponses.Payload(newUser, false)}, nil
+	refresh, err := s.refreshtokens.Issue(newUser.ID, s.cfg.JWT.RefreshTTL)
+	if err != nil {
+		return nil, err
+	}
+	return &authresponses.Result{Token: token, RefreshToken: refresh, User: userresponses.Payload(newUser, false)}, nil
 }
 
 // Login verifies credentials and returns a token.
@@ -101,7 +106,11 @@ func (s *AuthService) Login(in authrequests.LoginRequest) (*authresponses.Result
 	if err != nil {
 		return nil, err
 	}
-	return &authresponses.Result{Token: token, User: userresponses.Payload(found, true)}, nil
+	refresh, err := s.refreshtokens.Issue(found.ID, s.cfg.JWT.RefreshTTL)
+	if err != nil {
+		return nil, err
+	}
+	return &authresponses.Result{Token: token, RefreshToken: refresh, User: userresponses.Payload(found, true)}, nil
 }
 
 func lowerPtr(value, fallback string) *string {
@@ -118,4 +127,38 @@ func lowerPtrPtr(value *string) *string {
 	}
 	lowered := strings.ToLower(*value)
 	return &lowered
+}
+
+// Logout revokes the refresh token (access tokens are short-lived JWTs).
+func (s *AuthService) Logout(refreshToken string) error {
+	if refreshToken == "" {
+		return nil
+	}
+	return s.refreshtokens.Revoke(refreshToken)
+}
+
+// Refresh validates a refresh token, rotates it and returns a new token pair.
+func (s *AuthService) Refresh(refreshToken string) (*authresponses.Result, error) {
+	userID, err := s.refreshtokens.Resolve(refreshToken)
+	if err != nil {
+		return nil, err
+	}
+	if userID == 0 {
+		return nil, helpers.NewAppError(401, "Invalid refresh token.")
+	}
+	user, err := s.users.FindByID(userID)
+	if err != nil || user == nil {
+		return nil, helpers.NewAppError(401, "Invalid refresh token.")
+	}
+
+	_ = s.refreshtokens.Revoke(refreshToken) // rotate
+	access, err := helpers.GenerateToken(userID, s.cfg.JWT.Secret, s.cfg.JWT.TTL)
+	if err != nil {
+		return nil, err
+	}
+	refresh, err := s.refreshtokens.Issue(userID, s.cfg.JWT.RefreshTTL)
+	if err != nil {
+		return nil, err
+	}
+	return &authresponses.Result{Token: access, RefreshToken: refresh, User: userresponses.Payload(user, true)}, nil
 }

@@ -16,6 +16,7 @@ type PasswordResetService struct {
 	users  *userrepositories.UserRepository
 	otps   *userrepositories.OtpRepository
 	resets *userrepositories.PasswordResetRepository
+	tokens *userrepositories.RefreshTokenRepository
 	mailer Mailer
 }
 
@@ -23,9 +24,10 @@ func NewPasswordResetService(
 	users *userrepositories.UserRepository,
 	otps *userrepositories.OtpRepository,
 	resets *userrepositories.PasswordResetRepository,
+	tokens *userrepositories.RefreshTokenRepository,
 	mailer Mailer,
 ) *PasswordResetService {
-	return &PasswordResetService{users: users, otps: otps, resets: resets, mailer: mailer}
+	return &PasswordResetService{users: users, otps: otps, resets: resets, tokens: tokens, mailer: mailer}
 }
 
 // SendEmailCode e-mails a 4-digit code (same answer whether the address is known).
@@ -67,6 +69,7 @@ func (s *PasswordResetService) ResetByEmail(email, otpCode, password string) (in
 		return 0, err
 	}
 	_ = s.otps.DeleteByKey(email)
+	_ = s.tokens.RevokeAllForUser(user.ID)
 	return user.ID, nil
 }
 
@@ -87,6 +90,7 @@ func (s *PasswordResetService) ResetByPhone(phone, otpCode, password string) (in
 		return 0, err
 	}
 	_ = s.otps.DeleteByKey(phone)
+	_ = s.tokens.RevokeAllForUser(user.ID)
 	return user.ID, nil
 }
 
@@ -102,6 +106,7 @@ func (s *PasswordResetService) ChangePassword(userID int64, current, newPassword
 	if err := s.updatePassword(userID, newPassword); err != nil {
 		return false, err
 	}
+	_ = s.tokens.RevokeAllForUser(userID)
 	return true, nil
 }
 

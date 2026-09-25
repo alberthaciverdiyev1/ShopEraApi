@@ -52,7 +52,28 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	helpers.Respond(c, http.StatusOK, "Login successful.", result)
 }
 
-// Logout handles POST /api/auth/logout (stateless JWT: client discards token).
+// Logout handles POST /api/auth/logout (revokes the refresh token).
 func (h *AuthHandler) Logout(c *gin.Context) {
+	var req authrequests.RefreshRequest
+	_ = c.ShouldBindJSON(&req)
+	if err := h.service.Logout(req.RefreshToken); err != nil {
+		helpers.FromError(c, err)
+		return
+	}
 	helpers.Respond(c, http.StatusOK, "Logout successful.", nil)
+}
+
+// Refresh handles POST /api/auth/refresh (rotates the token pair).
+func (h *AuthHandler) Refresh(c *gin.Context) {
+	var req authrequests.RefreshRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		helpers.ValidationFailed(c, err)
+		return
+	}
+	result, err := h.service.Refresh(req.RefreshToken)
+	if err != nil {
+		helpers.FromError(c, err)
+		return
+	}
+	helpers.Respond(c, http.StatusOK, "Token refreshed successfully.", result)
 }

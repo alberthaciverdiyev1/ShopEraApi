@@ -11,7 +11,7 @@ import (
 // Register wires the auth module and mounts its routes.
 func Register(deps module.Deps) {
 	handler := authhandlers.NewAuthHandler(
-		authservices.NewAuthService(userrepositories.NewUserRepository(deps.DB), rolepermissionrepositories.NewRoleRepository(deps.DB), deps.Cfg),
+		authservices.NewAuthService(userrepositories.NewUserRepository(deps.DB), rolepermissionrepositories.NewRoleRepository(deps.DB), userrepositories.NewRefreshTokenRepository(deps.DB), deps.Cfg),
 	)
 	mount(deps.API, handler, deps.Auth)
 }
