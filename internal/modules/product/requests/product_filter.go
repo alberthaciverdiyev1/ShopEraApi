@@ -4,5 +4,4 @@ package requests
 type Filter struct {
 	Page    int
 	PerPage int
-	StoreID *int64
 }

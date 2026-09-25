@@ -3,25 +3,20 @@ package requests
 
 // UpdateRequest carries the writable settings fields (all optional).
 type UpdateRequest struct {
-	InstagramURL                  *string           `json:"instagram_url"`
-	TikTokURL                     *string           `json:"tiktok_url"`
-	WhatsAppNumber                *string           `json:"whatsapp_number"`
-	PhoneNumber1                  *string           `json:"phone_number_1"`
-	PhoneNumber2                  *string           `json:"phone_number_2"`
-	PhoneNumber3                  *string           `json:"phone_number_3"`
-	PhoneNumber4                  *string           `json:"phone_number_4"`
-	GoogleMapURL                  *string           `json:"google_map_url"`
-	Address                       *string           `json:"address"`
-	AppVersion                    *string           `json:"app_version" binding:"omitempty,regexp=^\\d+(\\.\\d+){1,2}$"`
-	AppVersionIOS                 *string           `json:"app_version_ios" binding:"omitempty,regexp=^\\d+(\\.\\d+){1,2}$"`
-	MinimalPurchasePrice          *float64          `json:"minimal_purchase_price"`
-	WholesaleMinimalPurchasePrice *float64          `json:"wholesale_minimal_purchase_price" binding:"omitempty,gte=0"`
-	StoreCommissionPercent        *float64          `json:"store_commission_percent" binding:"omitempty,gte=0,lte=100"`
-	StoreNegativeBalanceLimit     *float64          `json:"store_negative_balance_limit" binding:"omitempty,gte=0"`
-	StoreHandoverHours            *int              `json:"store_handover_hours" binding:"omitempty,gte=1,lte=168"`
-	StoreLatePenaltyAmount        *float64          `json:"store_late_penalty_amount" binding:"omitempty,gte=0"`
-	PublicLowStockThreshold       *int              `json:"public_low_stock_threshold" binding:"omitempty,gte=0"`
-	SellerInstructions            map[string]string `json:"seller_instructions"`
+	InstagramURL                  *string  `json:"instagram_url"`
+	TikTokURL                     *string  `json:"tiktok_url"`
+	WhatsAppNumber                *string  `json:"whatsapp_number"`
+	PhoneNumber1                  *string  `json:"phone_number_1"`
+	PhoneNumber2                  *string  `json:"phone_number_2"`
+	PhoneNumber3                  *string  `json:"phone_number_3"`
+	PhoneNumber4                  *string  `json:"phone_number_4"`
+	GoogleMapURL                  *string  `json:"google_map_url"`
+	Address                       *string  `json:"address"`
+	AppVersion                    *string  `json:"app_version" binding:"omitempty,regexp=^\\d+(\\.\\d+){1,2}$"`
+	AppVersionIOS                 *string  `json:"app_version_ios" binding:"omitempty,regexp=^\\d+(\\.\\d+){1,2}$"`
+	MinimalPurchasePrice          *float64 `json:"minimal_purchase_price"`
+	WholesaleMinimalPurchasePrice *float64 `json:"wholesale_minimal_purchase_price" binding:"omitempty,gte=0"`
+	PublicLowStockThreshold       *int     `json:"public_low_stock_threshold" binding:"omitempty,gte=0"`
 }
 
 // ChangeLocaleRequest is the change-locale payload.

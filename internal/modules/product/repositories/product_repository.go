@@ -17,11 +17,8 @@ type ProductRepository struct {
 func NewProductRepository(db *gorm.DB) *ProductRepository { return &ProductRepository{db: db} }
 
 // List returns active products (paginated) and the total count.
-func (r *ProductRepository) List(page, perPage int, storeID *int64) ([]models.Product, int64, error) {
+func (r *ProductRepository) List(page, perPage int) ([]models.Product, int64, error) {
 	query := r.db.Model(&models.Product{}).Where("is_active = ?", true)
-	if storeID != nil {
-		query = query.Where("store_id = ?", *storeID)
-	}
 
 	var total int64
 	if err := query.Count(&total).Error; err != nil {

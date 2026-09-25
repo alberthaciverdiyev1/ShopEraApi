@@ -19,7 +19,7 @@ func NewProductService(repo *productrepositories.ProductRepository) *ProductServ
 
 // List returns the paginated product list.
 func (s *ProductService) List(filter productrequests.Filter, lang string) (*productresponses.ListResult, error) {
-	products, total, err := s.repo.List(filter.Page, filter.PerPage, filter.StoreID)
+	products, total, err := s.repo.List(filter.Page, filter.PerPage)
 	if err != nil {
 		return nil, err
 	}

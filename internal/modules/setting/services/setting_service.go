@@ -43,25 +43,9 @@ func (s *SettingService) Update(req settingrequests.UpdateRequest) (*settingmode
 	set("app_version_ios", req.AppVersionIOS)
 	set("minimal_purchase_price", req.MinimalPurchasePrice)
 	set("wholesale_minimal_purchase_price", req.WholesaleMinimalPurchasePrice)
-	set("store_commission_percent", req.StoreCommissionPercent)
-	set("store_negative_balance_limit", req.StoreNegativeBalanceLimit)
-	set("store_handover_hours", req.StoreHandoverHours)
-	set("store_late_penalty_amount", req.StoreLatePenaltyAmount)
 	set("public_low_stock_threshold", req.PublicLowStockThreshold)
-	if req.SellerInstructions != nil {
-		fields["seller_instructions"] = req.SellerInstructions
-	}
 
 	return s.repo.UpdateFirst(fields)
-}
-
-// IsMarketplaceEnabled reports whether the marketplace is on (default true).
-func (s *SettingService) IsMarketplaceEnabled() bool {
-	first, err := s.repo.First()
-	if err != nil || first == nil || first.MarketplaceEnabled == nil {
-		return true
-	}
-	return *first.MarketplaceEnabled
 }
 
 // PublicLowStockThreshold returns the public low-stock threshold (default 20).

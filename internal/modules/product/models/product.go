@@ -10,7 +10,6 @@ type Product struct {
 	Price      *float64          `gorm:"column:price"`
 	StockCount int               `gorm:"column:stock_count"`
 	IsActive   bool              `gorm:"column:is_active"`
-	StoreID    *int64            `gorm:"column:store_id"`
 	DeletedAt  gorm.DeletedAt    `gorm:"column:deleted_at;index"`
 }
 
