@@ -4,6 +4,7 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -80,11 +81,7 @@ func (h *CategoryHandler) Details(c *gin.Context) {
 
 // Add handles POST /api/category.
 func (h *CategoryHandler) Add(c *gin.Context) {
-	var req categoryrequests.SaveRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		helpers.ValidationFailed(c, err)
-		return
-	}
+	req := bindCategorySave(c)
 
 	category, err := h.service.Add(req)
 	if err != nil {
@@ -102,11 +99,7 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 		return
 	}
 
-	var req categoryrequests.SaveRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		helpers.ValidationFailed(c, err)
-		return
-	}
+	req := bindCategorySave(c)
 
 	category, err := h.service.Update(id, req)
 	if err != nil {
@@ -129,4 +122,52 @@ func (h *CategoryHandler) Delete(c *gin.Context) {
 		return
 	}
 	helpers.Respond(c, http.StatusOK, "Category deleted successfully.", nil)
+}
+
+// bindCategorySave binds the category payload from JSON or multipart. Multipart
+// is needed for the image file and for the translated name map (name[az]=...),
+// which Gin's form binder does not populate by itself.
+func bindCategorySave(c *gin.Context) categoryrequests.SaveRequest {
+	var req categoryrequests.SaveRequest
+	if strings.HasPrefix(c.ContentType(), "multipart/form-data") {
+		req.Name = collectNameTranslations(c)
+		if path, err := helpers.SaveUpload(c, "image", "categories"); err == nil {
+			req.Image = &path
+		}
+		if v, ok := c.GetPostForm("description"); ok && v != "" {
+			req.Description = &v
+		}
+		if v, ok := c.GetPostForm("parent_id"); ok && v != "" {
+			if n, err := strconv.ParseInt(v, 10, 64); err == nil {
+				req.ParentID = &n
+			}
+		}
+		if v, ok := c.GetPostForm("is_active"); ok && v != "" {
+			b := v == "1" || v == "true"
+			req.IsActive = &b
+		}
+		if v, ok := c.GetPostForm("sort_order"); ok && v != "" {
+			if n, err := strconv.Atoi(v); err == nil {
+				req.SortOrder = &n
+			}
+		}
+		return req
+	}
+
+	_ = c.ShouldBindJSON(&req)
+	return req
+}
+
+// collectNameTranslations reads name[az], name[en], name[ru], name[tr] from the form.
+func collectNameTranslations(c *gin.Context) map[string]string {
+	out := map[string]string{}
+	for _, lang := range []string{"az", "en", "ru", "tr"} {
+		if v, ok := c.GetPostForm("name[" + lang + "]"); ok && v != "" {
+			out[lang] = v
+		}
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
 }

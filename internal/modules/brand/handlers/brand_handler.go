@@ -55,10 +55,11 @@ func (h *BrandHandler) Details(c *gin.Context) {
 // Add handles POST /api/brand.
 func (h *BrandHandler) Add(c *gin.Context) {
 	var req brandrequests.SaveRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBind(&req); err != nil {
 		helpers.ValidationFailed(c, err)
 		return
 	}
+	attachImage(c, &req.Image, "brands")
 
 	brand, err := h.service.Add(req)
 	if err != nil {
@@ -77,10 +78,11 @@ func (h *BrandHandler) Update(c *gin.Context) {
 	}
 
 	var req brandrequests.SaveRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
+	if err := c.ShouldBind(&req); err != nil {
 		helpers.ValidationFailed(c, err)
 		return
 	}
+	attachImage(c, &req.Image, "brands")
 
 	brand, err := h.service.Update(id, req)
 	if err != nil {
@@ -103,4 +105,14 @@ func (h *BrandHandler) Delete(c *gin.Context) {
 		return
 	}
 	helpers.Respond(c, http.StatusOK, "Brand deleted successfully.", nil)
+}
+
+// attachImage stores an uploaded "image" file (multipart) into the target path.
+func attachImage(c *gin.Context, target **string, dir string) {
+	if _, err := c.FormFile("image"); err != nil {
+		return
+	}
+	if path, err := helpers.SaveUpload(c, "image", dir); err == nil {
+		*target = &path
+	}
 }
