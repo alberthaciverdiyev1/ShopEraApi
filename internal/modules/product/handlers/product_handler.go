@@ -78,7 +78,7 @@ func (h *ProductHandler) Add(c *gin.Context) {
 		helpers.FromError(c, err)
 		return
 	}
-	helpers.Respond(c, http.StatusOK, "Product added successfully.", productresponses.JSON(*product, "az"))
+	helpers.Respond(c, http.StatusOK, "Product added successfully.", productresponses.JSON(*product, "az", nil))
 }
 
 // Update handles PUT /api/product/:id (multipart).
@@ -101,7 +101,7 @@ func (h *ProductHandler) Update(c *gin.Context) {
 		helpers.FromError(c, err)
 		return
 	}
-	helpers.Respond(c, http.StatusOK, "Product updated successfully.", productresponses.JSON(*product, "az"))
+	helpers.Respond(c, http.StatusOK, "Product updated successfully.", productresponses.JSON(*product, "az", nil))
 }
 
 // Delete handles DELETE /api/product/:id.
@@ -116,6 +116,21 @@ func (h *ProductHandler) Delete(c *gin.Context) {
 		return
 	}
 	helpers.Respond(c, http.StatusOK, "Product deleted successfully.", nil)
+}
+
+// UpdatePrices handles PUT /api/product/update-prices.
+func (h *ProductHandler) UpdatePrices(c *gin.Context) {
+	var req productrequests.UpdatePricesRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		helpers.ValidationFailed(c, err)
+		return
+	}
+	message, err := h.service.UpdatePrices(req)
+	if err != nil {
+		helpers.FromError(c, err)
+		return
+	}
+	helpers.Respond(c, http.StatusOK, message, nil)
 }
 
 // collectUploads saves image/video files and pairs images with their color tags.

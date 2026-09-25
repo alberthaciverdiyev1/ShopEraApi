@@ -2,6 +2,8 @@
 package services
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 
 	"shopera/internal/helpers"
@@ -27,7 +29,15 @@ func (s *ProductService) List(q helpers.Query, lang string) (gin.H, error) {
 	if err != nil {
 		return nil, err
 	}
-	return gin.H{"data": productresponses.Collection(items, lang), "meta": q.Meta(total)}, nil
+	ids := make([]int64, 0, len(items))
+	for _, p := range items {
+		ids = append(ids, p.ID)
+	}
+	pivots, err := s.repo.SizePivots(ids)
+	if err != nil {
+		return nil, err
+	}
+	return gin.H{"data": productresponses.Collection(items, lang, pivots), "meta": q.Meta(total)}, nil
 }
 
 // Details returns a single product shape, or nil when not found.
@@ -36,7 +46,47 @@ func (s *ProductService) Details(id int64, lang string) (gin.H, error) {
 	if err != nil || p == nil {
 		return nil, err
 	}
-	return productresponses.JSON(*p, lang), nil
+	pivots, err := s.repo.SizePivots([]int64{id})
+	if err != nil {
+		return nil, err
+	}
+	return productresponses.JSON(*p, lang, pivots[id]), nil
+}
+
+// UpdatePrices bulk-updates prices for size variants and standalone products.
+func (s *ProductService) UpdatePrices(req productrequests.UpdatePricesRequest) (string, error) {
+	priceVal := 0.0
+	if req.IsPercentage {
+		priceVal = deref(req.Percentage)
+	} else {
+		priceVal = deref(req.Price)
+	}
+	discountVal := 0.0
+	if req.IsPercentage {
+		discountVal = deref(req.DiscountPercentage)
+	} else {
+		discountVal = deref(req.DiscountPrice)
+	}
+
+	if priceVal <= 0 && discountVal <= 0 {
+		return "", helpers.NewAppError(400, "No valid values provided.")
+	}
+	if len(req.ProductIDs) == 0 && !req.ConfirmAllProducts {
+		return "", helpers.NewAppError(422, "Updating all products requires explicit confirmation.")
+	}
+
+	standalone, variants, err := s.repo.UpdatePrices(req.ProductIDs, req.IsPercentage, req.Type == "increment", priceVal, discountVal)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%d standalone products and %d size variants updated successfully.", standalone, variants), nil
+}
+
+func deref(value *float64) float64 {
+	if value == nil {
+		return 0
+	}
+	return *value
 }
 
 // Add creates a product with colors, sizes, images and videos.

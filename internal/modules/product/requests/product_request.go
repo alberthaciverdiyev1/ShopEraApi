@@ -8,14 +8,6 @@ import (
 	"strings"
 )
 
-// CreateRequest is the JSON payload for adding a product.
-type CreateRequest struct {
-	Title      map[string]string `json:"title"`
-	Price      *float64          `json:"price"`
-	StockCount int               `json:"stock_count"`
-	IsActive   bool              `json:"is_active"`
-}
-
 // SizeInput is a size variant with its own pricing.
 type SizeInput struct {
 	SizeID   int64    `json:"size_id"`

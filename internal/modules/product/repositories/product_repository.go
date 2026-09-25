@@ -311,3 +311,93 @@ func (r *ProductRepository) replaceSizes(tx *gorm.DB, productID int64, sizes []S
 	}
 	return nil
 }
+
+// SizePivots returns product_size rows grouped by product id.
+func (r *ProductRepository) SizePivots(productIDs []int64) (map[int64][]models.ProductSize, error) {
+	out := map[int64][]models.ProductSize{}
+	if len(productIDs) == 0 {
+		return out, nil
+	}
+	var rows []models.ProductSize
+	if err := r.db.Where("product_id IN ?", productIDs).Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	for _, row := range rows {
+		out[row.ProductID] = append(out[row.ProductID], row)
+	}
+	return out, nil
+}
+
+// UpdatePrices bulk-updates pivots and standalone products. Returns the affected
+// counts (standalone products, size variants).
+func (r *ProductRepository) UpdatePrices(ids []int64, isPercentage, increment bool, priceVal, discountVal float64) (int64, int64, error) {
+	var standalone, variants int64
+
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		var sets []string
+		var setArgs []any
+		if priceVal > 0 {
+			sets = append(sets, "price = "+priceExpression("price", isPercentage, increment))
+			setArgs = append(setArgs, priceVal)
+		}
+		if discountVal > 0 {
+			sets = append(sets, "discount = "+priceExpression("discount", isPercentage, increment))
+			setArgs = append(setArgs, discountVal)
+		}
+		if len(sets) == 0 {
+			return nil
+		}
+		setClause := strings.Join(sets, ", ")
+
+		// Size variants.
+		args := append([]any{}, setArgs...)
+		query := "UPDATE product_size SET " + setClause
+		if len(ids) > 0 {
+			query += " WHERE product_id IN (" + placeholders(len(ids)) + ")"
+			for _, id := range ids {
+				args = append(args, id)
+			}
+		}
+		res := tx.Exec(query, args...)
+		if res.Error != nil {
+			return res.Error
+		}
+		variants = res.RowsAffected
+
+		// Standalone products (no size variants).
+		args = append([]any{}, setArgs...)
+		query = "UPDATE products SET " + setClause +
+			" WHERE NOT EXISTS (SELECT 1 FROM product_size WHERE product_size.product_id = products.id)"
+		if len(ids) > 0 {
+			query += " AND id IN (" + placeholders(len(ids)) + ")"
+			for _, id := range ids {
+				args = append(args, id)
+			}
+		}
+		res = tx.Exec(query, args...)
+		if res.Error != nil {
+			return res.Error
+		}
+		standalone = res.RowsAffected
+		return nil
+	})
+	if err != nil {
+		return 0, 0, err
+	}
+	return standalone, variants, nil
+}
+
+func priceExpression(column string, isPercentage, increment bool) string {
+	operator := "+"
+	if !increment {
+		operator = "-"
+	}
+	if isPercentage {
+		return fmt.Sprintf("GREATEST(0, ROUND((COALESCE(%s, 0) * (1 %s (? / 100.0)))::numeric, 2))", column, operator)
+	}
+	return fmt.Sprintf("GREATEST(0, ROUND((COALESCE(%s, 0) %s ?)::numeric, 2))", column, operator)
+}
+
+func placeholders(n int) string {
+	return strings.TrimRight(strings.Repeat("?,", n), ",")
+}

@@ -9,15 +9,18 @@ import (
 	"shopera/internal/modules/product/models"
 )
 
-// JSON maps a product to its API shape (localized title/description + relations).
-func JSON(p models.Product, lang string) gin.H {
+// JSON maps a product to its API shape (localized fields + relations + retail pricing).
+func JSON(p models.Product, lang string, pivots []models.ProductSize) gin.H {
+	pricing := producthelpers.Retail(p, pivots, nil)
+
 	out := gin.H{
 		"id":                   p.ID,
 		"title":                producthelpers.Trans(p.Title, lang),
 		"description":          producthelpers.Trans(p.Description, lang),
 		"sku":                  p.Sku,
-		"price":                p.Price,
-		"discount":             p.Discount,
+		"price":                pricing.Original,
+		"discount":             pricing.Discounted,
+		"final_price":          pricing.Final,
 		"discount_expire_date": p.DiscountExpireDate,
 		"stock_count":          p.StockCount,
 		"views":                p.Views,
@@ -47,7 +50,16 @@ func JSON(p models.Product, lang string) gin.H {
 
 	sizes := make([]gin.H, 0, len(p.Sizes))
 	for _, s := range p.Sizes {
-		sizes = append(sizes, gin.H{"id": s.ID, "name": s.Name, "icon": s.Icon})
+		sizeID := s.ID
+		sizePricing := producthelpers.Retail(p, pivots, &sizeID)
+		sizes = append(sizes, gin.H{
+			"id":          s.ID,
+			"name":        s.Name,
+			"icon":        s.Icon,
+			"price":       sizePricing.Original,
+			"discount":    sizePricing.Discounted,
+			"final_price": sizePricing.Final,
+		})
 	}
 	out["sizes"] = sizes
 
@@ -61,10 +73,10 @@ func JSON(p models.Product, lang string) gin.H {
 }
 
 // Collection maps products to their API shape.
-func Collection(items []models.Product, lang string) []gin.H {
+func Collection(items []models.Product, lang string, pivotsByProduct map[int64][]models.ProductSize) []gin.H {
 	out := make([]gin.H, 0, len(items))
 	for _, p := range items {
-		out = append(out, JSON(p, lang))
+		out = append(out, JSON(p, lang, pivotsByProduct[p.ID]))
 	}
 	return out
 }
