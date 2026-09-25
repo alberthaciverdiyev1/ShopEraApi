@@ -113,6 +113,28 @@ func (s *AuthService) Login(in authrequests.LoginRequest) (*authresponses.Result
 	return &authresponses.Result{Token: token, RefreshToken: refresh, User: userresponses.Payload(found, true)}, nil
 }
 
+// TokensForUser issues a fresh token pair for an existing user. Used after a
+// password reset, where every prior session has already been revoked.
+func (s *AuthService) TokensForUser(userID int64) (*authresponses.Result, error) {
+	user, err := s.users.FindByID(userID)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, helpers.NewAppError(401, "User not found.")
+	}
+
+	token, err := helpers.GenerateToken(user.ID, s.cfg.JWT.Secret, s.cfg.JWT.TTL)
+	if err != nil {
+		return nil, err
+	}
+	refresh, err := s.refreshtokens.Issue(user.ID, s.cfg.JWT.RefreshTTL)
+	if err != nil {
+		return nil, err
+	}
+	return &authresponses.Result{Token: token, RefreshToken: refresh, User: userresponses.Payload(user, false)}, nil
+}
+
 func lowerPtr(value, fallback string) *string {
 	if value == "" {
 		value = fallback

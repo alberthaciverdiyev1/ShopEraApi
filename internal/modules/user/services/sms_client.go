@@ -1,4 +1,4 @@
-// Package services holds User module services (OTP). NOT wired into routes yet.
+// Package services holds User module services (OTP, password reset, SMS, mail).
 package services
 
 import (
@@ -11,8 +11,6 @@ import (
 )
 
 // SmsClient delivers an SMS message.
-//
-// NOTE: OTP/SMS is NOT wired into any route or the register flow yet — code only.
 type SmsClient interface {
 	SendSms(msisdn, text string) error
 }

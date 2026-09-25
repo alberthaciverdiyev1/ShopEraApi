@@ -11,6 +11,7 @@ type Config struct {
 }
 
 type AppConfig struct {
+	Name string
 	Port int
 	Env  string
 }
@@ -45,6 +46,7 @@ func Load() *Config {
 
 	return &Config{
 		App: AppConfig{
+			Name: getEnv("APP_NAME", "Shopera"),
 			Port: getEnvInt("APP_PORT", 3000),
 			Env:  getEnv("APP_ENV", "development"),
 		},

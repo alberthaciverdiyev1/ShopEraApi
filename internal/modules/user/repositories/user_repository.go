@@ -89,3 +89,13 @@ func (r *UserRepository) FindByEmail(email string) (*models.User, error) {
 func (r *UserRepository) UpdateFields(id int64, fields map[string]any) error {
 	return r.db.Model(&models.User{}).Where("id = ?", id).Updates(fields).Error
 }
+
+// FindByIDs returns the users whose id is in ids (empty input → empty result).
+func (r *UserRepository) FindByIDs(ids []int64) ([]models.User, error) {
+	if len(ids) == 0 {
+		return nil, nil
+	}
+	var users []models.User
+	err := r.db.Where("id IN ?", ids).Find(&users).Error
+	return users, err
+}

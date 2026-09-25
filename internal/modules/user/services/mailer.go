@@ -1,8 +1,6 @@
 package services
 
 // Mailer sends a plain e-mail message.
-//
-// NOTE: password reset / mail is NOT wired into routes yet — code only.
 type Mailer interface {
 	Send(to, subject, body string) error
 }

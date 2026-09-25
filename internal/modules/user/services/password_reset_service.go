@@ -5,13 +5,12 @@ import (
 	"time"
 
 	"shopera/internal/helpers"
+	usermodels "shopera/internal/modules/user/models"
 	userrepositories "shopera/internal/modules/user/repositories"
 )
 
 // PasswordResetService handles password reset flows (phone OTP, e-mail code and
 // admin-mediated requests).
-//
-// NOTE: NOT wired into routes or register yet — code only (per current decision).
 type PasswordResetService struct {
 	users  *userrepositories.UserRepository
 	otps   *userrepositories.OtpRepository
@@ -122,17 +121,22 @@ func (s *PasswordResetService) CreateRequest(phone string, note *string) error {
 	return s.resets.FirstOrCreatePending(user.ID, phone, note)
 }
 
-// ListRequests returns admin password-reset requests.
-func (s *PasswordResetService) ListRequests(status *string, search string, page, perPage int) ([]int64, int64, error) {
-	items, total, err := s.resets.List(status, search, perPage, (page-1)*perPage)
-	if err != nil {
-		return nil, 0, err
+// AdminChangePassword sets a password for any user and revokes their sessions.
+func (s *PasswordResetService) AdminChangePassword(userID int64, newPassword string) (bool, error) {
+	user, err := s.users.FindByID(userID)
+	if err != nil || user == nil {
+		return false, err
 	}
-	ids := make([]int64, 0, len(items))
-	for _, r := range items {
-		ids = append(ids, r.ID)
+	if err := s.updatePassword(userID, newPassword); err != nil {
+		return false, err
 	}
-	return ids, total, nil
+	_ = s.tokens.RevokeAllForUser(userID)
+	return true, nil
+}
+
+// ListRequests returns admin password-reset requests (paginated).
+func (s *PasswordResetService) ListRequests(status *string, search string, page, perPage int) ([]usermodels.PasswordResetRequest, int64, error) {
+	return s.resets.List(status, search, perPage, (page-1)*perPage)
 }
 
 // ResolveRequest sets the user's new password and marks the request resolved.

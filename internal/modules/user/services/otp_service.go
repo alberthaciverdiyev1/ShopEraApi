@@ -9,8 +9,6 @@ import (
 )
 
 // OtpService issues and verifies one-time codes (SMS).
-//
-// NOTE: NOT wired into routes or register yet — code only (per current decision).
 type OtpService struct {
 	repo *repositories.OtpRepository
 	sms  SmsClient
@@ -20,14 +18,15 @@ func NewOtpService(repo *repositories.OtpRepository, sms SmsClient) *OtpService 
 	return &OtpService{repo: repo, sms: sms}
 }
 
-// SendOtp generates a 4-digit code, stores it and sends it via SMS.
-func (s *OtpService) SendOtp(key, text string) (time.Time, error) {
+// SendOtp generates a 4-digit code, stores it and sends it via SMS. The text
+// builder receives the generated code so the caller can render the message.
+func (s *OtpService) SendOtp(key string, text func(code int) string) (time.Time, error) {
 	code := randomCode()
 	deactiveAt := time.Now().Add(10 * time.Minute)
 	if err := s.repo.Upsert(key, code, deactiveAt); err != nil {
 		return time.Time{}, err
 	}
-	if err := s.sms.SendSms(key, text); err != nil {
+	if err := s.sms.SendSms(key, text(code)); err != nil {
 		return time.Time{}, err
 	}
 	return deactiveAt, nil
