@@ -25,18 +25,13 @@ func NewProductHandler(service *productservices.ProductService) *ProductHandler 
 
 // List handles GET /api/product.
 func (h *ProductHandler) List(c *gin.Context) {
-	filter := productrequests.Filter{
-		Page:    helpers.QueryInt(c, "page", 1),
-		PerPage: helpers.QueryInt(c, "per_page", 20),
-	}
 	lang := producthelpers.ResolveLocale(c.GetHeader("Accept-Language"))
-
-	result, err := h.service.List(filter, lang)
+	result, err := h.service.List(helpers.ParseQuery(c), lang)
 	if err != nil {
 		helpers.FromError(c, err)
 		return
 	}
-	helpers.Respond(c, http.StatusOK, "", result)
+	helpers.Respond(c, http.StatusOK, "Products retrieved successfully.", result)
 }
 
 // Details handles GET /api/product/:id.
@@ -67,7 +62,6 @@ func (h *ProductHandler) Create(c *gin.Context) {
 		helpers.ValidationFailed(c, err)
 		return
 	}
-
 	product, err := h.service.Create(req)
 	if err != nil {
 		helpers.FromError(c, err)

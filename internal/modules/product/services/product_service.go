@@ -2,6 +2,9 @@
 package services
 
 import (
+	"github.com/gin-gonic/gin"
+
+	"shopera/internal/helpers"
 	"shopera/internal/modules/product/models"
 	productrepositories "shopera/internal/modules/product/repositories"
 	productrequests "shopera/internal/modules/product/requests"
@@ -18,30 +21,21 @@ func NewProductService(repo *productrepositories.ProductRepository) *ProductServ
 }
 
 // List returns the paginated product list.
-func (s *ProductService) List(filter productrequests.Filter, lang string) (*productresponses.ListResult, error) {
-	products, total, err := s.repo.List(filter.Page, filter.PerPage)
+func (s *ProductService) List(q helpers.Query, lang string) (gin.H, error) {
+	items, total, err := s.repo.List(q)
 	if err != nil {
 		return nil, err
 	}
-
-	data := make([]map[string]any, 0, len(products))
-	for _, p := range products {
-		data = append(data, map[string]any(productresponses.JSON(p, lang)))
-	}
-
-	return &productresponses.ListResult{
-		Data: data,
-		Meta: map[string]any{"total": total, "page": filter.Page, "per_page": filter.PerPage},
-	}, nil
+	return gin.H{"data": productresponses.Collection(items, lang), "meta": q.Meta(total)}, nil
 }
 
 // Details returns a single product shape, or nil when not found.
-func (s *ProductService) Details(id int64, lang string) (map[string]any, error) {
+func (s *ProductService) Details(id int64, lang string) (gin.H, error) {
 	p, err := s.repo.FindByID(id)
 	if err != nil || p == nil {
 		return nil, err
 	}
-	return map[string]any(productresponses.JSON(*p, lang)), nil
+	return productresponses.JSON(*p, lang), nil
 }
 
 // Create builds a product from the request and stores it.
