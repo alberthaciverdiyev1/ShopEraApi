@@ -53,6 +53,10 @@ import (
 	helprepositories "shopera/internal/modules/helpandpolicy/repositories"
 	helproutes "shopera/internal/modules/helpandpolicy/routes"
 	helpservices "shopera/internal/modules/helpandpolicy/services"
+	notificationhandlers "shopera/internal/modules/notification/handlers"
+	notificationrepositories "shopera/internal/modules/notification/repositories"
+	notificationroutes "shopera/internal/modules/notification/routes"
+	notificationservices "shopera/internal/modules/notification/services"
 	orderhandlers "shopera/internal/modules/order/handlers"
 	orderrepositories "shopera/internal/modules/order/repositories"
 	orderroutes "shopera/internal/modules/order/routes"
@@ -212,4 +216,15 @@ func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 		balanceservices.NewBalanceService(balancerepositories.NewBalanceRepository(db), paymentService),
 	)
 	balanceroutes.Register(api, balanceHandler, authMiddleware)
+
+	notificationService := notificationservices.NewNotificationService(
+		notificationrepositories.NewNotificationRepository(db),
+		notificationrepositories.NewNotificationTokenRepository(db),
+		notificationservices.LogPusher{},
+	)
+	notificationHandler := notificationhandlers.NewNotificationHandler(notificationService)
+	notificationTokenHandler := notificationhandlers.NewNotificationTokenHandler(
+		notificationservices.NewNotificationTokenService(notificationrepositories.NewNotificationTokenRepository(db)),
+	)
+	notificationroutes.Register(api, notificationHandler, notificationTokenHandler, authMiddleware)
 }
