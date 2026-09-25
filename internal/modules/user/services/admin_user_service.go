@@ -31,6 +31,41 @@ func NewAdminUserService(
 	return &AdminUserService{users: users, tokens: tokens, roles: roles, balances: balances, settings: settings}
 }
 
+// List returns users filtered by search/role, paginated and newest first.
+func (s *AdminUserService) List(search string, role *string, onlyTeam bool, page, perPage int) (gin.H, error) {
+	users, count, err := s.users.AdminList(search, role, onlyTeam, perPage, (page-1)*perPage)
+	if err != nil {
+		return nil, err
+	}
+
+	ids := make([]int64, 0, len(users))
+	for i := range users {
+		ids = append(ids, users[i].ID)
+	}
+	rolesByUser, err := s.roles.RolesByUserIDs(ids)
+	if err != nil {
+		return nil, err
+	}
+	minimal := s.settings.MinimalPurchasePrice()
+
+	data := make([]map[string]any, 0, len(users))
+	for i := range users {
+		u := users[i]
+		names := make([]string, 0, len(rolesByUser[u.ID]))
+		for _, r := range rolesByUser[u.ID] {
+			names = append(names, r.Name)
+		}
+		balance, err := s.balances.Sum(u.ID)
+		if err != nil {
+			return nil, err
+		}
+		data = append(data, userresponses.Resource(&u, balance, minimal, names))
+	}
+
+	q := helpers.Query{Page: page, PerPage: perPage}
+	return gin.H{"count": count, "user": data, "meta": q.Meta(count)}, nil
+}
+
 // Block activates/deactivates a user; blocking revokes their sessions.
 func (s *AdminUserService) Block(actorID, userID int64, block bool) (map[string]any, error) {
 	user, err := s.users.FindByID(userID)

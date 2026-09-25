@@ -19,6 +19,28 @@ func NewAdminUserHandler(service *userservices.AdminUserService) *AdminUserHandl
 	return &AdminUserHandler{service: service}
 }
 
+// List handles GET /user/list.
+func (h *AdminUserHandler) List(c *gin.Context) {
+	perPage := helpers.QueryInt(c, "limit", helpers.DefaultPerPage)
+	if perPage > 100 {
+		perPage = 100
+	}
+	page := helpers.QueryInt(c, "page", 1)
+
+	var role *string
+	if v := c.Query("role"); v != "" {
+		role = &v
+	}
+	onlyTeam := helpers.QueryBoolPtr(c, "only_team")
+
+	data, err := h.service.List(c.Query("search"), role, onlyTeam != nil && *onlyTeam, page, perPage)
+	if err != nil {
+		helpers.FromError(c, err)
+		return
+	}
+	helpers.Respond(c, http.StatusOK, "Users retrieved successfully", data)
+}
+
 // Block handles POST /user/block.
 func (h *AdminUserHandler) Block(c *gin.Context) {
 	var req userrequests.BlockUserRequest

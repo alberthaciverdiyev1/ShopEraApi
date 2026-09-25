@@ -7,6 +7,7 @@ import (
 
 	"gorm.io/gorm"
 
+	rolepermissionmodels "shopera/internal/modules/rolepermission/models"
 	userhelpers "shopera/internal/modules/user/helpers"
 	"shopera/internal/modules/user/models"
 )
@@ -109,6 +110,45 @@ func (r *UserRepository) SoftDelete(id int64) error {
 // ForceDelete permanently removes a user row.
 func (r *UserRepository) ForceDelete(id int64) error {
 	return r.db.Unscoped().Delete(&models.User{}, id).Error
+}
+
+// AdminList returns users filtered by search/role (paginated, newest first).
+// onlyTeam keeps users holding a role other than "user"; role matches one role.
+func (r *UserRepository) AdminList(search string, role *string, onlyTeam bool, limit, offset int) ([]models.User, int64, error) {
+	db := r.db.Model(&models.User{})
+
+	if trimmed := strings.TrimSpace(search); trimmed != "" {
+		like := "%" + strings.ToLower(trimmed) + "%"
+		db = db.Where(
+			"lower(name) LIKE ? OR lower(surname) LIKE ? OR lower(email) LIKE ? OR lower(phone) LIKE ? OR "+userhelpers.PhoneMatchSQL,
+			like, like, like, like, userhelpers.NormalizePhone(trimmed),
+		)
+	}
+
+	if onlyTeam {
+		db = db.Where(
+			`id IN (SELECT mhr.model_id FROM model_has_roles mhr
+			        JOIN roles rr ON rr.id = mhr.role_id
+			        WHERE mhr.model_type = ? AND rr.name <> 'user')`,
+			rolepermissionmodels.UserMorph,
+		)
+	} else if role != nil && *role != "" {
+		db = db.Where(
+			`id IN (SELECT mhr.model_id FROM model_has_roles mhr
+			        JOIN roles rr ON rr.id = mhr.role_id
+			        WHERE mhr.model_type = ? AND rr.name = ?)`,
+			rolepermissionmodels.UserMorph, *role,
+		)
+	}
+
+	var total int64
+	if err := db.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	var users []models.User
+	err := db.Order("created_at desc").Limit(limit).Offset(offset).Find(&users).Error
+	return users, total, err
 }
 
 // FindByIDs returns the users whose id is in ids (empty input → empty result).

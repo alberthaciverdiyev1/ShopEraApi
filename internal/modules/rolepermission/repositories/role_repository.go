@@ -260,4 +260,4 @@ func (r *RoleRepository) firstOrCreatePermission(name string) (*models.Permissio
 }
 
 // userMorph is the Laravel class name stored in the pivot columns — DO NOT CHANGE.
-const userMorph = `Modules\User\Http\Entities\User`
+const userMorph = models.UserMorph

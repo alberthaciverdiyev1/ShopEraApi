@@ -18,6 +18,7 @@ func mount(group *gin.RouterGroup, handler *userhandlers.UserHandler, admin *use
 	userGroup.PUT("/change-phone", auth, handler.ChangePhone)
 
 	// Management.
+	userGroup.GET("/list", auth, admin.List)
 	userGroup.GET("/details", auth, admin.Details)
 	userGroup.GET("/details/:id", auth, admin.Details)
 	userGroup.POST("/block", auth, admin.Block)

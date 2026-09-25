@@ -6,6 +6,9 @@ import "time"
 // Guard is the auth guard used across the app.
 const Guard = "sanctum"
 
+// UserMorph is the morph type stored for user model relations (spatie tables).
+const UserMorph = `Modules\User\Http\Entities\User`
+
 // Role maps the `roles` table.
 type Role struct {
 	ID        int64     `gorm:"column:id;primaryKey" json:"id"`
