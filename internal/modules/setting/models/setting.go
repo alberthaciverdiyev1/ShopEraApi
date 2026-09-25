@@ -9,25 +9,24 @@ import (
 
 // Setting maps the single-row `settings` table. Translatable jsonb fields are maps.
 type Setting struct {
-	ID                            int64          `gorm:"column:id;primaryKey" json:"id"`
-	InstagramURL                  *string        `gorm:"column:instagram_url" json:"instagram_url"`
-	TikTokURL                     *string        `gorm:"column:tiktok_url" json:"tiktok_url"`
-	WhatsAppNumber                *string        `gorm:"column:whatsapp_number" json:"whatsapp_number"`
-	PhoneNumber1                  *string        `gorm:"column:phone_number_1" json:"phone_number_1"`
-	PhoneNumber2                  *string        `gorm:"column:phone_number_2" json:"phone_number_2"`
-	PhoneNumber3                  *string        `gorm:"column:phone_number_3" json:"phone_number_3"`
-	PhoneNumber4                  *string        `gorm:"column:phone_number_4" json:"phone_number_4"`
-	GoogleMapURL                  *string        `gorm:"column:google_map_url" json:"google_map_url"`
-	Address                       *string        `gorm:"column:address" json:"address"`
-	ReferralRewardAmount          *float64       `gorm:"column:referral_reward_amount" json:"referral_reward_amount"`
-	AppVersion                    *string        `gorm:"column:app_version" json:"app_version"`
-	AppVersionIOS                 *string        `gorm:"column:app_version_ios" json:"app_version_ios"`
-	MinimalPurchasePrice          *float64       `gorm:"column:minimal_purchase_price" json:"minimal_purchase_price"`
-	WholesaleMinimalPurchasePrice *float64       `gorm:"column:wholesale_minimal_purchase_price" json:"wholesale_minimal_purchase_price"`
-	PublicLowStockThreshold       *int           `gorm:"column:public_low_stock_threshold" json:"public_low_stock_threshold"`
-	CreatedAt                     time.Time      `gorm:"column:created_at" json:"created_at"`
-	UpdatedAt                     time.Time      `gorm:"column:updated_at" json:"updated_at"`
-	DeletedAt                     gorm.DeletedAt `gorm:"column:deleted_at" json:"-"`
+	ID                      int64          `gorm:"column:id;primaryKey" json:"id"`
+	InstagramURL            *string        `gorm:"column:instagram_url" json:"instagram_url"`
+	TikTokURL               *string        `gorm:"column:tiktok_url" json:"tiktok_url"`
+	WhatsAppNumber          *string        `gorm:"column:whatsapp_number" json:"whatsapp_number"`
+	PhoneNumber1            *string        `gorm:"column:phone_number_1" json:"phone_number_1"`
+	PhoneNumber2            *string        `gorm:"column:phone_number_2" json:"phone_number_2"`
+	PhoneNumber3            *string        `gorm:"column:phone_number_3" json:"phone_number_3"`
+	PhoneNumber4            *string        `gorm:"column:phone_number_4" json:"phone_number_4"`
+	GoogleMapURL            *string        `gorm:"column:google_map_url" json:"google_map_url"`
+	Address                 *string        `gorm:"column:address" json:"address"`
+	ReferralRewardAmount    *float64       `gorm:"column:referral_reward_amount" json:"referral_reward_amount"`
+	AppVersion              *string        `gorm:"column:app_version" json:"app_version"`
+	AppVersionIOS           *string        `gorm:"column:app_version_ios" json:"app_version_ios"`
+	MinimalPurchasePrice    *float64       `gorm:"column:minimal_purchase_price" json:"minimal_purchase_price"`
+	PublicLowStockThreshold *int           `gorm:"column:public_low_stock_threshold" json:"public_low_stock_threshold"`
+	CreatedAt               time.Time      `gorm:"column:created_at" json:"created_at"`
+	UpdatedAt               time.Time      `gorm:"column:updated_at" json:"updated_at"`
+	DeletedAt               gorm.DeletedAt `gorm:"column:deleted_at" json:"-"`
 }
 
 func (Setting) TableName() string { return "settings" }

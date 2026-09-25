@@ -24,7 +24,6 @@ func JSON(p models.Product, lang string) gin.H {
 		"sales_count":          p.SalesCount,
 		"weight":               p.Weight,
 		"purchase_limit":       p.PurchaseLimit,
-		"wholesale_price":      p.WholesalePrice,
 		"gender":               p.Gender,
 		"is_active":            p.IsActive,
 		"is_suggest":           p.IsSuggest,

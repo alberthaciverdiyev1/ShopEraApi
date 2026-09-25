@@ -42,7 +42,6 @@ func (s *SettingService) Update(req settingrequests.UpdateRequest) (*settingmode
 	set("app_version", req.AppVersion)
 	set("app_version_ios", req.AppVersionIOS)
 	set("minimal_purchase_price", req.MinimalPurchasePrice)
-	set("wholesale_minimal_purchase_price", req.WholesaleMinimalPurchasePrice)
 	set("public_low_stock_threshold", req.PublicLowStockThreshold)
 
 	return s.repo.UpdateFirst(fields)
@@ -64,15 +63,6 @@ func (s *SettingService) MinimalPurchasePrice() float64 {
 		return 15
 	}
 	return *first.MinimalPurchasePrice
-}
-
-// WholesaleMinimalPurchasePrice returns the wholesale minimum (default 100).
-func (s *SettingService) WholesaleMinimalPurchasePrice() float64 {
-	first, err := s.repo.First()
-	if err != nil || first == nil || first.WholesaleMinimalPurchasePrice == nil {
-		return 100
-	}
-	return *first.WholesaleMinimalPurchasePrice
 }
 
 // ChangeLocale validates the locale and echoes it back.

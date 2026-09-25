@@ -32,7 +32,6 @@ type Product struct {
 	IsPinned           bool              `gorm:"column:is_pinned"`
 	DiscountExpireDate *time.Time        `gorm:"column:discount_expire_date"`
 	PurchaseLimit      *int              `gorm:"column:purchase_limit"`
-	WholesalePrice     *float64          `gorm:"column:wholesale_price"`
 	Weight             *float64          `gorm:"column:weight"`
 	CreatedAt          time.Time         `gorm:"column:created_at"`
 	UpdatedAt          time.Time         `gorm:"column:updated_at"`

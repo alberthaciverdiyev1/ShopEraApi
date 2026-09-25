@@ -12,5 +12,7 @@ func Register(group *gin.RouterGroup, handler *producthandlers.ProductHandler, a
 	productGroup := group.Group("/product")
 	productGroup.GET("", handler.List)
 	productGroup.GET("/:id", handler.Details)
-	productGroup.POST("/add", auth, handler.Create)
+	productGroup.POST("/add", auth, handler.Add)
+	productGroup.PUT("/:id", auth, handler.Update)
+	productGroup.DELETE("/:id", auth, handler.Delete)
 }

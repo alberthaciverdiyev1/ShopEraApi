@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"shopera/internal/helpers"
+	producthelpers "shopera/internal/modules/product/helpers"
 	"shopera/internal/modules/product/models"
 	productrepositories "shopera/internal/modules/product/repositories"
 	productrequests "shopera/internal/modules/product/requests"
@@ -38,16 +39,151 @@ func (s *ProductService) Details(id int64, lang string) (gin.H, error) {
 	return productresponses.JSON(*p, lang), nil
 }
 
-// Create builds a product from the request and stores it.
-func (s *ProductService) Create(req productrequests.CreateRequest) (*models.Product, error) {
-	product := &models.Product{
-		Title:      req.Title,
-		Price:      req.Price,
-		StockCount: req.StockCount,
-		IsActive:   req.IsActive,
+// Add creates a product with colors, sizes, images and videos.
+func (s *ProductService) Add(
+	req productrequests.SaveRequest,
+	images []productrepositories.ImageCreate,
+	videos []string,
+) (*models.Product, error) {
+	if req.Title == nil || req.Title["az"] == "" {
+		return nil, helpers.NewAppError(422, "The title.az field is required.")
 	}
-	if err := s.repo.Create(product); err != nil {
+
+	product := &models.Product{
+		Title:       producthelpers.FillLower(req.Title),
+		Description: producthelpers.FillLower(req.Description),
+		Sku:         req.Sku,
+		BrandID:     req.BrandID,
+		CategoryID:  req.CategoryID,
+		Price:       req.Price,
+		Discount:    req.Discount,
+		Weight:      req.Weight,
+		IsActive:    true,
+	}
+	if req.StockCount != nil {
+		product.StockCount = *req.StockCount
+	}
+	if req.PurchaseLimit != nil {
+		product.PurchaseLimit = req.PurchaseLimit
+	}
+	if req.IsActive != nil {
+		product.IsActive = *req.IsActive
+	}
+	if req.IsSuggest != nil {
+		product.IsSuggest = *req.IsSuggest
+	}
+	if req.IsPinned != nil {
+		product.IsPinned = *req.IsPinned
+	}
+	if req.Views != nil {
+		product.Views = *req.Views
+	}
+	if req.SalesCount != nil {
+		product.SalesCount = *req.SalesCount
+	}
+	if req.Gender != nil {
+		product.Gender = producthelpers.GenderValue(*req.Gender)
+	}
+	if req.DiscountExpireDate != nil {
+		product.DiscountExpireDate = producthelpers.ParseTime(*req.DiscountExpireDate)
+	}
+
+	if product.Sku == nil {
+		sku, err := s.repo.NextSku()
+		if err != nil {
+			return nil, err
+		}
+		product.Sku = &sku
+	}
+
+	if err := s.repo.Create(product, req.Colors, toSizePivots(req.Sizes), images, videos); err != nil {
 		return nil, err
 	}
-	return product, nil
+	return s.repo.FindByID(product.ID)
+}
+
+// Update applies changes to a product.
+func (s *ProductService) Update(
+	id int64,
+	req productrequests.SaveRequest,
+	newImages []productrepositories.ImageCreate,
+	newVideos []string,
+) (*models.Product, error) {
+	fields := map[string]any{}
+	set := func(key string, value any) {
+		if value != nil {
+			fields[key] = value
+		}
+	}
+	set("sku", req.Sku)
+	set("brand_id", req.BrandID)
+	set("category_id", req.CategoryID)
+	set("price", req.Price)
+	set("discount", req.Discount)
+	set("weight", req.Weight)
+	set("purchase_limit", req.PurchaseLimit)
+	set("is_active", req.IsActive)
+	set("is_suggest", req.IsSuggest)
+	set("is_pinned", req.IsPinned)
+	set("views", req.Views)
+	set("sales_count", req.SalesCount)
+	set("stock_count", req.StockCount)
+	if req.Gender != nil {
+		if g := producthelpers.GenderValue(*req.Gender); g != nil {
+			fields["gender"] = *g
+		}
+	}
+	if req.DiscountExpireDate != nil {
+		fields["discount_expire_date"] = producthelpers.ParseTime(*req.DiscountExpireDate)
+	}
+
+	var title, description map[string]string
+	if len(req.Title) > 0 {
+		title = producthelpers.FillLower(req.Title)
+	}
+	if len(req.Description) > 0 {
+		description = producthelpers.FillLower(req.Description)
+	}
+
+	var colors *[]int64
+	if len(req.Colors) > 0 || req.ColorsSynced {
+		c := req.Colors
+		colors = &c
+	}
+	var sizes *[]productrepositories.SizePivot
+	if req.SizesProvided {
+		sp := toSizePivots(req.Sizes)
+		sizes = &sp
+	}
+	var existingImages *[]productrepositories.ExistingImageSync
+	if req.ExistingImagesProvided || req.ImagesSynced {
+		list := make([]productrepositories.ExistingImageSync, 0, len(req.ExistingImages))
+		for _, e := range req.ExistingImages {
+			list = append(list, productrepositories.ExistingImageSync{ID: e.ID, ColorID: e.ColorID})
+		}
+		existingImages = &list
+	}
+	var existingVideos *[]int64
+	if req.ExistingVideosProvided {
+		v := req.ExistingVideos
+		existingVideos = &v
+	}
+
+	if _, err := s.repo.Update(id, fields, title, description, colors, sizes, newImages, existingImages, newVideos, existingVideos); err != nil {
+		return nil, err
+	}
+	return s.repo.FindByID(id)
+}
+
+// Delete removes a product (and its basket lines).
+func (s *ProductService) Delete(id int64) error {
+	return s.repo.Delete(id)
+}
+
+func toSizePivots(sizes []productrequests.SizeInput) []productrepositories.SizePivot {
+	out := make([]productrepositories.SizePivot, 0, len(sizes))
+	for _, s := range sizes {
+		out = append(out, productrepositories.SizePivot{SizeID: s.SizeID, Price: s.Price, Discount: s.Discount})
+	}
+	return out
 }
