@@ -128,3 +128,12 @@ type providerWithConfig struct {
 	contract.Provider
 	record *models.PaymentProvider
 }
+
+// Initiate starts a payment with the active provider using an explicit request.
+func (s *PaymentService) Initiate(ctx context.Context, req contract.InitiateRequest) (string, error) {
+	provider, err := s.activeProvider()
+	if err != nil {
+		return "", err
+	}
+	return provider.Initiate(ctx, req, provider.record.Config)
+}

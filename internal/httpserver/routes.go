@@ -14,6 +14,10 @@ import (
 	authhandlers "shopera/internal/modules/auth/handlers"
 	authroutes "shopera/internal/modules/auth/routes"
 	authservices "shopera/internal/modules/auth/services"
+	balancehandlers "shopera/internal/modules/balance/handlers"
+	balancerepositories "shopera/internal/modules/balance/repositories"
+	balanceroutes "shopera/internal/modules/balance/routes"
+	balanceservices "shopera/internal/modules/balance/services"
 	bannerhandlers "shopera/internal/modules/banner/handlers"
 	bannerrepositories "shopera/internal/modules/banner/repositories"
 	bannerroutes "shopera/internal/modules/banner/routes"
@@ -161,9 +165,8 @@ func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 	)
 	favoriteroutes.Register(api, favoriteHandler, authMiddleware)
 
-	paymentHandler := paymenthandlers.NewPaymentHandler(
-		paymentservices.NewPaymentService(paymentrepositories.NewPaymentProviderRepository(db), helpers.AppURL()),
-	)
+	paymentService := paymentservices.NewPaymentService(paymentrepositories.NewPaymentProviderRepository(db), helpers.AppURL())
+	paymentHandler := paymenthandlers.NewPaymentHandler(paymentService)
 	paymentroutes.Register(api, paymentHandler, authMiddleware)
 
 	cityRepo := deliveryrepositories.NewCityRepository(db)
@@ -204,4 +207,9 @@ func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 		productrepositories.NewProductRepository(db),
 	))
 	promocoderoutes.Register(api, promoHandler, authMiddleware)
+
+	balanceHandler := balancehandlers.NewBalanceHandler(
+		balanceservices.NewBalanceService(balancerepositories.NewBalanceRepository(db), paymentService),
+	)
+	balanceroutes.Register(api, balanceHandler, authMiddleware)
 }
