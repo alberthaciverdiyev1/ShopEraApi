@@ -20,5 +20,5 @@ func Register(deps module.Deps) {
 	infoHandler := deliveryhandlers.NewDeliveryInfoHandler(
 		deliveryservices.NewDeliveryInfoService(deliveryrepositories.NewDeliveryInfoRepository(deps.DB)),
 	)
-	mount(deps.API, cityHandler, priceHandler, pickupHandler, infoHandler, deps.Auth)
+	mount(deps.API, cityHandler, priceHandler, pickupHandler, infoHandler, deps.Auth, deps.Permission)
 }

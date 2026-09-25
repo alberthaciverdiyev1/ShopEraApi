@@ -15,5 +15,5 @@ func Register(deps module.Deps) {
 	handler := producthandlers.NewProductHandler(
 		productservices.NewProductService(productrepositories.NewProductRepository(deps.DB), settingService),
 	)
-	mount(deps.API, handler, deps.Auth)
+	mount(deps.API, handler, deps.Auth, deps.Permission)
 }

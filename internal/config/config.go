@@ -11,10 +11,11 @@ type Config struct {
 }
 
 type AppConfig struct {
-	Name        string
-	Port        int
-	Env         string
-	CORSOrigins []string
+	Name              string
+	Port              int
+	Env               string
+	CORSOrigins       []string
+	PermissionsStrict bool
 }
 
 type DBConfig struct {
@@ -47,10 +48,11 @@ func Load() *Config {
 
 	return &Config{
 		App: AppConfig{
-			Name:        getEnv("APP_NAME", "Shopera"),
-			Port:        getEnvInt("APP_PORT", 3000),
-			Env:         getEnv("APP_ENV", "development"),
-			CORSOrigins: getEnvList("CORS_ALLOWED_ORIGINS"),
+			Name:              getEnv("APP_NAME", "Shopera"),
+			Port:              getEnvInt("APP_PORT", 3000),
+			Env:               getEnv("APP_ENV", "development"),
+			CORSOrigins:       getEnvList("CORS_ALLOWED_ORIGINS"),
+			PermissionsStrict: getEnvBool("PERMISSIONS_STRICT", false),
 		},
 		DB: DBConfig{
 			Host:     getEnv("DB_HOST", "127.0.0.1"),

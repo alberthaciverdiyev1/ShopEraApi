@@ -7,12 +7,12 @@ import (
 	sizehandlers "shopera/internal/modules/size/handlers"
 )
 
-// Register mounts the size routes (all require auth) on the given group.
-func mount(group *gin.RouterGroup, handler *sizehandlers.SizeHandler, auth gin.HandlerFunc) {
+// mount registers the size routes (all require auth) on the given group.
+func mount(group *gin.RouterGroup, handler *sizehandlers.SizeHandler, auth gin.HandlerFunc, perm func(string) gin.HandlerFunc) {
 	sizeGroup := group.Group("/size", auth)
-	sizeGroup.GET("", handler.List)
-	sizeGroup.POST("", handler.Add)
-	sizeGroup.GET("/:id", handler.Details)
-	sizeGroup.PUT("/:id", handler.Update)
-	sizeGroup.DELETE("/:id", handler.Delete)
+	sizeGroup.GET("", perm("view sizes"), handler.List)
+	sizeGroup.POST("", perm("add size"), handler.Add)
+	sizeGroup.GET("/:id", perm("details size"), handler.Details)
+	sizeGroup.PUT("/:id", perm("update size"), handler.Update)
+	sizeGroup.DELETE("/:id", perm("delete size"), handler.Delete)
 }

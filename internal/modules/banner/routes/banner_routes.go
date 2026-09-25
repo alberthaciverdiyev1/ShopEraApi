@@ -7,9 +7,9 @@ import (
 	bannerhandlers "shopera/internal/modules/banner/handlers"
 )
 
-// Register mounts the banner routes on the given group.
-func mount(group *gin.RouterGroup, handler *bannerhandlers.BannerHandler, auth gin.HandlerFunc) {
+// mount registers the banner routes on the given group.
+func mount(group *gin.RouterGroup, handler *bannerhandlers.BannerHandler, auth gin.HandlerFunc, perm func(string) gin.HandlerFunc) {
 	group.GET("/banner", handler.List)
-	group.POST("/banner", auth, handler.Add)
-	group.DELETE("/banner/:id", auth, handler.Delete)
+	group.POST("/banner", auth, perm("add banner"), handler.Add)
+	group.DELETE("/banner/:id", auth, perm("delete banner"), handler.Delete)
 }

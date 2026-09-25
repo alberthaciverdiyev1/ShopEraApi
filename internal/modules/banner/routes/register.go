@@ -12,5 +12,5 @@ func Register(deps module.Deps) {
 	handler := bannerhandlers.NewBannerHandler(
 		bannerservices.NewBannerService(bannerrepositories.NewBannerRepository(deps.DB)),
 	)
-	mount(deps.API, handler, deps.Auth)
+	mount(deps.API, handler, deps.Auth, deps.Permission)
 }

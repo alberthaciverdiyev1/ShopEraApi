@@ -16,5 +16,5 @@ func Register(deps module.Deps) {
 	handler := balancehandlers.NewBalanceHandler(
 		balanceservices.NewBalanceService(balancerepositories.NewBalanceRepository(deps.DB), paymentService),
 	)
-	mount(deps.API, handler, deps.Auth)
+	mount(deps.API, handler, deps.Auth, deps.Permission)
 }

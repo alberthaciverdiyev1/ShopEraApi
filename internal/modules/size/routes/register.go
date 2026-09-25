@@ -12,5 +12,5 @@ func Register(deps module.Deps) {
 	handler := sizehandlers.NewSizeHandler(
 		sizeservices.NewSizeService(sizerepositories.NewSizeRepository(deps.DB)),
 	)
-	mount(deps.API, handler, deps.Auth)
+	mount(deps.API, handler, deps.Auth, deps.Permission)
 }

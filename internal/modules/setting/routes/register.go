@@ -19,5 +19,5 @@ func Register(deps module.Deps) {
 			productrepositories.NewProductRepository(deps.DB),
 		),
 	)
-	mount(deps.API, handler, stats, deps.Auth)
+	mount(deps.API, handler, stats, deps.Auth, deps.Permission)
 }

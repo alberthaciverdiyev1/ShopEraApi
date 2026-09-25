@@ -21,5 +21,5 @@ func Register(deps module.Deps) {
 		basketrepositories.NewBasketRepository(deps.DB),
 		productrepositories.NewProductRepository(deps.DB),
 	))
-	mount(deps.API, handler, deps.Auth)
+	mount(deps.API, handler, deps.Auth, deps.Permission)
 }

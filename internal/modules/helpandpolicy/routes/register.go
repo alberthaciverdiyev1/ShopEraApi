@@ -12,10 +12,10 @@ func Register(deps module.Deps) {
 	faqHandler := helphandlers.NewFaqHandler(
 		helpservices.NewFaqService(helprepositories.NewFaqRepository(deps.DB)),
 	)
-	mountFaq(deps.API, faqHandler, deps.Auth)
+	mountFaq(deps.API, faqHandler, deps.Auth, deps.Permission)
 
 	legalHandler := helphandlers.NewLegalTermHandler(
 		helpservices.NewLegalTermService(helprepositories.NewLegalTermRepository(deps.DB)),
 	)
-	mountLegalTerms(deps.API, legalHandler, deps.Auth)
+	mountLegalTerms(deps.API, legalHandler, deps.Auth, deps.Permission)
 }

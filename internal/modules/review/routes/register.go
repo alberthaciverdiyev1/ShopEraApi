@@ -12,5 +12,5 @@ func Register(deps module.Deps) {
 	handler := reviewhandlers.NewReviewHandler(
 		reviewservices.NewReviewService(reviewrepositories.NewReviewRepository(deps.DB)),
 	)
-	mount(deps.API, handler, deps.Auth)
+	mount(deps.API, handler, deps.Auth, deps.Permission)
 }

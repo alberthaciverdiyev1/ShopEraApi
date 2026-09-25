@@ -35,5 +35,5 @@ func Register(deps module.Deps) {
 		promocoderepositories.NewPromoCodeRepository(deps.DB),
 		balancerepositories.NewBalanceRepository(deps.DB),
 	))
-	mount(deps.API, handler, deps.Auth)
+	mount(deps.API, handler, deps.Auth, deps.Permission)
 }

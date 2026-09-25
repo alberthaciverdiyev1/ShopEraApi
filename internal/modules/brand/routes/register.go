@@ -12,5 +12,5 @@ func Register(deps module.Deps) {
 	handler := brandhandlers.NewBrandHandler(
 		brandservices.NewBrandService(brandrepositories.NewBrandRepository(deps.DB)),
 	)
-	mount(deps.API, handler, deps.Auth)
+	mount(deps.API, handler, deps.Auth, deps.Permission)
 }

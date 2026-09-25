@@ -197,6 +197,15 @@ func (r *RoleRepository) UserIDsWithNonUserRole() ([]int64, error) {
 	return ids, err
 }
 
+// PermissionExists reports whether a permission is defined (guard: sanctum).
+func (r *RoleRepository) PermissionExists(name string) (bool, error) {
+	var count int64
+	err := r.db.Model(&models.Permission{}).
+		Where("name = ? AND guard_name = ?", name, models.Guard).
+		Count(&count).Error
+	return count > 0, err
+}
+
 // UserPermissions returns the permissions a user holds directly or through any
 // of their roles (spatie tables).
 func (r *RoleRepository) UserPermissions(userID int64) ([]models.Permission, error) {

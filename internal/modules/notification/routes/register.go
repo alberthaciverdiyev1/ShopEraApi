@@ -18,5 +18,5 @@ func Register(deps module.Deps) {
 	tokenHandler := notificationhandlers.NewNotificationTokenHandler(
 		notificationservices.NewNotificationTokenService(notificationrepositories.NewNotificationTokenRepository(deps.DB)),
 	)
-	mount(deps.API, handler, tokenHandler, deps.Auth)
+	mount(deps.API, handler, tokenHandler, deps.Auth, deps.Permission)
 }

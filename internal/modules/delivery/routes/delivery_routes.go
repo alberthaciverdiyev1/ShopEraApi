@@ -7,7 +7,7 @@ import (
 	deliveryhandlers "shopera/internal/modules/delivery/handlers"
 )
 
-// Register mounts every delivery-related route on the given group.
+// mount registers every delivery-related route on the given group.
 func mount(
 	group *gin.RouterGroup,
 	city *deliveryhandlers.CityHandler,
@@ -15,6 +15,7 @@ func mount(
 	pickup *deliveryhandlers.PickupPointHandler,
 	info *deliveryhandlers.DeliveryInfoHandler,
 	auth gin.HandlerFunc,
+	perm func(string) gin.HandlerFunc,
 ) {
 	// Cities with their towns (app city picker).
 	group.GET("/cities", city.List)
@@ -22,14 +23,14 @@ func mount(
 	group.GET("/city", prices.Cities)
 
 	// Delivery prices.
-	group.GET("/delivery", auth, prices.List)
-	group.POST("/delivery", auth, prices.Add)
-	group.GET("/delivery/details", auth, prices.Details)
-	group.GET("/delivery/details-mobile", auth, prices.DetailsForMobile)
-	group.PUT("/delivery/:id", auth, prices.Update)
-	group.DELETE("/delivery/:id", auth, prices.Delete)
+	group.GET("/delivery", auth, perm("view deliveries"), prices.List)
+	group.POST("/delivery", auth, perm("add delivery"), prices.Add)
+	group.GET("/delivery/details", auth, perm("details delivery"), prices.Details)
+	group.GET("/delivery/details-mobile", auth, perm("details delivery"), prices.DetailsForMobile)
+	group.PUT("/delivery/:id", auth, perm("update delivery"), prices.Update)
+	group.DELETE("/delivery/:id", auth, perm("delete delivery"), prices.Delete)
 
-	// Pickup points.
+	// Pickup points (no dedicated permission in Laravel).
 	group.GET("/pickup-point", pickup.List)
 	group.POST("/pickup-point", auth, pickup.Add)
 	group.GET("/pickup-point/details", auth, pickup.Details)

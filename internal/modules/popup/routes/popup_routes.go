@@ -7,11 +7,11 @@ import (
 	popuphandlers "shopera/internal/modules/popup/handlers"
 )
 
-// Register mounts the popup routes on the given group.
-func mount(group *gin.RouterGroup, handler *popuphandlers.PopupHandler, auth gin.HandlerFunc) {
+// mount registers the popup routes on the given group.
+func mount(group *gin.RouterGroup, handler *popuphandlers.PopupHandler, auth gin.HandlerFunc, perm func(string) gin.HandlerFunc) {
 	group.GET("/popup", handler.List)
 	group.GET("/popup/show-one", handler.ShowOne)
-	group.POST("/popup", auth, handler.Add)
-	group.PUT("/popup/:id", auth, handler.ShowHome)
-	group.DELETE("/popup/:id", auth, handler.Delete)
+	group.POST("/popup", auth, perm("add popup"), handler.Add)
+	group.PUT("/popup/:id", auth, perm("active popup"), handler.ShowHome)
+	group.DELETE("/popup/:id", auth, perm("delete popup"), handler.Delete)
 }

@@ -14,5 +14,5 @@ func Register(deps module.Deps) {
 	chatService := chatservices.NewChatService(chatrepositories.NewChatRepository(deps.DB), autoReplyService, userrepositories.NewUserRepository(deps.DB))
 	handler := chathandlers.NewChatHandler(chatService)
 	autoReplyHandler := chathandlers.NewAutoReplyHandler(autoReplyService)
-	mount(deps.API, handler, autoReplyHandler, deps.Auth)
+	mount(deps.API, handler, autoReplyHandler, deps.Auth, deps.Permission)
 }

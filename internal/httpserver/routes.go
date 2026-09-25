@@ -50,14 +50,18 @@ func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 		return set, nil
 	}
 
+	gate := middleware.PermissionGate{
+		Check:  permissionChecker,
+		Exists: roles.PermissionExists,
+		Strict: cfg.App.PermissionsStrict,
+	}
+
 	deps := module.Deps{
-		API:  api,
-		DB:   db,
-		Cfg:  cfg,
-		Auth: middleware.AuthRequired(cfg.JWT.Secret),
-		Permission: func(permission string) gin.HandlerFunc {
-			return middleware.RequirePermission(permissionChecker, permission)
-		},
+		API:        api,
+		DB:         db,
+		Cfg:        cfg,
+		Auth:       middleware.AuthRequired(cfg.JWT.Secret),
+		Permission: gate.Require,
 	}
 
 	authroutes.Register(deps)

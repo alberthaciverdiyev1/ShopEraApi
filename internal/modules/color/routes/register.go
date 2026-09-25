@@ -12,5 +12,5 @@ func Register(deps module.Deps) {
 	handler := colorhandlers.NewColorHandler(
 		colorservices.NewColorService(colorrepositories.NewColorRepository(deps.DB)),
 	)
-	mount(deps.API, handler, deps.Auth)
+	mount(deps.API, handler, deps.Auth, deps.Permission)
 }

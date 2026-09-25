@@ -57,6 +57,15 @@ func getEnvInt(key string, fallback int) int {
 	return fallback
 }
 
+// getEnvBool reads a "1"/"true" style boolean env var.
+func getEnvBool(key string, fallback bool) bool {
+	v := strings.TrimSpace(os.Getenv(key))
+	if v == "" {
+		return fallback
+	}
+	return v == "1" || strings.EqualFold(v, "true")
+}
+
 // getEnvList reads a comma-separated env var into a trimmed slice.
 func getEnvList(key string) []string {
 	raw := strings.TrimSpace(getEnv(key, ""))
