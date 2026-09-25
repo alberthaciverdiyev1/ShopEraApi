@@ -247,3 +247,21 @@ func (q Query) list(param string) []string {
 	}
 	return values
 }
+
+// PerPageLimit returns the effective per-page size, honoring ?limit and
+// clamping it to [1, max].
+func (q Query) PerPageLimit(max int) int {
+	p := q.PerPage
+	if v := q.Params["limit"]; v != "" {
+		if n, err := strconv.Atoi(v); err == nil && n > 0 {
+			p = n
+		}
+	}
+	if p < 1 {
+		p = 1
+	}
+	if p > max {
+		p = max
+	}
+	return p
+}
