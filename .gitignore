@@ -10,10 +10,11 @@ bin/
 *.out
 coverage.out
 
-# AI assistant files (not part of the repo)
+# Local / internal notes (not part of the repo)
 CLAUDE.md
 .claude/
 .claudeignore
+DEFERRED.md
 
 # OS / IDE / logs
 .DS_Store
