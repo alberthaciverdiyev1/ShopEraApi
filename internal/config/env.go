@@ -56,3 +56,19 @@ func getEnvInt(key string, fallback int) int {
 	}
 	return fallback
 }
+
+// getEnvList reads a comma-separated env var into a trimmed slice.
+func getEnvList(key string) []string {
+	raw := strings.TrimSpace(getEnv(key, ""))
+	if raw == "" {
+		return nil
+	}
+	parts := strings.Split(raw, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		if p = strings.TrimSpace(p); p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
+}
