@@ -52,8 +52,25 @@ func (r *FaqRepository) Update(id int64, fields map[string]any) (*models.Faq, er
 		if err := tx.First(&f, id).Error; err != nil {
 			return err
 		}
+		// Map fields go through a struct update so `serializer:json` is applied.
+		changed := []string{}
+		if m, ok := fields["title"].(map[string]string); ok {
+			f.Title = m
+			changed = append(changed, "title")
+			delete(fields, "title")
+		}
+		if m, ok := fields["description"].(map[string]string); ok {
+			f.Description = m
+			changed = append(changed, "description")
+			delete(fields, "description")
+		}
 		if len(fields) > 0 {
 			if err := tx.Model(&f).Updates(fields).Error; err != nil {
+				return err
+			}
+		}
+		if len(changed) > 0 {
+			if err := tx.Model(&f).Select(changed).Updates(f).Error; err != nil {
 				return err
 			}
 		}

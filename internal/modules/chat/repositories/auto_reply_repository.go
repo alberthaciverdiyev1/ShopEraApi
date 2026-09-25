@@ -57,10 +57,31 @@ func (r *AutoReplyRepository) Match(text string) (*models.AutoReply, error) {
 // Create inserts an auto reply.
 func (r *AutoReplyRepository) Create(a *models.AutoReply) error { return r.db.Create(a).Error }
 
-// Update applies field changes.
+// Update applies field changes. Map fields go through a struct update so the
+// `serializer:json` tag is applied (a raw map cannot be encoded).
 func (r *AutoReplyRepository) Update(id int64, fields map[string]any) (*models.AutoReply, error) {
-	if err := r.db.Model(&models.AutoReply{}).Where("id = ?", id).Updates(fields).Error; err != nil {
-		return nil, err
+	var changed []string
+	patch := models.AutoReply{}
+	for _, key := range []string{"question", "answer"} {
+		if m, ok := fields[key].(map[string]string); ok {
+			if key == "question" {
+				patch.Question = m
+			} else {
+				patch.Answer = m
+			}
+			changed = append(changed, key)
+			delete(fields, key)
+		}
+	}
+	if len(fields) > 0 {
+		if err := r.db.Model(&models.AutoReply{}).Where("id = ?", id).Updates(fields).Error; err != nil {
+			return nil, err
+		}
+	}
+	if len(changed) > 0 {
+		if err := r.db.Model(&models.AutoReply{}).Where("id = ?", id).Select(changed).Updates(patch).Error; err != nil {
+			return nil, err
+		}
 	}
 	return r.FindByID(id)
 }

@@ -48,8 +48,20 @@ func (r *DeliveryInfoRepository) Update(id int64, fields map[string]any) (*model
 		if err := tx.First(&d, id).Error; err != nil {
 			return err
 		}
+		// Map fields go through a struct update so `serializer:json` is applied.
+		changed := []string{}
+		if m, ok := fields["description"].(map[string]string); ok {
+			d.Description = m
+			changed = append(changed, "description")
+			delete(fields, "description")
+		}
 		if len(fields) > 0 {
 			if err := tx.Model(&d).Updates(fields).Error; err != nil {
+				return err
+			}
+		}
+		if len(changed) > 0 {
+			if err := tx.Model(&d).Select(changed).Updates(d).Error; err != nil {
 				return err
 			}
 		}

@@ -42,8 +42,20 @@ func (r *LegalTermRepository) Update(termType string, fields map[string]any) (*m
 		if err := tx.Where("type = ?", termType).First(&t).Error; err != nil {
 			return err
 		}
+		// Map fields go through a struct update so `serializer:json` is applied.
+		changed := []string{}
+		if m, ok := fields["html"].(map[string]string); ok {
+			t.HTML = m
+			changed = append(changed, "html")
+			delete(fields, "html")
+		}
 		if len(fields) > 0 {
 			if err := tx.Model(&t).Updates(fields).Error; err != nil {
+				return err
+			}
+		}
+		if len(changed) > 0 {
+			if err := tx.Model(&t).Select(changed).Updates(t).Error; err != nil {
 				return err
 			}
 		}
