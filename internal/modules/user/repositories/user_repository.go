@@ -101,6 +101,16 @@ func (r *UserRepository) PhoneTakenByOther(phoneNumber string, excludeID int64) 
 	return count > 0, err
 }
 
+// SoftDelete marks a user deleted (sets deleted_at).
+func (r *UserRepository) SoftDelete(id int64) error {
+	return r.db.Delete(&models.User{}, id).Error
+}
+
+// ForceDelete permanently removes a user row.
+func (r *UserRepository) ForceDelete(id int64) error {
+	return r.db.Unscoped().Delete(&models.User{}, id).Error
+}
+
 // FindByIDs returns the users whose id is in ids (empty input → empty result).
 func (r *UserRepository) FindByIDs(ids []int64) ([]models.User, error) {
 	if len(ids) == 0 {

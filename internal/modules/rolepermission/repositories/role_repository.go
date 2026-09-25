@@ -146,6 +146,57 @@ func (r *RoleRepository) UserRoles(userID int64) ([]models.Role, error) {
 	return items, err
 }
 
+// RolesByUserIDs returns each user's roles keyed by user id.
+func (r *RoleRepository) RolesByUserIDs(ids []int64) (map[int64][]models.Role, error) {
+	result := map[int64][]models.Role{}
+	if len(ids) == 0 {
+		return result, nil
+	}
+	type row struct {
+		ModelID int64
+		models.Role
+	}
+	var rows []row
+	err := r.db.
+		Table("model_has_roles mhr").
+		Select("mhr.model_id, roles.*").
+		Joins("JOIN roles ON roles.id = mhr.role_id").
+		Where("mhr.model_type = ? AND mhr.model_id IN ?", userMorph, ids).
+		Order("roles.id asc").
+		Scan(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+	for _, rw := range rows {
+		result[rw.ModelID] = append(result[rw.ModelID], rw.Role)
+	}
+	return result, nil
+}
+
+// UserIDsByRoleName returns the ids of users holding the named role.
+func (r *RoleRepository) UserIDsByRoleName(roleName string) ([]int64, error) {
+	var ids []int64
+	err := r.db.
+		Table("model_has_roles mhr").
+		Select("mhr.model_id").
+		Joins("JOIN roles ON roles.id = mhr.role_id").
+		Where("mhr.model_type = ? AND roles.name = ? AND roles.guard_name = ?", userMorph, roleName, models.Guard).
+		Scan(&ids).Error
+	return ids, err
+}
+
+// UserIDsWithNonUserRole returns the ids of users who hold a role other than "user".
+func (r *RoleRepository) UserIDsWithNonUserRole() ([]int64, error) {
+	var ids []int64
+	err := r.db.
+		Table("model_has_roles mhr").
+		Distinct("mhr.model_id").
+		Joins("JOIN roles ON roles.id = mhr.role_id").
+		Where("mhr.model_type = ? AND roles.name <> ?", userMorph, "user").
+		Scan(&ids).Error
+	return ids, err
+}
+
 // Permissions returns every permission.
 func (r *RoleRepository) Permissions() ([]models.Permission, error) {
 	var items []models.Permission

@@ -24,3 +24,16 @@ type ChangePhoneRequest struct {
 	Phone   string `json:"phone" binding:"required,max=255"`
 	OtpCode string `json:"otpCode" binding:"required,len=4"`
 }
+
+// BlockUserRequest is the POST /user/block payload. Block is a pointer so a
+// false value is distinguishable from "omitted".
+type BlockUserRequest struct {
+	UserID int64 `json:"user_id" binding:"required"`
+	Block  *bool `json:"block"`
+}
+
+// WholesalerStatusRequest is the PUT /user/wholesaler-status payload.
+type WholesalerStatusRequest struct {
+	UserID       int64 `json:"user_id" binding:"required"`
+	IsWholesaler *bool `json:"is_wholesaler"`
+}
