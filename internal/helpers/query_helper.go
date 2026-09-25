@@ -87,28 +87,25 @@ func (q Query) ApplySearch(db *gorm.DB, columns ...SearchColumn) *gorm.DB {
 	}
 	like := "%" + search + "%"
 
-	return db.Where(func(d *gorm.DB) *gorm.DB {
-		tx := d.Session(&gorm.Session{NewDB: true})
-		first := true
-		add := func(expr string) {
-			if first {
-				tx = tx.Where(expr, like)
-				first = false
-			} else {
-				tx = tx.Or(expr, like)
+	// Build a single OR expression. (Passing a func to Where() made GORM treat it
+	// as a bound value, which broke the query.)
+	clauses := make([]string, 0, len(columns))
+	args := make([]any, 0, len(columns))
+	for _, col := range columns {
+		if col.Translatable {
+			for _, locale := range SearchLocales {
+				clauses = append(clauses, "unaccent(("+col.Column+"::jsonb)->>'"+locale+"') ILIKE unaccent(?)")
+				args = append(args, like)
 			}
+			continue
 		}
-		for _, col := range columns {
-			if col.Translatable {
-				for _, locale := range SearchLocales {
-					add("unaccent(" + col.Column + "->>'" + locale + "') ILIKE unaccent(?)")
-				}
-				continue
-			}
-			add("unaccent(" + col.Column + "::text) ILIKE unaccent(?)")
-		}
-		return tx
-	})
+		clauses = append(clauses, "unaccent("+col.Column+"::text) ILIKE unaccent(?)")
+		args = append(args, like)
+	}
+	if len(clauses) == 0 {
+		return db
+	}
+	return db.Where(strings.Join(clauses, " OR "), args...)
 }
 
 // Where applies an exact-match filter: ?<param>=value.

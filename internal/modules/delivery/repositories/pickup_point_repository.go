@@ -111,8 +111,19 @@ func (r *PickupPointRepository) Update(id int64, fields map[string]any) (*models
 		if err := tx.First(&p, id).Error; err != nil {
 			return err
 		}
+		changed := []string{}
+		if m, ok := fields["delivery_time"].(map[string]string); ok {
+			p.DeliveryTime = m
+			changed = append(changed, "delivery_time")
+			delete(fields, "delivery_time")
+		}
 		if len(fields) > 0 {
 			if err := tx.Model(&p).Updates(fields).Error; err != nil {
+				return err
+			}
+		}
+		if len(changed) > 0 {
+			if err := tx.Model(&p).Select(changed).Updates(p).Error; err != nil {
 				return err
 			}
 		}

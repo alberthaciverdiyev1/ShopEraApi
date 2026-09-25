@@ -67,8 +67,19 @@ func (r *PaymentProviderRepository) Update(id int64, fields map[string]any) (*mo
 		if err := tx.First(&p, id).Error; err != nil {
 			return err
 		}
+		changed := []string{}
+		if m, ok := fields["config"].(map[string]string); ok {
+			p.Config = m
+			changed = append(changed, "config")
+			delete(fields, "config")
+		}
 		if len(fields) > 0 {
 			if err := tx.Model(&p).Updates(fields).Error; err != nil {
+				return err
+			}
+		}
+		if len(changed) > 0 {
+			if err := tx.Model(&p).Select(changed).Updates(p).Error; err != nil {
 				return err
 			}
 		}
