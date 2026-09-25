@@ -6,6 +6,7 @@ import (
 
 	"shopera/internal/config"
 	"shopera/internal/middleware"
+	rolepermissionrepositories "shopera/internal/modules/rolepermission/repositories"
 	"shopera/internal/platform/module"
 
 	addressroutes "shopera/internal/modules/address/routes"
@@ -36,11 +37,27 @@ import (
 
 // registerModules mounts every feature module. Each module wires itself from Deps.
 func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
+	roles := rolepermissionrepositories.NewRoleRepository(db)
+	permissionChecker := func(userID int64) (map[string]struct{}, error) {
+		perms, err := roles.UserPermissions(userID)
+		if err != nil {
+			return nil, err
+		}
+		set := make(map[string]struct{}, len(perms))
+		for _, p := range perms {
+			set[p.Name] = struct{}{}
+		}
+		return set, nil
+	}
+
 	deps := module.Deps{
 		API:  api,
 		DB:   db,
 		Cfg:  cfg,
 		Auth: middleware.AuthRequired(cfg.JWT.Secret),
+		Permission: func(permission string) gin.HandlerFunc {
+			return middleware.RequirePermission(permissionChecker, permission)
+		},
 	}
 
 	authroutes.Register(deps)

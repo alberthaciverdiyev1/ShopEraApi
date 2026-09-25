@@ -8,21 +8,28 @@ import (
 )
 
 // mount registers the user routes on the given group.
-func mount(group *gin.RouterGroup, handler *userhandlers.UserHandler, admin *userhandlers.AdminUserHandler, auth gin.HandlerFunc) {
+func mount(
+	group *gin.RouterGroup,
+	handler *userhandlers.UserHandler,
+	admin *userhandlers.AdminUserHandler,
+	auth gin.HandlerFunc,
+	perm func(string) gin.HandlerFunc,
+) {
 	userGroup := group.Group("/user")
+	updateUser := perm("update user")
 
 	// Profile (self, optional user_id for admins).
-	userGroup.PUT("/change-email", auth, handler.ChangeEmail)
-	userGroup.PUT("/change-name", auth, handler.ChangeName)
-	userGroup.PUT("/change-surname", auth, handler.ChangeSurname)
-	userGroup.PUT("/change-phone", auth, handler.ChangePhone)
+	userGroup.PUT("/change-email", auth, updateUser, handler.ChangeEmail)
+	userGroup.PUT("/change-name", auth, updateUser, handler.ChangeName)
+	userGroup.PUT("/change-surname", auth, updateUser, handler.ChangeSurname)
+	userGroup.PUT("/change-phone", auth, updateUser, handler.ChangePhone)
 
 	// Management.
-	userGroup.GET("/list", auth, admin.List)
-	userGroup.GET("/details", auth, admin.Details)
-	userGroup.GET("/details/:id", auth, admin.Details)
+	userGroup.GET("/list", auth, perm("view users"), admin.List)
+	userGroup.GET("/details", auth, perm("details user"), admin.Details)
+	userGroup.GET("/details/:id", auth, perm("details user"), admin.Details)
 	userGroup.POST("/block", auth, admin.Block)
-	userGroup.PUT("/wholesaler-status", auth, admin.ChangeWholesalerStatus)
+	userGroup.PUT("/wholesaler-status", auth, updateUser, admin.ChangeWholesalerStatus)
 	userGroup.DELETE("/delete-admin/:id", auth, admin.Delete)
 	userGroup.DELETE("/delete", auth, admin.DeleteMyAccount)
 }

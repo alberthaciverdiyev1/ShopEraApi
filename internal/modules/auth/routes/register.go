@@ -32,5 +32,5 @@ func Register(deps module.Deps) {
 		authservices.NewAuthRecoveryService(otpService, passwordResetService, users, authService, deps.Cfg.App.Name),
 	)
 
-	mount(deps.API, handler, recovery, deps.Auth)
+	mount(deps.API, handler, recovery, deps.Auth, deps.Permission)
 }

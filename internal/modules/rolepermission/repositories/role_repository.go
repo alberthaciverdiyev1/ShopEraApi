@@ -197,6 +197,21 @@ func (r *RoleRepository) UserIDsWithNonUserRole() ([]int64, error) {
 	return ids, err
 }
 
+// UserPermissions returns the permissions a user holds directly or through any
+// of their roles (spatie tables).
+func (r *RoleRepository) UserPermissions(userID int64) ([]models.Permission, error) {
+	var items []models.Permission
+	err := r.db.
+		Where(`id IN (SELECT permission_id FROM model_has_permissions
+		              WHERE model_type = ? AND model_id = ?)
+		       OR id IN (SELECT rhp.permission_id FROM role_has_permissions rhp
+		                 JOIN model_has_roles mhr ON mhr.role_id = rhp.role_id
+		                 WHERE mhr.model_type = ? AND mhr.model_id = ?)`,
+			userMorph, userID, userMorph, userID).
+		Find(&items).Error
+	return items, err
+}
+
 // Permissions returns every permission.
 func (r *RoleRepository) Permissions() ([]models.Permission, error) {
 	var items []models.Permission

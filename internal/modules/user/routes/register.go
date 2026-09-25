@@ -29,5 +29,5 @@ func Register(deps module.Deps) {
 		),
 	)
 
-	mount(deps.API, handler, admin, deps.Auth)
+	mount(deps.API, handler, admin, deps.Auth, deps.Permission)
 }

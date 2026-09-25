@@ -14,4 +14,7 @@ type Deps struct {
 	DB   *gorm.DB
 	Cfg  *config.Config
 	Auth gin.HandlerFunc
+	// Permission returns a middleware that requires the named permission
+	// (spatie-style). Must be mounted after Auth.
+	Permission func(permission string) gin.HandlerFunc
 }

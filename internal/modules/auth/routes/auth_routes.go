@@ -11,7 +11,13 @@ import (
 )
 
 // mount registers the auth routes on the given group.
-func mount(group *gin.RouterGroup, handler *authhandlers.AuthHandler, recovery *authhandlers.AuthRecoveryHandler, auth gin.HandlerFunc) {
+func mount(
+	group *gin.RouterGroup,
+	handler *authhandlers.AuthHandler,
+	recovery *authhandlers.AuthRecoveryHandler,
+	auth gin.HandlerFunc,
+	perm func(string) gin.HandlerFunc,
+) {
 	authGroup := group.Group("/auth")
 	authGroup.POST("/register", handler.Register)
 	authGroup.POST("/login", handler.Login)
@@ -31,7 +37,7 @@ func mount(group *gin.RouterGroup, handler *authhandlers.AuthHandler, recovery *
 	authGroup.POST("/change-password", auth, recovery.ChangePassword)
 	authGroup.POST("/admin-change-password", auth, recovery.AdminChangePassword)
 	authGroup.POST("/password-reset-requests", recovery.CreateResetRequest)
-	authGroup.GET("/password-reset-requests", auth, recovery.ListResetRequests)
-	authGroup.PUT("/password-reset-requests/:id/resolve", auth, recovery.ResolveResetRequest)
-	authGroup.PUT("/password-reset-requests/:id/dismiss", auth, recovery.DismissResetRequest)
+	authGroup.GET("/password-reset-requests", auth, perm("view users"), recovery.ListResetRequests)
+	authGroup.PUT("/password-reset-requests/:id/resolve", auth, perm("update user"), recovery.ResolveResetRequest)
+	authGroup.PUT("/password-reset-requests/:id/dismiss", auth, perm("update user"), recovery.DismissResetRequest)
 }
