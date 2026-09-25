@@ -26,8 +26,8 @@ func NewProductHandler(service *productservices.ProductService) *ProductHandler 
 // List handles GET /api/product.
 func (h *ProductHandler) List(c *gin.Context) {
 	filter := productrequests.Filter{
-		Page:    queryInt(c, "page", 1),
-		PerPage: queryInt(c, "per_page", 20),
+		Page:    helpers.QueryInt(c, "page", 1),
+		PerPage: helpers.QueryInt(c, "per_page", 20),
 	}
 	lang := producthelpers.ResolveLocale(c.GetHeader("Accept-Language"))
 
@@ -74,11 +74,4 @@ func (h *ProductHandler) Create(c *gin.Context) {
 		return
 	}
 	helpers.Respond(c, http.StatusCreated, "Product created", productresponses.JSON(*product, "az"))
-}
-
-func queryInt(c *gin.Context, key string, fallback int) int {
-	if n, err := strconv.Atoi(c.Query(key)); err == nil && n > 0 {
-		return n
-	}
-	return fallback
 }

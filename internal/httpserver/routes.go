@@ -9,6 +9,10 @@ import (
 	authhandlers "shopera/internal/modules/auth/handlers"
 	authroutes "shopera/internal/modules/auth/routes"
 	authservices "shopera/internal/modules/auth/services"
+	brandhandlers "shopera/internal/modules/brand/handlers"
+	brandrepositories "shopera/internal/modules/brand/repositories"
+	brandroutes "shopera/internal/modules/brand/routes"
+	brandservices "shopera/internal/modules/brand/services"
 	categoryhandlers "shopera/internal/modules/category/handlers"
 	categoryrepositories "shopera/internal/modules/category/repositories"
 	categoryroutes "shopera/internal/modules/category/routes"
@@ -38,4 +42,9 @@ func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 		categoryservices.NewCategoryService(categoryrepositories.NewCategoryRepository(db)),
 	)
 	categoryroutes.Register(api, categoryHandler, authMiddleware)
+
+	brandHandler := brandhandlers.NewBrandHandler(
+		brandservices.NewBrandService(brandrepositories.NewBrandRepository(db)),
+	)
+	brandroutes.Register(api, brandHandler, authMiddleware)
 }
