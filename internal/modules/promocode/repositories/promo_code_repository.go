@@ -106,6 +106,19 @@ func (r *PromoCodeRepository) DecrementUserCount(id int64) error {
 		UpdateColumn("user_count", gorm.Expr("user_count - 1")).Error
 }
 
+// FindUsedByOrder returns the promo-code usage row for an order and user.
+func (r *PromoCodeRepository) FindUsedByOrder(orderID, userID int64) (*models.UsedPromoCode, error) {
+	var used models.UsedPromoCode
+	err := r.db.Where("order_id = ? AND user_id = ?", orderID, userID).First(&used).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &used, nil
+}
+
 // MarkUsed records that the user used the code for an order/transaction.
 func (r *PromoCodeRepository) MarkUsed(promoCodeID, userID int64, orderID *int64, transactionID *string) error {
 	return r.db.Create(&models.UsedPromoCode{

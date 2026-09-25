@@ -14,6 +14,8 @@ func mount(group *gin.RouterGroup, handler *orderhandlers.OrderHandler, auth gin
 	group.GET("/order/preview", auth, handler.Preview)
 	group.GET("/order/completed", auth, perm("completed-orders"), handler.Completed)
 	group.GET("/order/calculate-delivery-price", auth, handler.CalculateDeliveryPrice)
+	group.GET("/order/receipt/:order_id", auth, perm("view-receipt"), handler.Receipt)
+	group.GET("/order/download-receipt/:order_id", auth, perm("download-receipt"), handler.DownloadReceipt)
 
 	group.GET("/order", auth, perm("view orders"), handler.List)
 	group.POST("/order", auth, perm("basket order"), handler.Create)

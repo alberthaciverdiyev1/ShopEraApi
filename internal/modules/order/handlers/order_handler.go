@@ -196,3 +196,37 @@ func queryID(c *gin.Context) *int64 {
 	}
 	return nil
 }
+
+// Receipt handles GET /api/order/receipt/:order_id.
+func (h *OrderHandler) Receipt(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("order_id"), 10, 64)
+	if err != nil {
+		helpers.Respond(c, http.StatusNotFound, "Order not found.", nil)
+		return
+	}
+
+	lang := producthelpers.ResolveLocale(c.GetHeader("Accept-Language"))
+	result, err := h.service.GetReceipt(c.GetInt64("userID"), id, lang)
+	if err != nil {
+		helpers.FromError(c, err)
+		return
+	}
+	helpers.Respond(c, http.StatusOK, "Order receipt generated successfully.", result)
+}
+
+// DownloadReceipt handles GET /api/order/download-receipt/:order_id.
+func (h *OrderHandler) DownloadReceipt(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("order_id"), 10, 64)
+	if err != nil {
+		helpers.Respond(c, http.StatusNotFound, "Order not found.", nil)
+		return
+	}
+
+	lang := producthelpers.ResolveLocale(c.GetHeader("Accept-Language"))
+	result, err := h.service.DownloadReceipt(c.GetInt64("userID"), id, lang)
+	if err != nil {
+		helpers.FromError(c, err)
+		return
+	}
+	helpers.Respond(c, http.StatusOK, "Order receipt generated successfully.", result)
+}
