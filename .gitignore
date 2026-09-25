@@ -1,0 +1,23 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Go build artifacts
+bin/
+*.exe
+*.test
+*.out
+coverage.out
+
+# AI assistant files (not part of the repo)
+CLAUDE.md
+.claude/
+.claudeignore
+
+# OS / IDE / logs
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.log
