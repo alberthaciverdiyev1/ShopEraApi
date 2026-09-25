@@ -131,8 +131,8 @@ func (s *CategoryService) WithProducts(query helpers.Query, onlyParents bool, la
 
 	out := make([]gin.H, 0, len(categories))
 	for _, root := range categories {
-		payload := categoryresponses.JSON(root)
-		payload["children"] = categoryresponses.Collection(childrenByParent[root.ID])
+		payload := categoryresponses.JSON(root, lang)
+		payload["children"] = categoryresponses.Collection(childrenByParent[root.ID], lang)
 		payload["products"] = productresponses.Collection(selectedByRoot[root.ID], lang, pivots)
 		out = append(out, payload)
 	}

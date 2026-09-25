@@ -4,14 +4,15 @@ package responses
 import (
 	"github.com/gin-gonic/gin"
 
+	"shopera/internal/helpers"
 	"shopera/internal/modules/category/models"
 )
 
-// JSON maps a category to its API shape.
-func JSON(c models.Category) gin.H {
+// JSON maps a category to its API shape (name localized to lang).
+func JSON(c models.Category, lang string) gin.H {
 	return gin.H{
 		"id":          c.ID,
-		"name":        c.Name,
+		"name":        helpers.Trans(c.Name, lang),
 		"image":       c.Image,
 		"description": c.Description,
 		"parent_id":   c.ParentID,
@@ -21,10 +22,10 @@ func JSON(c models.Category) gin.H {
 }
 
 // Collection maps categories to their API shape.
-func Collection(items []models.Category) []gin.H {
+func Collection(items []models.Category, lang string) []gin.H {
 	out := make([]gin.H, 0, len(items))
 	for _, c := range items {
-		out = append(out, JSON(c))
+		out = append(out, JSON(c, lang))
 	}
 	return out
 }

@@ -23,26 +23,29 @@ func NewFaqHandler(service *helpservices.FaqService) *FaqHandler {
 
 // List handles GET /api/faq.
 func (h *FaqHandler) List(c *gin.Context) {
+	lang := helpers.ResolveLocale(c.GetHeader("Accept-Language"))
 	items, err := h.service.List(optionalQuery(c, "type"))
 	if err != nil {
 		helpers.FromError(c, err)
 		return
 	}
-	helpers.Respond(c, http.StatusOK, "Faqs retrieved successfully.", helpresponses.FaqCollection(items))
+	helpers.Respond(c, http.StatusOK, "Faqs retrieved successfully.", helpresponses.FaqCollection(items, lang))
 }
 
 // ListAdmin handles GET /api/faq/admin.
 func (h *FaqHandler) ListAdmin(c *gin.Context) {
+	lang := helpers.ResolveLocale(c.GetHeader("Accept-Language"))
 	items, err := h.service.List(optionalQuery(c, "type"))
 	if err != nil {
 		helpers.FromError(c, err)
 		return
 	}
-	helpers.Respond(c, http.StatusOK, "Faqs retrieved successfully.", helpresponses.FaqCollection(items))
+	helpers.Respond(c, http.StatusOK, "Faqs retrieved successfully.", helpresponses.FaqCollection(items, lang))
 }
 
 // Add handles POST /api/faq.
 func (h *FaqHandler) Add(c *gin.Context) {
+	lang := helpers.ResolveLocale(c.GetHeader("Accept-Language"))
 	var req helprequests.FaqSaveRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		helpers.ValidationFailed(c, err)
@@ -53,11 +56,12 @@ func (h *FaqHandler) Add(c *gin.Context) {
 		helpers.FromError(c, err)
 		return
 	}
-	helpers.Respond(c, http.StatusOK, "Faq added successfully.", helpresponses.FaqJSON(*faq))
+	helpers.Respond(c, http.StatusOK, "Faq added successfully.", helpresponses.FaqJSON(*faq, lang))
 }
 
 // Update handles PUT /api/faq/:id.
 func (h *FaqHandler) Update(c *gin.Context) {
+	lang := helpers.ResolveLocale(c.GetHeader("Accept-Language"))
 	id, err := helpers.PathID(c)
 	if err != nil {
 		helpers.Respond(c, http.StatusNotFound, "Faq not found.", nil)
@@ -73,7 +77,7 @@ func (h *FaqHandler) Update(c *gin.Context) {
 		helpers.FromError(c, err)
 		return
 	}
-	helpers.Respond(c, http.StatusOK, "Faq updated successfully.", helpresponses.FaqJSON(*faq))
+	helpers.Respond(c, http.StatusOK, "Faq updated successfully.", helpresponses.FaqJSON(*faq, lang))
 }
 
 // Delete handles DELETE /api/faq/:id.

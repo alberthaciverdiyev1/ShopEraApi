@@ -22,22 +22,24 @@ func NewLegalTermHandler(service *helpservices.LegalTermService) *LegalTermHandl
 
 // List handles GET /api/legal-terms.
 func (h *LegalTermHandler) List(c *gin.Context) {
+	lang := helpers.ResolveLocale(c.GetHeader("Accept-Language"))
 	items, err := h.service.List(optionalQuery(c, "type"))
 	if err != nil {
 		helpers.FromError(c, err)
 		return
 	}
-	helpers.Respond(c, http.StatusOK, "Legal Terms retrieved successfully.", helpresponses.LegalTermCollection(items))
+	helpers.Respond(c, http.StatusOK, "Legal Terms retrieved successfully.", helpresponses.LegalTermCollection(items, lang))
 }
 
 // ListAdmin handles GET /api/legal-terms/admin.
 func (h *LegalTermHandler) ListAdmin(c *gin.Context) {
+	lang := helpers.ResolveLocale(c.GetHeader("Accept-Language"))
 	items, err := h.service.List(optionalQuery(c, "type"))
 	if err != nil {
 		helpers.FromError(c, err)
 		return
 	}
-	helpers.Respond(c, http.StatusOK, "Legal Terms retrieved successfully.", helpresponses.LegalTermCollection(items))
+	helpers.Respond(c, http.StatusOK, "Legal Terms retrieved successfully.", helpresponses.LegalTermCollection(items, lang))
 }
 
 // PrivacyAndPolicy handles GET /api/privacy-and-policy (raw HTML).
@@ -52,6 +54,7 @@ func (h *LegalTermHandler) PrivacyAndPolicy(c *gin.Context) {
 
 // Update handles PUT /api/legal-terms/:type.
 func (h *LegalTermHandler) Update(c *gin.Context) {
+	lang := helpers.ResolveLocale(c.GetHeader("Accept-Language"))
 	termType := c.Param("type")
 	var req helprequests.LegalTermUpdateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -63,5 +66,5 @@ func (h *LegalTermHandler) Update(c *gin.Context) {
 		helpers.FromError(c, err)
 		return
 	}
-	helpers.Respond(c, http.StatusOK, "Legal Terms updated successfully.", helpresponses.LegalTermJSON(*term))
+	helpers.Respond(c, http.StatusOK, "Legal Terms updated successfully.", helpresponses.LegalTermJSON(*term, lang))
 }

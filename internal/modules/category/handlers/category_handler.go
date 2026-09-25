@@ -26,13 +26,14 @@ func NewCategoryHandler(service *categoryservices.CategoryService) *CategoryHand
 
 // List handles GET /api/category.
 func (h *CategoryHandler) List(c *gin.Context) {
+	lang := producthelpers.ResolveLocale(c.GetHeader("Accept-Language"))
 	onlyParents := c.Query("all") == ""
 	items, err := h.service.List(helpers.ParseQuery(c), onlyParents)
 	if err != nil {
 		helpers.FromError(c, err)
 		return
 	}
-	helpers.Respond(c, http.StatusOK, "Categories retrieved successfully.", categoryresponses.Collection(items))
+	helpers.Respond(c, http.StatusOK, "Categories retrieved successfully.", categoryresponses.Collection(items, lang))
 }
 
 // WithProducts handles GET /api/category/with-products.
@@ -50,17 +51,19 @@ func (h *CategoryHandler) WithProducts(c *gin.Context) {
 
 // ListAdmin handles GET /api/category/admin.
 func (h *CategoryHandler) ListAdmin(c *gin.Context) {
+	lang := producthelpers.ResolveLocale(c.GetHeader("Accept-Language"))
 	onlyParents := c.Query("all") == ""
 	items, err := h.service.List(helpers.ParseQuery(c), onlyParents)
 	if err != nil {
 		helpers.FromError(c, err)
 		return
 	}
-	helpers.Respond(c, http.StatusOK, "Categories retrieved successfully.", categoryresponses.Collection(items))
+	helpers.Respond(c, http.StatusOK, "Categories retrieved successfully.", categoryresponses.Collection(items, lang))
 }
 
 // Details handles GET /api/category/:id.
 func (h *CategoryHandler) Details(c *gin.Context) {
+	lang := producthelpers.ResolveLocale(c.GetHeader("Accept-Language"))
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		helpers.Respond(c, http.StatusForbidden, "Category not found.", nil)
@@ -76,11 +79,12 @@ func (h *CategoryHandler) Details(c *gin.Context) {
 		helpers.Respond(c, http.StatusForbidden, "Category not found.", nil)
 		return
 	}
-	helpers.Respond(c, http.StatusOK, "Category details retrieved successfully.", categoryresponses.JSON(*item))
+	helpers.Respond(c, http.StatusOK, "Category details retrieved successfully.", categoryresponses.JSON(*item, lang))
 }
 
 // Add handles POST /api/category.
 func (h *CategoryHandler) Add(c *gin.Context) {
+	lang := producthelpers.ResolveLocale(c.GetHeader("Accept-Language"))
 	req := bindCategorySave(c)
 
 	category, err := h.service.Add(req)
@@ -88,11 +92,12 @@ func (h *CategoryHandler) Add(c *gin.Context) {
 		helpers.FromError(c, err)
 		return
 	}
-	helpers.Respond(c, http.StatusOK, "Category added successfully.", categoryresponses.JSON(*category))
+	helpers.Respond(c, http.StatusOK, "Category added successfully.", categoryresponses.JSON(*category, lang))
 }
 
 // Update handles PUT /api/category/:id.
 func (h *CategoryHandler) Update(c *gin.Context) {
+	lang := producthelpers.ResolveLocale(c.GetHeader("Accept-Language"))
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		helpers.Respond(c, http.StatusForbidden, "Category not found.", nil)
@@ -106,7 +111,7 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 		helpers.FromError(c, err)
 		return
 	}
-	helpers.Respond(c, http.StatusOK, "Category updated successfully", categoryresponses.JSON(*category))
+	helpers.Respond(c, http.StatusOK, "Category updated successfully", categoryresponses.JSON(*category, lang))
 }
 
 // Delete handles DELETE /api/category/:id.
