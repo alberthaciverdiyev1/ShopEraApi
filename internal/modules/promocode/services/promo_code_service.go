@@ -209,3 +209,30 @@ func (s *PromoCodeService) resolveAddress(userID int64, addressID *int64) (*addr
 }
 
 func round2(v float64) float64 { return float64(int64(v*100+0.5)) / 100 }
+
+// ValidDiscount validates a promo code for a user and returns the discount amount
+// on the given subtotal (Panic-free alternative to Check for the order flow).
+func (s *PromoCodeService) ValidDiscount(userID int64, code string, subtotal float64) (*models.PromoCode, float64, error) {
+	promo, err := s.repo.FindActiveByCode(code)
+	if err != nil {
+		return nil, 0, err
+	}
+	if promo == nil {
+		return nil, 0, helpers.NewAppError(403, "Promo Code not found.")
+	}
+	if promo.UserCount <= 0 {
+		return nil, 0, helpers.NewAppError(403, "Promo Code usage limit reached.")
+	}
+	used, err := s.repo.UsedByUser(promo.ID, userID)
+	if err != nil {
+		return nil, 0, err
+	}
+	if used {
+		return nil, 0, helpers.NewAppError(403, "You have already used this Promo Code.")
+	}
+	percent := 0.0
+	if promo.DiscountPercent != nil {
+		percent = *promo.DiscountPercent
+	}
+	return promo, round2(subtotal * percent / 100), nil
+}

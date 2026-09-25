@@ -5,11 +5,14 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
 	"shopera/internal/helpers"
 	addressrepositories "shopera/internal/modules/address/repositories"
+	balancemodels "shopera/internal/modules/balance/models"
+	balancerepositories "shopera/internal/modules/balance/repositories"
 	basketrepositories "shopera/internal/modules/basket/repositories"
 	deliveryrepositories "shopera/internal/modules/delivery/repositories"
 	"shopera/internal/modules/order/models"
@@ -18,6 +21,9 @@ import (
 	orderresponses "shopera/internal/modules/order/responses"
 	producthelpers "shopera/internal/modules/product/helpers"
 	productrepositories "shopera/internal/modules/product/repositories"
+	promocodemodels "shopera/internal/modules/promocode/models"
+	promocoderepositories "shopera/internal/modules/promocode/repositories"
+	promocodeservices "shopera/internal/modules/promocode/services"
 )
 
 // OrderService holds the order business logic.
@@ -29,6 +35,9 @@ type OrderService struct {
 	cities    *deliveryrepositories.CityRepository
 	delivery  *deliveryrepositories.DeliveryPriceRepository
 	pickups   *deliveryrepositories.PickupPointRepository
+	promos    *promocodeservices.PromoCodeService
+	promoRepo *promocoderepositories.PromoCodeRepository
+	balances  *balancerepositories.BalanceRepository
 }
 
 func NewOrderService(
@@ -39,8 +48,11 @@ func NewOrderService(
 	cities *deliveryrepositories.CityRepository,
 	delivery *deliveryrepositories.DeliveryPriceRepository,
 	pickups *deliveryrepositories.PickupPointRepository,
+	promos *promocodeservices.PromoCodeService,
+	promoRepo *promocoderepositories.PromoCodeRepository,
+	balances *balancerepositories.BalanceRepository,
 ) *OrderService {
-	return &OrderService{orders: orders, baskets: baskets, products: products, addresses: addresses, cities: cities, delivery: delivery, pickups: pickups}
+	return &OrderService{orders: orders, baskets: baskets, products: products, addresses: addresses, cities: cities, delivery: delivery, pickups: pickups, promos: promos, promoRepo: promoRepo, balances: balances}
 }
 
 // List returns the user's orders.
@@ -154,31 +166,95 @@ func (s *OrderService) OrderFromBasket(userID int64, req orderrequests.CreateReq
 	if err != nil {
 		return nil, err
 	}
-	total := subtotal + shipping
+
+	discount, promo, err := s.applyPromo(userID, req.PromoCode, subtotal)
+	if err != nil {
+		return nil, err
+	}
+	total := subtotal + shipping - discount
+	if total < 0 {
+		total = 0
+	}
+
+	status, paidAt, err := s.paymentStatus(userID, req.PayWithBalance, total)
+	if err != nil {
+		return nil, err
+	}
 
 	order := &models.Order{
 		UserID:        userID,
 		AddressID:     s.addressIDFor(userID, req.AddressType, req.AddressTypeID),
 		TransactionID: generateTransactionID(),
 		TotalPrice:    ptr(round2(total)),
-		DiscountPrice: ptr(0),
+		DiscountPrice: ptr(round2(discount)),
 		ShippingPrice: ptr(round2(shipping)),
+		PaidAt:        paidAt,
 		Note:          req.Note,
 		AddressType:   &req.AddressType,
 		AddressTypeID: req.AddressTypeID,
 		PaymentType:   req.PaymentType,
 		PricingType:   strPtr("retail"),
 	}
-	if err := s.orders.Create(order, items, models.StatusWaitingPayment); err != nil {
+	if err := s.orders.Create(order, items, status); err != nil {
 		return nil, err
 	}
 	s.markBasketOrdered(userID)
+
+	if promo != nil {
+		_ = s.promoRepo.MarkUsed(promo.ID, userID, &order.ID, &order.TransactionID)
+		_ = s.promoRepo.DecrementUserCount(promo.ID)
+	}
+	if paidAt != nil {
+		if err := s.payWithBalance(userID, order); err != nil {
+			return nil, err
+		}
+	}
 
 	created, err := s.orders.FindByID(order.ID)
 	if err != nil || created == nil {
 		return nil, err
 	}
 	return orderresponses.JSON(*created, lang), nil
+}
+
+// applyPromo validates and prices a promo code (discount on the product subtotal).
+func (s *OrderService) applyPromo(userID int64, code *string, subtotal float64) (float64, *promocodemodels.PromoCode, error) {
+	if code == nil || *code == "" {
+		return 0, nil, nil
+	}
+	promo, discount, err := s.promos.ValidDiscount(userID, *code, subtotal)
+	if err != nil {
+		return 0, nil, err
+	}
+	return discount, promo, nil
+}
+
+// paymentStatus decides the initial order status; balance payment marks it paid.
+func (s *OrderService) paymentStatus(userID int64, payWithBalance *bool, total float64) (models.OrderStatus, *time.Time, error) {
+	if payWithBalance != nil && *payWithBalance {
+		balance, err := s.balances.Sum(userID)
+		if err != nil {
+			return 0, nil, err
+		}
+		if balance < total {
+			return 0, nil, helpers.NewAppError(403, "Insufficient balance to complete the order.")
+		}
+		now := time.Now()
+		return models.StatusPlaced, &now, nil
+	}
+	return models.StatusWaitingPayment, nil, nil
+}
+
+// payWithBalance records the balance withdrawal for a balance-paid order.
+func (s *OrderService) payWithBalance(userID int64, order *models.Order) error {
+	note := "Sifariş ödənişi - " + order.TransactionID
+	amount := 0.0
+	if order.TotalPrice != nil {
+		amount = *order.TotalPrice
+	}
+	return s.balances.Create(&balancemodels.Balance{
+		UserID: userID, Type: balancemodels.TypeWithdrawal, Amount: &amount, Note: &note,
+	})
 }
 
 // BuyOne creates an order for a single product.
