@@ -31,6 +31,7 @@ import (
 	rolepermissionroutes "shopera/internal/modules/rolepermission/routes"
 	settingroutes "shopera/internal/modules/setting/routes"
 	sizeroutes "shopera/internal/modules/size/routes"
+	userroutes "shopera/internal/modules/user/routes"
 )
 
 // registerModules mounts every feature module. Each module wires itself from Deps.
@@ -43,6 +44,7 @@ func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 	}
 
 	authroutes.Register(deps)
+	userroutes.Register(deps)
 	settingroutes.Register(deps)
 	productroutes.Register(deps)
 	categoryroutes.Register(deps)

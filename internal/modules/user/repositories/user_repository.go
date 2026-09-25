@@ -90,6 +90,17 @@ func (r *UserRepository) UpdateFields(id int64, fields map[string]any) error {
 	return r.db.Model(&models.User{}).Where("id = ?", id).Updates(fields).Error
 }
 
+// PhoneTakenByOther reports whether the normalized phone belongs to a user
+// other than excludeID.
+func (r *UserRepository) PhoneTakenByOther(phoneNumber string, excludeID int64) (bool, error) {
+	var count int64
+	err := r.db.Model(&models.User{}).
+		Where(userhelpers.PhoneMatchSQL, userhelpers.NormalizePhone(phoneNumber)).
+		Where("id <> ?", excludeID).
+		Count(&count).Error
+	return count > 0, err
+}
+
 // FindByIDs returns the users whose id is in ids (empty input → empty result).
 func (r *UserRepository) FindByIDs(ids []int64) ([]models.User, error) {
 	if len(ids) == 0 {
