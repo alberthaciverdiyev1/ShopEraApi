@@ -1,5 +1,6 @@
-// Package providers defines the pluggable payment-provider contract and registry.
-package providers
+// Package contract defines the shared payment-provider contract.
+// Each provider implements its own specifics in its own package.
+package contract
 
 import "context"
 
@@ -23,12 +24,14 @@ type CallbackResult struct {
 	Raw           map[string]string
 }
 
-// Provider is a payment gateway (Epoint, ...).
+// Provider is implemented by every payment gateway.
+//
+// NOTE: providers do NOT all work the same way. The contract only fixes what the
+// rest of the app needs; each provider implements its own signature, endpoints
+// and callback parsing inside its own package.
 type Provider interface {
-	// Key is the stable provider identifier stored in the DB.
 	Key() string
-	// Initiate starts a payment and returns where to redirect the user.
+	Name() string
 	Initiate(ctx context.Context, req InitiateRequest, config map[string]string) (redirectURL string, err error)
-	// VerifyCallback validates a callback signature and parses its result.
 	VerifyCallback(params map[string]string, config map[string]string) (*CallbackResult, error)
 }

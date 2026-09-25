@@ -19,6 +19,7 @@ import (
 	bannerroutes "shopera/internal/modules/banner/routes"
 	bannerservices "shopera/internal/modules/banner/services"
 	baskethandlers "shopera/internal/modules/basket/handlers"
+	basketrepositories "shopera/internal/modules/basket/repositories"
 	basketroutes "shopera/internal/modules/basket/routes"
 	brandhandlers "shopera/internal/modules/brand/handlers"
 	brandrepositories "shopera/internal/modules/brand/repositories"
@@ -48,6 +49,10 @@ import (
 	helprepositories "shopera/internal/modules/helpandpolicy/repositories"
 	helproutes "shopera/internal/modules/helpandpolicy/routes"
 	helpservices "shopera/internal/modules/helpandpolicy/services"
+	orderhandlers "shopera/internal/modules/order/handlers"
+	orderrepositories "shopera/internal/modules/order/repositories"
+	orderroutes "shopera/internal/modules/order/routes"
+	orderservices "shopera/internal/modules/order/services"
 	paymenthandlers "shopera/internal/modules/payment/handlers"
 	paymentrepositories "shopera/internal/modules/payment/repositories"
 	paymentroutes "shopera/internal/modules/payment/routes"
@@ -174,4 +179,15 @@ func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 		addressservices.NewAddressService(addressrepositories.NewAddressRepository(db), cityRepo),
 	)
 	addressroutes.Register(api, addressHandler, authMiddleware)
+
+	orderHandler := orderhandlers.NewOrderHandler(orderservices.NewOrderService(
+		orderrepositories.NewOrderRepository(db),
+		basketrepositories.NewBasketRepository(db),
+		productrepositories.NewProductRepository(db),
+		addressrepositories.NewAddressRepository(db),
+		deliveryrepositories.NewCityRepository(db),
+		deliveryrepositories.NewDeliveryPriceRepository(db),
+		deliveryrepositories.NewPickupPointRepository(db),
+	))
+	orderroutes.Register(api, orderHandler, authMiddleware)
 }

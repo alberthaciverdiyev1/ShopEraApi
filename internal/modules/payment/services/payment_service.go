@@ -5,6 +5,7 @@ import (
 	"context"
 
 	"shopera/internal/helpers"
+	"shopera/internal/modules/payment/contract"
 	"shopera/internal/modules/payment/models"
 	paymentproviders "shopera/internal/modules/payment/providers"
 	paymentrepositories "shopera/internal/modules/payment/repositories"
@@ -68,7 +69,7 @@ func (s *PaymentService) CreatePayment(ctx context.Context, req paymentrequests.
 		return "", err
 	}
 
-	return provider.Initiate(ctx, paymentproviders.InitiateRequest{
+	return provider.Initiate(ctx, contract.InitiateRequest{
 		OrderID:     req.OrderID,
 		Amount:      req.Amount,
 		Currency:    "AZN",
@@ -80,7 +81,7 @@ func (s *PaymentService) CreatePayment(ctx context.Context, req paymentrequests.
 }
 
 // HandleCallback verifies a provider callback and returns its result.
-func (s *PaymentService) HandleCallback(params map[string]string) (*paymentproviders.CallbackResult, error) {
+func (s *PaymentService) HandleCallback(params map[string]string) (*contract.CallbackResult, error) {
 	provider, err := s.providerFor(params)
 	if err != nil {
 		return nil, err
@@ -124,6 +125,6 @@ func (s *PaymentService) providerFor(params map[string]string) (providerWithConf
 
 // providerWithConfig pairs a provider implementation with its stored config.
 type providerWithConfig struct {
-	paymentproviders.Provider
+	contract.Provider
 	record *models.PaymentProvider
 }
