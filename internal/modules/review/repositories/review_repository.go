@@ -50,6 +50,13 @@ func (r *ReviewRepository) ListAdmin(status *string, q helpers.Query) ([]models.
 	return items, total, err
 }
 
+// IncrementProductViews bumps a product's view counter (Laravel incremented it
+// when the product's reviews were listed).
+func (r *ReviewRepository) IncrementProductViews(productID int64) error {
+	return r.db.Table("products").Where("id = ?", productID).
+		UpdateColumn("views", gorm.Expr("views + 1")).Error
+}
+
 // FindByID returns a review by id.
 func (r *ReviewRepository) FindByID(id int64) (*models.Review, error) {
 	var review models.Review

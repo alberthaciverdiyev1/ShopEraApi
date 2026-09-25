@@ -40,6 +40,16 @@ func (h *LegalTermHandler) ListAdmin(c *gin.Context) {
 	helpers.Respond(c, http.StatusOK, "Legal Terms retrieved successfully.", helpresponses.LegalTermCollection(items))
 }
 
+// PrivacyAndPolicy handles GET /api/privacy-and-policy (raw HTML).
+func (h *LegalTermHandler) PrivacyAndPolicy(c *gin.Context) {
+	html, err := h.service.PrivacyAndPolicy()
+	if err != nil {
+		helpers.FromError(c, err)
+		return
+	}
+	c.Data(http.StatusOK, "text/html; charset=UTF-8", []byte(html))
+}
+
 // Update handles PUT /api/legal-terms/:type.
 func (h *LegalTermHandler) Update(c *gin.Context) {
 	termType := c.Param("type")

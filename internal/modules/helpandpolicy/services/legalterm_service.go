@@ -21,6 +21,19 @@ func (s *LegalTermService) List(termType *string) ([]models.LegalTerm, error) {
 	return s.repo.List(resolveType(termType))
 }
 
+// PrivacyAndPolicy returns the raw English HTML of the main_page legal term
+// (Laravel LegalTermsService::privacyAndPolicy).
+func (s *LegalTermService) PrivacyAndPolicy() (string, error) {
+	term, err := s.repo.FindByType("main_page")
+	if err != nil {
+		return "", err
+	}
+	if term == nil {
+		return "", helpers.NewAppError(404, "Not found.")
+	}
+	return term.HTML["en"], nil
+}
+
 // Update applies changes to a legal term by type.
 func (s *LegalTermService) Update(termType string, req helprequests.LegalTermUpdateRequest) (*models.LegalTerm, error) {
 	if len(req.HTML) == 0 {

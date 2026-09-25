@@ -20,12 +20,13 @@ func NewReviewService(repo *reviewrepositories.ReviewRepository) *ReviewService 
 	return &ReviewService{repo: repo}
 }
 
-// List returns approved reviews of a product.
+// List returns approved reviews of a product, bumping its view counter.
 func (s *ReviewService) List(productID int64, q helpers.Query) (gin.H, error) {
 	items, total, err := s.repo.ListByProduct(productID, q)
 	if err != nil {
 		return nil, err
 	}
+	_ = s.repo.IncrementProductViews(productID)
 	return gin.H{"data": reviewresponses.Collection(items), "meta": q.Meta(total)}, nil
 }
 
