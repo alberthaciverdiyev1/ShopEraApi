@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -263,4 +264,13 @@ func (q Query) list(param string) []string {
 // PathID parses a numeric :id path parameter.
 func PathID(c *gin.Context) (int64, error) {
 	return strconv.ParseInt(c.Param("id"), 10, 64)
+}
+
+// QueryInt64 reads a required positive integer query param.
+func QueryInt64(c *gin.Context, key string) (int64, error) {
+	n, err := strconv.ParseInt(strings.TrimSpace(c.Query(key)), 10, 64)
+	if err != nil || n <= 0 {
+		return 0, fmt.Errorf("missing or invalid query parameter: %s", key)
+	}
+	return n, nil
 }

@@ -81,6 +81,14 @@ func (r *ProductRepository) buildListQuery(q helpers.Query) *gorm.DB {
 		helpers.SearchColumn{Column: "description", Translatable: true},
 		helpers.SearchColumn{Column: "sku"},
 	)
+
+	// Dynamic filters: ?filters[<filter_id>]=<value>
+	for key, value := range q.Params {
+		if strings.HasPrefix(key, "filters[") && strings.HasSuffix(key, "]") && value != "" {
+			id := key[len("filters[") : len(key)-1]
+			db = db.Where("EXISTS (SELECT 1 FROM product_filters pf WHERE pf.product_id = products.id AND pf.filter_id = ? AND pf.value = ?)", id, value)
+		}
+	}
 	return db
 }
 

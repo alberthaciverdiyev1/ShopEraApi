@@ -25,6 +25,10 @@ import (
 	colorrepositories "shopera/internal/modules/color/repositories"
 	colorroutes "shopera/internal/modules/color/routes"
 	colorservices "shopera/internal/modules/color/services"
+	filterhandlers "shopera/internal/modules/filter/handlers"
+	filterrepositories "shopera/internal/modules/filter/repositories"
+	filterroutes "shopera/internal/modules/filter/routes"
+	filterservices "shopera/internal/modules/filter/services"
 	helphandlers "shopera/internal/modules/helpandpolicy/handlers"
 	helprepositories "shopera/internal/modules/helpandpolicy/repositories"
 	helproutes "shopera/internal/modules/helpandpolicy/routes"
@@ -115,4 +119,9 @@ func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 		reviewservices.NewReviewService(reviewrepositories.NewReviewRepository(db)),
 	)
 	reviewroutes.Register(api, reviewHandler, authMiddleware)
+
+	filterHandler := filterhandlers.NewFilterHandler(
+		filterservices.NewFilterService(filterrepositories.NewFilterRepository(db)),
+	)
+	filterroutes.Register(api, filterHandler)
 }
