@@ -5,6 +5,7 @@ import (
 	"gorm.io/gorm"
 
 	"shopera/internal/config"
+	"shopera/internal/helpers"
 	"shopera/internal/middleware"
 	addresshandlers "shopera/internal/modules/address/handlers"
 	addressrepositories "shopera/internal/modules/address/repositories"
@@ -47,6 +48,10 @@ import (
 	helprepositories "shopera/internal/modules/helpandpolicy/repositories"
 	helproutes "shopera/internal/modules/helpandpolicy/routes"
 	helpservices "shopera/internal/modules/helpandpolicy/services"
+	paymenthandlers "shopera/internal/modules/payment/handlers"
+	paymentrepositories "shopera/internal/modules/payment/repositories"
+	paymentroutes "shopera/internal/modules/payment/routes"
+	paymentservices "shopera/internal/modules/payment/services"
 	popuphandlers "shopera/internal/modules/popup/handlers"
 	popuprepositories "shopera/internal/modules/popup/repositories"
 	popuproutes "shopera/internal/modules/popup/routes"
@@ -146,6 +151,11 @@ func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 		favoriteservices.NewFavoriteService(favoriterepositories.NewFavoriteRepository(db), productrepositories.NewProductRepository(db)),
 	)
 	favoriteroutes.Register(api, favoriteHandler, authMiddleware)
+
+	paymentHandler := paymenthandlers.NewPaymentHandler(
+		paymentservices.NewPaymentService(paymentrepositories.NewPaymentProviderRepository(db), helpers.AppURL()),
+	)
+	paymentroutes.Register(api, paymentHandler, authMiddleware)
 
 	cityRepo := deliveryrepositories.NewCityRepository(db)
 	cityHandler := deliveryhandlers.NewCityHandler(deliveryservices.NewCityService(cityRepo))

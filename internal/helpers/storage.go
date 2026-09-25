@@ -29,6 +29,15 @@ func SaveUpload(c *gin.Context, field, dir string) (string, error) {
 	return dir + "/" + name, nil
 }
 
+// AppURL returns the configured application base URL.
+func AppURL() string {
+	base := strings.TrimRight(os.Getenv("APP_URL"), "/")
+	if base == "" {
+		base = "http://localhost:8000"
+	}
+	return base
+}
+
 // StorageURL turns a stored relative path into a public URL (Laravel Storage::url).
 func StorageURL(path string) string {
 	if path == "" {
@@ -37,9 +46,5 @@ func StorageURL(path string) string {
 	if strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://") {
 		return path
 	}
-	base := strings.TrimRight(os.Getenv("APP_URL"), "/")
-	if base == "" {
-		base = "http://localhost:8000"
-	}
-	return base + "/storage/" + strings.TrimLeft(path, "/")
+	return AppURL() + "/storage/" + strings.TrimLeft(path, "/")
 }
