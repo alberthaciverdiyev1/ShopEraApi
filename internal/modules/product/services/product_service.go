@@ -333,3 +333,18 @@ func (s *ProductService) Recommended(lang string) (gin.H, error) {
 	}
 	return gin.H{"data": productresponses.Collection(items, lang, pivots), "meta": gin.H{"total": total}}, nil
 }
+
+// DetailsAdmin returns the admin view of a product (soft-deleted included).
+func (s *ProductService) DetailsAdmin(id int64, lang string) (gin.H, error) {
+	p, err := s.repo.FindAdmin(id)
+	if err != nil || p == nil {
+		return nil, err
+	}
+	pivots, err := s.repo.SizePivots([]int64{id})
+	if err != nil {
+		return nil, err
+	}
+	out := productresponses.JSON(*p, lang, pivots[id])
+	out["rate"] = 0
+	return out, nil
+}

@@ -37,6 +37,10 @@ import (
 	productrepositories "shopera/internal/modules/product/repositories"
 	productroutes "shopera/internal/modules/product/routes"
 	productservices "shopera/internal/modules/product/services"
+	reviewhandlers "shopera/internal/modules/review/handlers"
+	reviewrepositories "shopera/internal/modules/review/repositories"
+	reviewroutes "shopera/internal/modules/review/routes"
+	reviewservices "shopera/internal/modules/review/services"
 	settinghandlers "shopera/internal/modules/setting/handlers"
 	settingrepositories "shopera/internal/modules/setting/repositories"
 	settingroutes "shopera/internal/modules/setting/routes"
@@ -106,4 +110,9 @@ func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 		helpservices.NewLegalTermService(helprepositories.NewLegalTermRepository(db)),
 	)
 	helproutes.RegisterLegalTerms(api, legalHandler, authMiddleware)
+
+	reviewHandler := reviewhandlers.NewReviewHandler(
+		reviewservices.NewReviewService(reviewrepositories.NewReviewRepository(db)),
+	)
+	reviewroutes.Register(api, reviewHandler, authMiddleware)
 }

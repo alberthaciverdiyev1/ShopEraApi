@@ -183,6 +183,26 @@ func (h *ProductHandler) DeactivateStoryVideo(c *gin.Context) {
 	helpers.Respond(c, http.StatusOK, "Story video deactivated successfully.", item)
 }
 
+// DetailsAdmin handles GET /api/product/details/:id.
+func (h *ProductHandler) DetailsAdmin(c *gin.Context) {
+	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+	if err != nil {
+		helpers.Respond(c, http.StatusNotFound, "Product not found.", nil)
+		return
+	}
+	lang := producthelpers.ResolveLocale(c.GetHeader("Accept-Language"))
+	item, err := h.service.DetailsAdmin(id, lang)
+	if err != nil {
+		helpers.FromError(c, err)
+		return
+	}
+	if item == nil {
+		helpers.Respond(c, http.StatusNotFound, "Product not found.", nil)
+		return
+	}
+	helpers.Respond(c, http.StatusOK, "Product details retrieved successfully.", item)
+}
+
 // Statistics handles GET /api/product/statistics.
 func (h *ProductHandler) Statistics(c *gin.Context) {
 	lang := producthelpers.ResolveLocale(c.GetHeader("Accept-Language"))

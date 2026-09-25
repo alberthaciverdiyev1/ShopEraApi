@@ -69,6 +69,12 @@ func JSON(p models.Product, lang string, pivots []models.ProductSize) gin.H {
 	}
 	out["images"] = images
 
+	videos := make([]gin.H, 0, len(p.Videos))
+	for _, v := range p.Videos {
+		videos = append(videos, gin.H{"id": v.ID, "video_path": helpers.StorageURL(v.VideoPath)})
+	}
+	out["videos"] = videos
+
 	return out
 }
 

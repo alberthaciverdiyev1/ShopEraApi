@@ -496,3 +496,17 @@ func (r *ProductRepository) Recommended(limit int) ([]models.Product, int64, err
 	err := db.Order("RANDOM()").Limit(limit).Find(&items).Error
 	return items, total, err
 }
+
+// FindAdmin returns a product including soft-deleted ones (Laravel detailsAdmin).
+func (r *ProductRepository) FindAdmin(id int64) (*models.Product, error) {
+	var p models.Product
+	err := r.db.Unscoped().Preload("Colors").Preload("Sizes").Preload("Images").
+		Preload("Videos").Preload("Category").Preload("Brand").First(&p, id).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &p, nil
+}
