@@ -26,7 +26,7 @@ func (r *BrandRepository) List(q helpers.Query) ([]models.Brand, int64, error) {
 		db = db.Where("is_active = ?", true) // Laravel varsayılanı
 	}
 	db = q.ApplyRange(db, "sort_order")
-	db = q.ApplyWhereIn(db, "id", "ids")
+	db = q.WhereIn(db, "id", "ids")
 
 	var total int64
 	if err := db.Count(&total).Error; err != nil {
