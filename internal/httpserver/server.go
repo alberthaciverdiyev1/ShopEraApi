@@ -6,13 +6,13 @@ import (
 	"gorm.io/gorm"
 
 	"shopera/internal/config"
-	"shopera/internal/modules/health"
+	healthroutes "shopera/internal/modules/health/routes"
 )
 
 // New returns the configured Gin engine.
 func New(cfg *config.Config, db *gorm.DB) *gin.Engine {
 	r := gin.Default()
-	health.Register(r)
+	healthroutes.Register(r)
 	registerModules(r.Group("/api"), cfg, db)
 	return r
 }

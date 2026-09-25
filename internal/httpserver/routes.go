@@ -6,9 +6,13 @@ import (
 
 	"shopera/internal/config"
 	"shopera/internal/middleware"
-	"shopera/internal/modules/auth"
-	"shopera/internal/modules/product"
+	authhandlers "shopera/internal/modules/auth/handlers"
+	authroutes "shopera/internal/modules/auth/routes"
+	authservices "shopera/internal/modules/auth/services"
+	producthandlers "shopera/internal/modules/product/handlers"
 	productrepositories "shopera/internal/modules/product/repositories"
+	productroutes "shopera/internal/modules/product/routes"
+	productservices "shopera/internal/modules/product/services"
 	userrepositories "shopera/internal/modules/user/repositories"
 )
 
@@ -16,9 +20,13 @@ import (
 func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 	authMiddleware := middleware.AuthRequired(cfg.JWT.Secret)
 
-	authHandler := auth.NewAuthHandler(auth.NewAuthService(userrepositories.NewUserRepository(db), cfg))
-	auth.Register(api, authHandler, authMiddleware)
+	authHandler := authhandlers.NewAuthHandler(
+		authservices.NewAuthService(userrepositories.NewUserRepository(db), cfg),
+	)
+	authroutes.Register(api, authHandler, authMiddleware)
 
-	productHandler := product.NewProductHandler(product.NewProductService(productrepositories.NewProductRepository(db)))
-	product.Register(api, productHandler, authMiddleware)
+	productHandler := producthandlers.NewProductHandler(
+		productservices.NewProductService(productrepositories.NewProductRepository(db)),
+	)
+	productroutes.Register(api, productHandler, authMiddleware)
 }

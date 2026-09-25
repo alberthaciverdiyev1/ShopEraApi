@@ -1,5 +1,5 @@
-// Package health exposes the liveness endpoint.
-package health
+// Package handlers holds Health module HTTP handlers.
+package handlers
 
 import (
 	"net/http"

@@ -1,4 +1,5 @@
-package auth
+// Package services holds Auth module business logic.
+package services
 
 import (
 	"errors"
@@ -7,24 +8,27 @@ import (
 
 	"shopera/internal/config"
 	"shopera/internal/helpers"
-	user "shopera/internal/modules/user"
-	"shopera/internal/modules/user/models"
-	"shopera/internal/modules/user/repositories"
+	authrequests "shopera/internal/modules/auth/requests"
+	authresponses "shopera/internal/modules/auth/responses"
+	userhelpers "shopera/internal/modules/user/helpers"
+	usermodels "shopera/internal/modules/user/models"
+	userrepositories "shopera/internal/modules/user/repositories"
+	userresponses "shopera/internal/modules/user/responses"
 )
 
 // AuthService holds the auth business logic.
 type AuthService struct {
-	users *repositories.UserRepository
+	users *userrepositories.UserRepository
 	cfg   *config.Config
 }
 
-func NewAuthService(users *repositories.UserRepository, cfg *config.Config) *AuthService {
+func NewAuthService(users *userrepositories.UserRepository, cfg *config.Config) *AuthService {
 	return &AuthService{users: users, cfg: cfg}
 }
 
 // Register creates a user and returns a token.
-func (s *AuthService) Register(in RegisterRequest) (*Result, error) {
-	normalized := user.NormalizePhone(in.Phone)
+func (s *AuthService) Register(in authrequests.RegisterRequest) (*authresponses.Result, error) {
+	normalized := userhelpers.NormalizePhone(in.Phone)
 	if normalized == "" {
 		return nil, helpers.NewAppError(422, "The phone field must contain a valid phone number.")
 	}
@@ -53,7 +57,7 @@ func (s *AuthService) Register(in RegisterRequest) (*Result, error) {
 	}
 
 	now := time.Now()
-	newUser := &models.User{
+	newUser := &usermodels.User{
 		Name:            lowerPtr(in.Name, "user"),
 		Surname:         lowerPtrPtr(in.Surname),
 		Phone:           normalized,
@@ -63,7 +67,7 @@ func (s *AuthService) Register(in RegisterRequest) (*Result, error) {
 		EmailVerifiedAt: &now,
 	}
 	if err := s.users.Create(newUser); err != nil {
-		if errors.Is(err, repositories.ErrDuplicate) {
+		if errors.Is(err, userrepositories.ErrDuplicate) {
 			return nil, helpers.NewAppError(422, "This record is already in use.")
 		}
 		return nil, err
@@ -73,11 +77,11 @@ func (s *AuthService) Register(in RegisterRequest) (*Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Result{Token: token, User: user.Payload(newUser, false)}, nil
+	return &authresponses.Result{Token: token, User: userresponses.Payload(newUser, false)}, nil
 }
 
 // Login verifies credentials and returns a token.
-func (s *AuthService) Login(in LoginRequest) (*Result, error) {
+func (s *AuthService) Login(in authrequests.LoginRequest) (*authresponses.Result, error) {
 	found, err := s.users.FindByPhone(in.Phone)
 	if err != nil {
 		return nil, err
@@ -93,7 +97,7 @@ func (s *AuthService) Login(in LoginRequest) (*Result, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Result{Token: token, User: user.Payload(found, true)}, nil
+	return &authresponses.Result{Token: token, User: userresponses.Payload(found, true)}, nil
 }
 
 func lowerPtr(value, fallback string) *string {

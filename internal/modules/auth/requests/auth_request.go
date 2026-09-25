@@ -1,7 +1,7 @@
-// Package auth owns registration, login and logout.
-package auth
+// Package requests holds Auth module request payloads (validated by binding tags).
+package requests
 
-// RegisterRequest is the register payload (validated by binding tags).
+// RegisterRequest is the register payload.
 type RegisterRequest struct {
 	Name     string  `json:"name" binding:"required,max=255"`
 	Surname  *string `json:"surname"`

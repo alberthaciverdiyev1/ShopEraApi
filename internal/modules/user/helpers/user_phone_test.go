@@ -1,9 +1,9 @@
-package user_test
+package helpers_test
 
 import (
 	"testing"
 
-	"shopera/internal/modules/user"
+	userhelpers "shopera/internal/modules/user/helpers"
 )
 
 func TestNormalizePhone(t *testing.T) {
@@ -14,7 +14,7 @@ func TestNormalizePhone(t *testing.T) {
 		"":                    "",
 	}
 	for input, want := range cases {
-		if got := user.NormalizePhone(input); got != want {
+		if got := userhelpers.NormalizePhone(input); got != want {
 			t.Errorf("NormalizePhone(%q) = %q, want %q", input, got, want)
 		}
 	}

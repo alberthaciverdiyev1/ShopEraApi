@@ -1,8 +1,10 @@
-package product
+// Package responses holds Product module API response shapes.
+package responses
 
 import (
 	"github.com/gin-gonic/gin"
 
+	producthelpers "shopera/internal/modules/product/helpers"
 	"shopera/internal/modules/product/models"
 )
 
@@ -10,7 +12,7 @@ import (
 func JSON(p models.Product, lang string) gin.H {
 	return gin.H{
 		"id":          p.ID,
-		"title":       Trans(p.Title, lang),
+		"title":       producthelpers.Trans(p.Title, lang),
 		"price":       p.Price,
 		"stock_count": p.StockCount,
 		"is_active":   p.IsActive,

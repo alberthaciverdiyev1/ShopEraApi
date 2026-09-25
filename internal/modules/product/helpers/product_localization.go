@@ -1,4 +1,5 @@
-package product
+// Package helpers holds Product module specific helpers (localization).
+package helpers
 
 import "strings"
 

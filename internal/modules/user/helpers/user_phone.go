@@ -1,4 +1,5 @@
-package user
+// Package helpers holds User module specific helpers.
+package helpers
 
 import (
 	"regexp"

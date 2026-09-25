@@ -1,4 +1,4 @@
-package product
+package requests
 
 // Filter carries the list query parameters.
 type Filter struct {

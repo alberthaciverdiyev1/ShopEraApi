@@ -1,4 +1,5 @@
-package auth
+// Package handlers holds Auth module HTTP handlers.
+package handlers
 
 import (
 	"net/http"
@@ -6,18 +7,22 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"shopera/internal/helpers"
+	authrequests "shopera/internal/modules/auth/requests"
+	authservices "shopera/internal/modules/auth/services"
 )
 
 // AuthHandler serves the auth endpoints.
 type AuthHandler struct {
-	service *AuthService
+	service *authservices.AuthService
 }
 
-func NewAuthHandler(service *AuthService) *AuthHandler { return &AuthHandler{service: service} }
+func NewAuthHandler(service *authservices.AuthService) *AuthHandler {
+	return &AuthHandler{service: service}
+}
 
 // Register handles POST /api/auth/register.
 func (h *AuthHandler) Register(c *gin.Context) {
-	var req RegisterRequest
+	var req authrequests.RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		helpers.ValidationFailed(c, err)
 		return
@@ -33,7 +38,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 
 // Login handles POST /api/auth/login.
 func (h *AuthHandler) Login(c *gin.Context) {
-	var req LoginRequest
+	var req authrequests.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		helpers.ValidationFailed(c, err)
 		return

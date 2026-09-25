@@ -1,4 +1,5 @@
-package user
+// Package responses holds User module API response shapes.
+package responses
 
 import "shopera/internal/modules/user/models"
 

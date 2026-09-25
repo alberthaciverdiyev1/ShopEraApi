@@ -1,4 +1,5 @@
-package product
+// Package requests holds Product module request payloads and filters.
+package requests
 
 // CreateRequest is the payload for adding a product.
 type CreateRequest struct {

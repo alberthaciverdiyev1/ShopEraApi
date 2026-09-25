@@ -1,4 +1,5 @@
-package product
+// Package handlers holds Product module HTTP handlers.
+package handlers
 
 import (
 	"net/http"
@@ -7,24 +8,28 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"shopera/internal/helpers"
+	producthelpers "shopera/internal/modules/product/helpers"
+	productrequests "shopera/internal/modules/product/requests"
+	productresponses "shopera/internal/modules/product/responses"
+	productservices "shopera/internal/modules/product/services"
 )
 
 // ProductHandler serves the product endpoints.
 type ProductHandler struct {
-	service *ProductService
+	service *productservices.ProductService
 }
 
-func NewProductHandler(service *ProductService) *ProductHandler {
+func NewProductHandler(service *productservices.ProductService) *ProductHandler {
 	return &ProductHandler{service: service}
 }
 
 // List handles GET /api/product.
 func (h *ProductHandler) List(c *gin.Context) {
-	filter := Filter{
+	filter := productrequests.Filter{
 		Page:    queryInt(c, "page", 1),
 		PerPage: queryInt(c, "per_page", 20),
 	}
-	lang := ResolveLocale(c.GetHeader("Accept-Language"))
+	lang := producthelpers.ResolveLocale(c.GetHeader("Accept-Language"))
 
 	result, err := h.service.List(filter, lang)
 	if err != nil {
@@ -42,7 +47,7 @@ func (h *ProductHandler) Details(c *gin.Context) {
 		return
 	}
 
-	lang := ResolveLocale(c.GetHeader("Accept-Language"))
+	lang := producthelpers.ResolveLocale(c.GetHeader("Accept-Language"))
 	item, err := h.service.Details(id, lang)
 	if err != nil {
 		helpers.FromError(c, err)
@@ -57,7 +62,7 @@ func (h *ProductHandler) Details(c *gin.Context) {
 
 // Create handles POST /api/product/add (requires auth).
 func (h *ProductHandler) Create(c *gin.Context) {
-	var req CreateRequest
+	var req productrequests.CreateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		helpers.ValidationFailed(c, err)
 		return
@@ -68,7 +73,7 @@ func (h *ProductHandler) Create(c *gin.Context) {
 		helpers.FromError(c, err)
 		return
 	}
-	helpers.Respond(c, http.StatusCreated, "Product created", JSON(*product, "az"))
+	helpers.Respond(c, http.StatusCreated, "Product created", productresponses.JSON(*product, "az"))
 }
 
 func queryInt(c *gin.Context, key string, fallback int) int {

@@ -7,7 +7,7 @@ import (
 
 	"gorm.io/gorm"
 
-	"shopera/internal/modules/user"
+	userhelpers "shopera/internal/modules/user/helpers"
 	"shopera/internal/modules/user/models"
 )
 
@@ -24,7 +24,7 @@ func NewUserRepository(db *gorm.DB) *UserRepository { return &UserRepository{db:
 // ExistsByPhone reports whether a user with the normalized phone exists.
 func (r *UserRepository) ExistsByPhone(phoneNumber string) (bool, error) {
 	var count int64
-	err := r.db.Model(&models.User{}).Where(user.PhoneMatchSQL, user.NormalizePhone(phoneNumber)).Count(&count).Error
+	err := r.db.Model(&models.User{}).Where(userhelpers.PhoneMatchSQL, userhelpers.NormalizePhone(phoneNumber)).Count(&count).Error
 	return count > 0, err
 }
 
@@ -38,7 +38,7 @@ func (r *UserRepository) ExistsByEmail(email string) (bool, error) {
 // FindByPhone returns a user by normalized phone.
 func (r *UserRepository) FindByPhone(phoneNumber string) (*models.User, error) {
 	var u models.User
-	err := r.db.Where(user.PhoneMatchSQL, user.NormalizePhone(phoneNumber)).First(&u).Error
+	err := r.db.Where(userhelpers.PhoneMatchSQL, userhelpers.NormalizePhone(phoneNumber)).First(&u).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
