@@ -8,15 +8,15 @@ import (
 	"shopera/internal/helpers"
 )
 
-// Handler serves the auth endpoints.
-type Handler struct {
-	service *Service
+// AuthHandler serves the auth endpoints.
+type AuthHandler struct {
+	service *AuthService
 }
 
-func NewHandler(service *Service) *Handler { return &Handler{service: service} }
+func NewAuthHandler(service *AuthService) *AuthHandler { return &AuthHandler{service: service} }
 
 // Register handles POST /api/auth/register.
-func (h *Handler) Register(c *gin.Context) {
+func (h *AuthHandler) Register(c *gin.Context) {
 	var req RegisterRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		helpers.ValidationFailed(c, err)
@@ -32,7 +32,7 @@ func (h *Handler) Register(c *gin.Context) {
 }
 
 // Login handles POST /api/auth/login.
-func (h *Handler) Login(c *gin.Context) {
+func (h *AuthHandler) Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		helpers.ValidationFailed(c, err)
@@ -48,6 +48,6 @@ func (h *Handler) Login(c *gin.Context) {
 }
 
 // Logout handles POST /api/auth/logout (stateless JWT: client discards token).
-func (h *Handler) Logout(c *gin.Context) {
+func (h *AuthHandler) Logout(c *gin.Context) {
 	helpers.Respond(c, http.StatusOK, "Logout successful.", nil)
 }

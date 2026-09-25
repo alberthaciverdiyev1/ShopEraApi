@@ -16,9 +16,9 @@ import (
 func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 	authMiddleware := middleware.AuthRequired(cfg.JWT.Secret)
 
-	authHandler := auth.NewHandler(auth.NewService(userrepositories.NewUserRepository(db), cfg))
+	authHandler := auth.NewAuthHandler(auth.NewAuthService(userrepositories.NewUserRepository(db), cfg))
 	auth.Register(api, authHandler, authMiddleware)
 
-	productHandler := product.NewHandler(product.NewService(productrepositories.NewProductRepository(db)))
+	productHandler := product.NewProductHandler(product.NewProductService(productrepositories.NewProductRepository(db)))
 	product.Register(api, productHandler, authMiddleware)
 }

@@ -12,18 +12,18 @@ import (
 	"shopera/internal/modules/user/repositories"
 )
 
-// Service holds the auth business logic.
-type Service struct {
+// AuthService holds the auth business logic.
+type AuthService struct {
 	users *repositories.UserRepository
 	cfg   *config.Config
 }
 
-func NewService(users *repositories.UserRepository, cfg *config.Config) *Service {
-	return &Service{users: users, cfg: cfg}
+func NewAuthService(users *repositories.UserRepository, cfg *config.Config) *AuthService {
+	return &AuthService{users: users, cfg: cfg}
 }
 
 // Register creates a user and returns a token.
-func (s *Service) Register(in RegisterRequest) (*Result, error) {
+func (s *AuthService) Register(in RegisterRequest) (*Result, error) {
 	normalized := user.NormalizePhone(in.Phone)
 	if normalized == "" {
 		return nil, helpers.NewAppError(422, "The phone field must contain a valid phone number.")
@@ -77,7 +77,7 @@ func (s *Service) Register(in RegisterRequest) (*Result, error) {
 }
 
 // Login verifies credentials and returns a token.
-func (s *Service) Login(in LoginRequest) (*Result, error) {
+func (s *AuthService) Login(in LoginRequest) (*Result, error) {
 	found, err := s.users.FindByPhone(in.Phone)
 	if err != nil {
 		return nil, err

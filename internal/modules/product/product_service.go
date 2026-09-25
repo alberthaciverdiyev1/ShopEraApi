@@ -5,15 +5,17 @@ import (
 	"shopera/internal/modules/product/repositories"
 )
 
-// Service holds the product business logic.
-type Service struct {
+// ProductService holds the product business logic.
+type ProductService struct {
 	repo *repositories.ProductRepository
 }
 
-func NewService(repo *repositories.ProductRepository) *Service { return &Service{repo: repo} }
+func NewProductService(repo *repositories.ProductRepository) *ProductService {
+	return &ProductService{repo: repo}
+}
 
 // List returns the paginated product list.
-func (s *Service) List(filter Filter, lang string) (*ListResult, error) {
+func (s *ProductService) List(filter Filter, lang string) (*ListResult, error) {
 	products, total, err := s.repo.List(filter.Page, filter.PerPage, filter.StoreID)
 	if err != nil {
 		return nil, err
@@ -31,7 +33,7 @@ func (s *Service) List(filter Filter, lang string) (*ListResult, error) {
 }
 
 // Details returns a single product shape, or nil when not found.
-func (s *Service) Details(id int64, lang string) (map[string]any, error) {
+func (s *ProductService) Details(id int64, lang string) (map[string]any, error) {
 	p, err := s.repo.FindByID(id)
 	if err != nil || p == nil {
 		return nil, err
@@ -40,7 +42,7 @@ func (s *Service) Details(id int64, lang string) (map[string]any, error) {
 }
 
 // Create builds a product from the request and stores it.
-func (s *Service) Create(req CreateRequest) (*models.Product, error) {
+func (s *ProductService) Create(req CreateRequest) (*models.Product, error) {
 	product := &models.Product{
 		Title:      req.Title,
 		Price:      req.Price,

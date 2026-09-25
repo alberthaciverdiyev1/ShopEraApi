@@ -9,15 +9,17 @@ import (
 	"shopera/internal/helpers"
 )
 
-// Handler serves the product endpoints.
-type Handler struct {
-	service *Service
+// ProductHandler serves the product endpoints.
+type ProductHandler struct {
+	service *ProductService
 }
 
-func NewHandler(service *Service) *Handler { return &Handler{service: service} }
+func NewProductHandler(service *ProductService) *ProductHandler {
+	return &ProductHandler{service: service}
+}
 
 // List handles GET /api/product.
-func (h *Handler) List(c *gin.Context) {
+func (h *ProductHandler) List(c *gin.Context) {
 	filter := Filter{
 		Page:    queryInt(c, "page", 1),
 		PerPage: queryInt(c, "per_page", 20),
@@ -33,7 +35,7 @@ func (h *Handler) List(c *gin.Context) {
 }
 
 // Details handles GET /api/product/:id.
-func (h *Handler) Details(c *gin.Context) {
+func (h *ProductHandler) Details(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		helpers.Respond(c, http.StatusNotFound, "Product not found", nil)
@@ -54,7 +56,7 @@ func (h *Handler) Details(c *gin.Context) {
 }
 
 // Create handles POST /api/product/add (requires auth).
-func (h *Handler) Create(c *gin.Context) {
+func (h *ProductHandler) Create(c *gin.Context) {
 	var req CreateRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		helpers.ValidationFailed(c, err)
