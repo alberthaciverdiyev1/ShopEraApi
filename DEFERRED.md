@@ -104,7 +104,7 @@ Bu dosya, taşıma sırasında **bilinçli olarak ertelenen** veya Laravel'den *
 - [ ] **Listing** (ilan/classifieds).
 - [ ] **RoleAndPermissions** (spatie roller — auth'ta `assignRole` de kaldırıldı, register artık rol atamıyor).
 - [ ] **Store** — **taşınmayacak** (bilinçli kaldırıldı; ilgili kolonlar/ayarlar silindi).
-- [ ] User'ın kalan parçaları (Basket, Favorite, Address, Referral).
+- [ ] User'ın kalan parçaları (Address, Referral).  (Basket ✅ ve Favorite ✅ taşındı.)
 
 ---
 

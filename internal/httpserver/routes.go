@@ -13,6 +13,8 @@ import (
 	bannerrepositories "shopera/internal/modules/banner/repositories"
 	bannerroutes "shopera/internal/modules/banner/routes"
 	bannerservices "shopera/internal/modules/banner/services"
+	baskethandlers "shopera/internal/modules/basket/handlers"
+	basketroutes "shopera/internal/modules/basket/routes"
 	brandhandlers "shopera/internal/modules/brand/handlers"
 	brandrepositories "shopera/internal/modules/brand/repositories"
 	brandroutes "shopera/internal/modules/brand/routes"
@@ -25,6 +27,10 @@ import (
 	colorrepositories "shopera/internal/modules/color/repositories"
 	colorroutes "shopera/internal/modules/color/routes"
 	colorservices "shopera/internal/modules/color/services"
+	favoritehandlers "shopera/internal/modules/favorite/handlers"
+	favoriterepositories "shopera/internal/modules/favorite/repositories"
+	favoriteroutes "shopera/internal/modules/favorite/routes"
+	favoriteservices "shopera/internal/modules/favorite/services"
 	filterhandlers "shopera/internal/modules/filter/handlers"
 	filterrepositories "shopera/internal/modules/filter/repositories"
 	filterroutes "shopera/internal/modules/filter/routes"
@@ -124,4 +130,12 @@ func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 		filterservices.NewFilterService(filterrepositories.NewFilterRepository(db)),
 	)
 	filterroutes.Register(api, filterHandler)
+
+	basketHandler := baskethandlers.NewBasketHandler(db)
+	basketroutes.Register(api, basketHandler, authMiddleware)
+
+	favoriteHandler := favoritehandlers.NewFavoriteHandler(
+		favoriteservices.NewFavoriteService(favoriterepositories.NewFavoriteRepository(db), productrepositories.NewProductRepository(db)),
+	)
+	favoriteroutes.Register(api, favoriteHandler, authMiddleware)
 }
