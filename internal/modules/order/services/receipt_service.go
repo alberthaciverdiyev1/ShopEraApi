@@ -31,7 +31,7 @@ func (s *OrderService) GetReceipt(userID, orderID int64, lang string) (gin.H, er
 		"order_id":                       order.ID,
 		"transaction_id":                 order.TransactionID,
 		"order_time":                     order.CreatedAt.Format("2006-01-02 15:04:05"),
-		"items_totals":                   round2(summary.ItemsTotal + summary.Discounts),
+		"items_totals":                   summary.ItemsTotal,
 		"items_discounts":                fmt.Sprintf("%g", summary.Discounts),
 		"promo_code":                     nil,
 		"promo_code_discount_percentage": nil,
