@@ -11,6 +11,7 @@ import (
 	categoryrequests "shopera/internal/modules/category/requests"
 	categoryresponses "shopera/internal/modules/category/responses"
 	categoryservices "shopera/internal/modules/category/services"
+	producthelpers "shopera/internal/modules/product/helpers"
 )
 
 // CategoryHandler serves the category endpoints.
@@ -31,6 +32,19 @@ func (h *CategoryHandler) List(c *gin.Context) {
 		return
 	}
 	helpers.Respond(c, http.StatusOK, "Categories retrieved successfully.", categoryresponses.Collection(items))
+}
+
+// WithProducts handles GET /api/category/with-products.
+func (h *CategoryHandler) WithProducts(c *gin.Context) {
+	onlyParents := c.Query("all") == ""
+	lang := producthelpers.ResolveLocale(c.GetHeader("Accept-Language"))
+
+	items, err := h.service.WithProducts(helpers.ParseQuery(c), onlyParents, lang)
+	if err != nil {
+		helpers.FromError(c, err)
+		return
+	}
+	helpers.Respond(c, http.StatusOK, "Categories with products retrieved successfully.", items)
 }
 
 // ListAdmin handles GET /api/category/admin.

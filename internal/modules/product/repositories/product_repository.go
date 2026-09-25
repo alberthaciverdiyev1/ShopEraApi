@@ -97,6 +97,20 @@ func (r *ProductRepository) preload(db *gorm.DB) *gorm.DB {
 		Preload("Videos").Preload("Category").Preload("Brand")
 }
 
+// PublicByCategoryIDs returns publicly-available products in the given
+// categories, ordered by sales_count desc (relations preloaded).
+func (r *ProductRepository) PublicByCategoryIDs(categoryIDs []int64) ([]models.Product, error) {
+	if len(categoryIDs) == 0 {
+		return nil, nil
+	}
+	var items []models.Product
+	err := r.preload(r.db.Model(&models.Product{})).
+		Where("products.is_active = ? AND products.category_id IN ?", true, categoryIDs).
+		Order("sales_count desc").
+		Find(&items).Error
+	return items, err
+}
+
 // withChildCategories expands the given category ids with all descendants.
 func (r *ProductRepository) withChildCategories(ids []string) []string {
 	all := append([]string{}, ids...)

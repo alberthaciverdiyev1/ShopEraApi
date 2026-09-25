@@ -37,6 +37,13 @@ func (r *CategoryRepository) List(query helpers.Query, onlyParents bool) ([]mode
 	return items, err
 }
 
+// All returns every category (used to resolve descendant trees).
+func (r *CategoryRepository) All() ([]models.Category, error) {
+	var items []models.Category
+	err := r.db.Order("id asc").Find(&items).Error
+	return items, err
+}
+
 // FindByID returns a category by id.
 func (r *CategoryRepository) FindByID(id int64) (*models.Category, error) {
 	var c models.Category

@@ -11,6 +11,7 @@ import (
 func mount(group *gin.RouterGroup, handler *categoryhandlers.CategoryHandler, auth gin.HandlerFunc) {
 	categoryGroup := group.Group("/category")
 	categoryGroup.GET("", handler.List)
+	categoryGroup.GET("/with-products", handler.WithProducts)
 	categoryGroup.GET("/admin", handler.ListAdmin)
 	categoryGroup.GET("/:id", auth, handler.Details)
 	categoryGroup.POST("", auth, handler.Add)
