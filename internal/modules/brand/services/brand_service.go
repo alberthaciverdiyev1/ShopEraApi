@@ -11,8 +11,6 @@ import (
 	brandresponses "shopera/internal/modules/brand/responses"
 )
 
-const defaultPerPage = 20
-
 // BrandService holds the brand business logic.
 type BrandService struct {
 	repo *brandrepositories.BrandRepository
@@ -23,12 +21,12 @@ func NewBrandService(repo *brandrepositories.BrandRepository) *BrandService {
 }
 
 // List returns a paginated brand list.
-func (s *BrandService) List(search string, isActive *bool, page int) (gin.H, error) {
-	items, total, err := s.repo.List(search, isActive, page, defaultPerPage)
+func (s *BrandService) List(q helpers.Query, isActive *bool) (gin.H, error) {
+	items, total, err := s.repo.List(q, isActive)
 	if err != nil {
 		return nil, err
 	}
-	return brandresponses.Page(items, total, page, defaultPerPage), nil
+	return gin.H{"data": brandresponses.Collection(items), "meta": q.Meta(total)}, nil
 }
 
 // Details returns a brand by id.

@@ -26,17 +26,3 @@ func Collection(items []models.Brand) []gin.H {
 	}
 	return out
 }
-
-// Page mirrors a Laravel paginator payload.
-func Page(items []models.Brand, total int64, page, perPage int) gin.H {
-	lastPage := int((total + int64(perPage) - 1) / int64(perPage))
-	return gin.H{
-		"data": Collection(items),
-		"meta": gin.H{
-			"current_page": page,
-			"per_page":     perPage,
-			"total":        total,
-			"last_page":    lastPage,
-		},
-	}
-}

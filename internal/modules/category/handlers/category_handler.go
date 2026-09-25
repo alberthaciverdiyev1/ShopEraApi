@@ -25,7 +25,7 @@ func NewCategoryHandler(service *categoryservices.CategoryService) *CategoryHand
 // List handles GET /api/category.
 func (h *CategoryHandler) List(c *gin.Context) {
 	onlyParents := c.Query("all") == ""
-	items, err := h.service.List(onlyParents, c.Query("search"))
+	items, err := h.service.List(helpers.ParseQuery(c), onlyParents)
 	if err != nil {
 		helpers.FromError(c, err)
 		return
@@ -36,7 +36,7 @@ func (h *CategoryHandler) List(c *gin.Context) {
 // ListAdmin handles GET /api/category/admin.
 func (h *CategoryHandler) ListAdmin(c *gin.Context) {
 	onlyParents := c.Query("all") == ""
-	items, err := h.service.List(onlyParents, c.Query("search"))
+	items, err := h.service.List(helpers.ParseQuery(c), onlyParents)
 	if err != nil {
 		helpers.FromError(c, err)
 		return

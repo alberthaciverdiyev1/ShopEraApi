@@ -3,10 +3,10 @@ package repositories
 
 import (
 	"errors"
-	"strings"
 
 	"gorm.io/gorm"
 
+	"shopera/internal/helpers"
 	"shopera/internal/modules/brand/models"
 )
 
@@ -17,25 +17,23 @@ type BrandRepository struct {
 
 func NewBrandRepository(db *gorm.DB) *BrandRepository { return &BrandRepository{db: db} }
 
-// List returns a paginated brand list.
-func (r *BrandRepository) List(search string, isActive *bool, page, perPage int) ([]models.Brand, int64, error) {
-	q := r.db.Model(&models.Brand{})
-	if search = strings.TrimSpace(search); search != "" {
-		q = q.Where("lower(name) LIKE ?", "%"+strings.ToLower(search)+"%")
-	}
+// List returns a paginated brand list using the shared query helper.
+func (r *BrandRepository) List(q helpers.Query, isActive *bool) ([]models.Brand, int64, error) {
+	db := r.db.Model(&models.Brand{})
+	db = q.ApplySearch(db, helpers.SearchColumn{Column: "name"})
 	if isActive != nil {
-		q = q.Where("is_active = ?", *isActive)
+		db = db.Where("is_active = ?", *isActive)
 	} else {
-		q = q.Where("is_active = ?", true)
+		db = db.Where("is_active = ?", true)
 	}
 
 	var total int64
-	if err := q.Count(&total).Error; err != nil {
+	if err := db.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
 	var brands []models.Brand
-	err := q.Order("id desc").Limit(perPage).Offset((page - 1) * perPage).Find(&brands).Error
+	err := q.ApplyPage(q.ApplyOrder(db, "id")).Find(&brands).Error
 	return brands, total, err
 }
 

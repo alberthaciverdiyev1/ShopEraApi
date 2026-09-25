@@ -3,10 +3,10 @@ package repositories
 
 import (
 	"errors"
-	"strings"
 
 	"gorm.io/gorm"
 
+	"shopera/internal/helpers"
 	"shopera/internal/modules/category/models"
 )
 
@@ -18,15 +18,19 @@ type CategoryRepository struct {
 func NewCategoryRepository(db *gorm.DB) *CategoryRepository { return &CategoryRepository{db: db} }
 
 // List returns categories. When onlyParents is true only root categories are returned.
-func (r *CategoryRepository) List(onlyParents bool, search string) ([]models.Category, error) {
-	q := r.db.Model(&models.Category{})
+func (r *CategoryRepository) List(query helpers.Query, onlyParents bool) ([]models.Category, error) {
+	db := r.db.Model(&models.Category{})
 	if onlyParents {
-		q = q.Where("parent_id IS NULL")
+		db = db.Where("parent_id IS NULL")
 	}
-	q = applySearch(q, search)
+	db = query.ApplySearch(db,
+		helpers.SearchColumn{Column: "name", Translatable: true},
+		helpers.SearchColumn{Column: "description"},
+	)
+	db = query.ApplyOrder(db, "sort_order")
 
 	var items []models.Category
-	err := q.Order("sort_order desc").Find(&items).Error
+	err := db.Find(&items).Error
 	return items, err
 }
 
@@ -112,16 +116,4 @@ func (r *CategoryRepository) Delete(id int64) error {
 		}
 		return tx.Delete(&models.Category{}, id).Error
 	})
-}
-
-func applySearch(q *gorm.DB, search string) *gorm.DB {
-	search = strings.TrimSpace(search)
-	if search == "" {
-		return q
-	}
-	like := "%" + strings.ToLower(search) + "%"
-	return q.Where(
-		"lower(name->>'az') LIKE ? OR lower(name->>'en') LIKE ? OR lower(name->>'ru') LIKE ? OR lower(name->>'tr') LIKE ? OR lower(description) LIKE ?",
-		like, like, like, like, like,
-	)
 }

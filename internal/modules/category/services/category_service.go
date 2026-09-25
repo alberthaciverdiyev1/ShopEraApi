@@ -19,8 +19,8 @@ func NewCategoryService(repo *categoryrepositories.CategoryRepository) *Category
 }
 
 // List returns categories; onlyParents is used for the public endpoint.
-func (s *CategoryService) List(onlyParents bool, search string) ([]models.Category, error) {
-	return s.repo.List(onlyParents, search)
+func (s *CategoryService) List(query helpers.Query, onlyParents bool) ([]models.Category, error) {
+	return s.repo.List(query, onlyParents)
 }
 
 // Details returns a category by id.
