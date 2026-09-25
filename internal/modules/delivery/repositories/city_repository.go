@@ -85,3 +85,54 @@ func (r *CityRepository) HasTowns(cityID int64) (bool, error) {
 	err := r.db.Model(&models.CityTown{}).Where("city_id = ? AND is_active = ?", cityID, true).Count(&count).Error
 	return count > 0, err
 }
+
+// FindActiveByKey returns a non-deleted city by key.
+func (r *CityRepository) FindActiveByKey(key string) (*models.City, error) {
+	var city models.City
+	err := r.db.Where("key = ?", key).First(&city).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &city, nil
+}
+
+// Create inserts a city.
+func (r *CityRepository) Create(c *models.City) error { return r.db.Create(c).Error }
+
+// RestoreUpdate restores a soft-deleted city and applies changes.
+func (r *CityRepository) RestoreUpdate(id int64, fields map[string]any) (*models.City, error) {
+	var result models.City
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Unscoped().Model(&models.City{}).Where("id = ?", id).Update("deleted_at", nil).Error; err != nil {
+			return err
+		}
+		if err := tx.Model(&models.City{}).Where("id = ?", id).Updates(fields).Error; err != nil {
+			return err
+		}
+		return tx.First(&result, id).Error
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
+
+// Update applies field changes to a city.
+func (r *CityRepository) Update(id int64, fields map[string]any) (*models.City, error) {
+	var c models.City
+	if err := r.db.Model(&models.City{}).Where("id = ?", id).Updates(fields).Error; err != nil {
+		return nil, err
+	}
+	if err := r.db.First(&c, id).Error; err != nil {
+		return nil, err
+	}
+	return &c, nil
+}
+
+// Delete soft-deletes a city.
+func (r *CityRepository) Delete(id int64) error {
+	return r.db.Delete(&models.City{}, id).Error
+}

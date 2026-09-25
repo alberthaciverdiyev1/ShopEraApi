@@ -4,8 +4,8 @@ package requests
 import (
 	"mime/multipart"
 	"regexp"
-	"strconv"
-	"strings"
+
+	"shopera/internal/helpers"
 )
 
 // SizeInput is a size variant with its own pricing.
@@ -98,12 +98,12 @@ func FromMultipart(form *multipart.Form) SaveRequest {
 				req.Description[first] = value
 			}
 		case "colors":
-			if id, ok := parseInt(value); ok {
+			if id, ok := helpers.ParseInt(value); ok {
 				req.Colors = append(req.Colors, id)
 				req.ColorsSynced = true
 			}
 		case "sizes":
-			if idx, ok := parseInt(first); ok {
+			if idx, ok := helpers.ParseInt(first); ok {
 				if sizeFields[int(idx)] == nil {
 					sizeFields[int(idx)] = map[string]string{}
 				}
@@ -113,12 +113,12 @@ func FromMultipart(form *multipart.Form) SaveRequest {
 			}
 		case "images":
 			if second == "color_id" {
-				if idx, ok := parseInt(first); ok {
+				if idx, ok := helpers.ParseInt(first); ok {
 					imageColors[int(idx)] = value
 				}
 			}
 		case "existing_images":
-			if idx, ok := parseInt(first); ok {
+			if idx, ok := helpers.ParseInt(first); ok {
 				if existingImageFields[int(idx)] == nil {
 					existingImageFields[int(idx)] = map[string]string{}
 				}
@@ -128,7 +128,7 @@ func FromMultipart(form *multipart.Form) SaveRequest {
 			}
 		case "existing_videos":
 			req.ExistingVideosProvided = true
-			if id, ok := parseInt(value); ok {
+			if id, ok := helpers.ParseInt(value); ok {
 				req.ExistingVideos = append(req.ExistingVideos, id)
 			}
 		case "colors_synced":
@@ -148,21 +148,21 @@ func FromMultipart(form *multipart.Form) SaveRequest {
 		if !ok {
 			continue
 		}
-		sizeID, ok := parseInt(fields["size_id"])
+		sizeID, ok := helpers.ParseInt(fields["size_id"])
 		if !ok {
 			continue
 		}
 		req.Sizes = append(req.Sizes, SizeInput{
 			SizeID:   sizeID,
-			Price:    parseFloat(fields["price"]),
-			Discount: parseFloat(fields["discount"]),
+			Price:    helpers.ParseFloat(fields["price"]),
+			Discount: helpers.ParseFloat(fields["discount"]),
 		})
 	}
 
 	if len(imageColors) > 0 {
 		req.Images = make([]ImageInput, 0, len(imageColors))
 		for idx := 0; idx < len(imageColors); idx++ {
-			req.Images = append(req.Images, ImageInput{ColorID: parseInt64Ptr(imageColors[idx])})
+			req.Images = append(req.Images, ImageInput{ColorID: helpers.ParseInt64Ptr(imageColors[idx])})
 		}
 	}
 
@@ -172,11 +172,11 @@ func FromMultipart(form *multipart.Form) SaveRequest {
 		if !ok {
 			continue
 		}
-		id, ok := parseInt(fields["id"])
+		id, ok := helpers.ParseInt(fields["id"])
 		if !ok {
 			continue
 		}
-		req.ExistingImages = append(req.ExistingImages, ExistingImage{ID: id, ColorID: parseInt64Ptr(fields["color_id"])})
+		req.ExistingImages = append(req.ExistingImages, ExistingImage{ID: id, ColorID: helpers.ParseInt64Ptr(fields["color_id"])})
 	}
 
 	return req
@@ -189,67 +189,30 @@ func applyScalar(req *SaveRequest, key, value string) {
 	case "gender":
 		req.Gender = &value
 	case "price":
-		req.Price = parseFloat(value)
+		req.Price = helpers.ParseFloat(value)
 	case "discount":
-		req.Discount = parseFloat(value)
+		req.Discount = helpers.ParseFloat(value)
 	case "discount_expire_date":
 		req.DiscountExpireDate = &value
 	case "weight":
-		req.Weight = parseFloat(value)
+		req.Weight = helpers.ParseFloat(value)
 	case "category_id":
-		req.CategoryID = parseInt64Ptr(value)
+		req.CategoryID = helpers.ParseInt64Ptr(value)
 	case "brand_id":
-		req.BrandID = parseInt64Ptr(value)
+		req.BrandID = helpers.ParseInt64Ptr(value)
 	case "stock_count":
-		req.StockCount = parseIntPtr(value)
+		req.StockCount = helpers.ParseIntPtr(value)
 	case "purchase_limit":
-		req.PurchaseLimit = parseIntPtr(value)
+		req.PurchaseLimit = helpers.ParseIntPtr(value)
 	case "views":
-		req.Views = parseIntPtr(value)
+		req.Views = helpers.ParseIntPtr(value)
 	case "sales_count":
-		req.SalesCount = parseIntPtr(value)
+		req.SalesCount = helpers.ParseIntPtr(value)
 	case "is_active":
-		req.IsActive = parseBool(value)
+		req.IsActive = helpers.ParseBool(value)
 	case "is_suggest":
-		req.IsSuggest = parseBool(value)
+		req.IsSuggest = helpers.ParseBool(value)
 	case "is_pinned":
-		req.IsPinned = parseBool(value)
+		req.IsPinned = helpers.ParseBool(value)
 	}
-}
-
-func parseInt(value string) (int64, bool) {
-	n, err := strconv.ParseInt(strings.TrimSpace(value), 10, 64)
-	return n, err == nil
-}
-
-func parseFloat(value string) *float64 {
-	value = strings.TrimSpace(value)
-	if value == "" {
-		return nil
-	}
-	f, err := strconv.ParseFloat(value, 64)
-	if err != nil {
-		return nil
-	}
-	return &f
-}
-
-func parseIntPtr(value string) *int {
-	if n, ok := parseInt(value); ok {
-		v := int(n)
-		return &v
-	}
-	return nil
-}
-
-func parseInt64Ptr(value string) *int64 {
-	if n, ok := parseInt(value); ok {
-		return &n
-	}
-	return nil
-}
-
-func parseBool(value string) *bool {
-	b := value == "1" || value == "true"
-	return &b
 }

@@ -148,7 +148,17 @@ func registerModules(api *gin.RouterGroup, cfg *config.Config, db *gorm.DB) {
 	favoriteroutes.Register(api, favoriteHandler, authMiddleware)
 
 	cityRepo := deliveryrepositories.NewCityRepository(db)
-	deliveryroutes.Register(api, deliveryhandlers.NewCityHandler(deliveryservices.NewCityService(cityRepo)))
+	cityHandler := deliveryhandlers.NewCityHandler(deliveryservices.NewCityService(cityRepo))
+	priceHandler := deliveryhandlers.NewDeliveryPriceHandler(
+		deliveryservices.NewDeliveryPriceService(deliveryrepositories.NewDeliveryPriceRepository(db), cityRepo),
+	)
+	pickupHandler := deliveryhandlers.NewPickupPointHandler(
+		deliveryservices.NewPickupPointService(deliveryrepositories.NewPickupPointRepository(db)),
+	)
+	infoHandler := deliveryhandlers.NewDeliveryInfoHandler(
+		deliveryservices.NewDeliveryInfoService(deliveryrepositories.NewDeliveryInfoRepository(db)),
+	)
+	deliveryroutes.Register(api, cityHandler, priceHandler, pickupHandler, infoHandler, authMiddleware)
 
 	addressHandler := addresshandlers.NewAddressHandler(
 		addressservices.NewAddressService(addressrepositories.NewAddressRepository(db), cityRepo),
