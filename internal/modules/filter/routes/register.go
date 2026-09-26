@@ -12,5 +12,5 @@ func Register(deps module.Deps) {
 	handler := filterhandlers.NewFilterHandler(
 		filterservices.NewFilterService(filterrepositories.NewFilterRepository(deps.DB)),
 	)
-	mount(deps.API, handler)
+	mount(deps.API, handler, deps.Auth, deps.Permission)
 }
