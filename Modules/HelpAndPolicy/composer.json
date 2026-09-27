@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/helpandpolicy",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\HelpAndPolicy\\": "app/",
+            "Modules\\HelpAndPolicy\\Database\\Factories\\": "database/factories/",
+            "Modules\\HelpAndPolicy\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\HelpAndPolicy\\Tests\\": "tests/"
+        }
+    }
+}

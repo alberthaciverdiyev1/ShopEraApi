@@ -1,0 +1,11 @@
+{
+    "name": "HelpAndPolicy",
+    "alias": "helpandpolicy",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\HelpAndPolicy\\Providers\\HelpAndPolicyServiceProvider"
+    ],
+    "files": []
+}

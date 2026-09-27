@@ -1,0 +1,81 @@
+# .claudeignore
+# Claude / AI araçlarının bağlama almaması veya değiştirmemesi gereken yollar.
+# Amaç: gereksiz token tüketimini önlemek ve sırları modelden uzak tutmak.
+
+# --- Sırlar ve ortam dosyaları (ASLA okunmamalı) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+storage/*.key
+storage/firebase/
+storage/app/firebase/
+
+# --- Bağımlılıklar ve derlenmiş çıktılar ---
+/vendor/
+/node_modules/
+/public/build/
+/public/hot
+/public/storage
+/bootstrap/cache/*.php
+
+# --- Medya / yüklenen dosyalar ---
+/public/uploads/
+/public/assets/uploads/
+/storage/app/public/
+/storage/app/private/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.svg
+*.mp4
+*.mov
+*.pdf
+*.zip
+*.sql
+*.sqlite
+*.dump
+
+# --- Log ve cache ---
+*.log
+/storage/logs/
+/storage/framework/cache/
+/storage/framework/sessions/
+/storage/framework/views/
+/storage/pail/
+.phpunit.result.cache
+/.phpunit.cache/
+bootstrap/cache/
+
+# --- Kilit dosyaları (çok büyük, elle düzenlenmez) ---
+composer.lock
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# --- IDE / işletim sistemi ---
+/.idea/
+/.vscode/
+/.fleet/
+/.nova/
+/.zed/
+.DS_Store
+Thumbs.db
+
+# --- Üretilmiş / geçici dosyalar ---
+*.pid
+*.seed
+*.cache
+*.tmp
+*.bak
+*.orig
+*.swp
+*~
+
+# --- Git ---
+/.git/

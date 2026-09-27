@@ -1,0 +1,11 @@
+{
+    "name": "Store",
+    "alias": "store",
+    "description": "Marketplace stores, merchant wallet and order settlement",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Store\\Providers\\StoreServiceProvider"
+    ],
+    "files": []
+}

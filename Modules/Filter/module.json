@@ -1,0 +1,11 @@
+{
+    "name": "Filter",
+    "alias": "filter",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Filter\\Providers\\FilterServiceProvider"
+    ],
+    "files": []
+}

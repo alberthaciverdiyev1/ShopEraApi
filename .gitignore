@@ -1,27 +1,31 @@
-# Environment / secrets
-.env
-.env.*
-!.env.example
-
-# Go build artifacts
-bin/
-*.exe
-*.test
-*.out
-coverage.out
-
-# Local / internal notes (not part of the repo)
-CLAUDE.md
-.claude/
-.claudeignore
-DEFERRED.md
-
-# OS / IDE / logs
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/
 *.log
+.DS_Store
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+/.fleet
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/auth.json
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+/storage/firebase/firebase-service-account.json
+Homestead.json
+Homestead.yaml
+Thumbs.db
+/.composer
+/.npm
+/.scribe
 
-# Yüklenen dosyalar (runtime)
-storage/
+# AI tooling
+/.claude

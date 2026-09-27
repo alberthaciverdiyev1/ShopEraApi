@@ -1,0 +1,11 @@
+{
+    "name": "Popup",
+    "alias": "popup",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Popup\\Providers\\PopupServiceProvider"
+    ],
+    "files": []
+}

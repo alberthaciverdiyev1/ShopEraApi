@@ -1,0 +1,11 @@
+{
+    "name": "Listing",
+    "alias": "listing",
+    "description": "Classified ads: admin-built sections, their fields and filters, plus the ads themselves",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Listing\\Providers\\ListingServiceProvider"
+    ],
+    "files": []
+}
