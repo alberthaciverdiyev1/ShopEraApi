@@ -60,7 +60,7 @@
 	// Image stories have no video to end, so advance on a 5s timer.
 	$effect(() => {
 		const story = currentStory;
-		if (!story || story.video_path || !story.image) return;
+		if (!story || story.video || !story.image) return;
 
 		progress = 0;
 		const started = Date.now();
@@ -232,10 +232,10 @@
 		<!-- Story media: video when present, otherwise the story image -->
 		{#if currentStory}
 			{#key currentStory.id}
-				{#if currentStory.video_path}
+				{#if currentStory.video}
 					<video
 						bind:this={videoEl}
-						src={currentStory.video_path}
+						src={currentStory.video}
 						autoplay
 						playsinline
 						muted={isMuted}

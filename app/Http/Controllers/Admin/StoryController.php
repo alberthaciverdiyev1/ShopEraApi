@@ -23,7 +23,8 @@ class StoryController extends ResourceController
     ];
 
     protected array $fields = [
-        ['name' => 'image', 'label' => 'Şəkil', 'type' => 'image', 'path' => 'stories', 'rules' => ['required'], 'col' => 6],
+        ['name' => 'image', 'label' => 'Şəkil', 'type' => 'image', 'path' => 'stories', 'rules' => ['nullable'], 'col' => 6],
+        ['name' => 'video', 'label' => 'Video', 'type' => 'video', 'path' => 'stories', 'rules' => ['nullable'], 'col' => 6],
         ['name' => 'product_id', 'label' => 'Məhsul (opsional)', 'type' => 'select', 'col' => 6],
         ['name' => 'sort_order', 'label' => 'Sıra', 'type' => 'number', 'col' => 4],
         ['name' => 'expires_at', 'label' => 'Bitmə tarixi (opsional)', 'type' => 'date', 'col' => 4],

@@ -13,7 +13,7 @@ export interface ApiStoryProduct {
 export interface ApiStoryVideo {
 	id: number;
 	image?: string | null;
-	video_path?: string | null;
+	video?: string | null;
 	product_id?: number | null;
 	created_at?: string;
 	expires_at?: string | null;
@@ -60,7 +60,7 @@ export function markStoryAsViewed(storyId: number): void {
 export async function fetchStoryVideos(): Promise<ApiStoryVideo[]> {
 	try {
 		const data = await apiGet<ApiStoryVideo[]>('/story');
-		const list = Array.isArray(data) ? data.filter((s) => (s.image || s.video_path) && s.is_story_active !== false) : [];
+		const list = Array.isArray(data) ? data.filter((s) => (s.image || s.video) && s.is_story_active !== false) : [];
 		storyVideos.set(list);
 		return list;
 	} catch (e) {

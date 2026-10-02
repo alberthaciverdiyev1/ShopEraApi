@@ -26,6 +26,19 @@ class Story extends Model
         return $this->belongsTo(Product::class);
     }
 
+    public function getVideoAttribute($value): ?string
+    {
+        if (! $value) {
+            return null;
+        }
+
+        if (str_starts_with($value, 'http')) {
+            return $value;
+        }
+
+        return Storage::disk('public')->url($value);
+    }
+
     public function getImageAttribute($value): ?string
     {
         if (! $value) {

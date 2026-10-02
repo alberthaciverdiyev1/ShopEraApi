@@ -19,6 +19,7 @@ class StoryResource extends JsonResource
         return [
             'id' => $this->id,
             'image' => $this->image,
+            'video' => $this->video,
             'product_id' => $this->product_id,
             'expires_at' => $this->expires_at?->toIso8601String(),
             'product' => $this->whenLoaded('product', fn () => $product ? [

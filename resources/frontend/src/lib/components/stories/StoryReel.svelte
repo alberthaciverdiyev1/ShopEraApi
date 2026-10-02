@@ -102,7 +102,7 @@
 											<i class="fa-regular fa-image"></i>
 										</div>
 									{/if}
-									{#if story.video_path}
+									{#if story.video}
 										<span class="story-play-badge" aria-hidden="true">
 											<i class="fa-solid fa-play"></i>
 										</span>
