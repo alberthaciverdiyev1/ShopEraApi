@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import BestSellerCard from '$lib/components/cards/BestSellerCard.svelte';
+	import ShopProductCard from '$lib/components/cards/ShopProductCard.svelte';
 	import { fetchProducts, type ApiProduct } from '$lib/services/products';
 
 	let { products: serverProducts = [] }: { products?: ApiProduct[] } = $props();
@@ -34,7 +34,7 @@
 							<div class="row g-4">
 								{#each products as product (product.id)}
 									<div class="col-xl-3 col-md-4 col-6">
-										<BestSellerCard {product} />
+										<ShopProductCard {product} />
 									</div>
 								{/each}
 							</div>

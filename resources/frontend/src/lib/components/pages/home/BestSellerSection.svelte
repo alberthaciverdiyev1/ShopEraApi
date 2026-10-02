@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import BestSellerCard from '$lib/components/cards/BestSellerCard.svelte';
+	import ShopProductCard from '$lib/components/cards/ShopProductCard.svelte';
 	import { fetchBanners, bannerHref, type ApiBanner } from '$lib/services/banners';
 	import { fetchProducts, productImage, type ApiProduct } from '$lib/services/products';
 	import { translate } from '$lib/i18n';
@@ -117,7 +117,7 @@
 										<div class="row g-4">
 											{#each lists[tab.key] as product (product.id)}
 												<div class="col-xl-3 col-md-4 col-6">
-													<BestSellerCard {product} />
+													<ShopProductCard {product} />
 												</div>
 											{/each}
 										</div>
