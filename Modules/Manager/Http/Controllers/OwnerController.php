@@ -15,6 +15,8 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -176,6 +178,40 @@ class OwnerController extends Controller
         } catch (\Throwable $e) {
             return ['ok' => false, 'command' => $command, 'exit_code' => 1, 'output' => $e->getMessage()];
         }
+    }
+
+    public function updatePassword(Request $request, SiteOwner $owner)
+    {
+        $data = $request->validate(['password' => ['required', 'string', 'min:6']]);
+
+        $database = $owner->db_name ?: $owner->suggestedDbName();
+
+        if (! \App\Support\TenantDatabase::exists($database)) {
+            return back()->withErrors(['password' => 'Tenant bazası tapılmadı.']);
+        }
+
+        $previous = config('database.default');
+
+        try {
+            config(['database.connections.tenant.database' => $database]);
+            DB::purge('tenant');
+            DB::setDefaultConnection('tenant');
+
+            $user = \Modules\User\Entities\User::query()->where('email', $owner->email)->first();
+
+            if (! $user) {
+                return back()->withErrors(['password' => 'Bu sahibin admin hesabı tapılmadı ('.$owner->email.').']);
+            }
+
+            $user->update(['password' => Hash::make($data['password'])]);
+        } catch (\Throwable $e) {
+            return back()->withErrors(['password' => 'Şifrə yenilənə bilmədi: '.$e->getMessage()]);
+        } finally {
+            DB::setDefaultConnection($previous);
+            DB::purge('tenant');
+        }
+
+        return back()->with('status', __('Admin şifrəsi yeniləndi.'));
     }
 
     private function formData(?SiteOwner $owner): array

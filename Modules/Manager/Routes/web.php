@@ -31,6 +31,7 @@ Route::middleware(['auth:owner', EnsureOwner::class])->group(function () {
     // Site owners (customers) managed by domain
     Route::resource('owners', OwnerController::class)->except(['show']);
     Route::put('owners/{owner}/features', [OwnerController::class, 'updateFeatures'])->name('owners.features');
+    Route::post('owners/{owner}/password', [OwnerController::class, 'updatePassword'])->name('owners.password');
 
     // Plans & the feature matrix
     Route::get('plans', [PlanController::class, 'index'])->name('plans.index');
