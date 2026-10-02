@@ -36,5 +36,5 @@ Artisan::command('orders:expire-pending-payments {--hours=3} {--limit=200}', fun
 
 Schedule::command('orders:expire-pending-payments --hours=3 --limit=200')->everyFifteenMinutes()->withoutOverlapping();
 
-Schedule::command('manager:sync')->everyFifteenMinutes();
+Schedule::command('manager:map')->everyFiveMinutes()->withoutOverlapping();
 Schedule::command('manager:report-usage')->hourly();

@@ -26,6 +26,7 @@ PULL="${PULL:-0}"                       # 1 => once origin/<branch>'i cek
 SKIP_ASSETS="${SKIP_ASSETS:-0}"         # 1 => root Vite build'ini atla
 SKIP_FRONTEND="${SKIP_FRONTEND:-0}"     # 1 => Svelte build'ini atla
 RUN_MIGRATIONS="${RUN_MIGRATIONS:-1}"   # 0 => migrate atla
+SKIP_MANAGER="${SKIP_MANAGER:-0}"       # 1 => manager adimlarini atla
 STOREFRONT_MODE="${STOREFRONT_MODE:-ssr}"   # ssr (adapter-node) | static (adapter-static)
 
 PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-}"                  # bos => otomatik algila
@@ -158,16 +159,19 @@ info "Cache yenile (config/route/view + optimize)"
 "$PHP_BIN" artisan optimize
 ok "config/route/view cache"
 
-# 7) Manager'dan entitlement/tema ve tenant host->db haritasini yenile.
-# MANAGER_URL yoksa komut uyarip basariyla doner; bu yuzden fatal degil.
-info "manager:sync (entitlement + tenant map)"
-"$PHP_BIN" artisan manager:sync || warn "manager:sync basarisiz (atlandi)"
-ok "manager:sync"
+# 7) Manager control DB: migrate, rebuild the tenant map, push entitlements.
+if [ "$SKIP_MANAGER" != "1" ] && "$PHP_BIN" artisan list --raw 2>/dev/null | grep -q '^manager:migrate$'; then
+    info "manager:migrate (control DB)"
+    "$PHP_BIN" artisan manager:migrate || warn "manager:migrate basarisiz (atlandi)"
+    ok "control migrate"
 
-if "$PHP_BIN" artisan list --raw 2>/dev/null | grep -q '^manager:sync$'; then
-    info "Tenant haritasi yenileniyor (manager:sync)"
-    "$PHP_BIN" artisan manager:sync || warn "manager:sync basarisiz; tenant map cache bos kalabilir"
+    info "manager:map (tenant host->db map)"
+    "$PHP_BIN" artisan manager:map || warn "manager:map basarisiz; tenant map cache bos kalabilir"
     ok "tenant map"
+
+    info "manager:push (control entitlements -> tenants)"
+    "$PHP_BIN" artisan manager:push || warn "manager:push basarisiz (atlandi)"
+    ok "entitlements pushed"
 fi
 
 # 8) Izinler (yalnizca root iken)

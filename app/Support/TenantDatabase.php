@@ -15,7 +15,7 @@ class TenantDatabase
 {
     /**
      * Derive the tenant database name from a host. Must stay identical for
-     * ResolveTenant, tenant:provision and manager:sync so a host always maps
+     * ResolveTenant, tenant:provision and manager:map so a host always maps
      * to the same database.
      */
     public static function nameFor(string $host): string
@@ -40,7 +40,7 @@ class TenantDatabase
     /**
      * Cache repository for tenant metadata. Uses a store that does not depend
      * on the (per-tenant) database connection so ResolveTenant can read it
-     * before the connection is switched and manager:sync can write it while
+     * before the connection is switched and manager:map can write it while
      * the connection is switched.
      */
     public static function cache(): CacheRepository

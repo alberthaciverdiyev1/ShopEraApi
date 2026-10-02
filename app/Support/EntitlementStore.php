@@ -9,7 +9,7 @@ use App\Models\TenantSubscription;
 /**
  * Persists a Manager.Snaker entitlements payload into the currently active
  * (tenant) database. Callers must set the target connection first — either via
- * ResolveTenant (web) or manager:sync (cli/tenant map).
+ * ResolveTenant (web) or manager:push (cli).
  */
 class EntitlementStore
 {

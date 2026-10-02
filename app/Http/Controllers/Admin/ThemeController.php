@@ -2,30 +2,46 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Support\Features;
 use Illuminate\Http\Request;
-use App\Support\ManagerClient;
+use Modules\Manager\Entities\SiteOwner;
+use Modules\Manager\Services\EntitlementWriter;
+use Modules\Manager\Services\ThemeService;
 use Modules\Setting\Entities\ThemeColor;
 
 /**
- * Theme is owned by Manager.Snaker: the instance lists the available themes
- * and asks the Manager to switch. The selected palette is mirrored locally so
- * the storefront's own /api/theme keeps working.
+ * The owner picks one of the control-DB theme presets for this site. The
+ * selection is stored on the SiteOwner (control DB) and the effective palette
+ * is pushed into this tenant's ThemeColor rows so /api/theme keeps working.
  */
 class ThemeController extends AdminController
 {
     protected string $title = 'Tema';
 
+    public function __construct(private readonly ThemeService $themes, private readonly EntitlementWriter $writer) {}
+
     public function index(Request $request)
     {
-        [$themes, $current, $error] = $this->fetchThemes($request);
+        $owner = $this->owner($request);
+        $catalogue = $this->themes->themes();
+        $current = $owner?->theme_id;
+
+        $selected = $catalogue->firstWhere('id', $current) ?? $this->themes->defaultTheme();
 
         return view('admin.pages.theme', [
             'title' => $this->title,
-            'themes' => $themes,
+            'themes' => $catalogue->map(fn ($theme) => [
+                'id' => $theme->id,
+                'name' => $theme->name,
+                'slug' => $theme->slug,
+                'description' => $theme->description,
+                'is_default' => (bool) $theme->is_default,
+                'preview' => $this->themes->paletteForTheme($theme),
+            ])->all(),
             'current' => $current,
-            'error' => $error,
-            'palette' => $themes[$this->indexOfCurrent($themes, $current)]['preview'] ?? [],
-            'customThemeEnabled' => $this->customThemeEnabled($request),
+            'error' => null,
+            'palette' => $this->themes->paletteForTheme($selected),
+            'customThemeEnabled' => Features::enabled('custom_theme', false),
             'localColors' => ThemeColor::query()->orderBy('id')->get(),
         ]);
     }
@@ -33,7 +49,7 @@ class ThemeController extends AdminController
     /** Owner-specific custom palette (available with the `custom_theme` feature). */
     public function update(Request $request)
     {
-        if (! $this->customThemeEnabled($request)) {
+        if (! Features::enabled('custom_theme', false)) {
             return back()->withErrors(['theme' => 'Custom tema abunəliyinizə daxil deyil.']);
         }
 
@@ -51,68 +67,29 @@ class ThemeController extends AdminController
         return back()->with('status', __('Custom tema yadda saxlanıldı.'));
     }
 
-    private function customThemeEnabled(Request $request): bool
-    {
-        $response = ManagerClient::get('/api/v1/entitlements');
-        $value = $response && $response->ok() ? ($response->json('data.features.custom_theme.value') ?? null) : null;
-
-        return in_array(strtolower((string) $value), ['1', 'true', 'yes', 'on'], true);
-    }
-
     public function select(Request $request)
     {
         $data = $request->validate([
-            'theme_id' => ['required', 'integer'],
+            'theme_id' => ['required', 'integer', 'exists:control.themes,id'],
         ]);
 
-        $response = ManagerClient::put('/api/v1/theme-selection', [
-            'theme_id' => $data['theme_id'],
-        ]);
+        $owner = $this->owner($request);
 
-        if (! $response) {
-            return back()->withErrors(['theme' => 'Manager əlçatmazdır.']);
+        if (! $owner) {
+            return back()->withErrors(['theme' => 'Bu host üçün site sahibi tapılmadı.']);
         }
 
-        if (! $response->ok()) {
-            return back()->withErrors(['theme' => 'Tema seçilə bilmədi ('.$response->status().').']);
-        }
+        $owner->update(['theme_id' => $data['theme_id']]);
 
-        // Mirror the palette the Manager now reports for this instance.
-        $palette = $this->currentPalette();
-        $this->storePalette($palette);
+        $this->writer->push($owner->fresh('domains'), $request->getHost());
 
         return back()->with('status', __('Tema seçildi və tətbiq olundu.'));
-    }
-
-    private function fetchThemes(Request $request): array
-    {
-        if (empty(config('services.manager.url'))) {
-            return [[], null, 'Manager konfiqurasiya olunmayıb (MANAGER_URL).'];
-        }
-
-        $response = ManagerClient::get('/api/v1/themes');
-
-        if (! $response) {
-            return [[], null, 'Manager əlçatmazdır.'];
-        }
-
-        if (! $response->ok()) {
-            return [[], null, 'Manager cavabı: '.$response->status()];
-        }
-
-        return [$response->json('data.themes') ?? [], $response->json('data.current'), null];
     }
 
     /** @return array<string,string> */
     public function currentPalette(): array
     {
-        $response = ManagerClient::get('/api/v1/entitlements');
-
-        if (! $response || ! $response->ok()) {
-            return [];
-        }
-
-        return $response->json('data.theme') ?? [];
+        return $this->themes->forOwner($this->owner(request()));
     }
 
     public function storePalette(array $palette): void
@@ -124,19 +101,8 @@ class ThemeController extends AdminController
         }
     }
 
-    private function indexOfCurrent(array $themes, $current): int
+    private function owner(Request $request): ?SiteOwner
     {
-        foreach ($themes as $i => $theme) {
-            if ((int) ($theme['id'] ?? 0) === (int) $current) {
-                return $i;
-            }
-        }
-
-        return -1;
-    }
-
-    private function siteHost(Request $request): string
-    {
-        return (string) (config('services.manager.site_host') ?: $request->getHost());
+        return SiteOwner::query()->byHost($request->getHost())->with('theme')->first();
     }
 }

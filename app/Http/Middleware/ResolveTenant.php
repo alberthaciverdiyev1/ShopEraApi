@@ -12,7 +12,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 /**
  * Picks the tenant database for the incoming host. One codebase serves every
  * site owner (free and paid); the host → database map comes from Manager
- * (manager:sync). Every tenant has its own database.
+ * (manager:map). Every tenant has its own database.
  */
 class ResolveTenant
 {
@@ -65,7 +65,7 @@ class ResolveTenant
         }
 
         // Bootstrap / local development: an instance that has no tenants in its
-        // map yet (before the first manager:sync) serves the central database.
+        // map yet (before the first manager:map) serves the central database.
         // In production this stays strict, so an expired/empty map can never
         // silently cross tenant boundaries.
         if ($this->mapIsEmpty() && ! app()->environment('production')) {
@@ -103,7 +103,7 @@ class ResolveTenant
             return $map[$host] ?? null;
         }
 
-        // Bootstrap fallback before the first manager:sync (single host).
+        // Bootstrap fallback before the first manager:map (single host).
         return TenantDatabase::nameFor($host);
     }
 

@@ -3,7 +3,6 @@
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\FeaturesController;
 use App\Http\Controllers\Api\HomeController;
-use App\Http\Controllers\Api\ManagerWebhookController;
 use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\PromoBlockController;
 use App\Http\Controllers\Api\SubscriptionController;
@@ -31,9 +30,6 @@ Route::get('/plan', [PlanController::class, 'index'])->name('api.plan');
 
 // Offer / ad blocks managed in Manager.Snaker (Free plan only).
 Route::get('/promo-blocks', [PromoBlockController::class, 'index'])->name('api.promo-blocks');
-
-// Signed refresh events pushed by Manager.Snaker.
-Route::post('/manager/webhook', [ManagerWebhookController::class, 'handle'])->name('api.manager.webhook');
 
 // Contact info and form submission
 Route::get('/contact', [ContactController::class, 'info'])->name('api.contact.info');

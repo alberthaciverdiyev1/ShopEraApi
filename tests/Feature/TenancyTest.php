@@ -72,16 +72,14 @@ class TenancyTest extends TestCase
         $this->getJson('http://unknown.test/api/features')->assertStatus(404);
     }
 
-    public function test_central_webhook_path_never_needs_a_tenant(): void
+    public function test_central_health_path_never_needs_a_tenant(): void
     {
         config(['tenant.enabled' => true]);
         TenantDatabase::cache()->put(config('tenant.map_cache'), ['known.test' => 'shopera_known']);
 
-        // No tenant matches unknown.test, but the manager webhook is a central
-        // route, so it must reach the controller (which then rejects the
-        // unconfigured secret) instead of a tenancy 404.
-        $this->postJson('http://unknown.test/api/manager/webhook')
-            ->assertStatus(500);
+        // No tenant matches unknown.test, but /up is a central route, so it
+        // must reach the app instead of a tenancy 404.
+        $this->get('http://unknown.test/up')->assertStatus(200);
     }
 
     public function test_no_tenants_configured_falls_back_to_central_outside_production(): void

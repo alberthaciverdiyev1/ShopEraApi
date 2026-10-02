@@ -45,7 +45,14 @@ class EntitlementWriter
                 DB::purge('tenant');
                 DB::setDefaultConnection('tenant');
 
-                EntitlementStore::persist($this->payload($owner, $h), $h);
+                $payload = $this->payload($owner, $h);
+
+                EntitlementStore::persist($payload, $h);
+
+                // Mirror the resolved palette into this tenant's ThemeColor rows
+                // so the storefront's own /api/theme keeps working.
+                app(\App\Http\Controllers\Admin\ThemeController::class)->storePalette($payload['theme'] ?? []);
+
                 $pushed[] = $h;
             }
         } finally {

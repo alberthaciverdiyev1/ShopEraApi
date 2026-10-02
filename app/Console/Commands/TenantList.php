@@ -21,7 +21,7 @@ class TenantList extends Command
         $metadata = (array) TenantDatabase::cache()->get(config('tenant.metadata_cache'), []);
 
         if ($map === []) {
-            $this->warn('No tenants in the map. Run "php artisan manager:sync" first.');
+            $this->warn('No tenants in the map. Run "php artisan manager:map" first.');
 
             return self::SUCCESS;
         }

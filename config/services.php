@@ -49,12 +49,5 @@ return [
         'ollama_url' => env('OLLAMA_BASE_URL', 'http://localhost:11434'),
         'model' => env('OLLAMA_MODEL', 'llava'),
     ],
-    'manager' => [
-        'url' => env('MANAGER_URL'),
-        'token' => env('MANAGER_TOKEN'),
-        'webhook_secret' => env('MANAGER_WEBHOOK_SECRET'),
-        'api_key' => env('MANAGER_API_KEY'),
-        'site_host' => env('MANAGER_SITE_HOST'),
-    ],
 
 ];

@@ -2,32 +2,27 @@
 
 namespace App\Console\Commands;
 
-use App\Support\ManagerClient;
 use App\Support\TenantContext;
 use App\Support\TenantDatabase;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Modules\Category\Entities\Category;
+use Modules\Manager\Entities\SiteOwner;
 use Modules\Product\Entities\Product;
 use Modules\User\Entities\User;
 
-/** Pushes current usage counters to Manager.Snaker (limits dashboard). */
+/** Stores tenant usage counters on the control-DB site owners (limits view). */
 class ManagerReportUsage extends Command
 {
     protected $signature = 'manager:report-usage';
 
-    protected $description = 'Report usage (products, categories, staff, storage) to Manager.Snaker';
+    protected $description = 'Store tenant usage (products, categories, staff, storage) on the control DB';
 
     public function handle(): int
     {
-        if (empty(config('services.manager.url'))) {
-            $this->warn('MANAGER_URL is not configured.');
+        $targets = TenantDatabase::uniqueHosts();
 
-            return self::SUCCESS;
-        }
-
-        $targets = $this->targets();
         if ($targets === []) {
             $this->warn('No tenants to report.');
 
@@ -35,11 +30,10 @@ class ManagerReportUsage extends Command
         }
 
         $previous = config('database.default');
+        $metadata = (array) TenantDatabase::cache()->get(config('tenant.metadata_cache'), []);
         $reported = 0;
 
         try {
-            $metadata = (array) TenantDatabase::cache()->get(config('tenant.metadata_cache'), []);
-
             foreach ($targets as $host => $database) {
                 try {
                     if (! TenantDatabase::exists($database)) {
@@ -57,7 +51,7 @@ class ManagerReportUsage extends Command
                     DB::purge('tenant');
                     DB::setDefaultConnection('tenant');
 
-                    if ($this->reportFor($host)) {
+                    if ($this->reportFor($host, $database)) {
                         $reported++;
                     }
                 } catch (\Throwable $e) {
@@ -65,21 +59,20 @@ class ManagerReportUsage extends Command
                 }
             }
         } finally {
-            // Never leak the last tenant connection into the rest of the process.
             DB::setDefaultConnection($previous);
             DB::purge('tenant');
         }
 
-        $this->info("Usage reported to Manager for {$reported} tenant(s).");
+        $this->info("Usage stored for {$reported} tenant(s).");
 
         return self::SUCCESS;
     }
 
-    private function reportFor(string $host): bool
+    private function reportFor(string $host, string $database): bool
     {
         $storageBytes = 0;
         try {
-            $prefix = config('tenant.current_database') ? TenantContext::storagePath('') : '';
+            $prefix = $database ? TenantContext::storagePath('') : '';
             foreach (Storage::disk('public')->allFiles($prefix) as $file) {
                 $storageBytes += (int) Storage::disk('public')->size($file);
             }
@@ -87,34 +80,27 @@ class ManagerReportUsage extends Command
             // ignore
         }
 
-        $response = ManagerClient::post('/api/v1/usage', [
-            'products' => Product::query()->count(),
-            'categories' => Category::query()->count(),
-            'staff' => User::query()->whereHas('roles', fn ($q) => $q->where('name', '!=', 'user'))->count(),
-            'storage_gb' => round($storageBytes / 1073741824, 2),
-        ], $host !== '' ? $host : null);
+        $usage = [
+            'usage_products' => Product::query()->count(),
+            'usage_categories' => Category::query()->count(),
+            'usage_staff' => User::query()->whereHas('roles', fn ($q) => $q->where('name', '!=', 'user'))->count(),
+            'usage_storage_gb' => round($storageBytes / 1073741824, 2),
+            'usage_reported_at' => now(),
+        ];
 
-        if (! $response || ! $response->ok()) {
-            $this->error("Usage report failed for {$host}.");
+        // Write on the control connection (models above already run on the
+        // tenant connection via the default connection switch).
+        $owner = SiteOwner::query()->byHost($host)->first()
+            ?? SiteOwner::query()->where('db_name', $database)->first();
+
+        if (! $owner) {
+            $this->warn("No site owner for {$host}.");
 
             return false;
         }
 
+        $owner->update($usage);
+
         return true;
-    }
-
-    /** @return array<string,string> host => database */
-    private function targets(): array
-    {
-        // One report per tenant database, even if it has several domains.
-        $hosts = TenantDatabase::uniqueHosts();
-
-        if ($hosts !== []) {
-            return $hosts;
-        }
-
-        $host = (string) (config('services.manager.site_host') ?: gethostname());
-
-        return [$host => TenantDatabase::nameFor($host)];
     }
 }

@@ -48,6 +48,7 @@ class ManagerServiceProvider extends ServiceProvider
         $this->commands([
             \Modules\Manager\Console\MigrateCommand::class,
             \Modules\Manager\Console\PushCommand::class,
+            \Modules\Manager\Console\MapCommand::class,
         ]);
     }
 
