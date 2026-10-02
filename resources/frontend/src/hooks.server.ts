@@ -44,12 +44,18 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	const response = await resolve(event);
 
-	if (event.request.method === 'GET' && isCacheable(event.url.pathname) && !event.url.searchParams.has('_data')) {
-		// Browser: revalidate; CDN (Cloudflare s-maxage): serve from edge.
-		response.headers.set(
-			'Cache-Control',
-			'public, max-age=0, s-maxage=300, stale-while-revalidate=600'
-		);
+	if (event.request.method === 'GET') {
+		if (isCacheable(event.url.pathname) && !event.url.searchParams.has('_data')) {
+			// Browser: revalidate; CDN (Cloudflare s-maxage): serve from edge.
+			response.headers.set(
+				'Cache-Control',
+				'public, max-age=0, s-maxage=300, stale-while-revalidate=600'
+			);
+		} else {
+			// User-specific pages (cart, checkout, dashboard, settings, wishlist,
+			// login/register) must never be cached by a CDN "cache everything" rule.
+			response.headers.set('Cache-Control', 'private, no-store');
+		}
 	}
 
 	return response;
