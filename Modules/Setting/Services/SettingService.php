@@ -83,25 +83,9 @@ class SettingService
         return (float) ($setting?->wholesale_minimal_purchase_price ?? 100);
     }
 
-    public function getStoreCommissionPercent(): float
-    {
-        return (float) ($this->firstSetting()?->store_commission_percent ?? 10);
-    }
 
-    public function getStoreNegativeBalanceLimit(): float
-    {
-        return (float) ($this->firstSetting()?->store_negative_balance_limit ?? 10);
-    }
 
-    public function getStoreHandoverHours(): int
-    {
-        return (int) ($this->firstSetting()?->store_handover_hours ?? 24);
-    }
 
-    public function getStoreLatePenaltyAmount(): float
-    {
-        return (float) ($this->firstSetting()?->store_late_penalty_amount ?? 0);
-    }
 
     public function getStoreMinWithdrawalAmount(): float
     {
@@ -113,12 +97,6 @@ class SettingService
         return (int) ($this->firstSetting()?->store_release_hold_hours ?? 0);
     }
 
-    public function isMarketplaceEnabled(): bool
-    {
-        $value = $this->firstSetting()?->marketplace_enabled;
-
-        return $value === null ? true : (bool) $value;
-    }
 
     public function getPublicLowStockThreshold(): int
     {

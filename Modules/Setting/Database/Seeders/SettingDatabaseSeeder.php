@@ -30,19 +30,9 @@ class SettingDatabaseSeeder extends Seeder
                 'google_map_url' => 'https://maps.app.goo.gl/2ixKnqaSq5AeoXsu8',
                 'address' => 'Bakı, Nizami küçəsi 203',
                 'referral_reward_amount' => 1.00,
-                'app_version' => '1.2.0',
-                'app_version_ios' => '1.2.0',
                 'minimal_purchase_price' => 15.00,
                 'wholesale_minimal_purchase_price' => 100.00,
-                'store_commission_percent' => 10.00,
-                'store_negative_balance_limit' => 10.00,
-                'store_handover_hours' => 24,
-                'store_late_penalty_amount' => 5.00,
                 'public_low_stock_threshold' => 20,
-                'seller_instructions' => [
-                    'az' => 'Məhsulu 24 saat ərzində kuryerə təhvil verin. Qablaşdırmanın bütöv olduğuna əmin olun.',
-                    'en' => 'Hand the product over to the courier within 24 hours and make sure the packaging is intact.',
-                ],
             ]
         );
     }

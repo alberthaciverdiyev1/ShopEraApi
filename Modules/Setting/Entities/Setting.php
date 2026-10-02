@@ -25,11 +25,6 @@ class Setting extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'seller_instructions' => 'array',
-        'store_commission_percent' => 'decimal:2',
-        'store_negative_balance_limit' => 'decimal:2',
-        'store_late_penalty_amount' => 'decimal:2',
-        'store_handover_hours' => 'integer',
         'public_low_stock_threshold' => 'integer',
     ];
 
