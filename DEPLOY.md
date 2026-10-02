@@ -103,33 +103,37 @@ WantedBy=multi-user.target
 nginx'te storefront'u köke, `/api` ve `/admin`'i Laravel'e yönlendirin; SSR'ın
 `INTERNAL_API_URL`'e giderken tenant Host'unu taşıması `hooks.server.ts` ile yapılır.
 
-## 3. Manager (Manager.Shopera)
+## 3. Manager (uygulama ici kontrol paneli — `Modules/Manager`)
 
-Ayrı bir Laravel kurulumu (aynı host veya ayrı sunucu):
+Manager artik ayri bir proje degil; ayni uygulamanin icinde, ayri bir "control"
+(main) veritabani kullanir. Panel yalniz `owner` rollu hesapla acilir.
 
+```env
+DB_CONTROL_HOST=127.0.0.1
+DB_CONTROL_PORT=5432
+DB_CONTROL_DATABASE=manager_shopera  # merkez/main DB (bir kez olusturulur)
+DB_CONTROL_USERNAME=<kullanici>
+DB_CONTROL_PASSWORD=<sifre>
+MANAGER_HOSTS=manager.snaker.store   # panel host(lari), virgulle
+MANAGER_BASE_DOMAIN=snaker.store
+MANAGER_OWNER_EMAIL=owner@snaker.store
+MANAGER_OWNER_PASSWORD=<guclu-sifre>
+```
+
+Kurulum (control DB):
 ```bash
-composer install --no-dev --optimize-autoloader
-php artisan key:generate
-# .env: DB_DATABASE=manager_snaker, MANAGER_* , CLOUDFLARE_* (aşağıda)
-php artisan migrate --force && php artisan db:seed --force
-sudo APP_DIR=/var/www/Manager.Shopera APP_USER=www-data APP_GROUP=www-data bash deploy/scripts/fix-permissions.sh
-php artisan config:cache && php artisan route:cache
+php artisan manager:migrate --seed   # control semasi + feature/plan/tema + owner hesabi
+php artisan manager:map              # tenant host->db haritasini control DB'den kur
+php artisan manager:push             # effective entitlement/tema -> tenant DB'leri
 ```
 
-- nginx vhost'u Manager alan adına bağlayın (admin paneli buradan çalışır).
-- Scheduler: `billing:remind` için `schedule:run` cron'u (yukarıdaki gibi).
-
-### Cloudflare ortam değişkenleri (Manager)
-```
-CLOUDFLARE_ENABLED=true
-CLOUDFLARE_API_TOKEN=<Zone:Read + DNS:Edit>
-CLOUDFLARE_BASE_DOMAIN=snaker.store
-CLOUDFLARE_DNS_TARGET=<origin IP | <tunnel>.cfargotunnel.com>
-CLOUDFLARE_DNS_TYPE=A            # tunnel kullanıyorsanız CNAME
-CLOUDFLARE_PROXIED=true
-CLOUDFLARE_WILDCARD_SUBDOMAINS=true
-# CLOUDFLARE_ZONE_ID=<base zone id>   # opsiyonel
-```
+- Panel: `https://manager.snaker.store` (yalniz `owner` rollu hesap).
+- Zamanlayici (`schedule:run` cron): `manager:map` (5 dk) + `manager:report-usage` (saatlik).
+- Yeni tenant: panelde host tanimla -> `tenant:provision` (panel otomatik cagirir) -> `manager:push`.
+- Elle subdomain: nginx'te `server_name *.snaker.store;` + DNS wildcard kaydi yeterli; yeni subdomain icin nginx degisikligi gerekmez.
+- TLS/DNS otomasyonu (Cloudflare) kaldirildi; subdomainler elle yonetilir.
+- Deploy: `deploy/deploy.sh` (API + Svelte + admin + `manager:migrate|map|push`).
+- `php artisan migrate` yalniz TENANT (default) DB'sini migrate eder; control DB icin `manager:migrate`.
 
 ## Notlar
 - **TLS/DNS:** Subdomainler `*.base_domain` wildcard kaydıyla; custom domainler

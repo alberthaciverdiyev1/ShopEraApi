@@ -160,7 +160,7 @@ info "Cache yenile (config/route/view + optimize)"
 ok "config/route/view cache"
 
 # 7) Manager control DB: migrate, rebuild the tenant map, push entitlements.
-if [ "$SKIP_MANAGER" != "1" ] && "$PHP_BIN" artisan list --raw 2>/dev/null | grep -q '^manager:migrate$'; then
+if [ "$SKIP_MANAGER" != "1" ]; then
     info "manager:migrate (control DB)"
     "$PHP_BIN" artisan manager:migrate || warn "manager:migrate basarisiz (atlandi)"
     ok "control migrate"
