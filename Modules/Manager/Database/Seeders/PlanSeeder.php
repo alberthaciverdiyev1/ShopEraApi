@@ -28,7 +28,7 @@ class PlanSeeder extends Seeder
                     'multi_language', 'chat',
                 ],
                 'values' => [
-                    'product_variants' => '1', 'stock_tracking' => '1', 'branding' => '0', 'seo' => '1',
+                    'branding' => '0', 'seo' => '1',
                     'color_customization' => '0', 'font_customization' => '0', 'component_selection' => '0',
                     'homepage_editing' => '0', 'sales_reports' => '0', 'support_level' => '0',
                 ],
@@ -44,7 +44,7 @@ class PlanSeeder extends Seeder
                 ],
                 'off' => ['custom_code'],
                 'values' => [
-                    'product_variants' => '2', 'stock_tracking' => '2', 'branding' => '1', 'seo' => '2',
+                    'branding' => '1', 'seo' => '2',
                     'color_customization' => '1', 'font_customization' => '1', 'component_selection' => '1',
                     'homepage_editing' => '1', 'sales_reports' => '1', 'support_level' => '1',
                 ],
@@ -61,7 +61,7 @@ class PlanSeeder extends Seeder
                 ],
                 'off' => [],
                 'values' => [
-                    'product_variants' => '2', 'stock_tracking' => '2', 'branding' => '2', 'seo' => '3',
+                    'branding' => '2', 'seo' => '3',
                     'color_customization' => '2', 'font_customization' => '2', 'component_selection' => '2',
                     'homepage_editing' => '2', 'sales_reports' => '2', 'support_level' => '2',
                 ],

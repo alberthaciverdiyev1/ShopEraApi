@@ -103,8 +103,6 @@ class FeatureSeeder extends Seeder
             ['dark_light_theme', 'Dark / Light tema', 'bool', '0', 'Kontent'],
             ['google_analytics', 'Google Analytics / Pixel', 'bool', '0', 'Marketinq & Əlaqə'],
             ['custom_code', 'Özəl kod / inteqrasiya', 'bool', '0', 'Sistem'],
-            ['product_variants', 'Variantlar (rəng, ölçü)', 'limit', '1', 'Kataloq'],
-            ['stock_tracking', 'Stok izləmə', 'limit', '1', 'Kataloq'],
             ['color_customization', 'Rəng fərdiləşdirmə', 'limit', '0', 'Kontent'],
             ['font_customization', 'Font fərdiləşdirmə', 'limit', '0', 'Kontent'],
             ['component_selection', 'Hazır komponent seçimi', 'limit', '0', 'Kontent'],
