@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use Illuminate\Http\Request;
 use App\Support\TenantContext;
 use Illuminate\Support\Facades\Cache;
-use Modules\Setting\Entities\Setting;
+use Modules\Setting\Services\SettingService;
 
 class SettingsController extends AdminController
 {
@@ -61,7 +61,7 @@ class SettingsController extends AdminController
 
     public function index()
     {
-        $setting = Setting::query()->first() ?? new Setting;
+        $setting = app(SettingService::class)->current();
 
         return view('admin.pages.settings', [
             'title' => $this->title,
@@ -75,7 +75,7 @@ class SettingsController extends AdminController
     {
         $this->requirePermission('update setting');
 
-        $setting = Setting::query()->firstOrFail();
+        $setting = app(SettingService::class)->currentOrFail();
         $data = [];
 
         foreach (self::GROUPS as $group) {

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
-use Modules\User\Entities\ReferralSetting;
+use Modules\User\Services\ReferralSettingService;
 
 class ReferralSettingController extends AdminController
 {
@@ -11,17 +11,10 @@ class ReferralSettingController extends AdminController
 
     public function index()
     {
-        $referred = \Modules\User\Entities\UserReferral::query()
-            ->with(['user:id,name,phone', 'referredUsers.user:id,name,phone'])
-            ->latest('id')
-            ->limit(50)
-            ->get();
-
-        return view('admin.pages.referral', [
-            'title' => $this->title,
-            'setting' => ReferralSetting::query()->first() ?? new ReferralSetting(),
-            'referrals' => $referred,
-        ]);
+        return view('admin.pages.referral', array_merge(
+            ['title' => $this->title],
+            app(ReferralSettingService::class)->adminView()
+        ));
     }
 
     public function update(Request $request)
@@ -33,8 +26,7 @@ class ReferralSettingController extends AdminController
 
         $data['is_active'] = $request->boolean('is_active');
 
-        $setting = ReferralSetting::query()->firstOrNew();
-        $setting->fill($data)->save();
+        app(ReferralSettingService::class)->save($data);
 
         return back()->with('status', __('Referal parametrləri yeniləndi.'));
     }

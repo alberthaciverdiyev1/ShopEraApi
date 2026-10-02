@@ -3,9 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
-use Modules\Category\Entities\Category;
-use Modules\Filter\Entities\ProductFilter;
 use Modules\Filter\Entities\Filter;
+use Modules\Filter\Services\FilterService;
 
 class FilterController extends ResourceController
 {
@@ -44,16 +43,9 @@ class FilterController extends ResourceController
         $categoryId = $request->integer('category_id') ?: null;
         $productId = $request->integer('product_id') ?: null;
 
-        $filters = $categoryId
-            ? Filter::query()
-                ->whereHas('categories', fn ($q) => $q->where('categories.id', $categoryId))
-                ->orderBy('id')
-                ->get()
-            : collect();
-
-        $values = $productId
-            ? ProductFilter::query()->where('product_id', $productId)->pluck('value', 'filter_id')->all()
-            : [];
+        $service = app(FilterService::class);
+        $filters = $service->forCategory($categoryId);
+        $values = $service->productValuesFor($productId);
 
         return view('admin.pages.products._filters', [
             'filters' => $filters,
@@ -64,12 +56,7 @@ class FilterController extends ResourceController
     protected function resolveOptions(array $field): array
     {
         if ($field['name'] === 'categories') {
-            $options = [];
-            foreach (Category::query()->orderBy('id')->get() as $category) {
-                $options[$category->id] = admin_label($category, 'name', '#'.$category->id);
-            }
-
-            return $options;
+            return app(FilterService::class)->categoryOptions();
         }
 
         return parent::resolveOptions($field);

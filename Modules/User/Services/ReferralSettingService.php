@@ -53,4 +53,23 @@ class ReferralSettingService
             'amount' => (float) ($setting->referral_amount ?? 0),
         ];
     }
+
+    /** Admin settings page payload: current setting + latest referrals. */
+    public function adminView(): array
+    {
+        return [
+            'setting' => $this->setting->newQuery()->first() ?? new \Modules\User\Entities\ReferralSetting(),
+            'referrals' => \Modules\User\Entities\UserReferral::query()
+                ->with(['user:id,name,phone', 'referredUsers.user:id,name,phone'])
+                ->latest('id')
+                ->limit(50)
+                ->get(),
+        ];
+    }
+
+    public function save(array $data): void
+    {
+        $setting = $this->setting->newQuery()->firstOrNew();
+        $setting->fill($data)->save();
+    }
 }

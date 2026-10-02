@@ -201,4 +201,42 @@ class FilterService
             'Product filters updated successfully.'
         );
     }
+
+    /** Filters attached to a category (empty when no category chosen). */
+    public function forCategory(?int $categoryId)
+    {
+        if (! $categoryId) {
+            return collect();
+        }
+
+        return $this->model->newQuery()
+            ->whereHas('categories', fn ($q) => $q->where('categories.id', $categoryId))
+            ->orderBy('id')
+            ->get();
+    }
+
+    /** A product's saved filter values: [filter_id => value]. */
+    public function productValuesFor(?int $productId): array
+    {
+        if (! $productId) {
+            return [];
+        }
+
+        return \Modules\Filter\Entities\ProductFilter::query()
+            ->where('product_id', $productId)
+            ->pluck('value', 'filter_id')
+            ->all();
+    }
+
+    /** Category select options: [id => label]. */
+    public function categoryOptions(): array
+    {
+        $options = [];
+
+        foreach (\Modules\Category\Entities\Category::query()->orderBy('id')->get() as $category) {
+            $options[$category->id] = admin_label($category, 'name', '#'.$category->id);
+        }
+
+        return $options;
+    }
 }

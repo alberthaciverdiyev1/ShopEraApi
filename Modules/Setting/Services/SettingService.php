@@ -122,4 +122,15 @@ class SettingService
             'locale' => $request->locale,
         ]);
     }
+
+    /** The single settings row, or an empty instance for the create form. */
+    public function current(): Setting
+    {
+        return $this->model->newQuery()->first() ?? new Setting;
+    }
+
+    public function currentOrFail(): Setting
+    {
+        return $this->model->newQuery()->firstOrFail();
+    }
 }
