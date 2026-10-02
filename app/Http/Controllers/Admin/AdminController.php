@@ -13,6 +13,29 @@ abstract class AdminController extends Controller
 {
     protected string $title = 'Panel';
 
+    /** Lazily computed so it never depends on a subclass's constructor. */
+    private ?array $enabledLocales = null;
+
+    /**
+     * Locales this site has enabled (feature flags lang_az/lang_en/lang_ru/lang_tr).
+     * Defaults to all four when no flags are synced.
+     */
+    protected function enabledLocales(): array
+    {
+        if ($this->enabledLocales === null) {
+            $this->enabledLocales = array_values(array_filter(
+                ['az', 'en', 'ru', 'tr'],
+                fn (string $locale): bool => feature("lang_{$locale}")
+            ));
+
+            if ($this->enabledLocales === []) {
+                $this->enabledLocales = ['az', 'en', 'ru', 'tr'];
+            }
+        }
+
+        return $this->enabledLocales;
+    }
+
     protected function requirePermission(string $permission): void
     {
         abort_unless(admin_can($permission), 403, __('Bu əməliyyat üçün icazəniz yoxdur.'));

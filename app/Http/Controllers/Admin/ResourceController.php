@@ -43,7 +43,13 @@ abstract class ResourceController extends AdminController
 
     protected int $perPage = 20;
 
-    protected array $locales = ['az', 'en', 'ru', 'tr'];
+    /** Lazily resolved enabled locales (feature flags lang_xx). */
+    private ?array $localesCache = null;
+
+    protected function locales(): array
+    {
+        return $this->localesCache ??= $this->enabledLocales();
+    }
 
     /** Storage folder used for file/image fields without an explicit path. */
     protected string $storagePath = '';
@@ -75,7 +81,7 @@ abstract class ResourceController extends AdminController
             'fields' => $this->fields,
             'route' => $this->route,
             'title' => $this->title,
-            'locales' => $this->locales,
+            'locales' => $this->locales(),
             'options' => $this->optionsMap(),
         ]);
     }
@@ -89,7 +95,7 @@ abstract class ResourceController extends AdminController
             'fields' => $this->fields,
             'route' => $this->route,
             'title' => $this->title,
-            'locales' => $this->locales,
+            'locales' => $this->locales(),
             'options' => $this->optionsMap(),
         ]);
     }
@@ -202,7 +208,7 @@ abstract class ResourceController extends AdminController
             }
 
             if (str_starts_with($type, 'translatable_')) {
-                foreach ($this->locales as $locale) {
+                foreach ($this->locales() as $locale) {
                     $localeRules = $locale === 'az'
                         ? $base
                         : array_values(array_diff($base, ['required']));
@@ -295,7 +301,7 @@ abstract class ResourceController extends AdminController
     {
         $source = $values['az'] ?? reset($values) ?: '';
 
-        foreach ($this->locales as $locale) {
+        foreach ($this->locales() as $locale) {
             if (empty($values[$locale])) {
                 $values[$locale] = $source;
             }
@@ -343,7 +349,7 @@ abstract class ResourceController extends AdminController
                 'fields' => $this->fields,
                 'route' => $this->route,
                 'title' => $this->title,
-                'locales' => $this->locales,
+                'locales' => $this->locales(),
                 'options' => $this->optionsMap(),
                 'errors' => (new \Illuminate\Support\ViewErrorBag)->put(
                     'default',

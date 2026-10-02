@@ -67,7 +67,7 @@ class SettingsController extends AdminController
             'title' => $this->title,
             'setting' => $setting,
             'groups' => self::GROUPS,
-            'locales' => ['az', 'en', 'ru', 'tr'],
+            'locales' => $this->enabledLocales(),
         ]);
     }
 

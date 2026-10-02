@@ -62,7 +62,7 @@ class CategoryController extends ResourceController
             $escaped = addcslashes($term, '%_\\');
 
             return $query->where(function (Builder $inner) use ($escaped) {
-                foreach (['az', 'en', 'ru', 'tr'] as $locale) {
+                foreach ($this->locales() as $locale) {
                     $inner->orWhere("name->{$locale}", 'like', "%{$escaped}%");
                 }
             })->orderBy('id');

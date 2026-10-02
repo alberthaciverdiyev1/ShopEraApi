@@ -23,18 +23,6 @@ class ProductController extends AdminController
 {
     protected string $title = 'Məhsullar';
 
-    private array $locales = [];
-
-    function __construct()
-    {
-        foreach (['az', 'en', 'ru', 'tr'] as $locale) {
-            $key = "lang_{$locale}";
-
-            if (feature($key)) {
-                $this->locales[] = $locale;
-            }
-        }
-    }
 
     public function index(Request $request)
     {
@@ -101,7 +89,7 @@ class ProductController extends AdminController
             'colors' => Color::query()->orderByDesc('sort_order')->get(),
             'sizes' => Size::query()->orderByDesc('sort_order')->get(),
             'genders' => Gender::cases(),
-            'locales' => $this->locales,
+            'locales' => $this->enabledLocales(),
         ]);
     }
 
@@ -130,7 +118,7 @@ class ProductController extends AdminController
             'colors' => Color::query()->orderByDesc('sort_order')->get(),
             'sizes' => Size::query()->orderByDesc('sort_order')->get(),
             'genders' => Gender::cases(),
-            'locales' => $this->locales,
+            'locales' => $this->enabledLocales(),
         ]);
     }
 
