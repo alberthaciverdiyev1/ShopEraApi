@@ -261,7 +261,7 @@
 		display: block;
 		height: 100%;
 		min-height: 0;
-		padding: 10px;
+		padding: 0;
 		border-radius: 14px;
 		background: #ffffff;
 		border: 1px solid rgba(15, 23, 42, 0.08);
@@ -276,8 +276,9 @@
 
 	.best-seller-tab-content-wrapper :global(.best-seller-one__thumb a) {
 		display: block;
-		aspect-ratio: 1 / 1;
-		border-radius: 12px;
+		width: 100%;
+		height: 260px;
+		border-radius: 0;
 		overflow: hidden;
 	}
 
@@ -288,7 +289,7 @@
 	}
 
 	.best-seller-tab-content-wrapper :global(.best-seller-one__content) {
-		padding: 0;
+		padding: 0 12px 12px;
 	}
 
 	.best-seller-tab-content-wrapper :global(.best-seller-one__content-title) {
