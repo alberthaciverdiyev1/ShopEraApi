@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="refresh" content="5">
+    <title>Sayt yenilənir — Snaker</title>
+    <style>
+        *{box-sizing:border-box}
+        body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;
+             font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+             background:#0f172a;color:#e2e8f0;text-align:center;padding:24px}
+        .box{max-width:420px}
+        .spinner{width:44px;height:44px;margin:0 auto 20px;border-radius:50%;
+                 border:3px solid #334155;border-top-color:#06b6d4;animation:spin .8s linear infinite}
+        h1{font-size:20px;margin:0 0 8px}
+        p{color:#94a3b8;font-size:14px;line-height:1.5;margin:0 0 18px}
+        a{color:#06b6d4;text-decoration:none;font-weight:600}
+        @keyframes spin{to{transform:rotate(360deg)}}
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div class="spinner" aria-hidden="true"></div>
+        <h1>Sayt yenilənir…</h1>
+        <p>Qısa texniki yeniləmə aparılır. Səhifə avtomatik yenilənəcək — bir neçə saniyə sonra yenidən cəhd edin.</p>
+        <p><a href="/">İndi yenilə</a></p>
+    </div>
+</body>
+</html>
