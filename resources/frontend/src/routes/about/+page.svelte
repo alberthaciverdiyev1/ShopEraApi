@@ -21,7 +21,7 @@
 </section>
 
 <!-- The same admin-selected reviews as the home page (same gating) -->
-{#if data.features?.reviews !== false}
+{#if data.true}
 	<TestimonialSection featured={data.featuredReviews} />
 {/if}
 

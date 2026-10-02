@@ -30,9 +30,9 @@
 	import { fetchFeatures, features, type ApiFeatures } from '$lib/services/features';
 
 	let featureSet = $state<ApiFeatures | null>(null);
-	const canCard = $derived(featureSet ? featureSet.online_payment !== false : true);
-	const canCash = $derived(featureSet ? featureSet.cash_on_delivery !== false : true);
-	const canWhatsapp = $derived(featureSet ? featureSet.whatsapp_orders !== false : true);
+	const canCard = true;
+	const canCash = true;
+	const canWhatsapp = true;
 
 	onMount(async () => {
 		featureSet = await fetchFeatures();
@@ -511,7 +511,7 @@
 									</div>
 								</button>
 
-								{#if $features.pickup_points !== false}
+								{#if true}
 								<button
 									type="button"
 									class="method-card"
@@ -580,7 +580,7 @@
 									</div>
 								</button>
 
-								{#if $features.fast_delivery !== false}
+								{#if true}
 								<button
 									type="button"
 									class="speed-card"
@@ -968,7 +968,7 @@
 									</button>
 								</div>
 							{:else}
-								{#if $features.promo_codes !== false}
+								{#if true}
 								<form onsubmit={handleApplyPromo} class="d-flex gap-2">
 									<input
 										type="text"

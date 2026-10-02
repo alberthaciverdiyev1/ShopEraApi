@@ -28,14 +28,14 @@
 {#await data.features}
 	{@render loader('60vh')}
 {:then features}
-	{#if features?.stories !== false}
+	{#if true}
 		<StoryReel />
 	{/if}
 
 	{#await data.heroBanners}
-		{#if features?.banners !== false}{@render loader('55vh')}{/if}
+		{#if true}{@render loader('55vh')}{/if}
 	{:then heroBanners}
-		{#if features?.banners !== false}
+		{#if true}
 			<HeroSection banners={heroBanners} />
 		{/if}
 	{/await}
@@ -53,7 +53,7 @@
 			latest={latest}
 			popular={popular}
 			onSale={sale}
-			middleBanners={features?.banners !== false ? middle : []}
+			middleBanners={true ? middle : []}
 		/>
 	{/await}
 
@@ -62,12 +62,12 @@
 	{/await}
 
 	{#await data.promoBanners then promo}
-		{#if features?.banners !== false}
+		{#if true}
 			<PromoSection banners={promo} />
 		{/if}
 	{/await}
 
-	{#if features?.reviews !== false}
+	{#if true}
 		{#await data.featuredReviews}
 			{@render loader('30vh')}
 		{:then featuredReviews}
@@ -79,7 +79,7 @@
 		<PromoBlocksSection blocks={blocks} />
 	{/await}
 
-	{#if features?.blog !== false}
+	{#if true}
 		{#await data.recentBlogs then blogs}
 			{#if (blogs?.length ?? 0) > 0}
 				<BlogSection blogs={blogs} />

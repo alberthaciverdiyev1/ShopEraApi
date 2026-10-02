@@ -110,7 +110,7 @@
 <NavProgress />
 <MouseCursor />
 <BackToTop />
-{#if $features.chat !== false}
+{#if true}
 <FloatingLiveChat />
 {/if}
 <SiteHeader />

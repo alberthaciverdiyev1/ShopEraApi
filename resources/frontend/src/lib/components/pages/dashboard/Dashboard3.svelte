@@ -99,7 +99,7 @@
                     aria-selected={tab === 'order-details'} onclick={() => (tab = 'order-details')}><i
                         class="fa-solid fa-list"></i>{$translate('Order Details')}</button>
 
-                {#if features?.chat !== false}
+                {#if true}
                     <button class="nav-link" class:active={tab === 'messages'}
                         id="v-pills-messages-tab" type="button" role="tab" aria-controls="v-pills-messages"
                         aria-selected={tab === 'messages'} onclick={() => (tab = 'messages')}><i

@@ -175,7 +175,7 @@
                         </div>
 
                         <!-- Wishlist (Sevimlilər) Dropdown -->
-                        {#if $features.favorites !== false}
+                        {#if true}
                             <div class="menu-wishlist menu-cart">
                                 <div class="cart-box wishlist-box">
                                     {#if $favoriteProducts.length}

@@ -99,8 +99,8 @@
 							<li><a href="/about"><i class="fa-solid fa-chevron-right link-arrow"></i> {$translate('About')}</a></li>
 							<li><a href="/order/tracking"><i class="fa-solid fa-chevron-right link-arrow"></i> {$translate('Track Order')}</a></li>
 							<li><a href="/order/history"><i class="fa-solid fa-chevron-right link-arrow"></i> {$translate('Order History')}</a></li>
-							{#if $features.favorites !== false}<li><a href="/wishlist"><i class="fa-solid fa-chevron-right link-arrow"></i> {$translate('Wishlist')}</a></li>{/if}
-							{#if $features.faq !== false}<li><a href="/faq"><i class="fa-solid fa-chevron-right link-arrow"></i> {$translate('FAQ')}</a></li>{/if}
+							{#if true}<li><a href="/wishlist"><i class="fa-solid fa-chevron-right link-arrow"></i> {$translate('Wishlist')}</a></li>{/if}
+							{#if true}<li><a href="/faq"><i class="fa-solid fa-chevron-right link-arrow"></i> {$translate('FAQ')}</a></li>{/if}
 							<li><a href="/contact"><i class="fa-solid fa-chevron-right link-arrow"></i> {$translate('Contact')}</a></li>
 						</ul>
 					</div>
@@ -159,11 +159,11 @@
 				</div>
 				<div class="col-md-3 text-center">
 					<div class="legal-links d-inline-flex gap-3">
-						{#if $features.legal_terms !== false}<a href="/terms">{$translate('Terms')}</a>{/if}
+						{#if true}<a href="/terms">{$translate('Terms')}</a>{/if}
 						<span class="text-secondary opacity-50">•</span>
-						{#if $features.legal_terms !== false}<a href="/privacy">{$translate('Privacy')}</a>{/if}
+						{#if true}<a href="/privacy">{$translate('Privacy')}</a>{/if}
 						<span class="text-secondary opacity-50">•</span>
-						{#if $features.faq !== false}<a href="/faq">FAQ</a>{/if}
+						{#if true}<a href="/faq">FAQ</a>{/if}
 					</div>
 				</div>
 			</div>
