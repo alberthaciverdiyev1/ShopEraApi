@@ -1,11 +1,9 @@
 <?php
 
-use Illuminate\Http\Request;
 use Modules\Delivery\Http\Controllers\CityController;
 use Modules\Delivery\Http\Controllers\DeliveryController;
 use Modules\Delivery\Http\Controllers\DeliveryInfoController;
 use Modules\Delivery\Http\Controllers\PickupPointController;
-use Modules\Delivery\Http\Entities\DeliveryInfo;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,7 +15,6 @@ use Modules\Delivery\Http\Entities\DeliveryInfo;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
 
 Route::prefix('delivery')->controller(DeliveryController::class)->middleware('auth:sanctum')->group(function () {
     Route::get('/', 'list')->name('delivery.list');
@@ -55,5 +52,3 @@ Route::prefix('delivery-info')
         Route::put('/{id}', 'update')->name('delivery-info.update');
         Route::get('/{id}', 'getByType')->name('delivery-info.getById');
     });
-
-

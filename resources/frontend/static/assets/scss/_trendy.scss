@@ -1,0 +1,132 @@
+.trendy-product-items-three {
+    margin-top: 40px;
+
+    &__thumb {
+        position: relative;
+        padding: 75px 40px 90px;
+        background-color: $bg-color-2;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border-radius: 20px;
+
+        img {
+            width: 224px;
+            height: 168px;
+            object-fit: contain;
+        }
+
+        .icon {
+            opacity: 0;
+            visibility: hidden;
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            transform: translateX(-50%);
+            transition: all 0.3s linear;
+            -webkit-transform: translateX(-50%);
+            -moz-transform: translateX(-50%);
+            -ms-transform: translateX(-50%);
+            -o-transform: translateX(-50%);
+            -webkit-transition: all 0.3s linear;
+            -moz-transition: all 0.3s linear;
+            -ms-transition: all 0.3s linear;
+            -o-transition: all 0.3s linear;
+
+
+           a, button {
+                width: 43px;
+                height: 43px;
+                background-color: $white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                transition: all 0.3s linear;
+                -webkit-border-radius: 50%;
+                -moz-border-radius: 50%;
+                -ms-border-radius: 50%;
+                -o-border-radius: 50%; 
+
+                i {
+                    color: $title-color;
+                }
+
+                svg {
+                    width: 18px;
+                    height: 18px;
+                    path { 
+                        stroke: $title-color;
+                        transition: all 0.3s linear;
+                    }
+                }
+
+                &:hover {
+                    background-color: $theme-color;
+                    color: $white;
+
+                    i {
+                        color: $white;
+                    }
+
+                    svg {
+                        path {
+                            stroke: $white; 
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    &__content {
+        margin-top: 30px;
+
+        h6 {
+            margin-bottom: 10px;
+
+            a {
+                &:hover {
+                    color: #80B501;
+                }
+            }
+        }
+
+        &--star-wrap {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-bottom: 20px;
+
+            i {
+                font-size: 16px;
+                color: #E8C54A;
+            }
+        }
+
+        p {
+            color: $theme-color;
+            font-family: $body-font;
+            font-size: 18px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 20px;
+            text-transform: uppercase;
+        }
+    }
+
+    &:hover {
+
+        .trendy-product-items-three__thumb {
+            .icon {
+                opacity: 1;
+                visibility: visible;
+                bottom: 30px;
+            }
+        }
+    }
+}

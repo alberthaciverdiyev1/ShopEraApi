@@ -2,32 +2,28 @@
 
 namespace Modules\PromoCode\Http\Controllers;
 
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\PromoCode\Http\Requests\PromoCodeAddRequest;
 use Modules\PromoCode\Http\Requests\PromoCodeUpdateRequest;
 use Modules\PromoCode\Services\PromoCodeService;
-use Nwidart\Modules\Facades\Module;
 
 class PromoCodeController extends Controller
 {
-
     private PromoCodeService $service;
 
     public function __construct(PromoCodeService $service)
     {
         $this->middleware('permission:view promo-codes')->only('getAll');
-        $this->middleware('permission:check promo-code')->only('check');
+        // Shoppers validate their own code at checkout, so these two are open
+        // to any signed-in user; managing codes still needs the permissions.
         $this->middleware('permission:add promo-code')->only('add');
         $this->middleware('permission:details promo-code')->only('details');
         $this->middleware('permission:update promo-code')->only('update');
         $this->middleware('permission:delete promo-code')->only('delete');
-        $this->middleware('permission:check-promo-code-with-price')->only('checkPromoCodeWithPrice');
 
         $this->service = $service;
     }
-
 
     /**
      * Display a listing of the resource.
@@ -66,7 +62,6 @@ class PromoCodeController extends Controller
         return $this->service->update($request, $id);
     }
 
-
     /**
      * Remove the specified resource from storage.
      */
@@ -79,8 +74,8 @@ class PromoCodeController extends Controller
     {
         return $this->service->checkPromoCodeWithPrice($code, $request);
     }
-//    public function checkPromoCodeWithPrice(string $code, Request $request)
-//    {
-//        return $this->service->checkPromoCodeWithPrice($code, $request, true,);
-//    }
+    //    public function checkPromoCodeWithPrice(string $code, Request $request)
+    //    {
+    //        return $this->service->checkPromoCodeWithPrice($code, $request, true,);
+    //    }
 }

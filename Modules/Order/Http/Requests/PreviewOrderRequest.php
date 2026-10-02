@@ -3,8 +3,6 @@
 namespace Modules\Order\Http\Requests;
 
 use App\Enums\AddressType;
-use App\Enums\OrderStatus;
-use App\Enums\ReviewStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -28,6 +26,13 @@ class PreviewOrderRequest extends FormRequest
             'note' => ['nullable', 'string'],
             'pay_with_balance' => ['nullable', 'boolean'],
             'promo_code' => ['nullable', 'string'],
+            'address_id' => ['nullable', 'integer'],
+            'address_type' => [
+                'nullable',
+                'string',
+                Rule::in(array_column(AddressType::cases(), 'name')),
+            ],
+            'address_type_id' => ['nullable', 'integer'],
         ];
     }
 

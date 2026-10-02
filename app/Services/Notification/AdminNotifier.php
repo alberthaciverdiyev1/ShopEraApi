@@ -5,7 +5,7 @@ namespace App\Services\Notification;
 use App\Jobs\SendUserPushJob;
 use Illuminate\Support\Facades\Log;
 use Modules\Notification\Services\NotificationService;
-use Modules\User\Http\Entities\User;
+use Modules\User\Entities\User;
 
 /**
  * Notifies the staff who work the marketplace approval queues.
@@ -17,9 +17,7 @@ class AdminNotifier
 {
     private const ROLES = ['admin', 'manager', 'developer'];
 
-    public function __construct(private NotificationService $notifications)
-    {
-    }
+    public function __construct(private NotificationService $notifications) {}
 
     public function notify(string $title, string $body, array $data = []): void
     {

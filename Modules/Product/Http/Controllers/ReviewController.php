@@ -10,18 +10,16 @@ use Modules\Product\Services\ReviewService;
 
 class ReviewController extends Controller
 {
-
     private ReviewService $service;
 
     public function __construct(ReviewService $service)
     {
-       // $this->middleware('permission:view reviews')->only('list');
+        // $this->middleware('permission:view reviews')->only('list');
         $this->middleware('permission:add review')->only('add');
         $this->middleware('permission:delete review')->only('deleteByAdmin');
 
         $this->service = $service;
     }
-
 
     /**
      * Display a listing of the resource.
@@ -29,6 +27,11 @@ class ReviewController extends Controller
     public function list(int $product_id)
     {
         return $this->service->list($product_id);
+    }
+
+    public function featured()
+    {
+        return $this->service->featured();
     }
 
     public function listAdmin(Request $request)
@@ -51,6 +54,7 @@ class ReviewController extends Controller
     {
         return $this->service->delete($id);
     }
+
     public function deleteByAdmin(int $id)
     {
         return $this->service->deleteByAdmin($id);

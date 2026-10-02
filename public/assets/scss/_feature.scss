@@ -1,0 +1,64 @@
+ 
+
+.feature-box-item-two {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+    @include breakpoint (max-xl) {
+        justify-content: center;
+    }
+ 
+    &__content {
+        h6 {
+            color: #161616; 
+            font-family: $title-font;
+            font-size: 16px;
+            font-style: normal;
+            font-weight: 600;
+            line-height: 26px;  
+        }
+
+        &--text {
+            color: #555; 
+            font-family: $title-font;
+            font-size: 14px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 26px; 
+        }
+    }
+}
+
+.feature-box-item-three {
+    @include flex;
+    gap: 16px;
+}
+
+.feature-shop-wrapper {
+    background-color: #0A111E;
+
+    @include breakpoint (max-xl4){
+       padding: 40px;
+    }
+    
+    .feature-shop-thumb {
+        img {
+            @include imgw;
+        }
+    }
+
+    .feature-shop-wrapper {
+        margin-right: -15%;
+        margin-left: 20px;
+
+        @include breakpoint (max-xl4){
+            margin-left: 0;
+        }
+
+        @include breakpoint (max-xl){
+            margin-left: 0;
+            margin-right: 0;
+        }
+    }
+}

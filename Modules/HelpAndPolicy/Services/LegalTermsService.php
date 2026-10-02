@@ -2,18 +2,17 @@
 
 namespace Modules\HelpAndPolicy\Services;
 
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Response;
-use Modules\HelpAndPolicy\Http\Entities\LegalTerm;
-use Modules\HelpAndPolicy\Http\Resources\LegalTermResource;
 use App\Helpers\TranslateHelper as Translate;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Response;
+use Modules\HelpAndPolicy\Entities\LegalTerm;
+use Modules\HelpAndPolicy\Http\Resources\LegalTermResource;
 
 class LegalTermsService
 {
     private LegalTerm $model;
 
-    function __construct(LegalTerm $model)
+    public function __construct(LegalTerm $model)
     {
         $this->model = $model;
     }
@@ -29,6 +28,7 @@ class LegalTermsService
 
         return responseHelper(__('Legal Terms retrieved successfully.'), 200, LegalTermResource::collection($data));
     }
+
     public function getAllAdmin($request): JsonResponse
     {
         $params = $request->all();
@@ -70,7 +70,7 @@ class LegalTermsService
             ->where('type', 'main_page')
             ->first();
 
-        if (!$data) {
+        if (! $data) {
             return responseHelper(__('Not found.'), 404);
         }
 
@@ -80,14 +80,13 @@ class LegalTermsService
 
         $lang = app()->getLocale();
 
-        //$html = $translations[$lang] ?? $translations['en'];
+        // $html = $translations[$lang] ?? $translations['en'];
         $html = $translations['en'];
 
         return Response::make($html, 200, [
-            'Content-Type' => 'text/html; charset=UTF-8'
+            'Content-Type' => 'text/html; charset=UTF-8',
         ]);
     }
-
 
     public function update($request, $type): JsonResponse
     {
@@ -108,18 +107,18 @@ class LegalTermsService
         $legalTerm = handleTransaction(function () use ($validated, $html) {
             $record = $this->model->where('type', $validated['type'])->firstOrFail();
             $record->update(array_merge($validated, ['html' => $html]));
+
             return $record->refresh();
         }, 'Legal Terms updated successfully.', LegalTermResource::class);
 
         return $legalTerm;
     }
 
-
     private function translateHtmlPreserveTags(string $html, string $lang): string
     {
         $dom = new \DOMDocument('1.0', 'UTF-8');
         libxml_use_internal_errors(true);
-        $dom->loadHTML('<?xml encoding="UTF-8">' . $html);
+        $dom->loadHTML('<?xml encoding="UTF-8">'.$html);
         libxml_clear_errors();
 
         $xpath = new \DOMXPath($dom);
@@ -139,6 +138,4 @@ class LegalTermsService
 
         return $innerHTML;
     }
-
-
 }

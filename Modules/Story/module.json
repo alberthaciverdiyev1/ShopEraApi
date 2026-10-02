@@ -1,0 +1,11 @@
+{
+    "name": "Story",
+    "alias": "story",
+    "description": "Admin-curated image stories, optionally linked to a product.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Story\\Providers\\StoryServiceProvider"
+    ],
+    "files": []
+}

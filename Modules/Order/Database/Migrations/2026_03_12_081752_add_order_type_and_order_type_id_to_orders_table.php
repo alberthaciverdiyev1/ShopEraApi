@@ -18,11 +18,11 @@ return new class extends Migration
                 $table->unsignedBigInteger('address_id')->nullable()->after('id');
             }
 
-            if (!Schema::hasColumn('orders', 'order_type')) {
+            if (! Schema::hasColumn('orders', 'order_type')) {
                 $table->string('order_type')->nullable()->after('address_id');
             }
 
-            if (!Schema::hasColumn('orders', 'order_type_id')) {
+            if (! Schema::hasColumn('orders', 'order_type_id')) {
                 $table->string('order_type_id')->nullable()->after('order_type');
             }
         });

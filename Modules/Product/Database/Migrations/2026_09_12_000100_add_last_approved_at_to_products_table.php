@@ -36,7 +36,9 @@ return new class extends Migration
         // that queued it nulled the timestamp. The audit log is the only place
         // the history survives, so recover what it holds.
         if (Schema::hasTable('marketplace_audit_logs')) {
-            DB::statement(<<<'SQL'
+            $changes = DB::connection()->getDriverName() === 'pgsql' ? 'changes::text' : 'changes';
+
+            DB::statement(<<<SQL
                 UPDATE products p
                 SET last_approved_at = a.approved_at
                 FROM (
@@ -44,7 +46,7 @@ return new class extends Migration
                     FROM marketplace_audit_logs
                     WHERE action = 'product.approval_changed'
                       AND subject_type LIKE '%Product'
-                      AND changes::text LIKE '%"approved"%'
+                      AND {$changes} LIKE '%"approved"%'
                     GROUP BY subject_id
                 ) a
                 WHERE p.id = a.subject_id

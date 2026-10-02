@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        if (!Schema::hasColumn('products', 'purchase_limit')) {
+        if (! Schema::hasColumn('products', 'purchase_limit')) {
             return;
         }
 
@@ -16,15 +16,20 @@ return new class extends Migration
             ->where('purchase_limit', 100)
             ->update(['purchase_limit' => null]);
 
-        DB::statement('ALTER TABLE products ALTER COLUMN purchase_limit DROP DEFAULT');
+        // ALTER COLUMN ... DROP DEFAULT is PostgreSQL syntax only.
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE products ALTER COLUMN purchase_limit DROP DEFAULT');
+        }
     }
 
     public function down(): void
     {
-        if (!Schema::hasColumn('products', 'purchase_limit')) {
+        if (! Schema::hasColumn('products', 'purchase_limit')) {
             return;
         }
 
-        DB::statement('ALTER TABLE products ALTER COLUMN purchase_limit SET DEFAULT 100');
+        if (DB::connection()->getDriverName() === 'pgsql') {
+            DB::statement('ALTER TABLE products ALTER COLUMN purchase_limit SET DEFAULT 100');
+        }
     }
 };

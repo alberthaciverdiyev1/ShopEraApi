@@ -26,7 +26,6 @@ return new class extends Migration
             $table->index(['sender_type', 'sender_id']);
         });
 
-
     }
 
     /**

@@ -1,0 +1,128 @@
+
+
+.beauty-care-product-items-four {
+    padding: 30px;
+    border-radius: 20px;
+    background-color: $white;
+
+    @include breakpoint (max-xl4) {
+        padding: 20px;
+    }
+
+    &__badge {
+        display: inline-block;
+        margin-bottom: 5px;
+        padding: 5px 10px;
+        border-radius: 100px;
+        background: $theme-color;
+        color: $white;
+        font-family: $body-font;
+        font-size: 12px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: normal;
+        text-transform: capitalize;
+        -webkit-border-radius: 100px;
+        -moz-border-radius: 100px;
+        -ms-border-radius: 100px;
+        -o-border-radius: 100px;
+}
+
+    &__thumb { 
+        text-align: center;
+        img {
+            max-width: 100%;
+        }
+    }
+
+    &__content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 20px;
+    }
+
+    &__details {
+        p {
+            color: #A1A1A1; 
+            font-family: $body-font;
+            font-size: 14px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 26px; 
+
+            @include breakpoint (max-xl4) {
+                font-size: 16px;
+                line-height: 1.2;
+            }
+        }
+
+        &--title {
+            color: #0A111E; 
+            font-family: $title-font;
+            font-size: 20px;
+            font-style: normal;
+            font-weight: 500;
+            line-height: 26px;  
+
+            @include breakpoint (max-xl4) {
+                font-size: 16px;
+                line-height: 1.2;
+            }
+        }
+
+        &--price {
+            .original-price {
+                color: #A1A1A1; 
+                font-family: $title-font;
+                font-size: 20px;
+                font-style: normal;
+                font-weight: 600;
+                line-height: 26px;  
+                text-decoration-line: strikethrough;
+                
+                @include breakpoint (max-xl4) {
+                    font-size: 16px;
+                    line-height: 1.2;
+                }
+            }
+
+            .offer-price {
+                color:  #2B6377; 
+                font-family: $title-font;
+                font-size: 20px;
+                font-style: normal;
+                font-weight: 600;
+                line-height: 26px; 
+
+                @include breakpoint (max-xl4) {
+                    font-size: 16px;
+                    line-height: 1.2;
+                }
+            }
+        }
+    }
+
+    &__icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #D5E0E4;
+        border-radius: 50%;
+        transition: all 0.3s; 
+
+        i {
+            color: $theme-color;
+            transition: all 0.3s;
+        }
+
+        &:hover {
+            background-color: $theme-color;
+            i {
+                color: $white;
+            }
+        }
+}
+}

@@ -13,14 +13,32 @@
 storage/*.key
 storage/firebase/
 storage/app/firebase/
+*.p8
 
 # --- Bağımlılıklar ve derlenmiş çıktılar ---
 /vendor/
-/node_modules/
+node_modules/
 /public/build/
 /public/hot
 /public/storage
+/public/dist/
 /bootstrap/cache/*.php
+dist/
+build/
+
+# --- Frontend (resources/frontend — SvelteKit) ---
+resources/frontend/.svelte-kit/
+resources/frontend/.vite/
+resources/frontend/build/
+resources/frontend/package-lock.json
+# Tema varlıkları: kod bunları yalnızca yolla referans veriyor.
+resources/frontend/static/assets/images/
+resources/frontend/static/assets/webfonts/
+resources/frontend/static/assets/scss/
+
+# --- Şablon kaynakları (resources/html) ---
+# .html dosyaları okunabilir kalır; yalnızca büyük asset'ler hariç tutulur.
+resources/html/assets/
 
 # --- Medya / yüklenen dosyalar ---
 /public/uploads/
@@ -33,24 +51,41 @@ storage/app/firebase/
 *.gif
 *.webp
 *.svg
+*.ico
+*.bmp
 *.mp4
 *.mov
+*.avi
+*.webm
+*.mp3
 *.pdf
 *.zip
+*.rar
+*.7z
+*.tar
+*.gz
 *.sql
 *.sqlite
 *.dump
 
+# --- Web fontları ---
+*.woff
+*.woff2
+*.ttf
+*.eot
+*.otf
+
 # --- Log ve cache ---
 *.log
-/storage/logs/
+storage/logs/
 /storage/framework/cache/
 /storage/framework/sessions/
 /storage/framework/views/
 /storage/pail/
-.phpunit.result.cache
 /.phpunit.cache/
+.phpunit.result.cache
 bootstrap/cache/
+.cache/
 
 # --- Kilit dosyaları (çok büyük, elle düzenlenmez) ---
 composer.lock
@@ -64,17 +99,18 @@ pnpm-lock.yaml
 /.fleet/
 /.nova/
 /.zed/
+/.junie/
 .DS_Store
 Thumbs.db
 
 # --- Üretilmiş / geçici dosyalar ---
 *.pid
 *.seed
-*.cache
 *.tmp
 *.bak
 *.orig
 *.swp
+*.swo
 *~
 
 # --- Git ---

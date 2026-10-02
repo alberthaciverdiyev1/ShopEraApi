@@ -1,0 +1,33 @@
+@import "tailwindcss";
+@plugin "flowbite/plugin";
+
+@source "../views/admin";
+@source "../node_modules/flowbite";
+
+@theme {
+    --color-brand-50: #eef2ff;
+    --color-brand-100: #e0e7ff;
+    --color-brand-500: #6366f1;
+    --color-brand-600: #4f46e5;
+    --color-brand-700: #4338ca;
+}
+
+@layer base {
+    body {
+        @apply bg-slate-100 text-slate-800 antialiased;
+    }
+}
+
+/* htmx request indicator */
+.htmx-indicator { opacity: 0; transition: opacity .2s ease; }
+.htmx-request .htmx-indicator,
+.htmx-request.htmx-indicator { opacity: 1; }
+
+[x-cloak] { display: none !important; }
+
+/* Collapsible sidebar */
+#admin-shell.sidebar-collapsed .sidebar { width: 4.5rem; }
+#admin-shell.sidebar-collapsed .sidebar .nav-label,
+#admin-shell.sidebar-collapsed .sidebar .nav-group-title,
+#admin-shell.sidebar-collapsed .sidebar .brand-text { display: none; }
+#admin-shell.sidebar-collapsed .sidebar .nav-link { justify-content: center; }

@@ -1,0 +1,92 @@
+.common-newsletter-modal{
+    border-radius: 0;
+    .close{
+        position: absolute;
+        right: 20px;
+        top: 10px;
+        font-size: 24px;
+    }
+
+    .modal-content {
+        border-radius: 10px;
+    }
+    .offer-modal-right {
+        text-align: center;
+        padding: 30px 30px 20px 0;
+        @include breakpoint (max-xs) {
+            padding-right: 0;
+        }
+    
+        h3 {
+            color: $black;
+            text-align: center;
+            font-family: $title-font;
+            font-size: 40px;
+            font-style: normal;
+            font-weight: 600;
+            line-height: 120%;
+
+            @include breakpoint (max-xs) {
+                font-size: 30px;
+    
+            }
+        }
+    
+        p {
+            color: $title-color;
+            font-family: $title-font;
+            font-size: 16px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 150%;
+            padding: 14px 8px 30px 0;
+            @include breakpoint (max-xs) {
+                padding: 8px 0px 20px 0;
+    
+            }
+            span {
+                color: $theme-color;
+            }
+        }
+    
+        .input-group {
+            position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: stretch;
+            width: 100%;
+            .form-control {
+                height: 47px;
+                border-radius: 100px !important;
+                padding-left: 20px;
+            }
+    
+            .input-group-append{
+               position: absolute;
+               right: 0;
+               @include breakpoint (max-xxl) {
+                top: 4px;
+                right: 5px;
+            }
+               .theme-btn{
+                border: 1px solid transparent;
+                z-index: 9;
+                &:hover{
+                    border: 1px solid $black;
+                }
+               }
+            }
+        }
+    
+        .check_boxed_modal {
+            margin-top: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            @include breakpoint (max-xs) {
+                margin-top: 30px;
+            }
+        }
+    }
+}
+

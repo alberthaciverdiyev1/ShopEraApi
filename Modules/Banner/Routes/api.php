@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 
-Route::prefix('banner')->controller(\Modules\Banner\Http\Controllers\BannerController::class)->group(function () {
+Route::prefix('banner')->middleware('feature:banners')->controller(\Modules\Banner\Http\Controllers\BannerController::class)->group(function () {
 
     Route::get('/', 'getAll')->name('banner.list');
     Route::middleware('auth:sanctum')->group(function () {

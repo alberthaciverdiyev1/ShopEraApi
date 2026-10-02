@@ -2,12 +2,13 @@
 
 namespace App\Jobs;
 
+use App\Jobs\Concerns\TenantAware;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Modules\Notification\Http\Entities\NotificationToken;
+use Modules\Notification\Entities\NotificationToken;
 use Modules\Notification\Services\SendNotificationService;
 
 /**
@@ -18,7 +19,7 @@ use Modules\Notification\Services\SendNotificationService;
  */
 class SendUserPushJob implements ShouldQueue
 {
-    use Dispatchable, Queueable, SerializesModels;
+    use Dispatchable, Queueable, SerializesModels, TenantAware;
 
     public int $tries = 1;
 
@@ -32,6 +33,7 @@ class SendUserPushJob implements ShouldQueue
         public ?string $icon = null,
         public ?string $image = null,
     ) {
+        $this->captureTenant();
     }
 
     public function handle(SendNotificationService $service, NotificationToken $tokens): void

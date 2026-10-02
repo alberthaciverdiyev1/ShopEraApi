@@ -15,7 +15,6 @@ class PickupPointAddRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255', 'unique:pickup_points,name'],
-            'starex_delivery_point_id' => ['nullable', 'integer', 'min:1', 'unique:pickup_points,starex_delivery_point_id'],
             'address' => ['required', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
             'delivery_time.az' => ['required', 'string', 'max:255'],
@@ -40,7 +39,7 @@ class PickupPointAddRequest extends FormRequest
             'price.numeric' => 'Qiymət yalnız rəqəmlərdən ibarət olmalıdır.',
             'price.min' => 'Qiymət mənfi ola bilməz.',
 
-            'delivery_time.az.required' => 'Çatdırılma müddəti adı mütləq qeyd olunmalıdır.'
+            'delivery_time.az.required' => 'Çatdırılma müddəti adı mütləq qeyd olunmalıdır.',
         ];
     }
 }

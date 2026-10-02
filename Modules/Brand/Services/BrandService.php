@@ -2,50 +2,44 @@
 
 namespace Modules\Brand\Services;
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
-use Modules\Brand\Http\Entities\Brand;
+use App\Support\TenantContext;
+use Modules\Brand\Entities\Brand;
 use Modules\Brand\Http\Transformers\BrandDetailsResource;
 use Modules\Brand\Http\Transformers\BrandResource;
-use Modules\Product\Http\Entities\Product;
+use Modules\Product\Entities\Product;
 
 class BrandService
 {
     private Brand $model;
 
-    /**
-     * @param Brand $model
-     */
-    function __construct(Brand $model)
+    public function __construct(Brand $model)
     {
         $this->model = $model;
     }
 
-    /**
-     * @param $request
-     * @return JsonResponse
-     */
     public function list($request): JsonResponse
     {
         $params = $request->all();
-        $cacheKey = 'brands_list_' . md5(serialize($params));
+        $cacheKey = 'brands_list_'.md5(serialize($params));
 
-            $query = $this->model->query()->select(['id', 'name', 'image', 'is_active', 'sort_order']);
-            $query = filterLike($query, ['name'], $params);
+        $query = $this->model->query()->select(['id', 'name', 'image', 'is_active', 'sort_order']);
+        $query = filterLike($query, ['name'], $params);
 
-            if (isset($params['is_active'])) {
-                $query->where('is_active', $params['is_active']);
-            } else {
-                $query->where('is_active', 1);
-            }
+        if (isset($params['is_active'])) {
+            $query->where('is_active', $params['is_active']);
+        } else {
+            $query->where('is_active', 1);
+        }
 
-         $data = $query->orderBy('id', 'desc')->paginate(20);
+        $data = $query->orderBy('id', 'desc')->paginate(20);
 
-        return responseHelper(__('Brands retrieved successfully.'),200, BrandResource::collection($data));
+        return responseHelper(__('Brands retrieved successfully.'), 200, BrandResource::collection($data));
 
     }
-
 
     /**
      * Brand details
@@ -53,11 +47,12 @@ class BrandService
     public function details(int $id): JsonResponse
     {
         try {
-            $brand = $this->model->with('products','products.images','products.colors', 'products.sizes', 'products.category',)->findOrFail($id);
-            return responseHelper(__('Brand details retrieved successfully.'),200, BrandDetailsResource::make($brand));
+            $brand = $this->model->with('products', 'products.images', 'products.colors', 'products.sizes', 'products.category')->findOrFail($id);
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return responseHelper(__('Brand not found.'),403, []);
+            return responseHelper(__('Brand details retrieved successfully.'), 200, BrandDetailsResource::make($brand));
+
+        } catch (ModelNotFoundException $e) {
+            return responseHelper(__('Brand not found.'), 403, []);
         }
     }
 
@@ -76,18 +71,20 @@ class BrandService
 
             $cleanName = preg_replace('/\s+/', '', $originalName);
 
-            $imageName = time() . '_' . $cleanName . '.' . $extension;
+            $imageName = time().'_'.$cleanName.'.'.$extension;
 
-            if (!Storage::disk('public')->exists('brands')) {
-                Storage::disk('public')->makeDirectory('brands', 0755, true);
+            $directory = TenantContext::storagePath('brands');
+
+            if (! Storage::disk('public')->exists($directory)) {
+                Storage::disk('public')->makeDirectory($directory, 0755, true);
             }
 
-            $image->storeAs('brands', $imageName, 'public');
-            $validated['image'] = 'brands/' . $imageName;
+            $image->storeAs($directory, $imageName, 'public');
+            $validated['image'] = "{$directory}/{$imageName}";
         }
 
         $brand = handleTransaction(
-            fn() => $this->model->create($validated)->refresh(),
+            fn () => $this->model->create($validated)->refresh(),
             'Brand added successfully.',
             BrandResource::class
         );
@@ -96,7 +93,6 @@ class BrandService
 
         return $brand;
     }
-
 
     /**
      * Update brand
@@ -107,20 +103,23 @@ class BrandService
 
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $imageName = time() . '_' . $image->getClientOriginalName();
+            $imageName = time().'_'.$image->getClientOriginalName();
 
-            if (!Storage::disk('public')->exists('brands')) {
-                Storage::disk('public')->makeDirectory('brands', 0755, true);
+            $directory = TenantContext::storagePath('brands');
+
+            if (! Storage::disk('public')->exists($directory)) {
+                Storage::disk('public')->makeDirectory($directory, 0755, true);
             }
 
-            $image->storeAs('brands', $imageName, 'public');
-            $validated['image'] = 'brands/' . $imageName;
+            $image->storeAs($directory, $imageName, 'public');
+            $validated['image'] = "{$directory}/{$imageName}";
         }
 
         $brand = handleTransaction(
             function () use ($validated, $id) {
                 $brand = $this->model->findOrFail($id);
                 $brand->update($validated);
+
                 return $brand->refresh();
             },
             'Brand updated successfully.',
@@ -142,6 +141,7 @@ class BrandService
                 $brand = $this->model->findOrFail($id);
                 Product::where('brand_id', $brand->id)->update(['brand_id' => null]);
                 $brand->delete();
+
                 return $brand;
             },
             'Brand deleted successfully.'

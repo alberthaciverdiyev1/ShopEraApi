@@ -3,9 +3,9 @@
 namespace Modules\RoleAndPermissions\Services;
 
 use Exception;
-use Modules\User\Http\Entities\User;
-use Spatie\Permission\Models\Role;
+use Modules\User\Entities\User;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RoleService
 {
@@ -26,31 +26,31 @@ class RoleService
         return responseHelper(__('Roles retrieved successfully.'), 200, $roles);
     }
 
-
     public function add(string $name)
     {
         $role = Role::create([
             'name' => $name,
             'guard_name' => $this->guard,
         ]);
+
         return responseHelper(__('Role created successfully.'), 201, $role);
     }
 
     public function details(string|int $roleId)
     {
         $role = Role::with('permissions')->find($roleId);
-        if (!$role) {
+        if (! $role) {
             return responseHelper(__('Role not found.'), 404);
         }
 
         return responseHelper(__('Role details retrieved successfully.'), 200, $role);
     }
 
-
     public function update(Role $role, string $name)
     {
         $role->name = $name;
         $role->save();
+
         return responseHelper(__('Role updated successfully.'), 200, $role);
     }
 
@@ -58,12 +58,12 @@ class RoleService
     {
         $role = Role::find($roleId);
 
-        if (!$role) {
+        if (! $role) {
             return [
                 'success' => false,
                 'status_code' => 404,
                 'message' => 'Role not found.',
-                'data' => null
+                'data' => null,
             ];
         }
 
@@ -76,14 +76,14 @@ class RoleService
                 'success' => true,
                 'status_code' => 200,
                 'message' => 'Role deleted successfully.',
-                'data' => null
+                'data' => null,
             ];
         } catch (Exception $e) {
             return [
                 'success' => false,
                 'status_code' => 500,
-                'message' => 'Failed to delete role: ' . $e->getMessage(),
-                'data' => null
+                'message' => 'Failed to delete role: '.$e->getMessage(),
+                'data' => null,
             ];
         }
     }
@@ -98,6 +98,7 @@ class RoleService
         }
 
         $role->givePermissionTo($permission);
+
         return responseHelper(__('Permission assigned to role successfully.'), 200, $role->permissions);
     }
 
@@ -106,7 +107,7 @@ class RoleService
         if (is_string($permission)) {
             $permission = Permission::where([
                 'name' => $permission,
-                'guard_name' => $this->guard
+                'guard_name' => $this->guard,
             ])->first();
         }
 
@@ -122,7 +123,7 @@ class RoleService
         if (is_string($role)) {
             $role = Role::where([
                 'name' => $role,
-                'guard_name' => $this->guard
+                'guard_name' => $this->guard,
             ])->first();
         }
 
@@ -138,7 +139,7 @@ class RoleService
         if (is_string($role)) {
             $role = Role::where([
                 'name' => $role,
-                'guard_name' => $this->guard
+                'guard_name' => $this->guard,
             ])->first();
         }
 
@@ -153,5 +154,4 @@ class RoleService
     {
         return User::with('roles')->get();
     }
-
 }

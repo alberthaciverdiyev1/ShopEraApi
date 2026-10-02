@@ -1,0 +1,188 @@
+
+
+.package-shop-one {
+    padding: 14px;
+    background-color: $white;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    background:  $white; 
+
+    @include breakpoint (max-xxxl){
+        flex-wrap: wrap;
+        gap: 25px;
+    }
+
+    &__thumb {
+        border-radius: 10px;
+        background-color: #F6F6F6;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 126px;
+        height: 126px;
+    }
+
+
+    &__star-wrap {
+       display: flex;
+       align-items: center;
+       gap: 10px;
+       margin-bottom: 7px;
+       .star {
+           gap: 2px;
+
+           i { 
+               font-size: 13px; 
+               color: $orange-color3;
+           }
+       }
+
+       span {
+           color: #A1A1A1; 
+           font-family: $body-font;
+           font-size: 16px;
+           font-style: normal;
+           font-weight: 400;
+           line-height: normal; 
+           text-transform: capitalize;
+       }
+    }
+
+    &__content {
+       &-price {
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 10px;
+          margin-bottom: 7px;
+
+           .offer-price {
+               color: $title-color; 
+               font-family: $title-font;
+               font-size: 16px;
+               font-style: normal;
+               font-weight: 500;
+               line-height: normal;
+               text-transform: capitalize;
+           }
+
+           .original-price {
+               color: #A1A1A1; 
+               font-family: $body-font;
+               font-size: 16px;
+               font-style: normal;
+               font-weight: 500;
+               line-height: normal;
+               text-decoration: line-through;
+               text-transform: capitalize;
+           }
+       }
+
+       &-title {
+           color: $title-color; 
+           font-family: $title-font;
+           font-size: 16px;
+           font-style: normal;
+           font-weight: 600;
+           line-height: normal; 
+           margin-bottom: 10px;
+       }
+ 
+    }
+
+    &__icons { 
+       display: flex;
+       align-items: center;
+       gap: 10px;
+       margin-top: 10px;
+
+       a {
+           i {
+               width: 36px;
+               height: 36px;
+               display: flex;
+               align-items: center;
+               justify-content: center;
+               background-color: #F2F2F2;
+               font-size: 13px;
+               transition: all 0.3s;
+               border-radius: 50%;
+   
+               &:hover {
+                   background-color: #FFECEB;
+                   color: $theme-color;
+               }
+           }
+       }
+
+    }
+}
+
+
+
+.package-shop-preview {
+    position: relative;
+    padding: 51px 75px;
+    border-radius: 20px;
+    border: 1px solid $theme-color;
+    background-color: $white;
+
+    img {
+        border-radius: 20px;
+    }
+
+    .packges-thumb {
+        position: relative;
+
+        .content {
+            position: absolute;
+            top: 0;
+            left: 0;
+
+            h4 {
+                font-size: 22px;
+            }
+
+            p {
+                font-size: 18px;
+                color: $theme-color;
+                margin-top: 7px;
+            }
+        }
+    }
+
+    .arrow-btn {
+        .slider-arrow {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: $title-color;
+            color: $white;
+            border-radius: 50%;
+            transition: all 0.3s;
+
+            &:hover {
+                background-color: $theme-color;
+            }
+        }
+
+        .slider-prev {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            left: 20px;
+        }
+
+        .slider-next {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            right: 20px;
+        }
+    }
+}

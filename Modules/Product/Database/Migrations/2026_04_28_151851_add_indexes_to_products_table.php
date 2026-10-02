@@ -1,8 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -16,12 +15,27 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement('CREATE EXTENSION IF NOT EXISTS pg_trgm');
+        // GIN / pg_trgm trigram indexes are PostgreSQL-only.
+        if (DB::connection()->getDriverName() !== 'pgsql') {
+            return;
+        }
+
+        // pg_trgm is not guaranteed on every server (e.g. shared global-postgres);
+        // skip the trigram indexes when it is unavailable.
+        try {
+            DB::statement('CREATE EXTENSION IF NOT EXISTS pg_trgm');
+        } catch (Throwable) {
+            return;
+        }
 
         $locales = ['az', 'en', 'ru', 'tr'];
 
         foreach ($locales as $locale) {
-            DB::statement("CREATE INDEX CONCURRENTLY IF NOT EXISTS products_title_{$locale}_trgm_idx ON products USING gin ((title->>'{$locale}') gin_trgm_ops)");
+            try {
+                DB::statement("CREATE INDEX CONCURRENTLY IF NOT EXISTS products_title_{$locale}_trgm_idx ON products USING gin ((title->>'{$locale}') gin_trgm_ops)");
+            } catch (Throwable) {
+                // Ignore: the extension may be present without this operator class.
+            }
         }
     }
 
@@ -30,6 +44,10 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (DB::connection()->getDriverName() !== 'pgsql') {
+            return;
+        }
+
         $locales = ['az', 'en', 'ru', 'tr'];
 
         foreach ($locales as $locale) {

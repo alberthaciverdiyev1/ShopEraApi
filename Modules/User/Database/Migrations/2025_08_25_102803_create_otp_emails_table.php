@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('otp_emails', function (Blueprint $table) {
             $table->id();
-            $table->string("email");
-            $table->dateTime("deactive_date");
-            $table->tinyInteger("otp_code");
+            $table->string('email');
+            $table->dateTime('deactive_date');
+            $table->tinyInteger('otp_code');
             $table->softDeletes();
             $table->timestamps();
         });

@@ -36,7 +36,11 @@ return [
 
         'database' => [
             'driver' => 'database',
-            'connection' => env('DB_QUEUE_CONNECTION'),
+            // Pin the queue to the central connection: jobs are dispatched from
+            // tenant requests (where the default connection is swapped), but the
+            // worker reads them from one shared table. Tenant context travels
+            // inside the job payload (App\Jobs\Concerns\TenantAware).
+            'connection' => env('DB_QUEUE_CONNECTION', env('DB_CONNECTION')),
             'table' => env('DB_QUEUE_TABLE', 'jobs'),
             'queue' => env('DB_QUEUE', 'default'),
             'retry_after' => (int) env('DB_QUEUE_RETRY_AFTER', 90),

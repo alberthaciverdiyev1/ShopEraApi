@@ -1,8 +1,8 @@
 <?php
 
-use Modules\User\Http\Controllers\UserController;
+use Modules\User\Http\Controllers\AddressController;
 
-Route::controller(\Modules\User\Http\Controllers\AddressController::class)->middleware('auth:sanctum')->prefix('user/address')->group(function () {
+Route::controller(AddressController::class)->middleware('auth:sanctum')->prefix('user/address')->group(function () {
     Route::get('/', 'getAll')->name('address.getAll');
     Route::post('/', 'add')->name('address.add');
     Route::get('/{id}', 'details')->name('address.details');

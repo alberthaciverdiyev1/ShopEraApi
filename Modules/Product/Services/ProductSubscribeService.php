@@ -4,8 +4,8 @@ namespace Modules\Product\Services;
 
 use Illuminate\Support\Facades\DB;
 use Modules\Notification\Services\NotificationService;
-use Modules\Product\Http\Entities\Product;
-use Modules\User\Http\Entities\User;
+use Modules\Product\Entities\Product;
+use Modules\User\Entities\User;
 
 class ProductSubscribeService
 {
@@ -20,10 +20,9 @@ class ProductSubscribeService
             $productId => [
                 'created_at' => now(),
                 'updated_at' => now(),
-            ]
+            ],
         ]);
     }
-
 
     /**
      * Unsubscribe
@@ -75,16 +74,16 @@ class ProductSubscribeService
                     'user_id' => $user->id,
                     'image' => $image,
                     'data' => [
-                        'type'       => 'product_back_in_stock',
+                        'type' => 'product_back_in_stock',
                         'product_id' => (string) $product->id,
                     ],
                 ]);
             }
 
-//            $product->stockSubscribers()->updateExistingPivot(
-//                $subscribers->pluck('id')->toArray(),
-//                ['notified_at' => now()]
-//            );
+            //            $product->stockSubscribers()->updateExistingPivot(
+            //                $subscribers->pluck('id')->toArray(),
+            //                ['notified_at' => now()]
+            //            );
         });
     }
 }

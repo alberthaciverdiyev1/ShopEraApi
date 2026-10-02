@@ -22,9 +22,13 @@ return new class extends Migration
             ->whereNull('data')
             ->update(['source' => 'admin']);
 
+        $missingTypeMarker = DB::connection()->getDriverName() === 'pgsql'
+            ? "data::jsonb ->> 'type' IS NULL"
+            : "json_extract(data, '$.type') IS NULL";
+
         DB::table('notifications')
             ->whereNotNull('data')
-            ->whereRaw("data::jsonb ->> 'type' IS NULL")
+            ->whereRaw($missingTypeMarker)
             ->update(['source' => 'admin']);
     }
 

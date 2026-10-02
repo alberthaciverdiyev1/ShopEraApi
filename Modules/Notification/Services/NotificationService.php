@@ -5,7 +5,7 @@ namespace Modules\Notification\Services;
 use App\Jobs\SendUserPushJob;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Modules\Notification\Http\Entities\Notification;
+use Modules\Notification\Entities\Notification;
 use Modules\Notification\Http\Resources\NotificationResource;
 
 class NotificationService
@@ -31,7 +31,7 @@ class NotificationService
                 'image' => $data['image'] ?? null,
             ]);
 
-            if (!empty($data['user_id'])) {
+            if (! empty($data['user_id'])) {
                 $notification->users()->attach($data['user_id']);
             }
 
@@ -72,37 +72,37 @@ class NotificationService
         }
     }
 
-
     public function addMultiple(array $notificationData, array $userIds, bool $all = false): bool
     {
         try {
             DB::beginTransaction();
 
             $notification = $this->model->create([
-                'title'   => isset($notificationData['title']) ? Str::lower($notificationData['title']) : '',
-                'body'    => isset($notificationData['body']) ? Str::lower($notificationData['body']) : '',
+                'title' => isset($notificationData['title']) ? Str::lower($notificationData['title']) : '',
+                'body' => isset($notificationData['body']) ? Str::lower($notificationData['body']) : '',
                 'user_id' => $all ? null : ($notificationData['user_id'] ?? null),
-                'all'     => $all,
-                'source'  => $notificationData['source'] ?? 'system',
-                'data'    => $notificationData['data'] ?? null,
+                'all' => $all,
+                'source' => $notificationData['source'] ?? 'system',
+                'data' => $notificationData['data'] ?? null,
                 'icon' => $notificationData['icon'] ?? null,
                 'url' => $notificationData['url'] ?? null,
-                'image' => $notificationData['image'] ?? null
+                'image' => $notificationData['image'] ?? null,
             ]);
 
-            if (!$all && !empty($userIds)) {
+            if (! $all && ! empty($userIds)) {
                 $notification->users()->attach($userIds);
             }
 
             DB::commit();
+
             return true;
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Notification addMultiple failed', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
-
 
     /**
      * Notification list
@@ -122,7 +122,7 @@ class NotificationService
             $query->where('source', $filters['source'] ?? 'admin');
         }
 
-        if (!empty($filters['user_id'])) {
+        if (! empty($filters['user_id'])) {
             $query->where(function ($q) use ($filters) {
                 $q->where('user_id', $filters['user_id'])
                     ->orWhereHas('users', function ($q2) use ($filters) {
@@ -131,7 +131,7 @@ class NotificationService
             });
         }
 
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $search = Str::lower($filters['search']);
 
             $query->where(function ($q) use ($search) {
@@ -140,11 +140,11 @@ class NotificationService
             });
         }
 
-        if (!empty($filters['date_from'])) {
+        if (! empty($filters['date_from'])) {
             $query->where('created_at', '>=', $filters['date_from']);
         }
 
-        if (!empty($filters['date_to'])) {
+        if (! empty($filters['date_to'])) {
             $query->where('created_at', '<=', $filters['date_to']);
         }
 
@@ -156,7 +156,6 @@ class NotificationService
         );
     }
 
-
     public function list($request)
     {
         $filters = $request->all();
@@ -164,12 +163,12 @@ class NotificationService
         $query = $this->model
             ->orderBy('created_at', 'desc');
 
-            $userId = auth()->id();
-            $query->where(function ($q) use ($userId) {
-                $q->where('user_id', $userId)
-                    ->orWhere('all', true)
-                    ->orWhereHas('users', fn($q2) => $q2->where('users.id', $userId));
-            });
+        $userId = auth()->id();
+        $query->where(function ($q) use ($userId) {
+            $q->where('user_id', $userId)
+                ->orWhere('all', true)
+                ->orWhereHas('users', fn ($q2) => $q2->where('users.id', $userId));
+        });
 
         $notifications = $query->paginate(20);
 
@@ -186,7 +185,7 @@ class NotificationService
 
             $notification = $this->model->find($notificationId);
 
-            if (!$notification) {
+            if (! $notification) {
                 return false;
             }
 
@@ -203,11 +202,10 @@ class NotificationService
             DB::rollBack();
             \Log::error('Notification delete failed', [
                 'notification_id' => $notificationId,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
-
-
 }

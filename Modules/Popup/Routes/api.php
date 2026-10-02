@@ -16,12 +16,12 @@ use Modules\Popup\Http\Controllers\PopupController;
 
 
 
-Route::prefix('popup')->controller(PopupController::class)->group(function () {
+Route::prefix('popup')->middleware('feature:popups')->controller(PopupController::class)->group(function () {
     Route::get('/', 'list')->name('popup.list');
     Route::get('/show-one', 'showOne')->name('popup.showOne');
 });
 
-Route::middleware('auth:sanctum')->prefix('popup')->controller(PopupController::class)->group(function () {
+Route::middleware(['auth:sanctum', 'feature:popups'])->prefix('popup')->controller(PopupController::class)->group(function () {
     Route::delete('/{id}', 'delete')->name('popup.delete');
     Route::post('/', 'add')->name('popup.add');
     Route::put('/{id}', 'showHome')->name('popup.showHome');

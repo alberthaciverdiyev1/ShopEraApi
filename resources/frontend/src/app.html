@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="text-scale" content="scale" />
+		<!--
+			The palette is applied before the first paint: without this the
+			stylesheet's default colours flashed until the API answered.
+		-->
+		<script>
+			(function () {
+				try {
+					var cached = localStorage.getItem('shopera_theme');
+					if (!cached) return;
+					var colors = JSON.parse(cached);
+					var theme = colors['--theme'] || '#06B6D4';
+					colors['--theme'] = theme;
+					var clean = String(theme).replace('#', '');
+					if (/^[0-9a-fA-F]{6}$/.test(clean)) {
+						var int = parseInt(clean, 16);
+						colors['--theme-rgb'] = ((int >> 16) & 255) + ', ' + ((int >> 8) & 255) + ', ' + (int & 255);
+					}
+					for (var key in colors) {
+						var suffix = key.slice('--theme'.length);
+						var legacyThemeKey =
+							(key.indexOf('--theme') === 0 && suffix.length === 1 && Number(suffix) >= 2 && Number(suffix) <= 9) ||
+							key === '--'.concat('Theme-Color-2');
+
+						if (key.indexOf('--') === 0 && !legacyThemeKey && colors[key]) {
+							document.documentElement.style.setProperty(key, colors[key]);
+						}
+					}
+				} catch (e) {}
+			})();
+		</script>
+%sveltekit.head%
+	</head>
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">%sveltekit.body%</div>
+	</body>
+</html>

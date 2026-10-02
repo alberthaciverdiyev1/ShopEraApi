@@ -11,9 +11,9 @@ class DeleteAccountHtml
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-    <title>Teymur Store – Hesabın silinməsi</title>
+    <title>ShopEra – Hesabın silinməsi</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Teymur Store hesabınızın və şəxsi məlumatlarınızın silinməsi üçün müraciət formu.">
+    <meta name="description" content="ShopEra hesabınızın və şəxsi məlumatlarınızın silinməsi üçün müraciət formu.">
     <style>
         :root {
             --bg: #020617;
@@ -295,13 +295,13 @@ class DeleteAccountHtml
 <div class="shell">
     <div class="card" role="form" aria-labelledby="title">
         <div class="logo-row">
-            <img src="https://teymurstore.az/assets/images/logo-white.png" alt="Teymur Store Logo">
+            <img src="https://shopera.az/assets/images/logo-white.png" alt="ShopEra Logo">
             <span class="tag">Hesabın silinməsi</span>
         </div>
 
-        <h1 id="title">Teymur Store hesabının silinməsi</h1>
+        <h1 id="title">ShopEra hesabının silinməsi</h1>
         <p class="subtitle">
-            Buradan Teymur Store hesabınızın və şəxsi məlumatlarınızın silinməsi üçün müraciət göndərə bilərsiniz.
+            Buradan ShopEra hesabınızın və şəxsi məlumatlarınızın silinməsi üçün müraciət göndərə bilərsiniz.
         </p>
 
         <div class="info-box">
@@ -338,7 +338,7 @@ class DeleteAccountHtml
                     Silinmə istəyi göndər <span aria-hidden="true">↗</span>
                 </button>
 
-                <button type="button" class="button-secondary" onclick="window.location.href='https://teymurstore.az';">
+                <button type="button" class="button-secondary" onclick="window.location.href='https://shopera.az';">
                     <span>Ana səhifəyə qayıt</span>
                 </button>
 
@@ -350,8 +350,8 @@ class DeleteAccountHtml
 
         <p class="footer-note">
             Məxfilik siyasətimiz haqqında daha ətraflı:
-            <a href="https://teymurstore.az/#məxfilik-siyasəti" target="_blank" rel="noopener noreferrer">
-                Teymur Store Məxfilik siyasəti
+            <a href="https://shopera.az/#məxfilik-siyasəti" target="_blank" rel="noopener noreferrer">
+                ShopEra Məxfilik siyasəti
             </a>.
         </p>
     </div>

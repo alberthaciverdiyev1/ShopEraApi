@@ -1,0 +1,572 @@
+/*----------------------------------------------
+    # Buttons style here
+----------------------------------------------*/
+.theme-btn {
+    display: inline-block;
+    position: relative;
+    padding: 15px 25px;
+    gap: 10px;
+    color: $white;
+    font-family: $title-font; 
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    text-transform: capitalize;
+    background: $theme-color;
+    z-index: 1;
+    line-height: 1;
+    overflow: hidden;
+    border: 1px solid transparent;
+    border-radius: 100px;
+    transition: all 0.3s ease-in-out;
+    -webkit-transition: all 0.3s ease-in-out;
+    -moz-transition: all 0.3s ease-in-out;
+    -ms-transition: all 0.3s ease-in-out;
+    -o-transition: all 0.3s ease-in-out;
+
+    @include breakpoint (max-xxl) {
+        font-size: 12px; 
+        padding: 12px 13px;
+    }
+
+    i,svg {
+        margin-left: 6px;
+    }
+
+    &:before {
+        transition-duration: 800ms;
+        position: absolute;
+        width: 210%;
+        height: 290%;
+        content: "";
+        top: 162%;
+        left: 50%;
+        background: $title-color;
+        -webkit-transform: translateX(-50%);
+        transform: translateX(-50%) rotate(-8deg);
+        border-radius: 80%;
+        z-index: -1;
+    }
+ 
+
+    &.style2 {
+        border: none;
+        border-radius: 22px;
+        background: $bg-color-3;
+        -webkit-border-radius: 22px;
+        -moz-border-radius: 22px;
+        -ms-border-radius: 22px;
+        -o-border-radius: 22px;
+
+        i,svg,img {
+            margin-right: 6px;
+        }
+
+        &:before {
+            transition-duration: 800ms;
+            position: absolute;
+            width: 210%;
+            height: 290%;
+            content: "";
+            top: 162%;
+            left: 50%;
+            background: $theme-color;
+            -webkit-transform: translateX(-50%);
+            transform: translateX(-50%) rotate(-8deg);
+            border-radius: 80%;
+            z-index: -1;
+        }
+
+        &:hover {
+            svg path {
+                fill: $white;
+            }
+        }
+}
+
+    &.style3 {
+        padding: 15px 20px;
+        border: none;
+        color: $theme-color;
+        font-weight: 600;
+        border-radius: 22px;
+        background: $bg-color-3;
+        -webkit-border-radius: 22px;
+        -moz-border-radius: 22px;
+        -ms-border-radius: 22px;
+        -o-border-radius: 22px;
+
+        i,svg,img {
+            margin-right: 6px;
+        }
+
+        &:before {
+            transition-duration: 800ms;
+            position: absolute;
+            width: 210%;
+            height: 290%;
+            content: "";
+            top: 162%;
+            left: 50%;
+            background: $title-color;
+            -webkit-transform: translateX(-50%);
+            transform: translateX(-50%) rotate(-8deg);
+            border-radius: 80%;
+            z-index: -1;
+        }
+
+        &:hover {
+            svg path {
+                fill: $white;
+            }
+        }
+    }
+
+    &.style4 {
+        padding: 15px 30px;
+        border: none;
+        color: $white; 
+        font-family: $title-font;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+        text-transform: uppercase;
+        border-radius: 22px;
+        background: $theme-color;
+        -webkit-border-radius: 22px;
+        -moz-border-radius: 22px;
+        -ms-border-radius: 22px;
+        -o-border-radius: 22px;
+
+        i,svg,img {
+            margin-right: 6px;
+        }
+
+        &:before {
+            transition-duration: 800ms;
+            position: absolute;
+            width: 210%;
+            height: 290%;
+            content: "";
+            top: 162%;
+            left: 50%;
+            background: $title-color;
+            -webkit-transform: translateX(-50%);
+            transform: translateX(-50%) rotate(-8deg);
+            border-radius: 80%;
+            z-index: -1;
+        }
+
+        &:hover {
+            svg path {
+                fill: $white;
+            }
+        }
+    }
+
+    &.style6 { 
+        border: none;
+        text-transform: capitalize;
+        color: $white;
+        font-weight: 600;
+        border-radius: 22px;
+        background: $theme-color;
+        -webkit-border-radius: 22px;
+        -moz-border-radius: 22px;
+        -ms-border-radius: 22px;
+        -o-border-radius: 22px;
+
+        i,svg,img {
+            margin-right: 6px;
+        }
+        svg path {
+            fill: $white;
+            transition: all 0.3s ease-in-out;
+            -webkit-transition: all 0.3s ease-in-out;
+            -moz-transition: all 0.3s ease-in-out;
+            -ms-transition: all 0.3s ease-in-out;
+            -o-transition: all 0.3s ease-in-out;
+        }
+
+        &:before {
+            transition-duration: 800ms;
+            position: absolute;
+            width: 210%;
+            height: 290%;
+            content: "";
+            top: 162%;
+            left: 50%;
+            background: $bg-color-3;
+            color: $title-color;
+            -webkit-transform: translateX(-50%);
+            transform: translateX(-50%) rotate(-8deg);
+            border-radius: 80%;
+            z-index: -1;
+        }
+
+        &:hover {
+            color: $title-color!important;
+            svg path {
+                fill: $title-color;
+            }
+        }
+    }
+
+    &.style7 { 
+        border: none;
+        color: $white;
+        font-weight: 600;
+        text-transform: capitalize;
+        border-radius: 100px; 
+        background-color: $title-color;
+
+        i,svg,img {
+            margin-right: 6px;
+        }
+        svg path {
+            fill: $white;
+            transition: all 0.3s ease-in-out;
+            -webkit-transition: all 0.3s ease-in-out;
+            -moz-transition: all 0.3s ease-in-out;
+            -ms-transition: all 0.3s ease-in-out;
+            -o-transition: all 0.3s ease-in-out;
+        }
+
+        &:before {
+            transition-duration: 800ms;
+            position: absolute;
+            width: 210%;
+            height: 290%;
+            content: "";
+            top: 162%;
+            left: 50%;
+            background: $bg-color-3;
+            color: $title-color;
+            -webkit-transform: translateX(-50%);
+            transform: translateX(-50%) rotate(-8deg);
+            border-radius: 80%;
+            z-index: -1;
+        }
+
+        &:hover {
+            color: $title-color!important;
+            svg path {
+                fill: $title-color;
+            }
+        }
+    }
+
+    &.style9 {
+        padding: 10px 15px; 
+        border: 1px solid rgba(10, 17, 30, 0.25);
+        color: $theme-color;
+        font-family: $title-font; 
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 1;  
+        text-transform: capitalize;
+        border-radius: 100px;
+        background: transparent;
+        -webkit-border-radius: 100px;
+        -moz-border-radius: 100px;
+        -ms-border-radius: 100px;
+        -o-border-radius: 100px;
+        i,svg,img
+{
+            margin-right: 6px;
+        }
+
+        &:before {
+            transition-duration: 800ms;
+            position: absolute;
+            width: 210%;
+            height: 290%;
+            content: "";
+            top: 162%;
+            left: 50%;
+            background: $title-color;
+            -webkit-transform: translateX(-50%);
+            transform: translateX(-50%) rotate(-8deg);
+            border-radius: 80%;
+            z-index: -1;
+        }
+
+        &:hover {
+            svg path {
+                fill: $white;
+            }
+        }
+    }
+
+    &.style10 {
+        padding: 8px 10px;
+        border: 1px solid $theme-color;
+        color: $theme-color;
+        font-family: $title-font; 
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 1;  
+        text-transform: capitalize;
+        border-radius: 100px;
+        background: transparent;
+        -webkit-border-radius: 100px;
+        -moz-border-radius: 100px;
+        -ms-border-radius: 100px;
+        -o-border-radius: 100px;
+        i,svg,img
+{
+            margin-right: 6px;
+        }
+
+        &:before {
+            transition-duration: 800ms;
+            position: absolute;
+            width: 210%;
+            height: 290%;
+            content: "";
+            top: 162%;
+            left: 50%;
+            background: $title-color;
+            -webkit-transform: translateX(-50%);
+            transform: translateX(-50%) rotate(-8deg);
+            border-radius: 80%;
+            z-index: -1;
+        }
+
+        &:hover {
+            svg path {
+                fill: $white;
+            }
+        }
+    }
+
+    &.style11 {
+        padding: 15px 30px;
+        border: none;
+        color: $title-color;
+        font-weight: 600;
+        border-radius: 22px;
+        background: $bg-color-3;
+        -webkit-border-radius: 22px;
+        -moz-border-radius: 22px;
+        -ms-border-radius: 22px;
+        -o-border-radius: 22px;
+    
+        i,svg,img {
+            margin-right: 6px;
+        }
+    
+        &:before {
+            transition-duration: 800ms;
+            position: absolute;
+            width: 210%;
+            height: 290%;
+            content: "";
+            top: 162%;
+            left: 50%;
+            background: $title-color;
+            -webkit-transform: translateX(-50%);
+            transform: translateX(-50%) rotate(-8deg);
+            border-radius: 80%;
+            z-index: -1;
+        }
+    
+        &:hover {
+            svg path {
+                fill: $white;
+            }
+        }
+    }
+
+    &.style12 {
+        padding: 15px 30px;
+        border: none;
+        color: $white;
+        font-weight:500;
+        border-radius: 22px;
+        font-size: 16px;
+        background:$title-color;
+        -webkit-border-radius: 22px;
+        -moz-border-radius: 22px;
+        -ms-border-radius: 22px;
+        -o-border-radius: 22px;
+    
+        i,svg,img {
+            margin-right: 6px;
+        }
+    
+        &:before {
+            transition-duration: 800ms;
+            position: absolute;
+            width: 210%;
+            height: 290%;
+            content: "";
+            top: 162%;
+            left: 50%;
+            color:$title-color;
+            background: $white;
+            -webkit-transform: translateX(-50%);
+            transform: translateX(-50%) rotate(-8deg);
+            border-radius: 80%;
+            z-index: -1;
+        }
+    
+        &:hover {
+            color:$title-color !important;
+            svg path {
+                fill: $white;
+                
+            }
+        }
+    }
+
+    &.style13 {
+        padding: 15px 35px;
+        border: none;
+        color: $white; 
+        font-family: $title-font;
+        font-size: 16px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+        text-transform: uppercase;
+        border-radius: 22px;
+        background: $orange-color3;
+        -webkit-border-radius: 22px;
+        -moz-border-radius: 22px;
+        -ms-border-radius: 22px;
+        -o-border-radius: 22px;
+
+        i,svg,img {
+            margin-right: 6px;
+        }
+
+        &:before {
+            transition-duration: 800ms;
+            position: absolute;
+            width: 210%;
+            height: 290%;
+            content: "";
+            top: 162%;
+            left: 50%;
+            background: $title-color;
+            -webkit-transform: translateX(-50%);
+            transform: translateX(-50%) rotate(-8deg);
+            border-radius: 80%;
+            z-index: -1;
+        }
+
+        &:hover {
+            svg path {
+                fill: $white;
+            }
+        }
+    }
+
+    &.style14 {
+        padding: 15px 30px;
+        border: none;
+        color: $theme-color;
+        font-weight: 600;
+        border-radius: 22px;
+        background: $bg-color-3;
+        -webkit-border-radius: 22px;
+        -moz-border-radius: 22px;
+        -ms-border-radius: 22px;
+        -o-border-radius: 22px;
+    
+        i,svg,img {
+            margin-right: 6px;
+        }
+    
+        &:before {
+            transition-duration: 800ms;
+            position: absolute;
+            width: 210%;
+            height: 290%;
+            content: "";
+            top: 162%;
+            left: 50%;
+            background: $title-color;
+            -webkit-transform: translateX(-50%);
+            transform: translateX(-50%) rotate(-8deg);
+            border-radius: 80%;
+            z-index: -1;
+        }
+    
+        &:hover {
+            svg path {
+                fill: $white;
+            }
+        }
+    }
+
+    &.color {
+        background-color: $theme-color;
+    }
+
+    &.style15 {
+        font-weight: 500;
+        color: $theme-color;
+        background: $white;
+        border: none;
+        padding: 0;
+
+        &:before {
+            background-color: $white;
+        }
+
+        &:hover {
+            color: $theme-color !important;
+        }
+
+        i {
+            margin-left: 12px;
+            color: $theme-color;
+        }
+    }
+
+    &:hover {
+        color: $white !important;
+
+        &:before {
+            top: -96%;
+        }
+    }
+}
+
+ 
+
+.link-btn {
+    &.style1 {
+        display: inline-block;
+        width: 92px;
+        height: 92px;
+        line-height: 92px;
+        text-align: center; 
+        border: 1px solid  rgba(255, 255, 255, 0.25);
+        border-radius: 50%;
+
+        @include breakpoint (max-xl4) {
+            width: 60px;
+            height: 60px;
+            line-height: 60px; 
+        }
+    }
+
+    &.style2 {
+        display: inline-block;
+        width: 68px;
+        height: 68px;
+        line-height: 68px;
+        text-align: center;
+        background-color: $white;
+    }
+ 
+}
+
+//>>>>> Component Button End <<<<<//

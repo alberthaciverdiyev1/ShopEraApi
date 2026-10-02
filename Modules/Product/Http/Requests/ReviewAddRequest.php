@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class ReviewAddRequest extends FormRequest
 {
-    public function authorize():bool
+    public function authorize(): bool
     {
         return true;
     }
@@ -14,7 +14,7 @@ class ReviewAddRequest extends FormRequest
     public function prepareForValidation()
     {
         $this->merge([
-            'user_id' => auth()->id()
+            'user_id' => auth()->id(),
         ]);
     }
 

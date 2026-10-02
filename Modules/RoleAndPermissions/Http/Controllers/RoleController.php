@@ -5,7 +5,7 @@ namespace Modules\RoleAndPermissions\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\RoleAndPermissions\Services\RoleService;
-use Modules\User\Http\Entities\User;
+use Modules\User\Entities\User;
 use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
@@ -27,6 +27,7 @@ class RoleController extends Controller
     public function add(Request $request)
     {
         $request->validate(['name' => 'required|string|max:255']);
+
         return $this->roleService->add($request->name);
     }
 
@@ -38,6 +39,7 @@ class RoleController extends Controller
     public function update(Request $request, Role $role)
     {
         $request->validate(['name' => 'required|string|max:255']);
+
         return $this->roleService->update($role, $request->name);
     }
 
@@ -45,7 +47,6 @@ class RoleController extends Controller
     {
         return $roleService->delete($role->id);
     }
-
 
     public function assignRoleToUser(Request $request, $userId)
     {
@@ -62,15 +63,18 @@ class RoleController extends Controller
 
         return $this->roleService->revokeRoleFromUser($user, $request->role);
     }
+
     public function givePermission(Request $request, Role $role)
     {
         $request->validate(['permission' => 'required|string']);
+
         return $this->roleService->givePermission($role, $request->permission);
     }
 
     public function revokePermission(Request $request, Role $role)
     {
         $request->validate(['permission' => 'required|string']);
+
         return $this->roleService->revokePermission($role, $request->permission);
     }
 

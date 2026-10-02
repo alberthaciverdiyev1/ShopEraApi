@@ -11,6 +11,7 @@ class ProductAddRequest extends FormRequest
     {
         return true;
     }
+
     public function prepareForValidation()
     {
         $purchaseLimit = $this->input('purchase_limit');
@@ -35,11 +36,10 @@ class ProductAddRequest extends FormRequest
             'description.ru' => ['nullable', 'string'],
             'description.tr' => ['nullable', 'string'],
 
-
             'sku' => ['nullable', 'string', 'max:50', 'unique:products,sku'],
 
             'brand_id' => ['nullable', 'exists:brands,id'],
-            'gender' => ['nullable', Rule::in(['male', 'female', 'kids','unisex'])],
+            'gender' => ['nullable', Rule::in(['male', 'female', 'kids', 'unisex'])],
             'category_id' => ['nullable', 'exists:categories,id'],
 
             'price' => ['nullable', 'numeric', 'min:0'],
@@ -49,10 +49,10 @@ class ProductAddRequest extends FormRequest
 
             'stock_count' => ['required', 'integer', 'min:0'],
             'weight' => ['nullable', 'numeric', 'min:0.001'],
-            'purchase_limit'=>['nullable','integer','min:0'],
+            'purchase_limit' => ['nullable', 'integer', 'min:0'],
 
             'is_active' => ['boolean'],
-            'is_pinned' => ['boolean','nullable'],
+            'is_pinned' => ['boolean', 'nullable'],
             'is_suggest' => ['boolean'],
             'views' => ['nullable', 'integer', 'min:0'],
             'sales_count' => ['nullable', 'integer', 'min:0'],
@@ -72,18 +72,17 @@ class ProductAddRequest extends FormRequest
             'sizes.*.wholesale_price' => ['nullable', 'numeric', 'min:0'],
             'sizes.*.discount' => ['nullable', 'numeric', 'min:0'],
 
-
-            'images'   => ['nullable', 'array'],
-//            'images.*' => ['file', 'image', 'mimes:jpg,jpeg,png,webp,gif,svg,bmp,tiff,avif'],
+            'images' => ['nullable', 'array'],
+            //            'images.*' => ['file', 'image', 'mimes:jpg,jpeg,png,webp,gif,svg,bmp,tiff,avif'],
 
             'images.*.file' => ['required', 'image', 'mimes:jpg,jpeg,png,webp,gif,svg,bmp,tiff,avif'],
             'images.*.color_id' => ['nullable', 'exists:colors,id'],
 
-            'videos'   => ['nullable', 'array'],
+            'videos' => ['nullable', 'array'],
             'videos.*' => [
                 'file',
                 'max:512000',
-               // 'mimes: mp4, mov, avi, webm, mkv, flv, wmv, mpg, mpeg, m4v, 3gp, 3g2, ogv, ts, vob'
+                // 'mimes: mp4, mov, avi, webm, mkv, flv, wmv, mpg, mpeg, m4v, 3gp, 3g2, ogv, ts, vob'
             ],
 
         ];

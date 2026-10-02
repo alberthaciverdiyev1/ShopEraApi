@@ -3,7 +3,7 @@
 namespace Modules\Balance\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Modules\Balance\Http\Entities\Balance;
+use Modules\Balance\Entities\Balance;
 
 class BalanceFactory extends Factory
 {

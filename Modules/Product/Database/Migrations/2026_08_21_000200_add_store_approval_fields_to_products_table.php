@@ -9,7 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->foreignId('store_id')->nullable()->after('user_id')->constrained('stores')->nullOnDelete();
+            // No `stores` table exists in this schema; keep the column without a foreign key.
+            $table->unsignedBigInteger('store_id')->nullable()->after('user_id');
             $table->string('approval_status', 20)->default('approved')->after('store_id')->index();
             $table->foreignId('approved_by')->nullable()->after('approval_status')->constrained('users')->nullOnDelete();
             $table->timestamp('approved_at')->nullable()->after('approved_by');

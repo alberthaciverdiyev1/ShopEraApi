@@ -1,9 +1,6 @@
 <?php
 
-use Modules\User\Http\Controllers\AppleController;
 use Modules\User\Http\Controllers\AuthController;
-use Modules\User\Http\Controllers\GoogleController;
-use Modules\User\Http\Controllers\SocialLoginController;
 
 Route::prefix('auth')->controller(AuthController::class)->group(function () {
     Route::post('register', 'register')->name('auth.register');
@@ -24,13 +21,4 @@ Route::prefix('auth')->controller(AuthController::class)->group(function () {
         Route::put('password-reset-requests/{id}/resolve', 'resolvePasswordResetRequest')->whereNumber('id')->name('auth.password-reset-requests.resolve');
         Route::put('password-reset-requests/{id}/dismiss', 'dismissPasswordResetRequest')->whereNumber('id')->name('auth.password-reset-requests.dismiss');
     });
-});
-Route::get('auth/social-login', [SocialLoginController::class, 'config'])->name('auth.social-login');
-Route::prefix('login/google')->controller(GoogleController::class)->group(function () {
-    Route::get('/', 'redirectToGoogle')->name('login.google');
-    Route::get('/callback', 'handleGoogleCallback');
-    Route::post('/with-token', 'loginWithToken')->name('login.google.withToken');
-});
-Route::prefix('login/apple')->controller(AppleController::class)->group(function () {
-    Route::post('/with-token', 'loginWithToken')->name('login.apple.withToken');
 });

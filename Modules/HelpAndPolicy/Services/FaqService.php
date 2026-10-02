@@ -2,18 +2,19 @@
 
 namespace Modules\HelpAndPolicy\Services;
 
+use App\Helpers\TranslateHelper as Translate;
+use App\Support\TenantContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
-use Modules\HelpAndPolicy\Http\Entities\Faq;
-use Modules\HelpAndPolicy\Http\Resources\FaqResource;
-use App\Helpers\TranslateHelper as Translate;
 use Illuminate\Support\Str;
+use Modules\HelpAndPolicy\Entities\Faq;
+use Modules\HelpAndPolicy\Http\Resources\FaqResource;
 
 class FaqService
 {
     private Faq $model;
 
-    function __construct(Faq $model)
+    public function __construct(Faq $model)
     {
         $this->model = $model;
     }
@@ -21,18 +22,21 @@ class FaqService
     public function getAll($request)
     {
         $params = $request->all();
-        $cacheKey = 'faq_list_' . md5(serialize($params));
+        $cacheKey = TenantContext::cacheKey('faq_list_'.md5(serialize($params)));
 
         $data = Cache::remember($cacheKey, config('cache.faq_list_cache_time'), function () use ($params) {
             $query = $this->model->query()->select(['id', 'title', 'description', 'type'])->orderBy('id', 'desc');
 
-            if (isset($params['type'])) $query->where('type', $params['type']);
+            if (isset($params['type'])) {
+                $query->where('type', $params['type']);
+            }
 
             return $query->get();
         });
 
-        return responseHelper(__('Faqs retrieved successfully.'),200, FaqResource::collection($data));
+        return responseHelper(__('Faqs retrieved successfully.'), 200, FaqResource::collection($data));
     }
+
     public function getAllAdmin($request): JsonResponse
     {
         $params = $request->all();
@@ -74,7 +78,6 @@ class FaqService
         ], 200);
     }
 
-
     public function add($request): JsonResponse
     {
         $validated = $request->validated();
@@ -110,8 +113,7 @@ class FaqService
         }, 'Faq added successfully.', FaqResource::class);
     }
 
-
-    public function update($request,int $id)
+    public function update($request, int $id)
     {
         $validated = $request->validated();
 
@@ -119,6 +121,7 @@ class FaqService
             function () use ($validated, $id) {
                 $faq = $this->model->findOrFail($id);
                 $faq->update($validated);
+
                 return $faq->refresh();
             },
             'Faq updated successfully.',
@@ -136,6 +139,7 @@ class FaqService
             function () use ($id) {
                 $faq = $this->model->findOrFail($id);
                 $faq->delete();
+
                 return $faq;
             },
             'Faq deleted successfully.'

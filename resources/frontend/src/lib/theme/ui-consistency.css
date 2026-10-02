@@ -1,0 +1,214 @@
+/*
+ * Shared visual scale for the app.
+ *
+ * The template ships with page-specific sizes; after adding API-driven pages
+ * those local styles started drifting. This file keeps common typography,
+ * spacing and controls predictable without rewriting each page component.
+ */
+
+:root {
+	--ui-page-bg: #f7f8fb;
+	--ui-surface: #ffffff;
+	--ui-text: #0f172a;
+	--ui-muted: #64748b;
+	--ui-line: rgba(15, 23, 42, 0.1);
+	--ui-radius-sm: 8px;
+	--ui-radius-md: 12px;
+	--ui-control-h: 44px;
+	--ui-mobile-control-h: 38px;
+	--ui-section-y: 72px;
+	--ui-mobile-section-y: 32px;
+}
+
+html {
+	text-size-adjust: 100%;
+}
+
+body {
+	color: var(--ui-text);
+	font-family: "Albert Sans", sans-serif;
+}
+
+:where(h1, h2, h3, h4, h5, h6) {
+	letter-spacing: 0;
+}
+
+:where(.section-padding, .section-padding2) {
+	padding-top: var(--ui-section-y) !important;
+	padding-bottom: var(--ui-section-y) !important;
+}
+
+:where(.section-title) {
+	margin-bottom: 30px;
+}
+
+:where(.section-title .title, .section-title h2, h2.title) {
+	font-size: 32px !important;
+	line-height: 1.18 !important;
+	font-weight: 800 !important;
+	letter-spacing: 0 !important;
+	text-transform: none;
+}
+
+:where(.section-title .subtitle, .subtitle.style1) {
+	min-height: 34px;
+	padding: 7px 13px !important;
+	border-radius: 999px !important;
+	font-size: 13px !important;
+	font-weight: 800 !important;
+	line-height: 1.1 !important;
+}
+
+:where(.theme-btn, .theme-btn-2, button.theme-btn, a.theme-btn) {
+	min-height: var(--ui-control-h);
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	gap: 8px;
+	border-radius: 999px !important;
+	padding: 0 20px !important;
+	font-size: 14px !important;
+	font-weight: 800 !important;
+	line-height: 1 !important;
+	white-space: nowrap;
+}
+
+:where(input, select, textarea, .nice-select) {
+	font-family: "Albert Sans", sans-serif;
+}
+
+:where(input:not([type="checkbox"]):not([type="radio"]), select, .nice-select) {
+	min-height: var(--ui-control-h);
+	border-radius: var(--ui-radius-md);
+	font-size: 14px;
+}
+
+:where(.contact-form-items input, .contact-form-items select, .form-control, .form-select) {
+	min-height: var(--ui-control-h) !important;
+	border-radius: var(--ui-radius-md) !important;
+}
+
+:where(.contact-content__title, .login-wrapper h2, .register-wrapper h2) {
+	font-size: 32px !important;
+	line-height: 1.18 !important;
+	font-weight: 800 !important;
+}
+
+:where(.contact-content__subtitle, .form-clt span, .contact-content__logtitle) {
+	font-size: 14px !important;
+	line-height: 1.45 !important;
+}
+
+:where(.contact-info-area, .login-thumb, .delivery-address-box, .testimonial-card-items-one) {
+	border-radius: var(--ui-radius-md) !important;
+}
+
+:where(.blog_card_two, .best-seller-one, .featured-product-item-one, .best-seller-product-items-two, .popular-product-card-item-two) {
+	border-radius: var(--ui-radius-md) !important;
+	border-color: var(--ui-line) !important;
+}
+
+:where(.blog_card_two__thumb, .featured-product-item-one__thumb, .best-seller-product-items-two__thumb, .popular-product-card-item-two__thumb) {
+	border-radius: var(--ui-radius-md) var(--ui-radius-md) 0 0 !important;
+}
+
+:where(.best-seller-one__content-title a, .featured-product-item-one__content h6 a, .best-seller-product-items-two__details--title a, .blog_card_two__content h3 a) {
+	color: var(--ui-text);
+	font-weight: 800;
+	line-height: 1.3;
+}
+
+:where(.offer-price, .price, .amount) {
+	font-weight: 800;
+}
+
+@media (max-width: 991.98px) {
+	:where(.section-padding, .section-padding2) {
+		padding-top: 44px !important;
+		padding-bottom: 44px !important;
+	}
+}
+
+@media (max-width: 767.98px) {
+	body {
+		background: var(--ui-page-bg);
+	}
+
+	:where(.section-padding, .section-padding2) {
+		padding-top: var(--ui-mobile-section-y) !important;
+		padding-bottom: var(--ui-mobile-section-y) !important;
+	}
+
+	:where(.container) {
+		padding-right: 15px;
+		padding-left: 15px;
+	}
+
+	:where(.section-title) {
+		margin-bottom: 20px !important;
+	}
+
+	:where(.section-title .title, .section-title h2, h2.title) {
+		font-size: 26px !important;
+		line-height: 1.18 !important;
+	}
+
+	:where(.section-title .subtitle, .subtitle.style1) {
+		min-height: 30px;
+		padding: 6px 11px !important;
+		font-size: 12px !important;
+	}
+
+	:where(.theme-btn, .theme-btn-2, button.theme-btn, a.theme-btn) {
+		min-height: var(--ui-mobile-control-h);
+		display: inline-flex !important;
+		align-items: center !important;
+		justify-content: center !important;
+		padding: 0 15px !important;
+		font-size: 12px !important;
+	}
+
+	:where(input:not([type="checkbox"]):not([type="radio"]), select, .nice-select) {
+		min-height: var(--ui-mobile-control-h);
+		font-size: 13px;
+	}
+
+	:where(.contact-form-items input, .contact-form-items select, .form-control, .form-select) {
+		min-height: 42px !important;
+		font-size: 13px !important;
+	}
+
+	:where(.contact-content__title, .login-wrapper h2, .register-wrapper h2) {
+		font-size: 26px !important;
+	}
+
+	:where(.contact-content__subtitle, .form-clt span, .contact-content__logtitle) {
+		font-size: 13px !important;
+	}
+
+	:where(.contact-info-area, .login-wrapper, .register-wrapper) {
+		padding: 20px !important;
+	}
+
+	:where(.row.g-4) {
+		--bs-gutter-y: 16px;
+	}
+
+	:where(.blog_card_two__content h3 a, .best-seller-one__content-title a, .featured-product-item-one__content h6 a, .best-seller-product-items-two__details--title a) {
+		font-size: 13px !important;
+		line-height: 1.3 !important;
+	}
+
+	:where(.blog_card_two__content--post-list, .best-seller-product-items-two__details--subtitle, .star-wrapper span) {
+		font-size: 11px !important;
+	}
+
+	:where(.offer-price, .price, .amount, .best-seller-product-items-two__details--price) {
+		font-size: 14px !important;
+		line-height: 1.2 !important;
+	}
+
+	:where(.original-price) {
+		font-size: 12px !important;
+	}
+}

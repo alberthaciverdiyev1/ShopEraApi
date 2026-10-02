@@ -29,3 +29,15 @@ Thumbs.db
 
 # AI tooling
 /.claude
+/.agents
+/.codex
+/.junie
+
+# Nested dependencies / frontend build output
+**/node_modules
+/resources/frontend/.svelte-kit
+/resources/frontend/build
+
+# Svelte storefront build (published by `php artisan storefront:deploy`)
+/public/_app
+/public/storefront

@@ -2,12 +2,11 @@
 
 namespace Modules\Balance\Services;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
-use Modules\Balance\Http\Entities\Balance;
 use App\Enums\BalanceType;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Modules\Balance\Entities\Balance;
 use Modules\Balance\Http\Resources\BalanceResource;
 use Modules\Payment\Service\EPointService;
 
@@ -20,30 +19,29 @@ class BalanceService
         $this->model = $model;
     }
 
-        public function deposit($request): JsonResponse
-        {
-            $validated = $request->validated();
+    public function deposit($request): JsonResponse
+    {
+        $validated = $request->validated();
 
-            $validated['user_id'] = $validated['user_id'] ?? auth()->id();
+        $validated['user_id'] = $validated['user_id'] ?? auth()->id();
 
-            $type = match ($validated['type'] ?? null) {
-                'bonus'      => BalanceType::BONUS->value,
-                'withdrawal' => BalanceType::WITHDRAWAL->value,
-                default      => BalanceType::DEPOSIT->value,
-            };
+        $type = match ($validated['type'] ?? null) {
+            'bonus' => BalanceType::BONUS->value,
+            'withdrawal' => BalanceType::WITHDRAWAL->value,
+            default => BalanceType::DEPOSIT->value,
+        };
 
-            return handleTransaction(
-                fn() => $this->model->create([
-                    'user_id' => $validated['user_id'],
-                    'type' => $type ?? BalanceType::DEPOSIT->value,
-                    'amount' => (float)$validated['amount'],
-                    'note' => $validated['note'] ?? null,
-                ])->refresh(),
-                'Balance deposited successfully.',
-                BalanceResource::class
-            );
-        }
-
+        return handleTransaction(
+            fn () => $this->model->create([
+                'user_id' => $validated['user_id'],
+                'type' => $type ?? BalanceType::DEPOSIT->value,
+                'amount' => (float) $validated['amount'],
+                'note' => $validated['note'] ?? null,
+            ])->refresh(),
+            'Balance deposited successfully.',
+            BalanceResource::class
+        );
+    }
 
     public function increaseBalanceUrl(Request $request): JsonResponse
     {
@@ -52,12 +50,12 @@ class BalanceService
         ]);
 
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             return responseHelper(__('Unauthorized'), 401);
         }
 
-        $transactionId = 'BLNC-' . uniqid();
-        $amount = (float)$validated['amount'];
+        $transactionId = 'BLNC-'.uniqid();
+        $amount = (float) $validated['amount'];
         $description = "Balans Artımı #{$transactionId}";
 
         $successUrl = route('api.balance.success', ['transaction_id' => $transactionId]);
@@ -73,7 +71,6 @@ class BalanceService
             $errorUrl
         );
 
-
         if (isset($paymentResponse->error)) {
             return responseHelper($paymentResponse->error, 400);
         }
@@ -87,6 +84,7 @@ class BalanceService
                 'note' => "Kartla balans artırımı başlatıldı - {$transactionId}",
             ]);
         }
+
         return responseHelper($paymentUrl ? 'Payment initialized successfully.' : 'Payment error', $paymentUrl ? 200 : 400, [
             'payment_url' => $paymentUrl,
             'message' => $paymentUrl ? '' : $paymentResponse->message,
@@ -94,45 +92,44 @@ class BalanceService
         ]);
     }
 
-//    public function increaseBalanceCallback(Request $request): JsonResponse
-//    {
-//        $transactionId = $request->query('transaction_id');
-//
-//        $balance = $this->model
-//            ->where('transaction_order', $transactionId)
-//            ->where('type', BalanceType::WAITING->value)
-//            ->first();
-//
-//        if (!$balance) {
-//            return responseHelper(__('Balance record not found.'), 404);
-//        }
-//
-//        $response = EPointService::checkPayment(
-//            env('EPOINT_PRIVATE_KEY'),
-//            env('EPOINT_PUBLIC_KEY'),
-//            $transactionId
-//        );
-//
-//        $success = isset($response->code) && (string)$response->code === '000';
-//        $amountPaid = (float)($response->amount ?? 0);
-//
-//        if ($success) {
-//            $balance->update([
-//                'type' => BalanceType::DEPOSIT->value,
-//                'note' => "Kartla balans artırımı tamamlandı - {$transactionId}",
-//            ]);
-//
-//            return responseHelper(__('Balance deposited successfully.'), 200);
-//        }
-//
-//        $balance->delete();
-//
-//        return responseHelper(__('Payment failed, balance record deleted.'), 400, [
-//            'transaction_order' => $transactionId,
-//            'response' => $response,
-//        ]);
-//    }
-
+    //    public function increaseBalanceCallback(Request $request): JsonResponse
+    //    {
+    //        $transactionId = $request->query('transaction_id');
+    //
+    //        $balance = $this->model
+    //            ->where('transaction_order', $transactionId)
+    //            ->where('type', BalanceType::WAITING->value)
+    //            ->first();
+    //
+    //        if (!$balance) {
+    //            return responseHelper(__('Balance record not found.'), 404);
+    //        }
+    //
+    //        $response = EPointService::checkPayment(
+    //            env('EPOINT_PRIVATE_KEY'),
+    //            env('EPOINT_PUBLIC_KEY'),
+    //            $transactionId
+    //        );
+    //
+    //        $success = isset($response->code) && (string)$response->code === '000';
+    //        $amountPaid = (float)($response->amount ?? 0);
+    //
+    //        if ($success) {
+    //            $balance->update([
+    //                'type' => BalanceType::DEPOSIT->value,
+    //                'note' => "Kartla balans artırımı tamamlandı - {$transactionId}",
+    //            ]);
+    //
+    //            return responseHelper(__('Balance deposited successfully.'), 200);
+    //        }
+    //
+    //        $balance->delete();
+    //
+    //        return responseHelper(__('Payment failed, balance record deleted.'), 400, [
+    //            'transaction_order' => $transactionId,
+    //            'response' => $response,
+    //        ]);
+    //    }
 
     public function increaseBalanceCallback(Request $request)
     {
@@ -223,7 +220,7 @@ class BalanceService
         </style>
     ";
 
-        if (!$balance) {
+        if (! $balance) {
             $title = $translations['balance_not_found_title'];
             $text = $translations['balance_not_found_text'];
 
@@ -247,8 +244,8 @@ class BalanceService
             $transactionId
         );
 
-        $success = isset($response->code) && (string)$response->code === '000';
-        $amountPaid = (float)($response->amount ?? 0);
+        $success = isset($response->code) && (string) $response->code === '000';
+        $amountPaid = (float) ($response->amount ?? 0);
 
         if ($success) {
             $balance->update([
@@ -310,7 +307,7 @@ class BalanceService
                 return $this->model->create([
                     'user_id' => $userId,
                     'type' => $finalType->value,
-                    'amount' => (float)$amount,
+                    'amount' => (float) $amount,
                     'note' => $note,
                 ])->refresh();
             },
@@ -331,7 +328,7 @@ class BalanceService
             ->where('type', BalanceType::WAITING->value)
             ->first();
 
-        if (!$balance) {
+        if (! $balance) {
             return responseHelper(__('balance_not_found'), 404);
         }
 
@@ -435,10 +432,10 @@ class BalanceService
         return response($html, 400)->header('Content-Type', 'text/html');
     }
 
-    public function withdraw(int $user_id, float $amount, string $note = null): JsonResponse
+    public function withdraw(int $user_id, float $amount, ?string $note = null): JsonResponse
     {
         return handleTransaction(
-            fn() => $this->model->create([
+            fn () => $this->model->create([
                 'user_id' => $user_id,
                 'type' => BalanceType::WITHDRAWAL->value,
                 'amount' => $amount,
@@ -450,8 +447,7 @@ class BalanceService
         );
     }
 
-
-    public function getBalance(int $userId = null): JsonResponse
+    public function getBalance(?int $userId = null): JsonResponse
     {
         $userId = $userId ?? auth()->id();
 
@@ -464,14 +460,15 @@ class BalanceService
                     ELSE -amount
                 END
             "));
+
         return responseHelper(__('Balance retrieved successfully.'), 200, [
             'user_id' => $userId,
-            'balance' => (float)$totalBalance,
+            'balance' => (float) $totalBalance,
         ]);
 
     }
 
-    public function getBalanceHistory(int $userId = null, bool $is_admin = false): JsonResponse
+    public function getBalanceHistory(?int $userId = null, bool $is_admin = false): JsonResponse
     {
         $userId = $userId ?? auth()->id();
 
@@ -479,11 +476,12 @@ class BalanceService
             ->where('user_id', $userId)
             ->orderBy('created_at', 'desc');
 
-        if (!$is_admin) {
+        if (! $is_admin) {
             $query->whereNotIn('type', ['waiting']);
         }
 
         $history = $query->get();
+
         return responseHelper(__('Balance history retrieved successfully.'), 200, BalanceResource::collection($history));
     }
 }

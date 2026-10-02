@@ -10,7 +10,7 @@ class ReferralSettingController extends Controller
 {
     private ReferralSettingService $service;
 
-    function __construct(ReferralSettingService $service)
+    public function __construct(ReferralSettingService $service)
     {
         $this->service = $service;
     }
@@ -22,6 +22,6 @@ class ReferralSettingController extends Controller
 
     public function update(Request $request)
     {
-       return $this->service->update($request);
+        return $this->service->update($request);
     }
 }

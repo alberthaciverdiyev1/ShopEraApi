@@ -2,16 +2,16 @@
 
 namespace Modules\Notification\Services;
 
+use App\Support\TenantContext;
 use App\Jobs\SendNotificationChunkJob;
 use Google\Client as GoogleClient;
 use Illuminate\Http\Client\Pool;
 use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
-use Modules\Notification\Http\Entities\NotificationToken;
-use Modules\Notification\Services\NotificationService;
+use Modules\Notification\Entities\NotificationToken;
 
 class SendNotificationService
 {
@@ -33,50 +33,57 @@ class SendNotificationService
      */
     public const BROADCAST_CHUNK = 500;
 
-    private string $projectId;
-    private string $serviceAccountPath;
+    // Both may be absent in environments without Firebase configured; the
+    // send paths then fail with a clear message instead of a type error.
+    private ?string $projectId = null;
+
+    private ?string $serviceAccountPath = null;
+
     private NotificationToken $tokenModel;
+
     private NotificationService $notificationService;
 
     public function __construct(NotificationToken $tokenModel, NotificationService $notificationService)
     {
-        $this->projectId = config('services.fcm.project_id');
-        $this->serviceAccountPath = storage_path(config('services.fcm.service_account_path'));
+        $this->projectId = config('services.fcm.project_id') ?: null;
+        $serviceAccount = config('services.fcm.service_account_path');
+        $this->serviceAccountPath = $serviceAccount ? storage_path($serviceAccount) : null;
         $this->tokenModel = $tokenModel;
         $this->notificationService = $notificationService;
     }
 
-//    public function sendToOneUser(string $deviceToken, string $title, string $body, ?string $icon = null, array $data = [], bool $dryRun = false, $imageUrl = null, $url = null): array
-//    {
-//        $formattedData = $this->convertDataToStrings($data);
-//
-//        $message = [
-//            'token' => $deviceToken,
-//            'notification' => [
-//                'title' => $title,
-//                'body' => $body,
-//            ],
-//        ];
-//
-//        if ($imageUrl) {
-//            $message['notification']['image'] = $imageUrl;
-//        }
-//        if ($url) {
-//            $message['notification']['url'] = $url;
-//        }
-//
-//        if (!empty($formattedData)) {
-//            $message['data'] = $formattedData;
-//        }
-//
-//        if ($dryRun) {
-//            return $this->sendV1Request(['message' => $message, 'validate_only' => true]);
-//        }
-//
-//        return $this->sendV1Request(['message' => $message]);
-//    }
+    //    public function sendToOneUser(string $deviceToken, string $title, string $body, ?string $icon = null, array $data = [], bool $dryRun = false, $imageUrl = null, $url = null): array
+    //    {
+    //        $formattedData = $this->convertDataToStrings($data);
+    //
+    //        $message = [
+    //            'token' => $deviceToken,
+    //            'notification' => [
+    //                'title' => $title,
+    //                'body' => $body,
+    //            ],
+    //        ];
+    //
+    //        if ($imageUrl) {
+    //            $message['notification']['image'] = $imageUrl;
+    //        }
+    //        if ($url) {
+    //            $message['notification']['url'] = $url;
+    //        }
+    //
+    //        if (!empty($formattedData)) {
+    //            $message['data'] = $formattedData;
+    //        }
+    //
+    //        if ($dryRun) {
+    //            return $this->sendV1Request(['message' => $message, 'validate_only' => true]);
+    //        }
+    //
+    //        return $this->sendV1Request(['message' => $message]);
+    //    }
 
-    public function sendToOneUser(string $deviceToken, string $title, string $body, ?string $icon = null, array $data = [], bool $dryRun = false, $imageUrl = null, $url = null): array {
+    public function sendToOneUser(string $deviceToken, string $title, string $body, ?string $icon = null, array $data = [], bool $dryRun = false, $imageUrl = null, $url = null): array
+    {
         return $this->sendV1Request(
             $this->buildPayload($deviceToken, $title, $body, $data, $dryRun, $imageUrl, $url)
         );
@@ -188,10 +195,10 @@ class SendNotificationService
 
         $status = $response instanceof Response ? (string) $response->status() : 'transport';
 
-        return trim($status . ' ' . ($code ?? ''));
+        return trim($status.' '.($code ?? ''));
     }
 
-    public function sendToMultiple(array $deviceTokens, string $title, string $body, ?string $icon = null, array $data = [], bool $dryRun = false, $imageUrl = null,$url = null): array
+    public function sendToMultiple(array $deviceTokens, string $title, string $body, ?string $icon = null, array $data = [], bool $dryRun = false, $imageUrl = null, $url = null): array
     {
         // The same device can be registered twice; sending twice would show
         // the notification twice.
@@ -208,7 +215,7 @@ class SendNotificationService
                 'success' => 0,
                 'failure' => count($deviceTokens),
                 'results' => [],
-                'error' => 'Failed to get FCM access token: ' . $e->getMessage(),
+                'error' => 'Failed to get FCM access token: '.$e->getMessage(),
             ];
         }
 
@@ -254,7 +261,7 @@ class SendNotificationService
                     : 'Unknown FCM transport failure']];
             }
 
-            if (isset($result['name']) && !isset($result['error'])) {
+            if (isset($result['name']) && ! isset($result['error'])) {
                 $successCount++;
             } else {
                 $failureCount++;
@@ -262,7 +269,7 @@ class SendNotificationService
                 if ($this->isDeadToken($result)) {
                     // A device that uninstalled the app is an expected
                     // outcome, not an incident — removed, never logged.
-                    if (!$dryRun) {
+                    if (! $dryRun) {
                         $tokensToDelete[] = $token;
                     }
                 } else {
@@ -293,7 +300,7 @@ class SendNotificationService
             ]);
         }
 
-        if (!$dryRun && !empty($tokensToDelete)) {
+        if (! $dryRun && ! empty($tokensToDelete)) {
             $this->tokenModel->whereIn('token', $tokensToDelete)->delete();
         }
 
@@ -310,7 +317,7 @@ class SendNotificationService
         return [
             'success' => $successCount,
             'failure' => $failureCount,
-            'results' => $results
+            'results' => $results,
         ];
     }
 
@@ -326,14 +333,14 @@ class SendNotificationService
             $url = 'https://iid.googleapis.com/iid/v1:batchAdd';
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $accessToken,
+                'Authorization' => 'Bearer '.$accessToken,
                 'Content-Type' => 'application/json',
             ])->post($url, [
-                'to' => '/topics/' . $topic,
+                'to' => '/topics/'.$topic,
                 'registration_tokens' => $tokens,
             ]);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 Log::warning('Failed to subscribe tokens to topic', [
                     'topic' => $topic,
                     'status' => $response->status(),
@@ -343,11 +350,11 @@ class SendNotificationService
 
             return $response->json();
         } catch (\Throwable $e) {
-            Log::error('subscribeToTopic error: ' . $e->getMessage());
+            Log::error('subscribeToTopic error: '.$e->getMessage());
+
             return ['error' => $e->getMessage()];
         }
     }
-
 
     public function sendNotification($request, bool $dryRun = true)
     {
@@ -357,7 +364,7 @@ class SendNotificationService
             $imageUrl = null;
 
             if ($request->hasFile('image')) {
-                $path = $request->file('image')->store('notifications', 'public');
+                $path = $request->file('image')->store(TenantContext::storagePath('notifications'), 'public');
                 $imageUrl = Storage::disk('public')->url($path);
             }
             $validated['image'] = $imageUrl;
@@ -429,7 +436,7 @@ class SendNotificationService
                 ];
             }
 
-            if (empty($validated['users']) || !is_array($validated['users'])) {
+            if (empty($validated['users']) || ! is_array($validated['users'])) {
                 return ['error' => 'No users selected'];
             }
 
@@ -445,8 +452,9 @@ class SendNotificationService
             return $this->sendToMultiple($tokens, $title, $body, $validated['icon'], $data, $dryRun, $imageUrl, $url);
 
         } catch (\Throwable $e) {
-            Log::error('SendNotification error: ' . $e->getMessage());
-            return ['error' => 'Failed to send notification: ' . $e->getMessage()];
+            Log::error('SendNotification error: '.$e->getMessage());
+
+            return ['error' => 'Failed to send notification: '.$e->getMessage()];
         }
     }
 
@@ -457,11 +465,11 @@ class SendNotificationService
             $url = "https://fcm.googleapis.com/v1/projects/{$this->projectId}/messages:send";
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $accessToken,
+                'Authorization' => 'Bearer '.$accessToken,
                 'Content-Type' => 'application/json',
             ])->timeout(30)->post($url, $payload);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 Log::error('FCM V1 request failed', [
                     'status' => $response->status(),
                     'body' => $response->body(),
@@ -472,12 +480,13 @@ class SendNotificationService
             return $response->json() ?? ['error' => 'Invalid response from FCM'];
 
         } catch (\Throwable $e) {
-            Log::error('FCM V1 send request exception: ' . $e->getMessage());
-            return ['error' => 'Failed to send FCM request: ' . $e->getMessage()];
+            Log::error('FCM V1 send request exception: '.$e->getMessage());
+
+            return ['error' => 'Failed to send FCM request: '.$e->getMessage()];
         }
     }
 
-    //messaging.subscribeToTopic('all_users');
+    // messaging.subscribeToTopic('all_users');
 
     private function sendToTopic(string $topic, string $title, string $body, ?string $icon = null, array $data = []): array
     {
@@ -501,11 +510,11 @@ class SendNotificationService
             }
 
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $accessToken,
+                'Authorization' => 'Bearer '.$accessToken,
                 'Content-Type' => 'application/json',
             ])->post($url, $message);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 Log::error('FCM sendToTopic failed', [
                     'status' => $response->status(),
                     'body' => $response->body(),
@@ -514,29 +523,34 @@ class SendNotificationService
 
             return $response->json();
         } catch (\Exception $e) {
-            Log::error('FCM sendToTopic exception: ' . $e->getMessage());
-            return ['error' => 'Failed to send topic notification: ' . $e->getMessage()];
+            Log::error('FCM sendToTopic exception: '.$e->getMessage());
+
+            return ['error' => 'Failed to send topic notification: '.$e->getMessage()];
         }
     }
 
     private function getAccessToken(): string
     {
+        if (! $this->projectId || ! $this->serviceAccountPath) {
+            throw new \Exception('Firebase Cloud Messaging is not configured (FIREBASE_PROJECT_ID / FIREBASE_SERVICE_ACCOUNT_PATH).');
+        }
+
         return Cache::remember('fcm_access_token', 55 * 60, function () {
             try {
-                $client = new GoogleClient();
+                $client = new GoogleClient;
                 $client->setAuthConfig($this->serviceAccountPath);
                 $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
 
                 $accessToken = $client->fetchAccessTokenWithAssertion();
 
                 if (isset($accessToken['error'])) {
-                    throw new \Exception('Failed to get access token: ' . $accessToken['error']);
+                    throw new \Exception('Failed to get access token: '.$accessToken['error']);
                 }
 
                 return $accessToken['access_token'];
 
             } catch (\Exception $e) {
-                Log::error('Failed to get FCM access token: ' . $e->getMessage());
+                Log::error('Failed to get FCM access token: '.$e->getMessage());
                 throw $e;
             }
         });
@@ -548,9 +562,9 @@ class SendNotificationService
         foreach ($data as $key => $value) {
             $stringData[$key] = is_string($value) ? $value : json_encode($value);
         }
+
         return $stringData;
     }
-
 
     /**
      * Spesifik bir sifariş statusu üçün bildiriş göndərir
@@ -565,9 +579,9 @@ class SendNotificationService
             // list. This used to return early and lose the record entirely.
             $this->notificationService->addMultiple([
                 'title' => $title,
-                'body'  => $body,
-                'icon'  => $icon,
-                'data'  => $extraData
+                'body' => $body,
+                'icon' => $icon,
+                'data' => $extraData,
             ], [$userId]);
 
             $tokens = $this->tokenModel
@@ -579,6 +593,7 @@ class SendNotificationService
 
             if (empty($tokens)) {
                 Log::info("No active tokens for user ID: $userId. Push skipped.");
+
                 return false;
             }
 
@@ -593,7 +608,8 @@ class SendNotificationService
 
             return $result;
         } catch (\Throwable $e) {
-            Log::error("Order Notification Error: " . $e->getMessage());
+            Log::error('Order Notification Error: '.$e->getMessage());
+
             return false;
         }
     }

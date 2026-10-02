@@ -3,17 +3,18 @@
 namespace Modules\HelpAndPolicy\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Modules\HelpAndPolicy\Http\Entities\Faq;
+use Modules\HelpAndPolicy\Entities\Faq;
 
 class FaqFactory extends Factory
 {
-protected $model = Faq::class;
+    protected $model = Faq::class;
+
     public function definition()
     {
-       return [
-              'title' => $this->faker->sentence(),
-              'description' => $this->faker->paragraph(),
-              'type' => $this->faker->randomElement(['general', 'billing', 'technical', 'account']),
-       ];
+        return [
+            'title' => $this->faker->sentence(),
+            'description' => $this->faker->paragraph(),
+            'type' => $this->faker->randomElement(['general', 'billing', 'technical', 'account']),
+        ];
     }
 }

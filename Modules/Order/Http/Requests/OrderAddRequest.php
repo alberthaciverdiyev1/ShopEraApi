@@ -3,8 +3,6 @@
 namespace Modules\Order\Http\Requests;
 
 use App\Enums\AddressType;
-use App\Enums\OrderStatus;
-use App\Enums\ReviewStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -32,9 +30,9 @@ class OrderAddRequest extends FormRequest
             'address_type' => [
                 'required',
                 'string',
-                Rule::in(array_column(AddressType::cases(), 'name'))
+                Rule::in(array_column(AddressType::cases(), 'name')),
             ],
-            'address_type_id' => 'nullable|integer'
+            'address_type_id' => 'nullable|integer',
         ];
     }
 

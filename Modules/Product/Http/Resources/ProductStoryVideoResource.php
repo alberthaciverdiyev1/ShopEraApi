@@ -20,9 +20,9 @@ class ProductStoryVideoResource extends JsonResource
             'expires_at' => $this->story_expires_at?->format('Y-m-d H:i:s')
                 ?? $this->created_at?->copy()->addDay()->format('Y-m-d H:i:s'),
             'is_story_hidden' => (bool) $this->is_story_hidden,
-            'is_story_active' => !$this->is_story_hidden && (
+            'is_story_active' => ! $this->is_story_hidden && (
                 ($this->story_expires_at && $this->story_expires_at->isFuture())
-                || (!$this->story_expires_at && $this->created_at && $this->created_at->gte(now()->subDay()))
+                || (! $this->story_expires_at && $this->created_at && $this->created_at->gte(now()->subDay()))
             ),
             'product' => $product ? [
                 'id' => $product->id,

@@ -2,16 +2,16 @@
 
 namespace Modules\Delivery\Services;
 
-use App\Interfaces\ICrudInterface;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Log;
-use Modules\Delivery\Http\Entities\DeliveryInfo;
+use Modules\Delivery\Entities\DeliveryInfo;
 
 class DeliveryInfoService
 {
     private DeliveryInfo $model;
-    function __construct(DeliveryInfo $model)
+
+    public function __construct(DeliveryInfo $model)
     {
         $this->model = $model;
     }
@@ -20,15 +20,16 @@ class DeliveryInfoService
     {
         $query = $this->model->query()->select(['id', 'type', 'description']);
 
-        if ($request->has('type') && $request->type === "delivery") {
+        if ($request->has('type') && $request->type === 'delivery') {
             $query->whereIn('type', ['STANDARD', 'STANDARD_FAST']);
         }
 
-        if ($request->has('type') && $request->type === "pickup") {
+        if ($request->has('type') && $request->type === 'pickup') {
             $query->whereIn('type', ['PICKUP_POINT', 'TAKE_FROM_STORE']);
         }
 
-        $info = $query->orderBy("id")->get();
+        $info = $query->orderBy('id')->get();
+
         return response()->json($info);
     }
 
@@ -36,8 +37,10 @@ class DeliveryInfoService
     {
         $type = strtoupper($type);
         $info = $this->model->where('type', $type)->first();
+
         return response()->json($info);
     }
+
     public function update(int $id, $request): JsonResponse
     {
         try {
@@ -50,17 +53,16 @@ class DeliveryInfoService
 
             return response()->json([
                 'message' => 'Delivery info updated successfully',
-                'data' => $deliveryInfo
+                'data' => $deliveryInfo,
             ], 200);
 
         } catch (Exception $e) {
-            Log::error("DeliveryInfo Update Error: " . $e->getMessage());
+            Log::error('DeliveryInfo Update Error: '.$e->getMessage());
 
             return response()->json([
                 'message' => 'Update failed',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
-
 }

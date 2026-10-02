@@ -2,18 +2,19 @@
 
 namespace Modules\User\Services;
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Modules\User\Http\Entities\ReferralCode;
-use Modules\User\Http\Entities\User;
-use Modules\User\Http\Entities\UserReferral;
+use Modules\User\Entities\ReferralCode;
+use Modules\User\Entities\User;
+use Modules\User\Entities\UserReferral;
 use Modules\User\Http\UserResource;
 
 class ReferralService
 {
     private ReferralCode $model;
 
-    function __construct(ReferralCode $model)
+    public function __construct(ReferralCode $model)
     {
         $this->model = $model;
     }
@@ -32,7 +33,7 @@ class ReferralService
                 ['user_id' => $user_id],
                 ['referral_code' => $referral_code]
             );
-        }, "Referral Code Successfully added", [], 200, true);
+        }, 'Referral Code Successfully added', [], 200, true);
     }
 
     public function update($referral_code, $user_id = null)
@@ -50,15 +51,15 @@ class ReferralService
             }
 
             return $record;
-        }, "Referral Code Successfully updated", [], 200, true);
+        }, 'Referral Code Successfully updated', [], 200, true);
     }
-
 
     public function checkCode($referral_code)
     {
-        if (!$referral_code) {
+        if (! $referral_code) {
             return false;
         }
+
         return $this->model
             ->where('referral_code', strtoupper($referral_code))
             ->exists();
@@ -74,8 +75,6 @@ class ReferralService
             ->whereRaw('UPPER(referral_code) = ?', [strtoupper($referral_code)])
             ->value('user_id') ?? false;
     }
-
-
 
     public function getAllUsersReferralDetails(Request $request)
     {
@@ -103,16 +102,15 @@ class ReferralService
             ];
         };
 
-        if ($users instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator) {
+        if ($users instanceof LengthAwarePaginator) {
             $users->setCollection($users->getCollection()->map($mapUser));
             $data = $users;
         } else {
             $data = $users->map($mapUser);
         }
 
-        return responseHelper("All users referral details retrieved successfully", 200, $data);
+        return responseHelper('All users referral details retrieved successfully', 200, $data);
     }
-
 
     public function getReferredUsers(int $userId)
     {
@@ -120,8 +118,8 @@ class ReferralService
 
         $referralCode = $user->referralCode ? $user->referralCode->referral_code : null;
 
-        if (!$referralCode) {
-            return responseHelper("User has no referral code", 404);
+        if (! $referralCode) {
+            return responseHelper('User has no referral code', 404);
         }
 
         $referredUsers = UserReferral::with('user')
@@ -131,7 +129,7 @@ class ReferralService
             ->filter();
 
         return responseHelper(
-            "Referred users retrieved successfully",
+            'Referred users retrieved successfully',
             200,
             [
                 'referred_users_count' => $referredUsers->count(),
@@ -139,5 +137,4 @@ class ReferralService
             ]
         );
     }
-
 }

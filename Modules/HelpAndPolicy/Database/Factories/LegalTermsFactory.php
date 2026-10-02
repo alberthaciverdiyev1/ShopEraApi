@@ -3,11 +3,11 @@
 namespace Modules\HelpAndPolicy\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Modules\HelpAndPolicy\Http\Entities\LegalTerm;
+use Modules\HelpAndPolicy\Entities\LegalTerm;
 
 class LegalTermsFactory extends Factory
 {
-protected  $model = LegalTerm::class;
+    protected $model = LegalTerm::class;
 
     public function definition(): array
     {
@@ -26,5 +26,4 @@ protected  $model = LegalTerm::class;
             ]),
         ];
     }
-
 }

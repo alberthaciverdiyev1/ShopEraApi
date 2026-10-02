@@ -8,11 +8,15 @@ use Illuminate\Support\Facades\Http;
 class OtpService
 {
     public ?string $login;
+
     public ?string $password;
+
     public ?string $sender;
 
     protected string $apiUrl = 'https://apps.lsim.az/quicksms/v1/send';
+
     protected string $balanceUrl = 'https://apps.lsim.az/quicksms/v1/balance';
+
     protected string $checkNumberUrl = 'https://apps.lsim.az/lsimrest/mnp/api/get';
 
     public function __construct()
@@ -25,17 +29,18 @@ class OtpService
     protected function calculateKey($login, $password): string
     {
         $md5Password = md5($password);
-        return md5($md5Password . $login);
+
+        return md5($md5Password.$login);
     }
 
     public function sendSms($msisdn, $text, $unicode = false): string
     {
         if ($this->login && $this->password && $this->sender) {
 
-            $msisdn = '994' . substr($msisdn, 1);
+            $msisdn = '994'.substr($msisdn, 1);
 
             $md5Password = md5($this->password);
-            $key = md5($md5Password . $this->login . $text . $msisdn . $this->sender);
+            $key = md5($md5Password.$this->login.$text.$msisdn.$this->sender);
 
             $params = [
                 'login' => $this->login,
@@ -96,7 +101,6 @@ class OtpService
         }
     }
 
-
     public function checkNumber($msisdn): string
     {
         if ($this->login && $this->password && $this->sender) {
@@ -130,7 +134,7 @@ class OtpService
 
             return "HTTP {$statusCode} - {$body}";
         }
-            return __('Otp not configured!');
+
+        return __('Otp not configured!');
     }
 }
-

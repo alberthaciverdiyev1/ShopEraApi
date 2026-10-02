@@ -14,11 +14,14 @@ class UserController extends Controller
 {
     private UserService $service;
 
-    function __construct(UserService $service)
+    public function __construct(UserService $service)
     {
         $this->middleware('permission:view users')->only('getAll');
-        $this->middleware('permission:details user')->only('details');
-        $this->middleware('permission:update user')->only('changeEmail', 'changeName', 'changeSurname', 'changePhone', 'changeWholesalerStatus');
+        // Reading your own profile is free; reading someone else's needs the
+        // `details user` permission (enforced in the service).
+        // A user may always edit their own profile; editing somebody else's
+        // still needs `update user` (checked in the service).
+        $this->middleware('permission:update user')->only('changeWholesalerStatus');
 
         $this->service = $service;
     }
@@ -43,6 +46,16 @@ class UserController extends Controller
         return $this->service->changePhone($request);
     }
 
+    public function changeAvatar(Request $request): JsonResponse
+    {
+        return $this->service->changeAvatar($request);
+    }
+
+    public function removeAvatar(Request $request): JsonResponse
+    {
+        return $this->service->removeAvatar($request);
+    }
+
     public function getAll(Request $request): JsonResponse
     {
         return $this->service->getAll($request);
@@ -58,12 +71,12 @@ class UserController extends Controller
         return $this->service->changeWholesalerStatus($request);
     }
 
-    public function delete(int $id = null): JsonResponse
+    public function delete(?int $id = null): JsonResponse
     {
         return $this->service->delete($id);
     }
 
-    public function details(int $id = null): JsonResponse
+    public function details(?int $id = null): JsonResponse
     {
         return $this->service->details($id);
     }
@@ -72,6 +85,7 @@ class UserController extends Controller
     {
         return $this->service->deleteMyAccount();
     }
+
     public function deleteMyAccountHtml()
     {
         return $this->service->deleteMyAccountHtml();

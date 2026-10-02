@@ -10,11 +10,10 @@ class ReferralController extends Controller
 {
     private ReferralService $service;
 
-    function __construct(ReferralService $service)
+    public function __construct(ReferralService $service)
     {
         $this->service = $service;
     }
-
 
     public function getAllUsersReferralDetails(Request $request)
     {
@@ -24,6 +23,7 @@ class ReferralController extends Controller
     public function getReferredUsers()
     {
         $id = auth()->id();
+
         return $this->service->getReferredUsers($id);
     }
 }

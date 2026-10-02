@@ -15,7 +15,7 @@ class OrderUpdateRequest extends FormRequest
     {
         return [
             'status' => ['required'],
-            'return_to_balance' => 'nullable|boolean'
+            'return_to_balance' => 'nullable|boolean',
         ];
     }
 }

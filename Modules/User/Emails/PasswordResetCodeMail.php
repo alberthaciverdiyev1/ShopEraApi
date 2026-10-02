@@ -22,8 +22,7 @@ class PasswordResetCodeMail extends Mailable
         public string $code,
         public int $minutes,
         public ?string $name = null,
-    ) {
-    }
+    ) {}
 
     public function envelope(): Envelope
     {

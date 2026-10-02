@@ -1,32 +1,27 @@
 <?php
 
+use App\Support\DbExtensions;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Log;
 
-if (!function_exists('rangeFilter')) {
+if (! function_exists('rangeFilter')) {
     /**
      * Apply an exact, between, or min/max filter on a query.
-     *
-     * @param Builder $query
-     * @param string $column
-     * @param array $params
-     * @return Builder
      */
     function rangeFilter(Builder $query, string $column, array $params): Builder
     {
         $exact = $params[$column] ?? null;
-        $min = $params[$column . '_min'] ?? null;
-        $max = $params[$column . '_max'] ?? null;
+        $min = $params[$column.'_min'] ?? null;
+        $max = $params[$column.'_max'] ?? null;
 
-        if (!empty($exact) && empty($min) && empty($max)) {
+        if (! empty($exact) && empty($min) && empty($max)) {
             $query->where($column, $exact);
-        } else if (!empty($min) && !empty($max)) {
+        } elseif (! empty($min) && ! empty($max)) {
             $query->whereBetween($column, [$min, $max]);
         } else {
-            if (!empty($min)) {
+            if (! empty($min)) {
                 $query->where($column, '>=', $min);
             }
-            if (!empty($max)) {
+            if (! empty($max)) {
                 $query->where($column, '<=', $max);
             }
         }
@@ -34,39 +29,32 @@ if (!function_exists('rangeFilter')) {
         return $query;
     }
 
-
 }
-if (!function_exists('rangeDateFilter')) {
-    /**
-     * @param Builder $query
-     * @param string $column
-     * @param array $params
-     * @return Builder
-     */
+if (! function_exists('rangeDateFilter')) {
     function rangeDateFilter(Builder $query, string $column, array $params): Builder
     {
-        $min = $params[$column . '_min'] ?? null;
-        $max = $params[$column . '_max'] ?? null;
+        $min = $params[$column.'_min'] ?? null;
+        $max = $params[$column.'_max'] ?? null;
 
-        if ($min && !$max) {
+        if ($min && ! $max) {
             $max = now();
-        } elseif (!$min && $max) {
+        } elseif (! $min && $max) {
             $min = '1970-01-01';
-        } elseif (!$min && !$max) {
+        } elseif (! $min && ! $max) {
             return $query;
         }
 
         return $query->whereBetween($column, [$min, $max]);
     }
 }
-if (!function_exists('orderBy')) {
+if (! function_exists('orderBy')) {
     function orderBy(Builder $query, array $params): Builder
     {
-        if (!empty($params['order_by']) && !empty($params['order_type'])) {
+        if (! empty($params['order_by']) && ! empty($params['order_type'])) {
             $query->orderBy($params['order_by'], $params['order_type']);
-        } else if (!empty($params['order_by']) && empty($params['order_type'])) {
+        } elseif (! empty($params['order_by']) && empty($params['order_type'])) {
             $query->orderBy($params['order_by'], 'desc');
-        } else if (empty($params['order_by']) && !empty($params['order_type'])) {
+        } elseif (empty($params['order_by']) && ! empty($params['order_type'])) {
             $query->orderBy('created_at', 'desc');
         } else {
             $query->orderBy('created_at', 'desc');
@@ -76,8 +64,7 @@ if (!function_exists('orderBy')) {
     }
 }
 
-
-//if (!function_exists('filterLike')) {
+// if (!function_exists('filterLike')) {
 //
 //    function filterLike(Builder $query, array|string $columns, array $params): Builder
 //    {
@@ -113,10 +100,9 @@ if (!function_exists('orderBy')) {
 //
 //        return $query;
 //    }
-//}
+// }
 
-
-//if (!function_exists('filterLike')) {
+// if (!function_exists('filterLike')) {
 //
 //    function filterLike(Builder $query, array|string $columns, array $params): Builder
 //    {
@@ -167,20 +153,24 @@ if (!function_exists('orderBy')) {
 //
 //        return $query;
 //    }
-//}
-
+// }
 
 function filterLike(Builder $query, array|string $columns, array $params): Builder
 {
     $search = trim($params['search'] ?? '');
-    if (empty($search) || mb_strlen($search) < 2) return $query;
+    if (empty($search) || mb_strlen($search) < 2) {
+        return $query;
+    }
 
     $columns = (array) $columns;
     $model = $query->getModel();
     $tableName = $model->getTable();
     $locale = app()->getLocale();
 
-    $query->where(function ($q) use ($columns, $search, $model, $tableName, $locale) {
+    $unaccent = DbExtensions::hasUnaccent();
+    $trgm = DbExtensions::hasPgTrgm();
+
+    $query->where(function ($q) use ($columns, $search, $model, $tableName, $locale, $unaccent, $trgm) {
         foreach ($columns as $column) {
             $isTranslatable = method_exists($model, 'isTranslatableAttribute')
                 && $model->isTranslatableAttribute($column);
@@ -188,36 +178,52 @@ function filterLike(Builder $query, array|string $columns, array $params): Build
             if ($isTranslatable) {
                 $columnPath = "({$column}->>'{$locale}')";
 
-                $q->orWhereRaw("unaccent({$columnPath}) ILIKE unaccent(?)", ["%{$search}%"])
-                    ->orWhereRaw("{$columnPath} % ?", [$search]);
+                // unaccent()/similarity() are optional extensions; fall back to
+                // a plain ILIKE when the database does not provide them.
+                $q->orWhereRaw(
+                    $unaccent ? "unaccent({$columnPath}) ILIKE unaccent(?)" : "{$columnPath} ILIKE ?",
+                    ["%{$search}%"]
+                );
+
+                if ($trgm) {
+                    $q->orWhereRaw("{$columnPath} % ?", [$search]);
+                }
             } else {
-                $q->orWhereRaw("unaccent({$tableName}.{$column}::text) ILIKE unaccent(?)", ["%{$search}%"]);
+                $column = "{$tableName}.{$column}::text";
+                $q->orWhereRaw(
+                    $unaccent ? "unaccent({$column}) ILIKE unaccent(?)" : "{$column} ILIKE ?",
+                    ["%{$search}%"]
+                );
             }
         }
     });
 
     $firstCol = $columns[0];
-    if (method_exists($model, 'isTranslatableAttribute') && $model->isTranslatableAttribute($firstCol)) {
-        $query->orderByRaw("similarity(unaccent({$firstCol}->>'{$locale}'), unaccent(?)) DESC", [$search]);
+    if ($trgm && method_exists($model, 'isTranslatableAttribute') && $model->isTranslatableAttribute($firstCol)) {
+        $query->orderByRaw(
+            $unaccent
+                ? "similarity(unaccent({$firstCol}->>'{$locale}'), unaccent(?)) DESC"
+                : "similarity({$firstCol}->>'{$locale}', ?) DESC",
+            [$search]
+        );
     }
 
     return $query;
 }
 
-if (!function_exists('whereEach')) {
+if (! function_exists('whereEach')) {
     function whereEach(Builder $query, array|string $columns, array $params): Builder
     {
         if (is_array($columns)) {
             foreach ($columns as $column) {
-                if (!empty($params[$column])) {
+                if (! empty($params[$column])) {
                     $query->where($column, '=', $params[$column]);
                 }
             }
-        } elseif (is_string($columns) && !empty($params[$columns])) {
+        } elseif (is_string($columns) && ! empty($params[$columns])) {
             $query->where($columns, '=', $params[$columns]);
         }
 
         return $query;
     }
 }
-

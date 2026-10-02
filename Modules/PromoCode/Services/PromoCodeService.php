@@ -2,42 +2,37 @@
 
 namespace Modules\PromoCode\Services;
 
-use App\Interfaces\ICrudInterface;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
+use App\Support\TenantContext;
 use Modules\Delivery\Services\DeliveryService;
-use Modules\PromoCode\Http\Entities\PromoCode;
-use Modules\PromoCode\Http\Resources\PromoCodeResource;
 use Modules\Product\Services\ProductPricingService;
-use Modules\User\Http\Entities\Address;
-use Modules\User\Http\Entities\Basket;
-use Modules\User\Http\Entities\User;
+use Modules\PromoCode\Entities\PromoCode;
+use Modules\PromoCode\Http\Resources\PromoCodeResource;
+use Modules\User\Entities\Address;
+use Modules\User\Entities\Basket;
+use Modules\User\Entities\User;
 
 class PromoCodeService
 {
-
     private PromoCode $model;
+
     private DeliveryService $deliveryService;
+
     private ProductPricingService $pricingService;
 
-    /**
-     * @param PromoCode $model
-     */
-    function __construct(PromoCode $model, DeliveryService $deliveryService, ProductPricingService $pricingService)
+    public function __construct(PromoCode $model, DeliveryService $deliveryService, ProductPricingService $pricingService)
     {
         $this->deliveryService = $deliveryService;
         $this->model = $model;
         $this->pricingService = $pricingService;
     }
 
-    /**
-     * @param $request
-     * @return JsonResponse
-     */
     public function getAll($request): JsonResponse
     {
         $params = $request->all();
-        $cacheKey = 'promo_code_list_' . md5(serialize($params));
+        $cacheKey = TenantContext::cacheKey('promo_code_list_'.md5(serialize($params)));
 
         $data = Cache::remember($cacheKey, config('promo_code_list_cache_time'), function () use ($params) {
             $query = $this->model->query()->select(['id', 'code', 'discount_percent', 'is_active', 'user_count', 'created_at']);
@@ -66,16 +61,18 @@ class PromoCodeService
             if ($inline_request) {
                 return PromoCodeResource::make($promoCode);
             }
+
             return response()->json([
                 'success' => 200,
                 'message' => __('Promo Codes details retrieved successfully.'),
                 'data' => PromoCodeResource::make($promoCode),
             ]);
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             if ($inline_request) {
                 return PromoCodeResource::make([]);
             }
+
             return response()->json([
                 'success' => 403,
                 'message' => __('Promo Code not found.'),
@@ -84,40 +81,39 @@ class PromoCodeService
         }
     }
 
-//    public function check(string $code, $inline_request = false)
-//    {
-//        try {
-//            $user = auth()->user();
-//
-//            $promoCode = $this->model
-//                ->where('code', $code)
-//                ->where('is_active', 1)
-//                ->first();
-//
-//            if (!$promoCode) {
-//                return responseHelper(__('Promo Code not found.'), 403, [], $inline_request);
-//            }
-//
-//            if ($promoCode->user_count <= 0) {
-//                return responseHelper(__('Promo Code usage limit reached.'), 403, [], $inline_request);
-//            }
-//
-//            if ($user->usedPromoCodes()->where('promo_code_id', $promoCode->id)->whereNull('transaction_id')->exists()) {
-//                return responseHelper(__('You have already used this Promo Code.'), 403, [], $inline_request);
-//            }
-//
-//            $priceData = $this->checkPromoCodeWithPrice($promoCode, null,true);
-//
-//            $promoCode->setAttribute('discounted_price', $priceData["discounted_price"]);
-//            $promoCode->setAttribute('original_price', $priceData["original_price"]);
-//
-//            return responseHelper(__('Promo Code checked successfully.'), 200, PromoCodeResource::make($promoCode), $inline_request);
-//
-//        } catch (\Exception $e) {
-//            return responseHelper(__('An error occurred.'), 403, [], $inline_request);
-//        }
-//    }
-
+    //    public function check(string $code, $inline_request = false)
+    //    {
+    //        try {
+    //            $user = auth()->user();
+    //
+    //            $promoCode = $this->model
+    //                ->where('code', $code)
+    //                ->where('is_active', 1)
+    //                ->first();
+    //
+    //            if (!$promoCode) {
+    //                return responseHelper(__('Promo Code not found.'), 403, [], $inline_request);
+    //            }
+    //
+    //            if ($promoCode->user_count <= 0) {
+    //                return responseHelper(__('Promo Code usage limit reached.'), 403, [], $inline_request);
+    //            }
+    //
+    //            if ($user->usedPromoCodes()->where('promo_code_id', $promoCode->id)->whereNull('transaction_id')->exists()) {
+    //                return responseHelper(__('You have already used this Promo Code.'), 403, [], $inline_request);
+    //            }
+    //
+    //            $priceData = $this->checkPromoCodeWithPrice($promoCode, null,true);
+    //
+    //            $promoCode->setAttribute('discounted_price', $priceData["discounted_price"]);
+    //            $promoCode->setAttribute('original_price', $priceData["original_price"]);
+    //
+    //            return responseHelper(__('Promo Code checked successfully.'), 200, PromoCodeResource::make($promoCode), $inline_request);
+    //
+    //        } catch (\Exception $e) {
+    //            return responseHelper(__('An error occurred.'), 403, [], $inline_request);
+    //        }
+    //    }
 
     public function check(string $code, $inline_request = false, $request = null)
     {
@@ -127,11 +123,11 @@ class PromoCodeService
             $address_id = $request->address_id ?? null;
 
             $address = Address::where('user_id', $user->id)
-                ->when($address_id, fn($q) => $q->where('id', $address_id),
-                    fn($q) => $q->where('is_default', true))
+                ->when($address_id, fn ($q) => $q->where('id', $address_id),
+                    fn ($q) => $q->where('is_default', true))
                 ->first();
 
-            if (!$address) {
+            if (! $address) {
                 return responseHelper(__('Please set a valid default address with a city before placing an order.'), 403);
             }
 
@@ -140,17 +136,16 @@ class PromoCodeService
                 ->getData(true);
 
             $delivery = $deliveryResponse['data'] ?? null;
-            if (!$delivery) {
+            if (! $delivery) {
                 return responseHelper(__('Delivery service is not available for your city.'), 403);
             }
-
 
             $promoCode = $this->model
                 ->where('code', $code)
                 ->where('is_active', 1)
                 ->first();
 
-            if (!$promoCode) {
+            if (! $promoCode) {
                 return responseHelper(__('Promo Code not found.'), 404, [], $inline_request);
             }
 
@@ -179,7 +174,6 @@ class PromoCodeService
 
             $totalPrice = $this->pricingService->basketTotal($basket, $user);
 
-
             $shipping_price = $totalPrice < $delivery['free_from'] ? ($delivery['price'] ?? 0) : 0;
 
             $discountedPrice = round($totalPrice * (1 - $promoCode->discount_percent / 100), 2);
@@ -194,7 +188,8 @@ class PromoCodeService
             );
 
         } catch (\Exception $e) {
-            \Log::error("Promo Code Check Error: " . $e->getMessage());
+            \Log::error('Promo Code Check Error: '.$e->getMessage());
+
             return responseHelper(__('An error occurred during calculation.'), 500, [], $inline_request);
         }
     }
@@ -204,15 +199,14 @@ class PromoCodeService
         try {
             $user = auth()->user();
 
-
             $address_id = $request->address_id ?? null;
 
             $address = Address::where('user_id', $user->id)
-                ->when($address_id, fn($q) => $q->where('id', $address_id),
-                    fn($q) => $q->where('is_default', true))
+                ->when($address_id, fn ($q) => $q->where('id', $address_id),
+                    fn ($q) => $q->where('is_default', true))
                 ->first();
 
-            if (!$address) {
+            if (! $address) {
                 return responseHelper(__('Please set a valid default address with a city before placing an order.'), 403);
             }
 
@@ -221,17 +215,16 @@ class PromoCodeService
                 ->getData(true);
 
             $delivery = $deliveryResponse['data'] ?? null;
-            if (!$delivery) {
+            if (! $delivery) {
                 return responseHelper(__('Delivery service is not available for your city.'), 403);
             }
-
 
             $promoCode = $this->model
                 ->where('code', $code)
                 ->where('is_active', true)
                 ->first();
 
-            if (!$promoCode) {
+            if (! $promoCode) {
                 return responseHelper(__('Promo code not found.'), 403, []);
             }
 
@@ -253,13 +246,11 @@ class PromoCodeService
                 return responseHelper(__('Your basket is empty.'), 403, []);
             }
 
-
             $totalPrice = $this->pricingService->basketTotal($basket, $user);
 
             $discountedPrice = round($totalPrice * (1 - $promoCode->discount_percent / 100), 2);
 
             $shipping_price = $totalPrice < $delivery['free_from'] ? ($delivery['price'] ?? 0) : 0;
-
 
             if ($inline_request) {
                 return [
@@ -286,7 +277,6 @@ class PromoCodeService
         }
     }
 
-
     /**
      * Add promoCode
      */
@@ -295,16 +285,15 @@ class PromoCodeService
         $validated = $request->validated();
 
         $promoCode = handleTransaction(
-            fn() => $this->model->create($validated)->refresh(),
+            fn () => $this->model->create($validated)->refresh(),
             'Promo Code added successfully.',
             PromoCodeResource::class
         );
 
-        Cache::forget('promo_code_list_' . md5(serialize([])));
+        Cache::forget('promo_code_list_'.md5(serialize([])));
 
         return $promoCode;
     }
-
 
     /**
      * Update promoCode
@@ -317,6 +306,7 @@ class PromoCodeService
             function () use ($validated, $id) {
                 $promoCode = $this->model->findOrFail($id);
                 $promoCode->update($validated);
+
                 return $promoCode->refresh();
             },
             'Promo Code updated successfully.',
@@ -337,6 +327,7 @@ class PromoCodeService
             function () use ($id) {
                 $promoCode = $this->model->findOrFail($id);
                 $promoCode->delete();
+
                 return $promoCode;
             },
             'Promo Code deleted successfully.'
@@ -347,7 +338,7 @@ class PromoCodeService
         return $response;
     }
 
-    public function applyPromoCodeToUser(int $promoCodeId, int $userId, bool $inline_request = false, int $orderId = null, $transactionId = null): bool
+    public function applyPromoCodeToUser(int $promoCodeId, int $userId, bool $inline_request = false, ?int $orderId = null, $transactionId = null): bool
     {
         try {
             $promoCode = $this->model->findOrFail($promoCodeId);
@@ -358,7 +349,7 @@ class PromoCodeService
 
             $user = User::findOrFail($userId);
 
-            if (!$user->usedPromoCodes()->where('promo_code_id', $promoCodeId)->whereNull('transaction_id')->exists()) {
+            if (! $user->usedPromoCodes()->where('promo_code_id', $promoCodeId)->whereNull('transaction_id')->exists()) {
 
                 $pivotData = [];
                 if ($orderId !== null) {
@@ -377,7 +368,8 @@ class PromoCodeService
             return true;
 
         } catch (\Exception $e) {
-            \Log::error("Failed to apply promo code {$promoCodeId} to user {$userId}: " . $e->getMessage());
+            \Log::error("Failed to apply promo code {$promoCodeId} to user {$userId}: ".$e->getMessage());
+
             return false;
         }
     }
@@ -390,5 +382,4 @@ class PromoCodeService
             $promoCode->decrement('user_count');
         }
     }
-
 }

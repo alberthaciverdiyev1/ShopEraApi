@@ -134,7 +134,7 @@ class UserServiceProvider extends ServiceProvider
         // where the package layout puts them, and this is what finds them.
         $this->loadViewsFrom(module_path($this->name, 'Resources/views'), $this->nameLower);
 
-        Blade::componentNamespace(config('modules.namespace').'\\' . $this->name . '\\View\\Components', $this->nameLower);
+        Blade::componentNamespace(config('modules.namespace').'\\'.$this->name.'\\View\\Components', $this->nameLower);
     }
 
     /**

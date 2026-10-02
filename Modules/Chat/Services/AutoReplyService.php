@@ -3,10 +3,11 @@
 namespace Modules\Chat\Services;
 
 use App\Helpers\TranslateHelper as Translate;
+use App\Support\DbExtensions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Modules\Chat\Http\Entities\AutoReply;
+use Modules\Chat\Entities\AutoReply;
 use Modules\Chat\Http\Resources\AutoReplyResource;
 
 class AutoReplyService
@@ -118,7 +119,10 @@ class AutoReplyService
          */
         $searchEmbedding = $this->generateTextEmbedding($search);
 
-        if ($searchEmbedding) {
+        $safeLocale = in_array($appLocale, ['az', 'en', 'ru', 'tr'], true) ? $appLocale : 'az';
+
+        // 1. Semantic search — needs the pgvector extension and an embedding.
+        if ($searchEmbedding && DbExtensions::has('vector')) {
             $vector = $this->vectorToPgString($searchEmbedding);
 
             $match = $this->reply
@@ -135,24 +139,35 @@ class AutoReplyService
             }
         }
 
-        /*
-         * 2. Fallback: old pg_trgm search
-         * App locale hansı dildirsə, həmin question field-i ilə müqayisə edir.
-         */
-        DB::statement('SET pg_trgm.similarity_threshold = 0.25');
+        // 2. Trigram similarity — only when pg_trgm is available.
+        if (DbExtensions::hasPgTrgm()) {
+            DB::statement('SET pg_trgm.similarity_threshold = 0.25');
 
-        $safeLocale = in_array($appLocale, ['az', 'en', 'ru', 'tr'], true) ? $appLocale : 'az';
+            $match = $this->reply
+                ->select('answer', 'question')
+                ->selectRaw("similarity((question->>'{$safeLocale}')::text, ?::text) as score", [$search])
+                ->whereRaw("(question->>'{$safeLocale}')::text % ?::text", [$search])
+                ->orderBy('score', 'desc')
+                ->first();
 
+            if ($match && (float) $match->score >= 0.25) {
+                $answers = $match->getTranslations('answer');
+
+                return $answers[$safeLocale] ?? $answers['az'] ?? null;
+            }
+
+            return false;
+        }
+
+        // 3. Last resort: plain substring match.
         $match = $this->reply
             ->select('answer', 'question')
-            ->selectRaw("similarity((question->>'{$safeLocale}')::text, ?::text) as score", [$search])
-            ->whereRaw("(question->>'{$safeLocale}')::text % ?::text", [$search])
-            ->orderBy('score', 'desc')
+            ->whereRaw("(question->>'{$safeLocale}')::text ILIKE ?", ["%{$search}%"])
             ->first();
 
-        if ($match && (float) $match->score >= 0.25) {
+        if ($match) {
             $answers = $match->getTranslations('answer');
-        
+
             return $answers[$safeLocale] ?? $answers['az'] ?? null;
         }
 
@@ -173,7 +188,7 @@ class AutoReplyService
                     'text' => $text,
                 ]);
 
-            if (!$response->successful()) {
+            if (! $response->successful()) {
                 Log::warning('Text embedding service failed', [
                     'status' => $response->status(),
                     'body' => $response->body(),
@@ -185,8 +200,8 @@ class AutoReplyService
             $data = $response->json();
 
             if (
-                !isset($data['embedding']) ||
-                !is_array($data['embedding']) ||
+                ! isset($data['embedding']) ||
+                ! is_array($data['embedding']) ||
                 (($data['dim'] ?? null) !== 384)
             ) {
                 Log::warning('Invalid text embedding response', [
@@ -208,17 +223,17 @@ class AutoReplyService
 
     private function vectorToPgString(?array $embedding): ?string
     {
-        if (!$embedding) {
+        if (! $embedding) {
             return null;
         }
 
-        return '[' . implode(',', $embedding) . ']';
+        return '['.implode(',', $embedding).']';
     }
-    
+
     private function normalizeMessage(string $message): string
     {
         $message = mb_strtolower(trim($message), 'UTF-8');
-    
+
         $replacements = [
             'unvan' => 'ünvan',
             'adres' => 'ünvan adres',
@@ -245,14 +260,14 @@ class AutoReplyService
             'sifaris' => 'sifariş',
             'zakaz' => 'sifariş',
         ];
-    
+
         foreach ($replacements as $from => $to) {
             $message = str_replace($from, $to, $message);
         }
-    
+
         $message = preg_replace('/[^\p{L}\p{N}\s]+/u', ' ', $message);
         $message = preg_replace('/\s+/u', ' ', $message);
-    
+
         return trim($message);
     }
 }

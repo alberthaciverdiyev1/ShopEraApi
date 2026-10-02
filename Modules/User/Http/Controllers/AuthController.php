@@ -2,7 +2,6 @@
 
 namespace Modules\User\Http\Controllers;
 
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\User\Services\AuthService;
@@ -10,26 +9,25 @@ use Nwidart\Modules\Facades\Module;
 
 /**
  * @group Auth Management
- *
  */
 class AuthController extends Controller
 {
     private AuthService $service;
 
-    function __construct(AuthService $service)
+    public function __construct(AuthService $service)
     {
         $this->service = $service;
         $this->middleware('permission:view users')->only('passwordResetRequests');
         $this->middleware('permission:update user')->only(['resolvePasswordResetRequest', 'dismissPasswordResetRequest']);
 
         //        if (Module::find('Roles')->isEnabled()) {
-//            $this->middleware('permission:view users')->only('index');
-//            $this->middleware('permission:create user')->only('create');
-//            $this->middleware('permission:store user')->only('store');
-//            $this->middleware('permission:edit user')->only('edit');
-//            $this->middleware('permission:update user')->only('update');
-//            $this->middleware('permission:destroy user')->only('destroy');
-//        }
+        //            $this->middleware('permission:view users')->only('index');
+        //            $this->middleware('permission:create user')->only('create');
+        //            $this->middleware('permission:store user')->only('store');
+        //            $this->middleware('permission:edit user')->only('edit');
+        //            $this->middleware('permission:update user')->only('update');
+        //            $this->middleware('permission:destroy user')->only('destroy');
+        //        }
     }
 
     public function register(Request $request)

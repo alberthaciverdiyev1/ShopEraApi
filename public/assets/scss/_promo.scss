@@ -1,0 +1,66 @@
+.promo-wrapper {
+    &.style1 {
+        .promo-card {
+            border-radius: 20px;
+            background: #FFDEDC;
+            padding: 60px 40px;
+
+            @include breakpoint (max-xs) {
+                padding: 30px 20px;
+            }
+
+            &.promo-card_1 {
+                .thumb {
+                    padding-bottom: 54px;
+                    padding-top: 20px;
+                    @include breakpoint (max-sm) {
+                        padding-bottom: 20px;
+                    }
+                }
+                @include breakpoint (max-lg) {
+                    margin-bottom: 30px;
+                }
+
+                
+            }
+
+            &.promo-card_2 {
+                background: #CCD9EB;
+            }
+
+            .thumb {
+                text-align: center;
+            }
+
+            .promo-content {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 20px;
+                flex-wrap: wrap;
+
+                .offer-text {
+                    color: $theme-color;
+                    font-family: $title-font;
+                    font-size: 16px;
+                    font-style: normal;
+                    font-weight: 600;
+                    line-height: 32px;
+                    text-transform: capitalize;
+                }
+
+                .promo-title {
+                    color: #161616;
+                    font-family: $title-font;
+                    font-size: 24px;
+                    font-style: normal;
+                    font-weight: 600;
+                    line-height: 32px;
+                    text-transform: capitalize;
+                    padding-top: 10px;
+                }
+
+            }
+        }
+    }
+}

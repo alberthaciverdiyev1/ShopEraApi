@@ -8,15 +8,14 @@ trait ImagePath
 {
     public function getImageAttribute($value): ?string
     {
-        if (!$value) {
+        if (! $value) {
             return null;
         }
 
-        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://')) {
+        if (str_starts_with($value, 'http://') || str_starts_with($value, 'https://') || str_starts_with($value, '/')) {
             return $value;
         }
 
         return Storage::disk('public')->url($value);
     }
-
 }

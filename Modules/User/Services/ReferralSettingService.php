@@ -2,13 +2,13 @@
 
 namespace Modules\User\Services;
 
-use Modules\User\Http\Entities\ReferralSetting;
+use Modules\User\Entities\ReferralSetting;
 
 class ReferralSettingService
 {
     private ReferralSetting $setting;
 
-    function __construct(ReferralSetting $setting)
+    public function __construct(ReferralSetting $setting)
     {
         $this->setting = $setting;
     }
@@ -29,7 +29,7 @@ class ReferralSettingService
 
         $setting = $this->setting->first();
 
-        if (!$setting) {
+        if (! $setting) {
             return responseHelper(__('Referral setting not found.'), 404);
         }
 
@@ -50,8 +50,7 @@ class ReferralSettingService
 
         return [
             'is_active' => (bool) ($setting->is_active ?? false),
-            'amount'    => (float) ($setting->referral_amount ?? 0),
+            'amount' => (float) ($setting->referral_amount ?? 0),
         ];
     }
-
 }

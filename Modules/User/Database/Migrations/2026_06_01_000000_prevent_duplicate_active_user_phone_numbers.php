@@ -7,6 +7,11 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // PL/pgSQL trigger; phone normalisation is enforced in the app on other drivers.
+        if (DB::connection()->getDriverName() !== 'pgsql') {
+            return;
+        }
+
         DB::unprepared(<<<'SQL'
             CREATE OR REPLACE FUNCTION prevent_duplicate_active_user_phone()
             RETURNS TRIGGER AS $$
@@ -61,6 +66,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (DB::connection()->getDriverName() !== 'pgsql') {
+            return;
+        }
+
         DB::unprepared(<<<'SQL'
             DROP TRIGGER IF EXISTS users_prevent_duplicate_active_phone ON users;
             DROP FUNCTION IF EXISTS prevent_duplicate_active_user_phone();

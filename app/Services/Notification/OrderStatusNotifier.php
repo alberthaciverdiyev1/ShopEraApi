@@ -5,7 +5,7 @@ namespace App\Services\Notification;
 use App\Enums\OrderStatus as OrderStatusEnum;
 use App\Jobs\SendOrderStatusNotificationJob;
 use Illuminate\Support\Facades\Log;
-use Modules\Order\Http\Entities\Order;
+use Modules\Order\Entities\Order;
 
 /**
  * Turns an order status change into a customer notification.

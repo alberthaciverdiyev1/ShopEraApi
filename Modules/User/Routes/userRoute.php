@@ -7,6 +7,8 @@ Route::controller(UserController::class)->middleware('auth:sanctum')->prefix('us
     Route::put('/change-name', 'changeName')->name('auth.changeName');
     Route::put('/change-surname', 'changeSurname')->name('auth.changeSurname');
     Route::put('/change-phone', 'changePhone')->name('auth.changePhone');
+    Route::post('/change-avatar', 'changeAvatar')->name('auth.changeAvatar');
+    Route::delete('/remove-avatar', 'removeAvatar')->name('auth.removeAvatar');
     Route::get('/list', 'getAll')->name('user.list');
     Route::post('/block', 'blockUser')->name('user.block');
     Route::put('/wholesaler-status', 'changeWholesalerStatus')->name('user.wholesaler-status');

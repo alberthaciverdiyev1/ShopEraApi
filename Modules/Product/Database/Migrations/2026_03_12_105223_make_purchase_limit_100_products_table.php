@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('products', function (Blueprint $table) {
-            if (!Schema::hasColumn('products', 'purchase_limit')) {
+            if (! Schema::hasColumn('products', 'purchase_limit')) {
                 $table->integer('purchase_limit')
                     ->nullable()
                     ->default(100)

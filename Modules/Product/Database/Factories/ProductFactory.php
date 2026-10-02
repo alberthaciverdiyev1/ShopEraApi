@@ -4,12 +4,12 @@ namespace Modules\Product\Database\Factories;
 
 use App\Enums\Gender;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Modules\Brand\Http\Entities\Brand;
-use Modules\Category\Http\Entities\Category;
-use Modules\Product\Http\Entities\Product;
-use Modules\Color\Http\Entities\Color;
-use Modules\Size\Http\Entities\Size;
-use Modules\User\Http\Entities\User;
+use Modules\Brand\Entities\Brand;
+use Modules\Category\Entities\Category;
+use Modules\Color\Entities\Color;
+use Modules\Product\Entities\Product;
+use Modules\Size\Entities\Size;
+use Modules\User\Entities\User;
 
 class ProductFactory extends Factory
 {
@@ -17,6 +17,9 @@ class ProductFactory extends Factory
 
     public function definition()
     {
+        $price = $this->faker->randomFloat(2, 40, 400);
+        $onSale = $this->faker->boolean(40);
+
         return [
             'title' => [
                 'az' => $this->faker->word(),
@@ -38,10 +41,9 @@ class ProductFactory extends Factory
                 Gender::KIDS->value,
             ]),
             'category_id' => Category::inRandomOrder()->first()->id,
-//            'price' => $this->faker->randomFloat(2, 10, 1000),
-            'price' => 100,
-//            'discount' => $this->faker->optional()->randomFloat(2, 1, 100),
-            'discount' => 0,
+            'price' => $price,
+            // `discount` holds the sale price (absolute), not a percentage.
+            'discount' => $onSale ? round($price * $this->faker->randomFloat(2, 0.5, 0.85), 2) : 0,
             'stock_count' => $this->faker->numberBetween(0, 100),
             'is_active' => $this->faker->boolean(90),
             'views' => $this->faker->numberBetween(0, 1000),
@@ -49,7 +51,6 @@ class ProductFactory extends Factory
             'user_id' => User::inRandomOrder()->first()->id,
         ];
     }
-
 
     public function configure()
     {
@@ -70,7 +71,7 @@ class ProductFactory extends Factory
                 ['image_path' => 'https://ireland.apollo.olxcdn.com/v1/files/s5cuywo9lcal3-PL/image;s=1000x700'],
                 ['image_path' => 'https://ireland.apollo.olxcdn.com/v1/files/v6nubmokw7mm2-PL/image;s=1000x700'],
                 ['image_path' => 'https://ireland.apollo.olxcdn.com/v1/files/beyc3fqlzzyt3-PL/image;s=1000x700'],
-                ['image_path' => 'https://ireland.apollo.olxcdn.com/v1/files/9dauuwfw7ug43-PL/image;s=1000x700']
+                ['image_path' => 'https://ireland.apollo.olxcdn.com/v1/files/9dauuwfw7ug43-PL/image;s=1000x700'],
             ];
 
             shuffle($images);
@@ -78,5 +79,4 @@ class ProductFactory extends Factory
             $product->images()->createMany($images);
         });
     }
-
 }

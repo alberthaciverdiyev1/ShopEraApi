@@ -6,8 +6,8 @@ use App\Enums\ReviewStatus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Modules\Product\Http\Entities\Product;
-use Modules\Product\Http\Entities\Review;
+use Modules\Product\Entities\Product;
+use Modules\Product\Entities\Review;
 use Modules\Product\Http\Resources\ReviewListResource;
 use Modules\Product\Http\Resources\ReviewResource;
 
@@ -15,9 +15,6 @@ class ReviewService
 {
     private Review $model;
 
-    /**
-     * @param Review $model
-     */
     public function __construct(Review $model)
     {
         $this->model = $model;
@@ -28,9 +25,9 @@ class ReviewService
      */
     public function list(int $product_id): JsonResponse
     {
-        $viewKey = 'product_view_' . $product_id . '_' . request()->ip();
+        $viewKey = 'product_view_'.$product_id.'_'.request()->ip();
 
-        if (!Cache::has($viewKey)) {
+        if (! Cache::has($viewKey)) {
             Product::where('id', $product_id)->increment('views');
             Cache::put($viewKey, true, now()->addMinutes(30));
         }
@@ -39,7 +36,7 @@ class ReviewService
             'user',
             'product.category',
             'product.brand',
-            'product.images'
+            'product.images',
         ])
             ->where('product_id', $product_id)
             ->where('status', ReviewStatus::APPROVED->value)
@@ -55,7 +52,7 @@ class ReviewService
             'user',
             'product.category',
             'product.brand',
-            'product.images'
+            'product.images',
         ]);
 
         if ($request->filled('status')) {
@@ -76,11 +73,43 @@ class ReviewService
     /**
      * Add review
      */
+    /**
+     * Reviews the admin picked for the "What our client say" home strip.
+     */
+    public function featured(): JsonResponse
+    {
+        $reviews = $this->model->query()
+            ->with(['user', 'product.images'])
+            ->where('status', ReviewStatus::APPROVED->value)
+            ->where('is_featured', true)
+            ->orderByDesc('id')
+            ->limit(12)
+            ->get()
+            ->map(fn ($review) => [
+                'id' => $review->id,
+                'rate' => (int) $review->rate,
+                'comment' => $review->comment,
+                'created_at' => $review->created_at?->format('d.m.Y'),
+                'user' => [
+                    'id' => $review->user?->id,
+                    'name' => $review->user?->name,
+                    'avatar' => $review->user?->avatar,
+                ],
+                'product' => [
+                    'id' => $review->product?->id,
+                    'title' => $review->product?->title,
+                    'image' => $review->product?->images->first()?->image_path,
+                ],
+            ]);
+
+        return responseHelper(__('Featured reviews retrieved successfully.'), 200, $reviews);
+    }
+
     public function add($request): JsonResponse
     {
         $validated = $request->validated();
 
-        if (!empty($validated['image'])) {
+        if (! empty($validated['image'])) {
             $url = compressAndUploadImage($validated['image'], 'reviews', 'review');
             $validated['image'] = ltrim(str_replace(url('/'), '', $url), '/');
         }
@@ -88,7 +117,7 @@ class ReviewService
         $validated['status'] = ReviewStatus::PENDING->value;
 
         return handleTransaction(
-            fn() => $this->model->create($validated)->refresh(),
+            fn () => $this->model->create($validated)->refresh(),
             'Review added successfully.',
             ReviewResource::class
         );
@@ -96,11 +125,11 @@ class ReviewService
 
     public function changeStatus(int $review_id, string $status): JsonResponse
     {
-        $statusEnum = constant(ReviewStatus::class . '::' . strtoupper($status));
+        $statusEnum = constant(ReviewStatus::class.'::'.strtoupper($status));
 
         return handleTransaction(function () use ($review_id, $statusEnum) {
             $this->model->where('id', $review_id)->update([
-                'status' => $statusEnum->value
+                'status' => $statusEnum->value,
             ]);
         }, 'Review status updated successfully.');
     }
@@ -118,6 +147,7 @@ class ReviewService
                 }
 
                 $review->delete();
+
                 return $review;
             },
             'Review deleted successfully.'
@@ -131,6 +161,7 @@ class ReviewService
                 $review = $this->model->findOrFail($id);
 
                 $review->delete();
+
                 return $review;
             },
             'Review deleted successfully.'

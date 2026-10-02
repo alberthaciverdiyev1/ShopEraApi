@@ -40,6 +40,16 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        /*
+         * The Blade admin panel. Session based, but backed by the marketplace
+         * User entity so spatie/laravel-permission roles & permissions resolve
+         * against the same records the API uses.
+         */
+        'admin' => [
+            'driver' => 'session',
+            'provider' => 'admin_users',
+        ],
     ],
 
     /*
@@ -63,6 +73,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
+        ],
+
+        'admin_users' => [
+            'driver' => 'eloquent',
+            'model' => Modules\User\Entities\User::class,
         ],
 
         // 'users' => [

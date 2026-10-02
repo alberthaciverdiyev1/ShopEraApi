@@ -25,15 +25,15 @@ class AiService
     private function analyzeWithGemini(array $imagePaths, string $prompt): ?array
     {
         $apiKey = config('services.ai.api_key');
-        $url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . $apiKey;
+        $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='.$apiKey;
 
         $inlineData = [];
         foreach ($imagePaths as $path) {
-            $fullPath = storage_path('app/public/' . $path);
+            $fullPath = storage_path('app/public/'.$path);
             if (file_exists($fullPath)) {
                 $inlineData[] = [
                     'mime_type' => 'image/jpeg',
-                    'data' => base64_encode(file_get_contents($fullPath))
+                    'data' => base64_encode(file_get_contents($fullPath)),
                 ];
             }
         }
@@ -44,12 +44,12 @@ class AiService
                     'parts' => array_merge(
                         [['text' => $prompt]],
                         $inlineData
-                    )
-                ]
+                    ),
+                ],
             ],
             'generationConfig' => [
                 'response_mime_type' => 'application/json',
-            ]
+            ],
         ];
 
         try {
@@ -58,12 +58,13 @@ class AiService
             if ($response->successful()) {
                 $result = $response->json();
                 $textResponse = $result['candidates'][0]['content']['parts'][0]['text'] ?? null;
+
                 return json_decode($textResponse, true);
             }
 
-            Log::error("Gemini Hatası: " . $response->body());
+            Log::error('Gemini Hatası: '.$response->body());
         } catch (\Exception $e) {
-            Log::error("Gemini Bağlantı Hatası: " . $e->getMessage());
+            Log::error('Gemini Bağlantı Hatası: '.$e->getMessage());
         }
 
         return null;
@@ -76,7 +77,7 @@ class AiService
 
         $base64Images = [];
         foreach ($imagePaths as $path) {
-            $fullPath = storage_path('app/public/' . $path);
+            $fullPath = storage_path('app/public/'.$path);
             if (file_exists($fullPath)) {
                 $base64Images[] = trim(base64_encode(file_get_contents($fullPath)));
             }
@@ -91,11 +92,11 @@ class AiService
                     CURLOPT_FRESH_CONNECT => true,
                 ],
             ])->post('http://172.17.0.1:11434/api/generate', [
-                'model'  => 'llava-hybrid:latest',
+                'model' => 'llava-hybrid:latest',
                 'prompt' => $prompt,
                 'images' => $base64Images,
                 'stream' => false,
-                'format' => 'json'
+                'format' => 'json',
             ]);
 
             if ($response->successful()) {
@@ -104,12 +105,13 @@ class AiService
                 if (is_string($rawResponse)) {
                     return json_decode($rawResponse, true);
                 }
+
                 return $rawResponse;
             }
 
-            Log::error("Ollama HTTP Hatası: " . $response->status() . " - " . $response->body());
+            Log::error('Ollama HTTP Hatası: '.$response->status().' - '.$response->body());
         } catch (\Exception $e) {
-            Log::error("Ollama Bağlantı Hatası: " . $e->getMessage());
+            Log::error('Ollama Bağlantı Hatası: '.$e->getMessage());
         }
 
         return null;

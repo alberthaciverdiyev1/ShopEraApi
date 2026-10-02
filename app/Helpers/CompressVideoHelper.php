@@ -1,5 +1,6 @@
 <?php
 
+use App\Support\TenantContext;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
@@ -31,6 +32,7 @@ if (!function_exists('compressAndUploadVideo')) {
         string $fileNamePrefix = null
     ): string {
         $subDir = $subDir ? trim($subDir, '/') : '';
+        $subDir = TenantContext::storagePath($subDir);
 
         $extension = strtolower($file->getClientOriginalExtension());
         $fileName  = ($fileNamePrefix ? $fileNamePrefix . '-' : '') . Str::uuid() . '.' . $extension;

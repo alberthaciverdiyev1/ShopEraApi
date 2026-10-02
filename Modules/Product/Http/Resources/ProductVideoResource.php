@@ -9,8 +9,8 @@ class ProductVideoResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            "id"=>$this->id,
-            "video_path"=>$this->video_path
+            'id' => $this->id,
+            'video_path' => $this->video_path,
         ];
     }
 }

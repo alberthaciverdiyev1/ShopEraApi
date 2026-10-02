@@ -21,9 +21,9 @@ return new class extends Migration
 
         DB::table('referral_setting')->insert([
             'referral_amount' => 0.5,
-            'is_active'       => true,
-            'created_at'      => now(),
-            'updated_at'      => now(),
+            'is_active' => true,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 

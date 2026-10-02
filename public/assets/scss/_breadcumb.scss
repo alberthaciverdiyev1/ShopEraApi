@@ -1,0 +1,55 @@
+
+
+
+.breadcumb-section {
+    overflow: hidden;
+}
+
+.breadcumb-container-wrapper {
+    position: relative; 
+    .shape1 {
+        position: absolute;
+        bottom: 0;
+        left: 87px;
+    }
+    .shape2 {
+        position: absolute;
+        bottom: 0;
+        left: 67px;
+    }
+    .shape3 {
+        position: absolute;
+        top: 0;
+        right: 58px;
+    }
+    .shape4 {
+        position: absolute;
+        top: 0;
+        right: 97px;
+    }
+
+    .shape1, .shape2, .shape3, .shape4 {
+        @include breakpoint (max-md) {
+            display: none !important;
+        }
+    }
+}
+
+
+.breadcumb-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 28px 0;
+
+    @include breakpoint (max-md) { 
+        gap: 6px; 
+        padding: 13px 0;
+        font-size: 13px;
+    }
+    
+    li:nth-last-child(1) {
+        color: $theme-color; 
+    }
+}

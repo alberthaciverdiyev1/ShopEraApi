@@ -4,7 +4,7 @@ namespace Modules\Product\Services;
 
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Modules\Product\Http\Entities\Product;
+use Modules\Product\Entities\Product;
 
 class ProductPricingService
 {
@@ -36,8 +36,8 @@ class ProductPricingService
             ?? ($sizeId === null ? $this->minimumPivotValue($product, 'discount') : null)
             ?? 0;
 
-        $retailPrice = (float)$retailPrice;
-        $discountedPrice = (float)$discountedPrice;
+        $retailPrice = (float) $retailPrice;
+        $discountedPrice = (float) $discountedPrice;
         $hasValidDiscount = $discountedPrice > 0
             && $discountedPrice < $retailPrice
             && $this->hasActiveDiscount($product);
@@ -64,13 +64,13 @@ class ProductPricingService
         $wholesalePrice = $rawWholesalePrice ?? $retailPrices['final_price'];
 
         return [
-            'original_price' => (float)$retailPrices['original_price'],
+            'original_price' => (float) $retailPrices['original_price'],
             'discounted_price' => 0.0,
-            'final_price' => (float)$wholesalePrice,
+            'final_price' => (float) $wholesalePrice,
             'pricing_type' => 'wholesale',
-            'wholesale_price' => (float)$wholesalePrice,
+            'wholesale_price' => (float) $wholesalePrice,
             'has_wholesale_price' => $rawWholesalePrice !== null,
-            'retail_final_price' => (float)$retailPrices['final_price'],
+            'retail_final_price' => (float) $retailPrices['final_price'],
         ];
     }
 
@@ -88,7 +88,7 @@ class ProductPricingService
         $wholesaleTotal = 0.0;
 
         foreach ($basket as $item) {
-            $quantity = (int)$item->quantity;
+            $quantity = (int) $item->quantity;
             $retailPrices = $this->retailPrices($item->product, $item->size_id);
             $wholesalePrices = $this->wholesalePrices($item->product, $item->size_id);
 
@@ -120,7 +120,7 @@ class ProductPricingService
 
     private function minimumPivotValue(Product $product, string $field): ?float
     {
-        if (!$product->relationLoaded('sizes') || $product->sizes->isEmpty()) {
+        if (! $product->relationLoaded('sizes') || $product->sizes->isEmpty()) {
             return null;
         }
 
@@ -129,12 +129,12 @@ class ProductPricingService
             ->filter(fn ($price) => $price !== null)
             ->min();
 
-        return $value !== null ? (float)$value : null;
+        return $value !== null ? (float) $value : null;
     }
 
     private function hasActiveDiscount(Product $product): bool
     {
-        return !$product->discount_expire_date
+        return ! $product->discount_expire_date
             || Carbon::parse($product->discount_expire_date)->isFuture();
     }
 }

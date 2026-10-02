@@ -3,12 +3,10 @@
 namespace Modules\Notification\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Modules\Notification\Http\Entities\Notification;
-use Modules\User\Http\Entities\User;
+use Modules\Notification\Entities\Notification;
 
 class NotificationFactory extends Factory
 {
-
     protected $model = Notification::class;
 
     public function definition()
@@ -24,8 +22,6 @@ class NotificationFactory extends Factory
             'user_id' => $userId,
             'all' => $userId === null,
         ];
-
-
 
     }
 }

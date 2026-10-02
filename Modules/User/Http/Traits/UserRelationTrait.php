@@ -3,23 +3,18 @@
 namespace Modules\User\Http\Traits;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Modules\Balance\Http\Entities\Balance;
-use Modules\Notification\Http\Entities\NotificationToken;
-use Modules\Product\Http\Entities\Product;
-use Modules\Product\Http\Entities\Review;
-use Modules\PromoCode\Http\Entities\PromoCode;
-use Modules\User\Http\Entities\Address;
-use Modules\User\Http\Entities\Basket;
-use Modules\User\Http\Entities\ReferralCode;
-use Modules\User\Http\Entities\UserReferral;
-use Modules\Store\Http\Entities\Store;
+use Modules\Balance\Entities\Balance;
+use Modules\Notification\Entities\NotificationToken;
+use Modules\Product\Entities\Product;
+use Modules\Product\Entities\Review;
+use Modules\PromoCode\Entities\PromoCode;
+use Modules\User\Entities\Address;
+use Modules\User\Entities\Basket;
+use Modules\User\Entities\ReferralCode;
+use Modules\User\Entities\UserReferral;
 
 trait UserRelationTrait
 {
-    public function store()
-    {
-        return $this->hasOne(Store::class);
-    }
     public function favorites()
     {
         return $this->belongsToMany(
@@ -93,5 +88,4 @@ trait UserRelationTrait
     {
         return $this->hasOne(UserReferral::class, 'user_id');
     }
-
 }

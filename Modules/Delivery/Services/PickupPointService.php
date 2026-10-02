@@ -8,17 +8,14 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Modules\Delivery\Http\Entities\PickupPoint;
+use Modules\Delivery\Entities\PickupPoint;
 use Modules\Delivery\Http\Resources\PickupPointResource;
 
 class PickupPointService implements ICrudInterface
 {
     private PickupPoint $model;
 
-    /**
-     * @param PickupPoint $model
-     */
-    function __construct(PickupPoint $model)
+    public function __construct(PickupPoint $model)
     {
         /** @var PickupPoint|Builder $model */
         $this->model = $model;
@@ -32,7 +29,7 @@ class PickupPointService implements ICrudInterface
         if ($request->has('is_active')) {
             $isActive = filter_var($request->query('is_active'), FILTER_VALIDATE_BOOLEAN);
             $query->where('is_active', $isActive);
-        } elseif (!$isAdmin) {
+        } elseif (! $isAdmin) {
             $query->where('is_active', true);
         }
 
@@ -50,11 +47,12 @@ class PickupPointService implements ICrudInterface
             PickupPointResource::collection($pickupPoints)
         );
     }
+
     public function details(int $id): JsonResponse
     {
         $pickupPoint = $this->model->newQuery()->where('is_active', true)->find($id);
 
-        if (!$pickupPoint) {
+        if (! $pickupPoint) {
             return responseHelper(__('Pickup point not found.'), 404);
         }
 
@@ -86,7 +84,7 @@ class PickupPointService implements ICrudInterface
 
                 foreach ($languages as $lang) {
                     $text = $data['delivery_time'][$lang] ?? (
-                    !empty($sourceText) ? Translate::translate($sourceText, $lang) : ''
+                        ! empty($sourceText) ? Translate::translate($sourceText, $lang) : ''
                     );
 
                     $deliveryTimeTranslations[$lang] = Str::lower($text);
@@ -99,11 +97,12 @@ class PickupPointService implements ICrudInterface
             return new PickupPointResource($pickupPoint);
         }, 'Pickup point added successfully.', null, 201);
     }
+
     public function update(int $id, $request): JsonResponse
     {
         $pickupPoint = $this->model->newQuery()->find($id);
 
-        if (!$pickupPoint) {
+        if (! $pickupPoint) {
             return responseHelper(__('Pickup point not found.'), 404);
         }
 
@@ -116,11 +115,11 @@ class PickupPointService implements ICrudInterface
                 $sourceText = $data['delivery_time']['az'] ?? '';
 
                 foreach ($languages as $lang) {
-                    if (empty($data['delivery_time'][$lang]) && !empty($sourceText)) {
+                    if (empty($data['delivery_time'][$lang]) && ! empty($sourceText)) {
                         $data['delivery_time'][$lang] = Translate::translate($sourceText, $lang);
                     }
 
-                    if (!empty($data['delivery_time'][$lang])) {
+                    if (! empty($data['delivery_time'][$lang])) {
                         $data['delivery_time'][$lang] = Str::lower($data['delivery_time'][$lang]);
                     }
                 }
@@ -136,7 +135,7 @@ class PickupPointService implements ICrudInterface
     {
         $pickupPoint = $this->model->newQuery()->find($id);
 
-        if (!$pickupPoint) {
+        if (! $pickupPoint) {
             return responseHelper(__('Pickup point not found.'), 404);
         }
 
@@ -150,14 +149,13 @@ class PickupPointService implements ICrudInterface
                 : $rawDeliveryTime;
 
             $data = [
-                'id'            => $pickupPoint->id,
-                'starex_delivery_point_id' => $pickupPoint->starex_delivery_point_id,
-                'name'          => $pickupPoint->name,
-                'address'       => $pickupPoint->address,
-                'price'         => $pickupPoint->price,
+                'id' => $pickupPoint->id,
+                'name' => $pickupPoint->name,
+                'address' => $pickupPoint->address,
+                'price' => $pickupPoint->price,
                 'delivery_time' => $deliveryTime,
-                'is_active'     => (bool)$pickupPoint->is_active,
-                'created_at'    => $pickupPoint->created_at->format('Y-m-d H:i:s'),
+                'is_active' => (bool) $pickupPoint->is_active,
+                'created_at' => $pickupPoint->created_at->format('Y-m-d H:i:s'),
             ];
 
             return responseHelper(__('Pickup point details retrieved successfully (Admin Mode).'), 200, $data);
@@ -173,13 +171,14 @@ class PickupPointService implements ICrudInterface
     {
         $pickupPoint = $this->model->newQuery()->find($id);
 
-        if (!$pickupPoint) {
+        if (! $pickupPoint) {
             return responseHelper(__('Pickup point not found.'), 404);
         }
 
         return handleTransaction(function () use ($pickupPoint) {
 
             $pickupPoint->delete();
+
             return null;
 
         }, 'Pickup point deleted successfully.', null, 204);

@@ -1,12 +1,14 @@
 <?php
 
 use Modules\Product\Http\Controllers\AiController;
+use Modules\Product\Http\Controllers\ProductController;
 
-Route::prefix('product')->controller(\Modules\Product\Http\Controllers\ProductController::class)->group(function () {
+Route::prefix('product')->controller(ProductController::class)->group(function () {
 
     Route::get('/statistics', 'statistics')->name('product.statistics');
     Route::get('/story-videos', 'storyVideos')->name('product.storyVideos');
-    Route::match(['get','post'],'/', 'list')->name('product.list');
+    Route::match(['get', 'post'], '/', 'list')->name('product.list');
+    Route::get('/filters', 'filters')->name('product.filters');
     Route::get('/{id}', 'details')->name('product.details')->whereNumber('id');
     Route::get('/recommend', 'recommendedProductsList')->name('product.recommendedProductsList');
 

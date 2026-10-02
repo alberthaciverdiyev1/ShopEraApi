@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Jobs\Concerns\TenantAware;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -11,7 +12,7 @@ use Modules\Notification\Services\SendNotificationService;
 
 class SendOrderStatusNotificationJob implements ShouldQueue
 {
-    use Dispatchable, Queueable, SerializesModels;
+    use Dispatchable, Queueable, SerializesModels, TenantAware;
 
     public int $tries = 1;
 
@@ -25,6 +26,7 @@ class SendOrderStatusNotificationJob implements ShouldQueue
         public string $body,
         public array $extraData = []
     ) {
+        $this->captureTenant();
     }
 
     public function handle(SendNotificationService $service): void

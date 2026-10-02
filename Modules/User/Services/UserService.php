@@ -2,6 +2,7 @@
 
 namespace Modules\User\Services;
 
+use App\Helpers\DeleteAccountHtml;
 use App\Helpers\PhoneHelper;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
@@ -9,8 +10,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Modules\User\Http\Entities\OtpEmail;
-use Modules\User\Http\Entities\User;
+use Illuminate\Support\Facades\Storage;
+use App\Support\TenantContext;
+use Modules\User\Entities\OtpEmail;
+use Modules\User\Entities\User;
 use Modules\User\Http\UserResource;
 use Symfony\Component\HttpFoundation\Response as StatusCode;
 
@@ -23,24 +26,43 @@ class UserService
         $this->user = $user;
     }
 
+    /**
+     * The account being edited: the caller's own, or another one for admins.
+     */
+    private function targetUser(Request $request, ?int $userId): ?User
+    {
+        if (! $userId) {
+            return $request->user();
+        }
+
+        if ($userId !== $request->user()?->id) {
+            abort_unless(
+                $request->user()?->can('update user'),
+                403,
+                'User does not have the right permissions.'
+            );
+        }
+
+        return $this->user->find($userId);
+    }
+
     public function changeEmail(Request $request)
     {
         $validated = $request->validate([
             'email' => 'required|string|email|unique:users,email',
-            'user_id' => 'nullable|exists:users,id'
+            'user_id' => 'nullable|exists:users,id',
         ]);
 
         $userId = $validated['user_id'] ?? null;
-        $user = $userId ? $this->user->find($userId) : $request->user();
+        $user = $this->targetUser($request, $userId);
 
-        if (!$user) {
+        if (! $user) {
             return responseHelper(__('User not found or not authenticated'), 404);
         }
 
         return handleTransaction(function () use ($user, $validated) {
             $user->email = $validated['email'];
             $user->save();
-
 
             return $user;
         }, 'Email changed successfully');
@@ -50,19 +72,20 @@ class UserService
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'user_id' => 'nullable|exists:users,id'
+            'user_id' => 'nullable|exists:users,id',
         ]);
 
         $userId = $validated['user_id'] ?? null;
-        $user = $userId ? $this->user->find($userId) : $request->user();
+        $user = $this->targetUser($request, $userId);
 
-        if (!$user) {
+        if (! $user) {
             return responseHelper(__('User not found or not authenticated'), 404);
         }
 
         return handleTransaction(function () use ($user, $validated) {
             $user->name = strtolower($validated['name']);
             $user->save();
+
             return $user;
         }, 'Name changed successfully');
     }
@@ -88,13 +111,13 @@ class UserService
 
         $otpCheck = OtpEmail::where([
             'email' => $validated['phone'],
-            'otp_code' => $validated['otpCode']
+            'otp_code' => $validated['otpCode'],
         ])->where('deactive_date', '>', now())->first();
 
-        if (!$otpCheck) {
+        if (! $otpCheck) {
             return response()->json([
                 'status' => StatusCode::HTTP_FORBIDDEN,
-                'message' => 'OTP code is invalid or expired'
+                'message' => 'OTP code is invalid or expired',
             ], StatusCode::HTTP_FORBIDDEN);
         }
 
@@ -130,21 +153,72 @@ class UserService
     {
         $validated = $request->validate([
             'surname' => 'required|string|max:255',
-            'user_id' => 'nullable|exists:users,id'
+            'user_id' => 'nullable|exists:users,id',
         ]);
 
         $userId = $validated['user_id'] ?? null;
-        $user = $userId ? $this->user->find($userId) : $request->user();
+        $user = $this->targetUser($request, $userId);
 
-        if (!$user) {
+        if (! $user) {
             return responseHelper(__('User not found or not authenticated'), 404);
         }
 
         return handleTransaction(function () use ($user, $validated) {
             $user->surname = strtolower($validated['surname']);
             $user->save();
+
             return $user;
         }, 'Surname changed successfully');
+    }
+
+    public function changeAvatar(Request $request): JsonResponse
+    {
+        $request->validate([
+            'avatar' => 'required|image|mimes:jpeg,png,jpg,webp|max:5120',
+        ]);
+
+        $user = $request->user();
+        if (! $user) {
+            return responseHelper(__('User not found or not authenticated'), 404);
+        }
+
+        $file = $request->file('avatar');
+        $fileName = 'avatar_'.$user->id.'_'.time().'.'.$file->getClientOriginalExtension();
+
+        $directory = TenantContext::storagePath('avatars');
+
+        if (! Storage::disk('public')->exists($directory)) {
+            Storage::disk('public')->makeDirectory($directory, 0755, true);
+        }
+
+        $oldPath = $user->getRawOriginal('avatar');
+        if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+            Storage::disk('public')->delete($oldPath);
+        }
+
+        $file->storeAs($directory, $fileName, 'public');
+        $user->avatar = "{$directory}/{$fileName}";
+        $user->save();
+
+        return responseHelper(__('Avatar updated successfully.'), 200, UserResource::make($user));
+    }
+
+    public function removeAvatar(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        if (! $user) {
+            return responseHelper(__('User not found or not authenticated'), 404);
+        }
+
+        $oldPath = $user->getRawOriginal('avatar');
+        if ($oldPath && Storage::disk('public')->exists($oldPath)) {
+            Storage::disk('public')->delete($oldPath);
+        }
+
+        $user->avatar = null;
+        $user->save();
+
+        return responseHelper(__('Avatar removed successfully.'), 200, UserResource::make($user));
     }
 
     public function getAll(Request $request): JsonResponse
@@ -170,7 +244,7 @@ class UserService
             });
         }
 
-        if ($request->filled('role') && !$request->boolean('only_team')) {
+        if ($request->filled('role') && ! $request->boolean('only_team')) {
             $query->whereHas('roles', function ($q) use ($request) {
                 $q->where('name', $request->role);
             });
@@ -192,11 +266,12 @@ class UserService
             ],
         ]);
     }
+
     public function blockUser(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'block' => 'required|boolean'
+            'block' => 'required|boolean',
         ]);
 
         $user = $this->user->find($validated['user_id']);
@@ -212,12 +287,12 @@ class UserService
             );
         }
 
-        if (!$user) {
+        if (! $user) {
             return responseHelper(__('User not found'), 404);
         }
 
         return handleTransaction(function () use ($user, $validated) {
-            $user->is_active = !$validated['block'];
+            $user->is_active = ! $validated['block'];
             $user->save();
 
             if ($validated['block']) {
@@ -225,7 +300,7 @@ class UserService
             }
 
             return $user;
-        }, "User " . ($validated['block'] ? 'blocked' : 'unblocked') . " successfully");
+        }, 'User '.($validated['block'] ? 'blocked' : 'unblocked').' successfully');
     }
 
     public function changeWholesalerStatus(Request $request): JsonResponse
@@ -237,7 +312,7 @@ class UserService
 
         $user = $this->user->find($validated['user_id']);
 
-        if (!$user) {
+        if (! $user) {
             return responseHelper(__('User not found'), 404);
         }
 
@@ -249,17 +324,23 @@ class UserService
         }, 'Wholesale status updated successfully', UserResource::class);
     }
 
-
-    public function details(int $id = null): JsonResponse
+    public function details(?int $id = null): JsonResponse
     {
+        $self = Auth::user();
+
+        // Another account may only be inspected with the right permission.
+        if ($id && $id !== $self?->id) {
+            abort_unless($self?->can('details user'), 403, 'User does not have the right permissions.');
+        }
+
         $user = $id
             ? User::with(['roles.permissions', 'referralCode'])->find($id)
-            : Auth::user()->load(['roles.permissions', 'referralCode']);
+            : $self?->load(['roles.permissions', 'referralCode']);
 
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'success' => false,
-                'message' => 'User not found'
+                'message' => 'User not found',
             ], 404);
         }
 
@@ -279,7 +360,7 @@ class UserService
         return response()->json([
             'success' => true,
             'user' => UserResource::make($user),
-            'roles' => $roles
+            'roles' => $roles,
         ]);
     }
 
@@ -291,46 +372,41 @@ class UserService
 
         $user = $this->user->find($id);
 
-        if (!$user) {
+        if (! $user) {
             return responseHelper(__('User not found'), 404);
         }
-
-        // Outside the transaction: it revokes Apple grants over the network.
-        app(SocialAccountService::class)->forget($user);
 
         return handleTransaction(function () use ($user) {
             $user->forceDelete();
 
             return $user;
-        }, "User deleted successfully");
+        }, 'User deleted successfully');
     }
 
     public function deleteMyAccount(): JsonResponse
     {
         $user = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             return responseHelper(__('User not authenticated'), 403);
         }
 
         try {
-            // Apple requires its sign-in grant to be revoked when the account
-            // is deleted. Never throws.
-            app(SocialAccountService::class)->forget($user);
-
             $user->tokens()->delete();
 
             $user->delete();
+
             return responseHelper(__('User deleted successfully'), 200);
 
         } catch (\Exception $e) {
-            \Log::error('Error deleting user: ' . $e->getMessage());
+            \Log::error('Error deleting user: '.$e->getMessage());
+
             return responseHelper(__('Failed to delete user'), 403);
         }
     }
 
     public function deleteMyAccountHtml()
     {
-        return (new \App\Helpers\DeleteAccountHtml())();
+        return (new DeleteAccountHtml)();
     }
 }

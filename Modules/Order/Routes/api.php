@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Http\Request;
+use Modules\Order\Http\Controllers\OrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,8 +13,7 @@ use Illuminate\Http\Request;
 |
 */
 
-
-Route::prefix('order')->controller(\Modules\Order\Http\Controllers\OrderController::class)->group(function () {
+Route::prefix('order')->controller(OrderController::class)->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', 'getAll')->name('order.list');
@@ -22,11 +21,11 @@ Route::prefix('order')->controller(\Modules\Order\Http\Controllers\OrderControll
         Route::post('/', 'orderFromBasket')->name('order.orderFromBasket');
         Route::get('/preview', 'previewOrder')->name('order.previewOrder');
         Route::post('/{product_id}', 'buyOne')->name('order.buyOne');
+        Route::get('/whatsapp-link', 'whatsappLink')->name('order.whatsappLink');
         Route::get('/completed', 'completedOrders')->name('order.completed');
 
         Route::get('/{id}', 'details')->whereNumber('id')->name('order.details');
         Route::get('/admin/{id}', 'detailsAdmin')->name('order.details-admin');
-        Route::post('/admin/{id}/starex/retry', 'retryStarexShipment')->whereNumber('id')->name('order.starex-retry');
 
         Route::put('/{id}', 'update')->name('order.update');
         Route::delete('/{id}', 'delete')->name('order.delete');

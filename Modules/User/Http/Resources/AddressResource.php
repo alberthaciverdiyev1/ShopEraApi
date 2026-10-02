@@ -4,7 +4,7 @@ namespace Modules\User\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Modules\Delivery\Http\Entities\City;
+use Modules\Delivery\Entities\City;
 
 class AddressResource extends JsonResource
 {
@@ -12,7 +12,7 @@ class AddressResource extends JsonResource
     {
         $data = parent::toArray($request);
 
-        if (!is_array($data)) {
+        if (! is_array($data)) {
             return $data;
         }
 

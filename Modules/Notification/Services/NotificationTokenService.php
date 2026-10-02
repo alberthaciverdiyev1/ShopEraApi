@@ -4,12 +4,14 @@ namespace Modules\Notification\Services;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-use Modules\Notification\Http\Entities\NotificationToken;
+use Modules\Notification\Entities\NotificationToken;
 
 class NotificationTokenService
 {
     private NotificationToken $model;
+
     private NotificationService $notificationService;
+
     private SendNotificationService $sendNotificationService;
 
     public function __construct(
@@ -40,14 +42,14 @@ class NotificationTokenService
                     ]
                 );
 
-//                try {
-//                    $deviceToken = $validated['device_token'] ?? null;
-//                    if ($deviceToken) {
-//                        $this->sendNotificationService->subscribeToTopic('all_users', [$deviceToken]);
-//                    }
-//                } catch (\Throwable $e) {
-//                    Log::error('Failed to subscribe user to FCM topic: ' . $e->getMessage());
-//                }
+                //                try {
+                //                    $deviceToken = $validated['device_token'] ?? null;
+                //                    if ($deviceToken) {
+                //                        $this->sendNotificationService->subscribeToTopic('all_users', [$deviceToken]);
+                //                    }
+                //                } catch (\Throwable $e) {
+                //                    Log::error('Failed to subscribe user to FCM topic: ' . $e->getMessage());
+                //                }
 
                 return $tokenModel;
             },
@@ -56,7 +58,6 @@ class NotificationTokenService
             200
         );
     }
-
 
     public function deleteToken($request): void
     {

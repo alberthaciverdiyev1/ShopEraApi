@@ -3,58 +3,58 @@
 namespace Modules\Product\Services;
 
 use App\Enums\Gender;
-use Google\Service\Logging\Resource\Logs;
+use App\Helpers\TranslateHelper as Translate;
+use App\Support\DbExtensions;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Modules\Category\Http\Entities\Category;
-use Modules\Notification\Services\SendNotificationService;
-use Modules\Order\Http\Entities\OrderItem;
-use Modules\Product\Http\Entities\Product;
-use Modules\Product\Http\Entities\ProductImage;
-use Modules\Product\Http\Entities\ProductVideo;
+use Illuminate\Support\Str;
+use Modules\Brand\Entities\Brand;
+use Modules\Brand\Http\Transformers\BrandResource;
+use Modules\Category\Entities\Category;
+use Modules\Color\Entities\Color;
+use Modules\Color\Http\Transformers\ColorResource;
+use Modules\Order\Entities\OrderItem;
+use Modules\Product\Entities\Product;
+use Modules\Product\Entities\ProductImage;
+use Modules\Product\Entities\ProductVideo;
 use Modules\Product\Http\Resources\ProductResource;
 use Modules\Product\Http\Resources\ProductStoryVideoResource;
-use Illuminate\Support\Str;
-use App\Helpers\TranslateHelper as Translate;
-use Modules\User\Http\Entities\Basket;
+use Modules\Size\Entities\Size;
+use Modules\Size\Http\Transformers\SizeResource;
+use Modules\User\Entities\Basket;
 
 class ProductService
 {
     private Product $model;
+
     private ProductSubscribeService $subscribe_service;
 
-    /**
-     * @param Product $model
-     */
-    function __construct(Product $model, ProductSubscribeService $subscribe_service)
+    public function __construct(Product $model, ProductSubscribeService $subscribe_service)
     {
         $this->model = $model;
         $this->subscribe_service = $subscribe_service;
     }
 
-    /**
-     * @param $request
-     * @return JsonResponse
-     */
     public function list($request): JsonResponse
     {
         $params = $request->all();
         $locale = app()->getLocale();
 
-        $discountCount = Product::whereNotNull('discount')
+        $discountCount = Product::where('discount', '>', 0)
+            ->whereColumn('discount', '<', 'price')
             ->publiclyAvailable()
             ->count();
 
         $query = Product::query()
-            ->with(['colors', 'sizes', 'images', 'videos', 'category', 'brand', 'store'])
+            ->with(['colors', 'sizes', 'images', 'videos', 'category', 'brand'])
             ->withAvg('reviews', 'rate')
             ->withCount('reviews');
 
-        $isAdminRequest = !empty($params['is_admin']) && auth('sanctum')->check();
+        $isAdminRequest = ! empty($params['is_admin']) && auth('sanctum')->check();
 
         if ($isAdminRequest && isset($params['is_active'])) {
             $query->where('is_active', $params['is_active']);
@@ -64,21 +64,7 @@ class ProductService
             $query->publiclyAvailable();
         }
 
-        // Admin needs to tell its own catalogue apart from marketplace stock;
-        // absent the filter nothing changes, so existing callers are unaffected.
-        if (isset($params['source'])) {
-            if ($params['source'] === 'own') {
-                $query->whereNull('store_id');
-            } elseif ($params['source'] === 'store') {
-                $query->whereNotNull('store_id');
-            }
-        }
-
-        if (!empty($params['store_id'])) {
-            $query->where('store_id', $params['store_id']);
-        }
-
-        if ($isAdminRequest && !empty($params['approval_status'])) {
+        if ($isAdminRequest && ! empty($params['approval_status'])) {
             $query->where('approval_status', $params['approval_status']);
         }
 
@@ -86,17 +72,20 @@ class ProductService
             $query->where('is_suggest', $params['is_suggest']);
         }
 
-        if (!empty($params['discount'])) {
-            $query->whereNotNull('discount');
+        if (! empty($params['discount'])) {
+            // `discount` is the sale price; a product is on sale only when it is
+            // set and actually below the regular price.
+            $query->where('discount', '>', 0)
+                ->whereColumn('discount', '<', 'price');
         }
 
-        if (!empty($params['gender']) && in_array($params['gender'], ['male', 'female', 'kids'])) {
+        if (! empty($params['gender']) && in_array($params['gender'], ['male', 'female', 'kids'])) {
             $query->where('gender', Gender::fromString($params['gender'])->value);
         }
 
         rangeFilter($query, 'price', $params);
 
-        if (!empty($params['category_ids']) && is_array($params['category_ids'])) {
+        if (! empty($params['category_ids']) && is_array($params['category_ids'])) {
 
             $categoryIds = collect($params['category_ids']);
             $allCategoryIds = collect();
@@ -118,20 +107,35 @@ class ProductService
             $query->whereIn('category_id', $finalIds);
         }
 
-
-        if (!empty($params['brand_ids']) && is_array($params['brand_ids'])) {
+        if (! empty($params['brand_ids']) && is_array($params['brand_ids'])) {
             $query->whereIn('brand_id', $params['brand_ids']);
         }
 
-        if (!empty($params['color_ids']) && is_array($params['color_ids'])) {
-            $query->whereHas('colors', fn($q) => $q->whereIn('colors.id', $params['color_ids']));
+        if (! empty($params['color_ids']) && is_array($params['color_ids'])) {
+            $query->whereHas('colors', fn ($q) => $q->whereIn('colors.id', $params['color_ids']));
         }
 
-        if (!empty($params['size_ids']) && is_array($params['size_ids'])) {
-            $query->whereHas('sizes', fn($q) => $q->whereIn('sizes.id', $params['size_ids']));
+        if (! empty($params['size_ids']) && is_array($params['size_ids'])) {
+            $query->whereHas('sizes', fn ($q) => $q->whereIn('sizes.id', $params['size_ids']));
         }
 
-        if (!empty($params['search'])) {
+        // Dynamic filters: ?filters[<filter_id>][]=value (OR inside a filter,
+        // AND across different filters).
+        if (! empty($params['filters']) && is_array($params['filters'])) {
+            foreach ($params['filters'] as $filterId => $values) {
+                $values = array_values(array_filter((array) $values, fn ($value) => $value !== '' && $value !== null));
+
+                if (empty($values)) {
+                    continue;
+                }
+
+                $query->whereHas('productFilters', function ($q) use ($filterId, $values) {
+                    $q->where('filter_id', $filterId)->whereIn('value', $values);
+                });
+            }
+        }
+
+        if (! empty($params['search'])) {
             filterLike($query, ['title', 'description', 'sku'], $params);
         }
 
@@ -165,9 +169,9 @@ class ProductService
         // it, which is the same rule the house catalogue follows above.
         $pinnedFirst = empty($params['order_by']);
 
-        if (!empty($params['is_admin'])) {
+        if (! empty($params['is_admin'])) {
             orderBy($query, $params);
-        } elseif (!$isFiltered) {
+        } elseif (! $isFiltered) {
             if ($pinnedFirst) {
                 $query->orderByDesc('is_pinned');
             }
@@ -176,10 +180,6 @@ class ProductService
         } else {
             if ($pinnedFirst) {
                 $query->orderByDesc('is_pinned');
-            }
-
-            if ($prioritiseOwnProducts) {
-                $query->orderByRaw('CASE WHEN store_id IS NULL THEN 0 ELSE 1 END');
             }
 
             orderBy($query, $params);
@@ -222,6 +222,104 @@ class ProductService
         ]);
     }
 
+    /**
+     * Filter facets for the storefront: the brands, colours, sizes and price
+     * range that actually exist among the products — optionally restricted to
+     * a category and its children. Each entry carries how many products use it.
+     */
+    public function filters($request): JsonResponse
+    {
+        $params = $request->all();
+        $categoryIds = $params['category_ids'] ?? null;
+
+        $build = function () use ($categoryIds) {
+            $query = Product::query()->publiclyAvailable();
+
+            if (! empty($categoryIds) && is_array($categoryIds)) {
+                $query->whereIn('category_id', $this->categoryWithDescendants($categoryIds));
+            }
+
+            return $query;
+        };
+
+        $brandCounts = $build()
+            ->whereNotNull('brand_id')
+            ->selectRaw('brand_id as id, COUNT(*) as total')
+            ->groupBy('brand_id')
+            ->pluck('total', 'id');
+
+        $brands = Brand::query()
+            ->whereIn('id', $brandCounts->keys())
+            ->orderBy('name')
+            ->get()
+            ->map(fn ($brand) => array_merge(
+                (new BrandResource($brand))->resolve(),
+                ['products_count' => (int) ($brandCounts[$brand->id] ?? 0)]
+            ));
+
+        $colorCounts = $build()
+            ->join('color_product', 'color_product.product_id', '=', 'products.id')
+            ->selectRaw('color_product.color_id as id, COUNT(DISTINCT products.id) as total')
+            ->groupBy('color_product.color_id')
+            ->pluck('total', 'id');
+
+        $colors = Color::query()
+            ->whereIn('id', $colorCounts->keys())
+            ->orderBy('sort_order')
+            ->get()
+            ->map(fn ($color) => array_merge(
+                (new ColorResource($color))->resolve(),
+                ['products_count' => (int) ($colorCounts[$color->id] ?? 0)]
+            ));
+
+        $sizeCounts = $build()
+            ->join('product_size', 'product_size.product_id', '=', 'products.id')
+            ->selectRaw('product_size.size_id as id, COUNT(DISTINCT products.id) as total')
+            ->groupBy('product_size.size_id')
+            ->pluck('total', 'id');
+
+        $sizes = Size::query()
+            ->whereIn('id', $sizeCounts->keys())
+            ->orderBy('sort_order')
+            ->get()
+            ->map(fn ($size) => array_merge(
+                (new SizeResource($size))->resolve(),
+                ['products_count' => (int) ($sizeCounts[$size->id] ?? 0)]
+            ));
+
+        $price = $build()->selectRaw('MIN(price) as min_price, MAX(price) as max_price')->first();
+
+        return responseHelper(__('Product filters retrieved successfully.'), 200, [
+            'brands' => $brands,
+            'colors' => $colors,
+            'sizes' => $sizes,
+            'price' => [
+                'min' => (float) ($price->min_price ?? 0),
+                'max' => (float) ($price->max_price ?? 0),
+            ],
+            'total' => $build()->count(),
+        ]);
+    }
+
+    /**
+     * A category plus every descendant category id.
+     */
+    private function categoryWithDescendants(array $ids): array
+    {
+        $all = collect($ids);
+
+        $fetchChildren = function ($parentIds) use (&$fetchChildren, &$all) {
+            $children = Category::whereIn('parent_id', $parentIds)->pluck('id');
+            if ($children->isNotEmpty()) {
+                $all = $all->merge($children);
+                $fetchChildren($children);
+            }
+        };
+
+        $fetchChildren($ids);
+
+        return $all->unique()->values()->all();
+    }
 
     /**
      * Product details
@@ -230,7 +328,7 @@ class ProductService
     {
         try {
             $product = $this->model->with([
-                'colors', 'sizes', 'images', 'videos', 'category', 'brand', 'store', 'reviews.user'
+                'colors', 'sizes', 'images', 'videos', 'category', 'brand', 'reviews.user', 'productFilters.filter',
             ])->publiclyAvailable()->findOrFail($id);
 
             $product?->increment('views');
@@ -251,7 +349,7 @@ class ProductService
 
             return responseHelper(__('Product details retrieved successfully.'), 200, $data);
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return responseHelper(__('Product not found.'), 403, []);
         }
     }
@@ -260,7 +358,7 @@ class ProductService
     {
         $videos = ProductVideo::query()
             ->with([
-                'product' => fn($query) => $query
+                'product' => fn ($query) => $query
                     ->publiclyAvailable()
                     ->with(['images']),
             ])
@@ -274,7 +372,7 @@ class ProductService
                             ->where('created_at', '>=', now()->subDay());
                     });
             })
-            ->whereHas('product', fn($query) => $query->publiclyAvailable())
+            ->whereHas('product', fn ($query) => $query->publiclyAvailable())
             ->latest()
             ->get();
 
@@ -286,38 +384,43 @@ class ProductService
 
     public function storyVideosAdmin($request): JsonResponse
     {
-        $search = trim((string)$request->query('search', ''));
+        $search = trim((string) $request->query('search', ''));
         $isNumericSearch = ctype_digit($search);
         $locale = app()->getLocale();
 
-        $limit = (int)$request->query('limit', 0);
+        $limit = (int) $request->query('limit', 0);
+
+        // unaccent() is optional; fall back to a plain ILIKE without it.
+        $unaccent = DbExtensions::hasUnaccent();
+        $titleLocaleRaw = $unaccent ? 'unaccent(title->>?) ILIKE unaccent(?)' : 'title->>? ILIKE ?';
+        $titleAzRaw = $unaccent ? "unaccent(title->>'az') ILIKE unaccent(?)" : "title->>'az' ILIKE ?";
 
         $videos = ProductVideo::query()
             ->with(['product.images'])
-            ->when($search !== '', function ($query) use ($search, $isNumericSearch, $locale) {
-                $query->where(function ($query) use ($search, $isNumericSearch, $locale) {
+            ->when($search !== '', function ($query) use ($search, $isNumericSearch, $locale, $titleLocaleRaw, $titleAzRaw) {
+                $query->where(function ($query) use ($search, $isNumericSearch, $locale, $titleLocaleRaw, $titleAzRaw) {
                     if ($isNumericSearch) {
                         $query
-                            ->where('id', (int)$search)
-                            ->orWhere('product_id', (int)$search)
+                            ->where('id', (int) $search)
+                            ->orWhere('product_id', (int) $search)
                             ->orWhere('video_path', 'like', "%{$search}%")
-                            ->orWhereHas('product', function ($productQuery) use ($search, $locale) {
+                            ->orWhereHas('product', function ($productQuery) use ($search, $locale, $titleLocaleRaw, $titleAzRaw) {
                                 $productQuery
-                                    ->whereRaw("unaccent(title->>?) ILIKE unaccent(?)", [$locale, "%{$search}%"])
-                                    ->orWhereRaw("unaccent(title->>'az') ILIKE unaccent(?)", ["%{$search}%"]);
+                                    ->whereRaw($titleLocaleRaw, [$locale, "%{$search}%"])
+                                    ->orWhereRaw($titleAzRaw, ["%{$search}%"]);
                             });
                     } else {
                         $query
                             ->where('video_path', 'like', "%{$search}%")
-                            ->orWhereHas('product', function ($productQuery) use ($search, $locale) {
+                            ->orWhereHas('product', function ($productQuery) use ($search, $locale, $titleLocaleRaw, $titleAzRaw) {
                                 $productQuery
-                                    ->whereRaw("unaccent(title->>?) ILIKE unaccent(?)", [$locale, "%{$search}%"])
-                                    ->orWhereRaw("unaccent(title->>'az') ILIKE unaccent(?)", ["%{$search}%"]);
+                                    ->whereRaw($titleLocaleRaw, [$locale, "%{$search}%"])
+                                    ->orWhereRaw($titleAzRaw, ["%{$search}%"]);
                             });
                     }
                 });
             })
-            ->when($limit > 0, fn($query) => $query->limit($limit))
+            ->when($limit > 0, fn ($query) => $query->limit($limit))
             ->latest()
             ->get();
 
@@ -361,13 +464,12 @@ class ProductService
     {
         try {
             $product = $this->model->withTrashed()->with([
-                'colors', 'sizes', 'images', 'videos', 'category', 'brand', 'store', 'reviews.user'
+                'colors', 'sizes', 'images', 'videos', 'category', 'brand', 'reviews.user',
             ])->findOrFail($id);
 
             $averageRate = $product->reviews()->avg('rate') ?? 5;
             $data = ProductResource::make($product);
             $data->rate = round($averageRate, 2);
-
 
             return response()->json([
                 'success' => 200,
@@ -375,7 +477,7 @@ class ProductService
                 'data' => $product,
             ]);
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'success' => 404,
                 'message' => __('Product not found.'),
@@ -387,147 +489,145 @@ class ProductService
     /**
      * Add product
      */
-//    public function add($request): JsonResponse
-//    {
-//        $data = $request->validated();
-//        if (!isset($data['sku'])) {
-//            $lastProduct = $this->model->orderByDesc('id')->first();
-//            if ($lastProduct && preg_match('/P(\d+)/', $lastProduct->sku, $matches)) {
-//                $nextNumber = (int)$matches[1] + 1;
-//            } else {
-//                $nextNumber = 1;
-//            }
-//
-//            $data['sku'] = 'P' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
-//
-//            while ($this->model->where('sku', $data['sku'])->exists()) {
-//                $nextNumber++;
-//                $data['sku'] = 'P' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
-//            }
-//        }
-//        if (isset($data['gender'])) {
-//            $data['gender'] = Gender::fromString($data['gender'])->value;
-//        }
-//
-//        $product = handleTransaction(function () use ($data, $request) {
-//            $images_arr = $request->hasFile('images') ? $request->file('images') : [];
-//            $videos_arr = $request->hasFile('videos') ? $request->file('videos') : [];
-//            $sizesData = $data['sizes'] ?? [];
-//            $imagesData = $request->input('images', []);
-//            $imageFiles = $request->file('images', []);
-//
-//
-//            $languages = ['az', 'ru', 'en', 'tr'];
-//
-//            $title = $data['title'] ?? ['az' => ''];
-//            foreach ($languages as $lang) {
-//                if (empty($title[$lang])) {
-//                    $title[$lang] = Translate::translate($title['az'], $lang);
-//                }
-//                $title[$lang] = Str::lower($title[$lang]);
-//            }
-//
-//            $description = $data['description'] ?? ['az' => ''];
-//            foreach ($languages as $lang) {
-//                if (empty($description[$lang])) {
-//                    $description[$lang] = Translate::translate($description['az'], $lang);
-//                }
-//                $description[$lang] = Str::lower($description[$lang]);
-//            }
-//
-//            $translations = [
-//                'title' => $title,
-//                'description' => $description,
-//            ];
-//            $colors = isset($data['colors']) && is_array($data['colors']) ? $data['colors'] : [];
-//            $sizes = isset($data['sizes']) && is_array($data['sizes']) ? $data['sizes'] : [];
-//
-//            unset($data['title'], $data['description'], $data['images'], $data['colors'], $data['sizes'], $data['videos']);
-//
-//            $product = $this->model->create($data);
-//
-//            $product->update($translations);
-//
-//            if (!empty($colors)) {
-//                $product->colors()->sync($colors);
-//            }
-//
-//            if (!empty($sizesData)) {
-//                $syncSizes = [];
-//                foreach ($sizesData as $item) {
-//                    $syncSizes[$item['size_id']] = [
-//                        'price' => $item['price'] ?? null,
-//                        'wholesale_price' => $item['wholesale_price'] ?? null,
-//                        'discount' => $item['discount'] ?? null
-//                    ];
-//                }
-//                $product->sizes()->sync($syncSizes);
-//            }
-//
-//            if (!empty($imageFiles)) {
-//                foreach ($imageFiles as $index => $imageFile) {
-//                    $url = compressAndUploadImage($imageFile['file'], 'products', 'product');
-//                    $relativePath = ltrim(str_replace(url('/'), '', $url), '/');
-//                    $product->images()->create([
-//                        'image_path' => $relativePath,
-//                        'color_id'   => $imagesData[$index]['color_id'] ?? null,
-//                        'embedding'  => generateImageEmbedding($imageFile['file']->getRealPath()),
-//                    ]);
-//                }
-//            }
-//
-//
-//            if (!empty($videos_arr) && is_array($videos_arr)) {
-//                $videos = [];
-//                foreach ($videos_arr as $video) {
-//                    $url = compressAndUploadVideo($video, 'videos', 'video');
-//                    $relativePath = str_replace(url('/'), '', $url);
-//
-//                    $videos[] = ['video_path' => ltrim($relativePath, '/')];
-//                }
-//                $product->videos()->createMany($videos);
-//            }
-//
-//            return $product->refresh();
-//        }, 'Product added successfully.', ProductResource::class);
-//
-//        return $product;
-//    }
-
+    //    public function add($request): JsonResponse
+    //    {
+    //        $data = $request->validated();
+    //        if (!isset($data['sku'])) {
+    //            $lastProduct = $this->model->orderByDesc('id')->first();
+    //            if ($lastProduct && preg_match('/P(\d+)/', $lastProduct->sku, $matches)) {
+    //                $nextNumber = (int)$matches[1] + 1;
+    //            } else {
+    //                $nextNumber = 1;
+    //            }
+    //
+    //            $data['sku'] = 'P' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+    //
+    //            while ($this->model->where('sku', $data['sku'])->exists()) {
+    //                $nextNumber++;
+    //                $data['sku'] = 'P' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+    //            }
+    //        }
+    //        if (isset($data['gender'])) {
+    //            $data['gender'] = Gender::fromString($data['gender'])->value;
+    //        }
+    //
+    //        $product = handleTransaction(function () use ($data, $request) {
+    //            $images_arr = $request->hasFile('images') ? $request->file('images') : [];
+    //            $videos_arr = $request->hasFile('videos') ? $request->file('videos') : [];
+    //            $sizesData = $data['sizes'] ?? [];
+    //            $imagesData = $request->input('images', []);
+    //            $imageFiles = $request->file('images', []);
+    //
+    //
+    //            $languages = ['az', 'ru', 'en', 'tr'];
+    //
+    //            $title = $data['title'] ?? ['az' => ''];
+    //            foreach ($languages as $lang) {
+    //                if (empty($title[$lang])) {
+    //                    $title[$lang] = Translate::translate($title['az'], $lang);
+    //                }
+    //                $title[$lang] = Str::lower($title[$lang]);
+    //            }
+    //
+    //            $description = $data['description'] ?? ['az' => ''];
+    //            foreach ($languages as $lang) {
+    //                if (empty($description[$lang])) {
+    //                    $description[$lang] = Translate::translate($description['az'], $lang);
+    //                }
+    //                $description[$lang] = Str::lower($description[$lang]);
+    //            }
+    //
+    //            $translations = [
+    //                'title' => $title,
+    //                'description' => $description,
+    //            ];
+    //            $colors = isset($data['colors']) && is_array($data['colors']) ? $data['colors'] : [];
+    //            $sizes = isset($data['sizes']) && is_array($data['sizes']) ? $data['sizes'] : [];
+    //
+    //            unset($data['title'], $data['description'], $data['images'], $data['colors'], $data['sizes'], $data['videos']);
+    //
+    //            $product = $this->model->create($data);
+    //
+    //            $product->update($translations);
+    //
+    //            if (!empty($colors)) {
+    //                $product->colors()->sync($colors);
+    //            }
+    //
+    //            if (!empty($sizesData)) {
+    //                $syncSizes = [];
+    //                foreach ($sizesData as $item) {
+    //                    $syncSizes[$item['size_id']] = [
+    //                        'price' => $item['price'] ?? null,
+    //                        'wholesale_price' => $item['wholesale_price'] ?? null,
+    //                        'discount' => $item['discount'] ?? null
+    //                    ];
+    //                }
+    //                $product->sizes()->sync($syncSizes);
+    //            }
+    //
+    //            if (!empty($imageFiles)) {
+    //                foreach ($imageFiles as $index => $imageFile) {
+    //                    $url = compressAndUploadImage($imageFile['file'], 'products', 'product');
+    //                    $relativePath = ltrim(str_replace(url('/'), '', $url), '/');
+    //                    $product->images()->create([
+    //                        'image_path' => $relativePath,
+    //                        'color_id'   => $imagesData[$index]['color_id'] ?? null,
+    //                        'embedding'  => generateImageEmbedding($imageFile['file']->getRealPath()),
+    //                    ]);
+    //                }
+    //            }
+    //
+    //
+    //            if (!empty($videos_arr) && is_array($videos_arr)) {
+    //                $videos = [];
+    //                foreach ($videos_arr as $video) {
+    //                    $url = compressAndUploadVideo($video, 'videos', 'video');
+    //                    $relativePath = str_replace(url('/'), '', $url);
+    //
+    //                    $videos[] = ['video_path' => ltrim($relativePath, '/')];
+    //                }
+    //                $product->videos()->createMany($videos);
+    //            }
+    //
+    //            return $product->refresh();
+    //        }, 'Product added successfully.', ProductResource::class);
+    //
+    //        return $product;
+    //    }
 
     public function add($request, array $overrides = []): JsonResponse
     {
-        $lock = Cache::lock('add_product_' . auth()->id(), 10);
+        $lock = Cache::lock('add_product_'.auth()->id(), 10);
         $productHash = '';
 
-        if (!$lock->get()) {
-            return responseHelper("The process is in progress, please wait.",429);
+        if (! $lock->get()) {
+            return responseHelper('The process is in progress, please wait.', 429);
         }
         try {
             $data = array_merge($request->validated(), $overrides);
 
-            $productHash = md5($data['title']['az'] . ($data['category_id'] ?? ''));
+            $productHash = md5($data['title']['az'].($data['category_id'] ?? ''));
 
-            if (Cache::has('processing_product_' . $productHash)) {
-                return responseHelper("This product is already being registered.",429);
+            if (Cache::has('processing_product_'.$productHash)) {
+                return responseHelper('This product is already being registered.', 429);
             }
 
+            Cache::put('processing_product_'.$productHash, true, 5);
 
-            Cache::put('processing_product_' . $productHash, true, 5);
-
-            if (!isset($data['sku'])) {
+            if (! isset($data['sku'])) {
                 $lastProduct = $this->model->orderByDesc('id')->first();
                 if ($lastProduct && preg_match('/P(\d+)/', $lastProduct->sku, $matches)) {
-                    $nextNumber = (int)$matches[1] + 1;
+                    $nextNumber = (int) $matches[1] + 1;
                 } else {
                     $nextNumber = 1;
                 }
 
-                $data['sku'] = 'P' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+                $data['sku'] = 'P'.str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
 
                 while ($this->model->where('sku', $data['sku'])->exists()) {
                     $nextNumber++;
-                    $data['sku'] = 'P' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+                    $data['sku'] = 'P'.str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
                 }
             }
             if (isset($data['gender'])) {
@@ -540,7 +640,6 @@ class ProductService
                 $sizesData = $data['sizes'] ?? [];
                 $imagesData = $request->input('images', []);
                 $imageFiles = $request->file('images', []);
-
 
                 $languages = ['az', 'ru', 'en', 'tr'];
 
@@ -573,23 +672,23 @@ class ProductService
 
                 $product->update($translations);
 
-                if (!empty($colors)) {
+                if (! empty($colors)) {
                     $product->colors()->sync($colors);
                 }
 
-                if (!empty($sizesData)) {
+                if (! empty($sizesData)) {
                     $syncSizes = [];
                     foreach ($sizesData as $item) {
                         $syncSizes[$item['size_id']] = [
                             'price' => $item['price'] ?? null,
                             'wholesale_price' => $item['wholesale_price'] ?? null,
-                            'discount' => $item['discount'] ?? null
+                            'discount' => $item['discount'] ?? null,
                         ];
                     }
                     $product->sizes()->sync($syncSizes);
                 }
 
-                if (!empty($imageFiles)) {
+                if (! empty($imageFiles)) {
                     foreach ($imageFiles as $index => $imageFile) {
                         $url = compressAndUploadImage($imageFile['file'], 'products', 'product');
                         $relativePath = ltrim(str_replace(url('/'), '', $url), '/');
@@ -601,8 +700,7 @@ class ProductService
                     }
                 }
 
-
-                if (!empty($videos_arr) && is_array($videos_arr)) {
+                if (! empty($videos_arr) && is_array($videos_arr)) {
                     $videos = [];
                     foreach ($videos_arr as $video) {
                         $url = compressAndUploadVideo($video, 'videos', 'video');
@@ -620,10 +718,9 @@ class ProductService
 
         } finally {
             $lock->release();
-            Cache::forget('processing_product_' . $productHash);
+            Cache::forget('processing_product_'.$productHash);
         }
     }
-
 
     /**
      * Update product
@@ -734,7 +831,7 @@ class ProductService
                         $syncSizes[$item['size_id']] = [
                             'price' => $item['price'] ?? null,
                             'wholesale_price' => $item['wholesale_price'] ?? null,
-                            'discount' => $item['discount'] ?? null
+                            'discount' => $item['discount'] ?? null,
                         ];
                     }
                 }
@@ -747,7 +844,7 @@ class ProductService
             // Same reasoning as colours: removing every photo sends no key.
             if ($request->has('existing_images') || $request->boolean('images_synced')) {
                 $imagesToDelete = $product->images()
-                    ->when(!empty($existingImageIds), fn($q) => $q->whereNotIn('id', $existingImageIds))
+                    ->when(! empty($existingImageIds), fn ($q) => $q->whereNotIn('id', $existingImageIds))
                     ->get();
 
                 foreach ($imagesToDelete as $img) {
@@ -766,10 +863,12 @@ class ProductService
                 }
             }
 
-            if (!empty($imageFiles)) {
+            if (! empty($imageFiles)) {
                 foreach ($imageFiles as $index => $imageArray) {
                     $file = is_array($imageArray) ? ($imageArray['file'] ?? null) : $imageArray;
-                    if (!$file) continue;
+                    if (! $file) {
+                        continue;
+                    }
                     $fullUrl = compressAndUploadImage($file, 'products', 'product');
                     $product->images()->create([
                         'image_path' => $fullUrl,
@@ -782,7 +881,7 @@ class ProductService
             $existingVideoIds = $request->input('existing_videos', []);
             if ($request->has('existing_videos')) {
                 $videosToDelete = $product->videos()
-                    ->when(!empty($existingVideoIds), fn($q) => $q->whereNotIn('id', $existingVideoIds))
+                    ->when(! empty($existingVideoIds), fn ($q) => $q->whereNotIn('id', $existingVideoIds))
                     ->get();
 
                 foreach ($videosToDelete as $video) {
@@ -794,7 +893,7 @@ class ProductService
                 }
             }
 
-            if (!empty($videoFiles)) {
+            if (! empty($videoFiles)) {
                 foreach ($videoFiles as $videoFile) {
                     $cdnUrl = compressAndUploadVideo($videoFile, 'videos', 'Video');
                     $product->videos()->create(['video_path' => $cdnUrl]);
@@ -855,7 +954,6 @@ class ProductService
         ]);
     }
 
-
     public function recommendedProductsList($user, $request): JsonResponse
     {
         $params = $request->all();
@@ -894,63 +992,62 @@ class ProductService
             $product->rate = $product->reviews_avg_rate !== null ? round($product->reviews_avg_rate, 2) : 0;
             $product->rate_count = $product->reviews_count;
             $product->is_favorite = Auth::check() ? $product->favoritedBy()->where('user_id', Auth::id())->exists() : false;
+
             return $product;
         });
 
         return responseHelper(__('Recommended products list fetched successfully.'), 200, ProductResource::collection($data));
     }
 
-
-//    public function updatePrices($request)
-//    {
-//        $data = $request->validated();
-//
-//        $isPerc = filter_var($data['is_percentage'] ?? false, FILTER_VALIDATE_BOOLEAN);
-//        $isInc = $data['type'] === 'increment';
-//        $operator = $isInc ? '+' : '-';
-//
-//        $priceVal = (float) ($isPerc ? ($data['percentage'] ?? 0) : ($data['price'] ?? 0));
-//        $discVal = (float) ($isPerc ? ($data['discount_percentage'] ?? 0) : ($data['discount_price'] ?? 0));
-//
-//        if ($priceVal <= 0 && $discVal <= 0) {
-//            return responseHelper(__('No valid values provided.'), 400);
-//        }
-//
-//        return \DB::transaction(function () use ($data, $isPerc, $operator, $priceVal, $discVal) {
-//            $query = \DB::table('products');
-//
-//            if (!empty($data['product_ids'])) {
-//                $query->whereIn('id', $data['product_ids']);
-//            }
-//
-//            $updatePayload = [];
-//
-//            if ($priceVal > 0) {
-//                $priceExpr = $isPerc
-//                    ? "COALESCE(price, 0) * (1 {$operator} ({$priceVal} / 100.0))"
-//                    : "COALESCE(price, 0) {$operator} {$priceVal}";
-//
-//                $updatePayload['price'] = \DB::raw("GREATEST(0, ROUND(({$priceExpr})::numeric, 2))");
-//            }
-//
-//            if ($discVal > 0) {
-//                $discExpr = $isPerc
-//                    ? "COALESCE(discount, 0) * (1 {$operator} ({$discVal} / 100.0))"
-//                    : "COALESCE(discount, 0) {$operator} {$discVal}";
-//
-//                $updatePayload['discount'] = \DB::raw("GREATEST(0, ROUND(({$discExpr})::numeric, 2))");
-//            }
-//
-//            if (empty($updatePayload)) {
-//                return responseHelper(__('Nothing to update.'), 400);
-//            }
-//
-//            $affectedRows = $query->update($updatePayload);
-//
-//            return responseHelper("{$affectedRows} products updated successfully.", 200);
-//        });
-//    }
-
+    //    public function updatePrices($request)
+    //    {
+    //        $data = $request->validated();
+    //
+    //        $isPerc = filter_var($data['is_percentage'] ?? false, FILTER_VALIDATE_BOOLEAN);
+    //        $isInc = $data['type'] === 'increment';
+    //        $operator = $isInc ? '+' : '-';
+    //
+    //        $priceVal = (float) ($isPerc ? ($data['percentage'] ?? 0) : ($data['price'] ?? 0));
+    //        $discVal = (float) ($isPerc ? ($data['discount_percentage'] ?? 0) : ($data['discount_price'] ?? 0));
+    //
+    //        if ($priceVal <= 0 && $discVal <= 0) {
+    //            return responseHelper(__('No valid values provided.'), 400);
+    //        }
+    //
+    //        return \DB::transaction(function () use ($data, $isPerc, $operator, $priceVal, $discVal) {
+    //            $query = \DB::table('products');
+    //
+    //            if (!empty($data['product_ids'])) {
+    //                $query->whereIn('id', $data['product_ids']);
+    //            }
+    //
+    //            $updatePayload = [];
+    //
+    //            if ($priceVal > 0) {
+    //                $priceExpr = $isPerc
+    //                    ? "COALESCE(price, 0) * (1 {$operator} ({$priceVal} / 100.0))"
+    //                    : "COALESCE(price, 0) {$operator} {$priceVal}";
+    //
+    //                $updatePayload['price'] = \DB::raw("GREATEST(0, ROUND(({$priceExpr})::numeric, 2))");
+    //            }
+    //
+    //            if ($discVal > 0) {
+    //                $discExpr = $isPerc
+    //                    ? "COALESCE(discount, 0) * (1 {$operator} ({$discVal} / 100.0))"
+    //                    : "COALESCE(discount, 0) {$operator} {$discVal}";
+    //
+    //                $updatePayload['discount'] = \DB::raw("GREATEST(0, ROUND(({$discExpr})::numeric, 2))");
+    //            }
+    //
+    //            if (empty($updatePayload)) {
+    //                return responseHelper(__('Nothing to update.'), 400);
+    //            }
+    //
+    //            $affectedRows = $query->update($updatePayload);
+    //
+    //            return responseHelper("{$affectedRows} products updated successfully.", 200);
+    //        });
+    //    }
 
     public function updatePrices($request)
     {
@@ -960,8 +1057,8 @@ class ProductService
         $isInc = ($data['type'] ?? 'increment') === 'increment';
         $operator = $isInc ? '+' : '-';
 
-        $priceVal = (float)($isPerc ? ($data['percentage'] ?? 0) : ($data['price'] ?? 0));
-        $discVal = (float)($isPerc ? ($data['discount_percentage'] ?? 0) : ($data['discount_price'] ?? 0));
+        $priceVal = (float) ($isPerc ? ($data['percentage'] ?? 0) : ($data['price'] ?? 0));
+        $discVal = (float) ($isPerc ? ($data['discount_percentage'] ?? 0) : ($data['discount_price'] ?? 0));
 
         if ($priceVal <= 0 && $discVal <= 0) {
             return responseHelper(__('No valid values provided.'), 400);
@@ -998,7 +1095,7 @@ class ProductService
             // --- 2. PİVOT TABLO GÜNCELLEME (Bedenli ürünlerin fiyatları) ---
             // Sadece seçili ürünlerin beden kayıtlarını güncelle
             $pivotQuery = \DB::table('product_size');
-            if (!empty($productIds)) {
+            if (! empty($productIds)) {
                 $pivotQuery->whereIn('product_id', $productIds);
             }
             $affectedSizes = $pivotQuery->update($updatePayload);
@@ -1007,7 +1104,7 @@ class ProductService
             // Burada kritik nokta: product_size tablosunda kaydı olmayan ürünleri bulmalıyız
             $productQuery = \DB::table('products');
 
-            if (!empty($productIds)) {
+            if (! empty($productIds)) {
                 $productQuery->whereIn('id', $productIds);
             }
 

@@ -10,12 +10,13 @@ class SendMessageRequest extends FormRequest
     {
         return true;
     }
+
     public function rules(): array
     {
         return [
-            'image' => ['nullable','file', 'image', 'mimes:jpg,jpeg,png,webp,gif,svg,bmp,tiff,avif'],
+            'image' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp,gif,svg,bmp,tiff,avif'],
             'target_user_id' => 'nullable|integer|exists:users,id',
-            'message'        => 'nullable|string',
+            'message' => 'nullable|string',
         ];
     }
 
@@ -23,9 +24,9 @@ class SendMessageRequest extends FormRequest
     {
         return [
             'image.required' => 'Şəkil yükləmək məcburidir.',
-            'image.file'     => 'Yüklənən fayl düzgün deyil.',
-            'image.image'    => 'Yüklənən fayl şəkil formatında olmalıdır.',
-            'image.mimes'    => 'Şəklin formatı düzgün deyil. İcazə verilən formatlar: jpg, jpeg, png, webp, gif, svg, bmp, tiff, avif.',
+            'image.file' => 'Yüklənən fayl düzgün deyil.',
+            'image.image' => 'Yüklənən fayl şəkil formatında olmalıdır.',
+            'image.mimes' => 'Şəklin formatı düzgün deyil. İcazə verilən formatlar: jpg, jpeg, png, webp, gif, svg, bmp, tiff, avif.',
         ];
     }
 }

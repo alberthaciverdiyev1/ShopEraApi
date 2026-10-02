@@ -17,8 +17,7 @@
     "RoleAndPermissions": true,
     "Popup": true,
     "Chat": true,
-    "Store": true,
-    "Live": true,
-    "Listing": true,
-    "Filter": true
+    "Filter": true,
+    "Blog": true,
+    "Story": true
 }

@@ -3,7 +3,6 @@
 namespace Modules\Delivery\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Interfaces\IBaseController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Delivery\Services\DeliveryInfoService;

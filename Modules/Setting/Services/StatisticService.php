@@ -5,21 +5,24 @@ namespace Modules\Setting\Services;
 use App\Enums\OrderStatus as OrderStatusEnum;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
-use Modules\Delivery\Http\Entities\City;
-use Modules\Product\Http\Entities\Product;
+use Illuminate\Support\Facades\Log;
+use Modules\Delivery\Entities\City;
+use Modules\Order\Entities\Order;
+use Modules\Order\Entities\OrderItem;
+use Modules\Order\Entities\OrderStatus;
+use Modules\Product\Entities\Product;
 
 class StatisticService
 {
     public function statistics($request): JsonResponse
     {
         try {
-//            $fromDate = Carbon::now()->startOfYear();
+            //            $fromDate = Carbon::now()->startOfYear();
             $fromDate = Carbon::now()->startOfMonth();
 
-            $topProducts = \Modules\Order\Http\Entities\OrderItem::query()
-                ->whereHas('order', fn($q) => $q->where('created_at', '>=', $fromDate))
+            $topProducts = OrderItem::query()
+                ->whereHas('order', fn ($q) => $q->where('created_at', '>=', $fromDate))
                 ->selectRaw('product_id, SUM(quantity) as total_sold')
                 ->groupBy('product_id')
                 ->orderByDesc('total_sold')
@@ -39,12 +42,13 @@ class StatisticService
                     $product->is_favorite = Auth::check()
                         ? $product->favoritedBy()->where('user_id', Auth::id())->exists()
                         : false;
+
                     return $product;
                 })
                 ->sortByDesc('total_sold')
                 ->values();
 
-            $topCustomers = \Modules\Order\Http\Entities\Order::query()
+            $topCustomers = Order::query()
                 ->where('created_at', '>=', $fromDate)
                 ->selectRaw('user_id, COUNT(*) as orders_count, SUM(total_price) as total_spent')
                 ->groupBy('user_id')
@@ -54,6 +58,7 @@ class StatisticService
                 ->get()
                 ->map(function ($item) {
                     $user = $item->user;
+
                     return [
                         'id' => $user?->id,
                         'name' => $user?->name,
@@ -64,12 +69,12 @@ class StatisticService
                     ];
                 });
 
-            $cityOrders = \Modules\Order\Http\Entities\Order::query()
+            $cityOrders = Order::query()
                 ->where('created_at', '>=', $fromDate)
                 ->with('address:id,city')
                 ->get()
-                ->groupBy(fn($order) => $order->address?->city ?? 'Unknown')
-                ->map(fn($orders) => $orders->count());
+                ->groupBy(fn ($order) => $order->address?->city ?? 'Unknown')
+                ->map(fn ($orders) => $orders->count());
 
             $cityLabels = City::withTrashed()->pluck('name', 'key');
 
@@ -90,7 +95,7 @@ class StatisticService
                 ->whereColumn('discount', '<', 'price')
                 ->count();
 
-            $statusData = \Modules\Order\Http\Entities\OrderStatus::query()
+            $statusData = OrderStatus::query()
                 ->whereIn('id', function ($query) use ($fromDate) {
                     $query->selectRaw('MAX(id)')
                         ->from('order_statuses')
@@ -110,6 +115,7 @@ class StatisticService
                 ->mapWithKeys(function ($case) use ($statusData) {
                     $label = $case->label();
                     $value = $statusData[$case->value] ?? 0;
+
                     return [$label => (int) $value];
                 });
             $data = [

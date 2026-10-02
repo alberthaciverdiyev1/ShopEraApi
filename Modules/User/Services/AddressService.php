@@ -5,9 +5,8 @@ namespace Modules\User\Services;
 use App\Interfaces\ICrudInterface;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
-use Modules\Product\Http\Resources\ReviewResource;
-use Modules\Delivery\Http\Entities\City;
-use Modules\User\Http\Entities\Address;
+use Modules\Delivery\Entities\City;
+use Modules\User\Entities\Address;
 use Modules\User\Http\Resources\AddressResource;
 
 class AddressService implements ICrudInterface
@@ -28,42 +27,43 @@ class AddressService implements ICrudInterface
 
     }
 
-    public function details(int $id,$without_user_check = false): JsonResponse
+    public function details(int $id, $without_user_check = false): JsonResponse
     {
         try {
             $address = $this->model;
-            if(!$without_user_check){
+            if (! $without_user_check) {
                 $address->where('user_id', auth()->id());
             }
 
             $address->findOrFail($id);
+
             return responseHelper(__('Address retrieved successfully.'), 200, new AddressResource($address));
 
         } catch (ModelNotFoundException $e) {
-            return responseHelper(__('Address not found.'), 403,[]);
+            return responseHelper(__('Address not found.'), 403, []);
         }
     }
 
     /**
      * Add address
      */
-//    public function add($request): JsonResponse
-//    {
-//        $validated = $request->validated();
-//        $validated['user_id'] = auth()->id();
-//
-//        $hasAddress = $this->model->where('user_id', $validated['user_id'])->exists();
-//
-//        $validated['is_default'] = !$hasAddress;
-//
-//
-//        \Log::error($validated);
-//        return handleTransaction(
-//            fn() => $this->model->create($validated)->refresh(),
-//            'Address added successfully.',
-//            AddressResource::class
-//        );
-//    }
+    //    public function add($request): JsonResponse
+    //    {
+    //        $validated = $request->validated();
+    //        $validated['user_id'] = auth()->id();
+    //
+    //        $hasAddress = $this->model->where('user_id', $validated['user_id'])->exists();
+    //
+    //        $validated['is_default'] = !$hasAddress;
+    //
+    //
+    //        \Log::error($validated);
+    //        return handleTransaction(
+    //            fn() => $this->model->create($validated)->refresh(),
+    //            'Address added successfully.',
+    //            AddressResource::class
+    //        );
+    //    }
 
     public function add($request): JsonResponse
     {
@@ -71,34 +71,32 @@ class AddressService implements ICrudInterface
         $validated['user_id'] = auth()->id();
 
         $hasAddress = $this->model->where('user_id', $validated['user_id'])->exists();
-        $validated['is_default'] = !$hasAddress;
+        $validated['is_default'] = ! $hasAddress;
 
-        if (!empty($validated['city'])) {
+        if (! empty($validated['city'])) {
             $city = City::findMatching($validated['city']);
-            if (!$city) {
+            if (! $city) {
                 return responseHelper(__('Invalid city name.'), 403);
             }
 
             $validated['city'] = $city->key;
         }
 
-
         return handleTransaction(
-            fn() => $this->model->create($validated)->refresh(),
+            fn () => $this->model->create($validated)->refresh(),
             'Address added successfully.',
             AddressResource::class
         );
     }
-
 
     public function update(int $id, $request): JsonResponse
     {
         try {
             $data = $request->validated();
 
-            if (!empty($data['city'])) {
+            if (! empty($data['city'])) {
                 $city = City::findMatching($data['city']);
-                if (!$city) {
+                if (! $city) {
                     return responseHelper(__('Invalid city name.'), 403);
                 }
 
@@ -110,7 +108,7 @@ class AddressService implements ICrudInterface
                 ->findOrFail($id);
 
             return handleTransaction(function () use ($address, $data) {
-                if (!empty($data['is_default']) && $data['is_default']) {
+                if (! empty($data['is_default']) && $data['is_default']) {
                     $this->model
                         ->where('user_id', auth()->id())
                         ->where('id', '<>', $address->id)
@@ -122,7 +120,7 @@ class AddressService implements ICrudInterface
             }, 'Address updated successfully.', AddressResource::class);
 
         } catch (ModelNotFoundException $e) {
-            return responseHelper(__('Address not found.'), 403,[]);
+            return responseHelper(__('Address not found.'), 403, []);
         }
     }
 
@@ -134,11 +132,11 @@ class AddressService implements ICrudInterface
                 ->findOrFail($id);
 
             return handleTransaction(
-                fn() => tap($address)->delete(),
+                fn () => tap($address)->delete(),
                 'Address deleted successfully.'
             );
         } catch (ModelNotFoundException $e) {
-            return responseHelper(__('Address not found.'), 403,[]);
+            return responseHelper(__('Address not found.'), 403, []);
         }
     }
 }

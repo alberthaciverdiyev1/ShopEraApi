@@ -8,15 +8,11 @@ use Modules\Delivery\Http\Requests\DeliveryAddRequest;
 use Modules\Delivery\Http\Requests\DeliveryUpdateRequest;
 use Modules\Delivery\Services\DeliveryService;
 
-
 /**
  * @group Delivery Management
- *
  */
-
 class DeliveryController extends Controller
 {
-
     private DeliveryService $service;
 
     public function __construct(DeliveryService $service)
@@ -29,7 +25,6 @@ class DeliveryController extends Controller
 
         $this->service = $service;
     }
-
 
     /**
      * Display a listing of the resource.
@@ -54,9 +49,10 @@ class DeliveryController extends Controller
     {
         $name = request()->input('city_name', '');
 
-        if (!$name) {
+        if (! $name) {
             return responseHelper(__('Delivery service is not available for your city.'), 403);
         }
+
         return $this->service->details(null, $name);
     }
 
@@ -64,9 +60,10 @@ class DeliveryController extends Controller
     {
         $name = request()->input('city_name', '');
 
-        if (!$name) {
+        if (! $name) {
             return responseHelper(__('Delivery service is not available for your city.'), 403);
         }
+
         return $this->service->detailsForMobile(null, $name);
     }
 
@@ -77,7 +74,6 @@ class DeliveryController extends Controller
     {
         return $this->service->update($request, $id);
     }
-
 
     /**
      * Remove the specified resource from storage.

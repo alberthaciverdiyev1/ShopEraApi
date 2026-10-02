@@ -11,11 +11,10 @@ use Modules\Delivery\Http\Requests\PickupPointUpdateRequest;
 use Modules\Delivery\Services\PickupPointService;
 
 class PickupPointController extends Controller implements IBaseController
-
 {
     private PickupPointService $service;
 
-    function __construct(PickupPointService $service)
+    public function __construct(PickupPointService $service)
     {
         $this->service = $service;
     }
@@ -30,14 +29,15 @@ class PickupPointController extends Controller implements IBaseController
         return $this->service->details($id);
     }
 
-    public function detailsAdmin(Request $request,int $id): JsonResponse
+    public function detailsAdmin(Request $request, int $id): JsonResponse
     {
-        return $this->service->detailsAdmin($request,$id);
+        return $this->service->detailsAdmin($request, $id);
     }
 
     public function add(Request $request): JsonResponse
     {
         $validatedData = app(PickupPointAddRequest::class)->validated();
+
         return $this->service->add($validatedData);
     }
 

@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::table('orders', function (Blueprint $table) {
 
-            if (!Schema::hasColumn('orders', 'address_type')) {
+            if (! Schema::hasColumn('orders', 'address_type')) {
                 $table->string('address_type')->nullable()->after('address_id');
             }
 
-            if (!Schema::hasColumn('orders', 'address_type_id')) {
+            if (! Schema::hasColumn('orders', 'address_type_id')) {
                 $table->string('address_type_id')->nullable()->after('address_type');
             }
         });

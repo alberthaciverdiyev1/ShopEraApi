@@ -4,9 +4,8 @@ namespace Modules\Product\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Modules\Product\Http\Entities\ProductImage;
+use Modules\Product\Entities\ProductImage;
 
 class GenerateMissingProductImageEmbeddings extends Command
 {
@@ -21,8 +20,8 @@ class GenerateMissingProductImageEmbeddings extends Command
 
     public function handle(): int
     {
-        $limit  = $this->option('limit') ? (int) $this->option('limit') : null;
-        $chunk  = (int) $this->option('chunk');
+        $limit = $this->option('limit') ? (int) $this->option('limit') : null;
+        $chunk = (int) $this->option('chunk');
         $dryRun = (bool) $this->option('dry-run');
 
         $query = ProductImage::query()
@@ -44,20 +43,22 @@ class GenerateMissingProductImageEmbeddings extends Command
         // CLIP service-i yoxla
         try {
             $health = Http::timeout(5)->get("{$this->clipServiceUrl}/health");
-            if (!$health->successful()) {
+            if (! $health->successful()) {
                 $this->error('CLIP service cavab vermir. Supervisor-u yoxla: supervisorctl status clip-service');
+
                 return self::FAILURE;
             }
             $this->info('CLIP service: OK');
         } catch (\Throwable $e) {
-            $this->error('CLIP service-ə qoşulmaq olmadı: ' . $e->getMessage());
+            $this->error('CLIP service-ə qoşulmaq olmadı: '.$e->getMessage());
+
             return self::FAILURE;
         }
 
         $processed = 0;
-        $success   = 0;
-        $failed    = 0;
-        $skipped   = 0;
+        $success = 0;
+        $failed = 0;
+        $skipped = 0;
 
         $bar = $this->output->createProgressBar($total);
         $bar->start();
@@ -76,9 +77,10 @@ class GenerateMissingProductImageEmbeddings extends Command
                 try {
                     $imageUrl = $this->resolveImageUrl($image);
 
-                    if (!$imageUrl) {
+                    if (! $imageUrl) {
                         $skipped++;
                         $bar->advance();
+
                         continue;
                     }
 
@@ -86,14 +88,15 @@ class GenerateMissingProductImageEmbeddings extends Command
                         'url' => $imageUrl,
                     ]);
 
-                    if (!$response->successful() || !empty($response->json('error'))) {
+                    if (! $response->successful() || ! empty($response->json('error'))) {
                         $failed++;
                         logger()->warning('Embedding failed', [
                             'image_id' => $image->id,
-                            'url'      => $imageUrl,
-                            'error'    => $response->json('error') ?? $response->status(),
+                            'url' => $imageUrl,
+                            'error' => $response->json('error') ?? $response->status(),
                         ]);
                         $bar->advance();
+
                         continue;
                     }
 
@@ -102,12 +105,13 @@ class GenerateMissingProductImageEmbeddings extends Command
                     if (empty($embedding) || count($embedding) !== 512) {
                         $failed++;
                         $bar->advance();
+
                         continue;
                     }
 
-                    if (!$dryRun) {
+                    if (! $dryRun) {
                         // Vector formatı: '[0.1, 0.2, ...]'
-                        $vectorString = '[' . implode(',', $embedding) . ']';
+                        $vectorString = '['.implode(',', $embedding).']';
 
                         $image->updateQuietly(['embedding' => $vectorString]);
                     }
@@ -117,7 +121,7 @@ class GenerateMissingProductImageEmbeddings extends Command
                     $failed++;
                     logger()->error('Product image embedding generate failed', [
                         'image_id' => $image->id,
-                        'error'    => $e->getMessage(),
+                        'error' => $e->getMessage(),
                     ]);
                 }
 
@@ -145,7 +149,7 @@ class GenerateMissingProductImageEmbeddings extends Command
     {
         $imagePath = $image->image_path;
 
-        if (!$imagePath) {
+        if (! $imagePath) {
             return null;
         }
 
@@ -158,7 +162,7 @@ class GenerateMissingProductImageEmbeddings extends Command
         $cdnBase = rtrim(config('filesystems.disks.bunnycdn.pull_zone'), '/');
 
         if ($cdnBase) {
-            return $cdnBase . '/' . ltrim($imagePath, '/');
+            return $cdnBase.'/'.ltrim($imagePath, '/');
         }
 
         return null;

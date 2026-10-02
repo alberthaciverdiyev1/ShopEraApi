@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -19,7 +17,3 @@ require 'favoriteRoute.php';
 require 'addressRoute.php';
 require 'basketRoute.php';
 require 'referralRoute.php';
-
-
-
-

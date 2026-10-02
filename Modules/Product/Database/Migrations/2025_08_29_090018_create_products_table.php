@@ -3,6 +3,8 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Modules\Brand\Entities\Brand;
+use Modules\Category\Entities\Category;
 
 return new class extends Migration
 {
@@ -15,7 +17,7 @@ return new class extends Migration
             $table->id();
 
             if (Module::find('Brand')->isEnabled()) {
-                $table->foreignIdFor(\Modules\Brand\Http\Entities\Brand::class)
+                $table->foreignIdFor(Brand::class)
                     ->nullable()
                     ->constrained()
                     ->cascadeOnUpdate()
@@ -23,7 +25,7 @@ return new class extends Migration
             }
 
             if (Module::find('Category')->isEnabled()) {
-                $table->foreignIdFor(\Modules\Category\Http\Entities\Category::class)
+                $table->foreignIdFor(Category::class)
                     ->nullable()
                     ->constrained()
                     ->cascadeOnUpdate()
@@ -47,6 +49,7 @@ return new class extends Migration
         });
 
     }
+
     /**
      * Reverse the migrations.
      */

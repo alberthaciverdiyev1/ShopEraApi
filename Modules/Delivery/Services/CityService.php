@@ -5,7 +5,7 @@ namespace Modules\Delivery\Services;
 use App\Interfaces\ICrudInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
-use Modules\Delivery\Http\Entities\City;
+use Modules\Delivery\Entities\City;
 
 class CityService implements ICrudInterface
 {
@@ -22,7 +22,7 @@ class CityService implements ICrudInterface
             ->active()
             ->orderBy('name')
             ->get()
-            ->map(fn(City $city) => $this->resource($city));
+            ->map(fn (City $city) => $this->resource($city));
 
         return responseHelper(__('Cities retrieved successfully.'), 200, $data);
     }
@@ -33,7 +33,7 @@ class CityService implements ICrudInterface
         $key = $this->generateKey($nameAz);
         $city = City::withTrashed()->where('key', $key)->first();
 
-        if ($city && !$city->trashed() && $city->is_active) {
+        if ($city && ! $city->trashed() && $city->is_active) {
             return responseHelper(__('City already exists.'), 400);
         }
 
@@ -51,32 +51,32 @@ class CityService implements ICrudInterface
     {
         $newNameAz = $request->input('name');
         $city = City::query()->where('key', $id)->first();
-        if (!$city) {
-            return responseHelper("City not found.", 404);
+        if (! $city) {
+            return responseHelper('City not found.', 404);
         }
 
         $city->update(['name' => $newNameAz]);
 
-        return responseHelper("City updated successfully.", 200, $this->resource($city));
+        return responseHelper('City updated successfully.', 200, $this->resource($city));
     }
 
     public function delete(int|string $id): JsonResponse
     {
         $city = City::query()->where('key', $id)->first();
-        if (!$city) {
+        if (! $city) {
             return responseHelper(__('City Not Found'), 404);
         }
 
         $city->update(['is_active' => false]);
         $city->delete();
 
-        return responseHelper("City deleted successfully.", 200);
+        return responseHelper('City deleted successfully.', 200);
     }
 
     public function details(int|string $id): JsonResponse
     {
         $city = City::query()->where('key', $id)->first();
-        if (!$city) {
+        if (! $city) {
             return responseHelper(__('City Not Found'), 404);
         }
 

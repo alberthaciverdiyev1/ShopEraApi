@@ -30,7 +30,7 @@ class CityController extends Controller implements IBaseController
     public function add(Request $request): JsonResponse
     {
         $request->validate([
-            'name' => 'required|string|min:2'
+            'name' => 'required|string|min:2',
         ]);
 
         return $this->service->add($request);
@@ -39,7 +39,7 @@ class CityController extends Controller implements IBaseController
     public function update($id, Request $request): JsonResponse
     {
         $request->validate([
-            'name' => 'required|string|min:2'
+            'name' => 'required|string|min:2',
         ]);
 
         return $this->service->update($id, $request);

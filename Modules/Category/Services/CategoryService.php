@@ -3,41 +3,38 @@
 namespace Modules\Category\Services;
 
 use App\Helpers\TranslateHelper as Translate;
+use App\Support\TenantContext;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Modules\Category\Http\Entities\Category;
+use Modules\Category\Entities\Category;
 use Modules\Category\Http\Transformers\CategoryResource;
-use Modules\Product\Http\Entities\Product;
+use Modules\Product\Entities\Product;
 
 class CategoryService
 {
     private Category $model;
 
-    /**
-     * @param Category $model
-     */
-    function __construct(Category $model)
+    public function __construct(Category $model)
     {
         $this->model = $model;
     }
 
-    /**
-     * @param $request
-     * @return JsonResponse
-     */
     public function list($request): JsonResponse
     {
         $params = $request->all();
         $query = $this->model->query();
 
-        if (!$request->has('all')) {
+        if (! $request->has('all')) {
             $query->where('parent_id', null);
         }
 
         $query = filterLike($query, ['name', 'description'], $params);
-        $data = $query->orderByDesc('sort_order')->get();
+        $data = $query->withCount('products')->orderByDesc('sort_order')->get();
+        $this->attachVisibleProductCounts($data);
 
         return responseHelper(__('Categories retrieved successfully.'), 200, CategoryResource::collection($data));
 
@@ -49,7 +46,7 @@ class CategoryService
 
         $query = $this->model->query();
 
-        if (!$request->has('all')) {
+        if (! $request->has('all')) {
             $query->whereNull('parent_id');
         }
 
@@ -97,12 +94,12 @@ class CategoryService
                         ->withCount('reviews')
                         ->orderByDesc('sales_count')
                         ->limit(10);
-                }
+                },
             ])
             ->withCount('children')
             ->orderByDesc('children_count');
 
-        if (!$request->has('all')) {
+        if (! $request->has('all')) {
             $query->whereNull('parent_id');
         }
 
@@ -112,7 +109,7 @@ class CategoryService
         $categories->each(function ($category) {
             $allChildIds = $this->getAllChildCategoryIds($category->id);
 
-            if (!empty($allChildIds)) {
+            if (! empty($allChildIds)) {
                 $childProducts = Product::whereIn('category_id', $allChildIds)
                     ->publiclyAvailable()
                     ->with(['colors', 'sizes', 'images', 'category', 'brand'])
@@ -132,6 +129,7 @@ class CategoryService
                 $product->is_favorite = Auth::check()
                     ? $product->favoritedBy()->where('user_id', Auth::id())->exists()
                     : false;
+
                 return $product;
             });
         });
@@ -156,10 +154,38 @@ class CategoryService
         return $all->unique()->values()->toArray();
     }
 
-    /**
-     * @param int $id
-     * @return JsonResponse
-     */
+    private function attachVisibleProductCounts(Collection $categories): void
+    {
+        if ($categories->isEmpty()) {
+            return;
+        }
+
+        $allCategories = $this->model->query()->select(['id', 'parent_id'])->get();
+        $childrenByParent = $allCategories->groupBy(fn (Category $category) => $category->parent_id ?? 0);
+        $directCounts = Product::query()
+            ->publiclyAvailable()
+            ->selectRaw('category_id, COUNT(*) as total')
+            ->groupBy('category_id')
+            ->pluck('total', 'category_id');
+
+        $descendantIds = function (int $categoryId) use (&$descendantIds, $childrenByParent): array {
+            $children = $childrenByParent->get($categoryId, collect());
+            $ids = $children->pluck('id')->all();
+
+            foreach ($children as $child) {
+                $ids = array_merge($ids, $descendantIds((int) $child->id));
+            }
+
+            return $ids;
+        };
+
+        $categories->each(function (Category $category) use ($descendantIds, $directCounts) {
+            $ids = array_merge([(int) $category->id], $descendantIds((int) $category->id));
+            $total = collect($ids)->sum(fn (int $id) => (int) ($directCounts[$id] ?? 0));
+            $category->setAttribute('products_count', $total);
+        });
+    }
+
     public function details(int $id): JsonResponse
     {
         try {
@@ -167,15 +193,10 @@ class CategoryService
 
             return responseHelper(__('Category details retrieved successfully.'), 200, CategoryResource::make($category));
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return responseHelper(__('Category not found.'), 403, []);
         }
     }
-
-    /**
-     * @param $request
-     * @return JsonResponse
-     */
 
     public function add($request): JsonResponse
     {
@@ -192,15 +213,17 @@ class CategoryService
 
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $imageName = time() . '_' . $image->getClientOriginalName();
+            $imageName = time().'_'.$image->getClientOriginalName();
 
-            if (!Storage::disk('public')->exists('categories')) {
-                Storage::disk('public')->makeDirectory('categories', 0755, true);
+            $directory = TenantContext::storagePath('categories');
+
+            if (! Storage::disk('public')->exists($directory)) {
+                Storage::disk('public')->makeDirectory($directory, 0755, true);
             }
 
-            $image->storeAs('categories', $imageName, 'public');
+            $image->storeAs($directory, $imageName, 'public');
 
-            $validated['image'] = 'categories/' . $imageName;
+            $validated['image'] = "{$directory}/{$imageName}";
         }
 
         unset($validated['name']);
@@ -213,50 +236,38 @@ class CategoryService
         }, 'Category added successfully.', CategoryResource::class);
     }
 
-
-    /**
-     * @param $request
-     * @param int $id
-     * @return JsonResponse
-     */
-//    public function update($request, int $id): JsonResponse
-//    {
-//        $validated = $request->validated();
-//
-//        if ($request->hasFile('image')) {
-//            $image = $request->file('image');
-//            $imageName = time() . '_' . $image->getClientOriginalName();
-//
-//            if (!Storage::disk('public')->exists('categories')) {
-//                Storage::disk('public')->makeDirectory('categories', 0755, true);
-//            }
-//            $image->storeAs('categories', $imageName, 'public');
-//            $validated['image'] = 'categories/' . $imageName;
-//        }
-//
-//        return handleTransaction(
-//            function () use ($validated, $id) {
-//                $category = $this->model->findOrFail($id);
-//                $category->update($validated);
-//                return $category->refresh();
-//            },
-//            'Category updated successfully.',
-//            CategoryResource::class
-//        );
-//    }
-
-    /**
-     * @param $request
-     * @param int $id
-     * @return JsonResponse
-     */
+    //    public function update($request, int $id): JsonResponse
+    //    {
+    //        $validated = $request->validated();
+    //
+    //        if ($request->hasFile('image')) {
+    //            $image = $request->file('image');
+    //            $imageName = time() . '_' . $image->getClientOriginalName();
+    //
+    //            if (!Storage::disk('public')->exists('categories')) {
+    //                Storage::disk('public')->makeDirectory('categories', 0755, true);
+    //            }
+    //            $image->storeAs('categories', $imageName, 'public');
+    //            $validated['image'] = 'categories/' . $imageName;
+    //        }
+    //
+    //        return handleTransaction(
+    //            function () use ($validated, $id) {
+    //                $category = $this->model->findOrFail($id);
+    //                $category->update($validated);
+    //                return $category->refresh();
+    //            },
+    //            'Category updated successfully.',
+    //            CategoryResource::class
+    //        );
+    //    }
 
     public function update($request, int $id): JsonResponse
     {
         $validated = $request->validated();
         $languages = ['az', 'ru', 'en', 'tr'];
 
-        if (!empty($validated['name'])) {
+        if (! empty($validated['name'])) {
             $name = is_string($validated['name']) ? ['az' => $validated['name']] : $validated['name'];
 
             foreach ($languages as $lang) {
@@ -270,10 +281,11 @@ class CategoryService
             $image = $request->file('image');
             $imageName = time().'_'.$image->getClientOriginalName();
 
-            Storage::disk('public')->makeDirectory('categories');
-            $image->storeAs('categories',$imageName,'public');
+            $directory = TenantContext::storagePath('categories');
+            Storage::disk('public')->makeDirectory($directory);
+            $image->storeAs($directory, $imageName, 'public');
 
-            $validated['image'] = 'categories/'.$imageName;
+            $validated['image'] = "{$directory}/{$imageName}";
         }
 
         $newPos = $validated['sort_order'] ?? null;
@@ -286,37 +298,42 @@ class CategoryService
             $this->model->whereNull('parent_id')
                 ->orderBy('sort_order')
                 ->get()
-                ->each(fn($c,$i)=>$c->update(['sort_order'=>$i+1]));
+                ->each(fn ($c, $i) => $c->update(['sort_order' => $i + 1]));
 
             if ($category->parent_id !== null) {
                 unset($validated['sort_order']);
                 $category->update($validated ?? []);
-                if(isset($name)) $category->update(['name'=>$name]);
+                if (isset($name)) {
+                    $category->update(['name' => $name]);
+                }
+
                 return $category->refresh();
             }
 
             $category->refresh();
             $oldPos = $category->sort_order;
 
-            if($newPos && $newPos != $oldPos){
+            if ($newPos && $newPos != $oldPos) {
 
-                if($newPos < $oldPos){
+                if ($newPos < $oldPos) {
                     $this->model->whereNull('parent_id')
-                        ->whereBetween('sort_order',[$newPos,$oldPos-1])
+                        ->whereBetween('sort_order', [$newPos, $oldPos - 1])
                         ->increment('sort_order');
-                }else{
+                } else {
                     $this->model->whereNull('parent_id')
-                        ->whereBetween('sort_order',[$oldPos+1,$newPos])
+                        ->whereBetween('sort_order', [$oldPos + 1, $newPos])
                         ->decrement('sort_order');
                 }
 
-                $validated['sort_order']=$newPos;
-            }else{
+                $validated['sort_order'] = $newPos;
+            } else {
                 unset($validated['sort_order']);
             }
 
             $category->update($validated ?? []);
-            if(isset($name)) $category->update(['name'=>$name]);
+            if (isset($name)) {
+                $category->update(['name' => $name]);
+            }
 
             return $category->refresh();
 
@@ -324,10 +341,6 @@ class CategoryService
 
     }
 
-    /**
-     * @param int $id
-     * @return JsonResponse
-     */
     public function delete(int $id): JsonResponse
     {
         return handleTransaction(
@@ -335,10 +348,10 @@ class CategoryService
                 $category = $this->model->findOrFail($id);
                 Product::where('category_id', $category->id)->update(['category_id' => null]);
                 $category->delete();
+
                 return $category;
             },
             'Category deleted successfully.'
         );
     }
-
 }

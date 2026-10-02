@@ -2,17 +2,18 @@
 
 namespace Modules\Delivery\Services;
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-use Modules\Delivery\Http\Entities\City;
+use Modules\Delivery\Entities\City;
+use Modules\Delivery\Entities\Delivery;
 use Modules\Delivery\Http\Resources\DeliveryResource;
-use Modules\Delivery\Http\Entities\Delivery;
 
 class DeliveryService
 {
     private Delivery $model;
 
-    function __construct(Delivery $model)
+    public function __construct(Delivery $model)
     {
         $this->model = $model;
     }
@@ -20,14 +21,13 @@ class DeliveryService
     /**
      * list
      */
-
     public function list($request): JsonResponse
     {
         $params = $request->all();
 
-        $query = $this->model->query()->select(['id', 'city_name', 'starex_region_id', 'price','fast_price', 'is_active', 'free_from', 'delivery_time','fast_delivery_time']);
+        $query = $this->model->query()->select(['id', 'city_name', 'price', 'fast_price', 'is_active', 'free_from', 'delivery_time', 'fast_delivery_time']);
 
-        if (!empty($params['search'])) {
+        if (! empty($params['search'])) {
             $search = mb_strtolower(trim($params['search']));
             $cityKeys = City::query()
                 ->whereRaw('LOWER(key) LIKE ?', ["%{$search}%"])
@@ -37,7 +37,7 @@ class DeliveryService
             $query->whereIn('city_name', $cityKeys);
         }
 
-        if (!isset($params['is_admin']) || !$params['is_admin']) {
+        if (! isset($params['is_admin']) || ! $params['is_admin']) {
             $query->where('is_active', 1);
         }
 
@@ -49,10 +49,10 @@ class DeliveryService
     /**
      * details
      */
-    public function detailsForMobile(int $id = null, string $name): JsonResponse
+    public function detailsForMobile(?int $id, string $name): JsonResponse
     {
         try {
-            if (!$id && !$name) {
+            if (! $id && ! $name) {
 
                 return responseHelper(__('Either ID or city name must be provided.'), 400, []);
 
@@ -62,7 +62,7 @@ class DeliveryService
 
             return responseHelper(__('Delivery details retrieved successfully.'), 200, DeliveryResource::make($delivery));
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'success' => 403,
                 'message' => __('Delivery not found.'),
@@ -71,10 +71,10 @@ class DeliveryService
         }
     }
 
-    public function details(int $id = null, string $name = null): JsonResponse
+    public function details(?int $id = null, ?string $name = null): JsonResponse
     {
         try {
-            if (!$id && !$name) {
+            if (! $id && ! $name) {
                 return response()->json([
                     'success' => 400,
                     'message' => __('Either ID or city name must be provided.'),
@@ -90,7 +90,7 @@ class DeliveryService
                 'data' => DeliveryResource::make($delivery),
             ]);
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return response()->json([
                 'success' => 403,
                 'message' => __('Delivery not found.'),
@@ -112,11 +112,9 @@ class DeliveryService
     /**
      * Add
      */
-
     public function add($request): JsonResponse
     {
         $validated = $request->validated();
-
 
         try {
             $existing = $this->model->withTrashed()
@@ -125,7 +123,7 @@ class DeliveryService
 
             if ($existing) {
                 if ($existing->trashed()) {
-                    handleTransaction(function() use ($existing, $validated) {
+                    handleTransaction(function () use ($existing, $validated) {
                         $existing->restore();
                         $existing->update($validated);
                     });
@@ -145,7 +143,7 @@ class DeliveryService
             }
 
             return handleTransaction(
-                fn() => $this->model->create($validated)->refresh(),
+                fn () => $this->model->create($validated)->refresh(),
                 'Delivery added successfully.',
                 DeliveryResource::class
             );
@@ -153,16 +151,17 @@ class DeliveryService
         } catch (\Exception $e) {
             Log::error('Delivery error', [
                 'message' => $e->getMessage(),
-                'line' => $e->getLine()
+                'line' => $e->getLine(),
             ]);
 
             return response()->json([
                 'success' => 500,
                 'message' => 'Technical error occurred.',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
+
     /**
      * Update
      */
@@ -174,6 +173,7 @@ class DeliveryService
             function () use ($validated, $id) {
                 $delivery = $this->model->findOrFail($id);
                 $delivery->update($validated);
+
                 return $delivery->refresh();
             },
             'Delivery updated successfully.',
@@ -192,6 +192,7 @@ class DeliveryService
             function () use ($id) {
                 $delivery = $this->model->findOrFail($id);
                 $delivery->delete();
+
                 return $delivery;
             },
             'Delivery deleted successfully.'
@@ -206,8 +207,8 @@ class DeliveryService
             $delivery = $this->model->newQuery()->where('is_active', true)->findOrFail($id);
             $city = City::findMatching($delivery->city_name);
 
-            if (!$city) {
-                throw new \Illuminate\Database\Eloquent\ModelNotFoundException();
+            if (! $city) {
+                throw new ModelNotFoundException;
             }
 
             return $delivery;
@@ -215,8 +216,8 @@ class DeliveryService
 
         $city = City::findMatching($name);
 
-        if (!$city) {
-            throw new \Illuminate\Database\Eloquent\ModelNotFoundException();
+        if (! $city) {
+            throw new ModelNotFoundException;
         }
 
         return $this->model->newQuery()

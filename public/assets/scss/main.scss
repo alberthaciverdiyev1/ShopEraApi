@@ -1,0 +1,134 @@
+/*-----------------------------------------------------------------
+Theme Name: EcomArts
+Author: namespace-it
+Author URI: https://themeforest.net/user/namespace-it
+Version: 1.0.0
+Description: EcomArts - Multipurpose Ecommerce HTML Template <
+
+-------------------------------------------------------------------
+ CSS TABLE OF CONTENTS
+-------------------------------------------------------------------
+
+    01.Mixins
+    02.Variables
+    03.Typography
+    04.Buttons
+    05.Gutter
+    06.Container
+    07.Animation
+    08.Helping
+    09.MeanMenu
+    10.Preloader
+    11.Title
+    12.Common
+    13.Header
+    14.Breadcumb
+    15.Footer
+    16.Intro
+    17.Brand
+    18.About
+    19.Work Process
+    20.Advantage
+    21.Wcu
+    22.Counter
+    23.Faq
+    24.Testimonial
+    25.Feature
+    26.Pricing
+    27.Cta
+    28.Blog
+    29.Services
+    30.Project
+    31.Team
+    32.Team Extra
+    33.Sidebar
+    34.Contact
+    35.Input
+------------------------------------------------------------------*/
+
+
+//>> Basic Start <<//
+
+/* 01.Mixins */
+@import "mixins";
+/* 02.Variables */
+@import "variables";
+/* 03.Typography */
+@import "typography";
+/* 04.Buttons */
+@import "buttons";
+/* 05.Gutter */
+@import "gutter";
+/* 06.Container */
+@import "container";
+/* 07.Animation */
+@import "animation";
+/* 08.Helping */
+@import "helping";
+/* 09.MeanMenu */
+@import "meanmenu";
+/* 10.Preloader */
+@import "preloader";
+//>> Basic End <<//
+
+
+//>> Template Section Style Start <<//
+
+/* 11.Title */
+@import "title";
+/* 12.Common */
+@import "common";
+/* 13.Header */
+@import "header";
+/* 15.Footer */
+@import "footer";
+/* 35.Input */
+@import "input";
+/* 35.Modal */
+@import "modal";
+/* 37.Featured Item */
+@import "featured-item";
+@import "top-deals-item";
+@import "video";
+@import "blog";
+@import "testimonial";
+@import "brand";
+@import "best-seller-product";
+@import "cta";
+@import "popular-product";
+@import "feature";
+@import "featured-product";
+@import "offer";
+@import "trendy";
+@import "product-box";
+@import "intro";
+@import "timer";
+@import "popular-categories";
+@import "beauty-care";
+@import "brand-marquee";
+@import "top-rated";
+@import "product-gallery";
+@import "gallery";
+@import "faq";
+@import "cart";
+@import "wishlist";
+@import "checkout";
+@import "order-tracking";
+@import "breadcumb";
+@import "dashboard";
+@import "shop-details";
+@import "look-book";
+@import "main-sidebar";
+@import "shop-items";
+@import "blog-classic";
+@import "blog-details";
+@import "login";
+@import "register";
+@import "contact";
+@import "about";
+@import "team";
+@import "promo";
+@import "package-shop";
+
+
+//>> Template Section Style End <<//

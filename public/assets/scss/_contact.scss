@@ -1,0 +1,231 @@
+.contact-section-wrapper {
+  padding: 10px 10px 10px 10px;
+  border-radius: 10px;
+  background:$bg-color-1;
+  position: relative;
+
+  .contact-info {
+    position: relative;
+
+    &__contact {
+      padding: 40px 0px 36px 45px;
+      background-color:$theme-color;
+      border-radius: 10px;
+      z-index: 9;
+
+      @include breakpoint (max-xl) {
+        padding: 20px;
+      }
+
+      &--title {
+        color:$white;
+        font-family:$title-font;
+        font-size: 28px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: normal;
+      }
+
+      &--subtitle {
+        color:$bg-color-1;
+        font-family:$title-font;
+        font-size: 18px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+        margin-top: 14px;
+      }
+
+      &--contact-items {
+        .contact-info-items {
+          margin-top: 110px;
+          position: relative;
+          z-index: 9;
+
+          li {
+            display: flex;
+            gap: 10px;
+            margin-top: 50px;
+
+            i {
+              color: $white;
+              font-size: 15px;
+              margin-right: 20px;
+            }
+
+            a {
+              color:$white;
+              font-family:$title-font;
+              font-size: 16px;
+              font-style: normal;
+              font-weight: 400;
+              line-height: normal;
+
+              &:hover {
+
+                color: $white;
+
+              }
+            }
+          }
+
+        }
+      }
+
+      &--social-icon {
+        margin-top: 150px;
+        gap: 24px;
+        position: relative;
+        z-index: 9;
+        @include breakpoint (max-sm) {
+          margin-top: 20px;
+        }
+
+        a {
+          width: 40px;
+          height: 40px;
+          line-height: 40px;
+          text-align: center;
+          border-radius: 36px;
+          border: 1px solid rgba(255, 255, 255, .2);
+          background-color: $white;
+
+          i {
+            color: $theme-color;
+          }
+
+          &:hover {
+            background-color: $theme-color;
+          }
+        }
+
+      }
+    }
+
+    &__icon {
+      .icon-1 {
+        position: absolute;
+        right: 0px;
+        bottom: 0px;
+
+        img {
+          @include imgw;
+        }
+
+      }
+
+      .icon-2 {
+        position: absolute;
+        right: 50px;
+        top: 350px;
+
+        img {
+          width: 100px;
+          height: 100px;
+        }
+
+      }
+
+      .icon-2 {
+        position: absolute;
+        right: 0px;
+        bottom: 0px;
+
+        img {
+          @include imgw;
+        }
+
+      }
+
+
+
+    }
+
+  }
+
+  .contact-form-items-1 {
+    padding:40px 40px;
+
+    @include breakpoint (max-xl) {
+      padding: 20px;
+    }
+
+    .form-clt-1 {
+      input,
+      textarea {
+        width: 100%;
+        outline: none;
+        border: none;
+        background-color: transparent;
+        border-bottom: 1px solid $border-color;
+        padding-bottom: 10px;
+        @include transition;
+        text-transform: capitalize;
+        margin-top: 8px;
+        height: 30px;
+        padding-left: 0;
+        cursor: pointer;
+
+        &:hover {
+          border-bottom: 1px solid $title-color;
+          border-image-slice: 2;
+        }
+       
+      }
+
+      textarea {
+        padding-bottom: 10px;
+        cursor: pointer;
+
+      }
+    }
+
+    .subjects {
+      h6 {
+        margin-bottom: 15px;
+      }
+      .checkbox { 
+        display: flex;
+        align-items: center;
+        gap: 20px;
+
+        @include breakpoint (max-md) {
+         flex-wrap: wrap;
+         gap: 8px;
+        }
+
+        .checkbox-area { 
+          .text {
+            color:$title-color;
+            font-family: "Albert Sans";
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 400;  
+            margin-left: 10px;
+          }
+        }
+      }
+    }
+ 
+  }
+
+}
+
+
+
+
+
+
+
+.map-items {
+  margin-bottom: -10px;
+
+  .googpemap {
+    filter: grayscale(100%) invert(7%) contrast(83%);
+
+    iframe {
+      width: 100%;
+      height: 675px;
+    }
+  }
+}

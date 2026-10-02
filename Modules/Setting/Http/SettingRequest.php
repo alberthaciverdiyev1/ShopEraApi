@@ -15,6 +15,11 @@ class SettingRequest extends FormRequest
     {
         return [
             'instagram_url' => ['sometimes','nullable', 'string'],
+            'facebook_url' => ['sometimes','nullable', 'string'],
+            'twitter_url' => ['sometimes','nullable', 'string'],
+            'youtube_url' => ['sometimes','nullable', 'string'],
+            'telegram_url' => ['sometimes','nullable', 'string'],
+            'linkedin_url' => ['sometimes','nullable', 'string'],
             'tiktok_url' => ['sometimes','nullable', 'string'],
             'whatsapp_number' => ['sometimes','nullable', 'string'],
             'phone_number_1' => ['sometimes','nullable', 'string'],

@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use League\Flysystem\Filesystem;
+use App\Support\TenantContext;
+use Modules\Setting\Entities\Setting;
 use PlatformCommunity\Flysystem\BunnyCDN\BunnyCDNAdapter;
 use PlatformCommunity\Flysystem\BunnyCDN\BunnyCDNClient;
 
@@ -35,9 +37,9 @@ class AppServiceProvider extends ServiceProvider
         View::composer('storefront.layout', function ($view) {
             $view->with([
                 'settings' => Cache::remember(
-                    'storefront:settings',
+                    TenantContext::cacheKey('storefront:settings'),
                     600,
-                    fn () => \Modules\Setting\Http\Entities\Setting::query()->first(),
+                    fn () => Setting::query()->first(),
                 ),
                 'downloadLinks' => [
                     'ios' => config('app.app_store_url', '#'),
@@ -46,9 +48,9 @@ class AppServiceProvider extends ServiceProvider
             ]);
         });
 
-//        if ($this->app->environment('production')) {
-//            URL::forceScheme('https');
-//        }
+        //        if ($this->app->environment('production')) {
+        //            URL::forceScheme('https');
+        //        }
 
         if (app()->environment('production') || app()->environment('staging')) {
             URL::forceScheme('https');

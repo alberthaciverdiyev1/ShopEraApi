@@ -6,7 +6,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class ReviewResource extends JsonResource
 {
-    public function toArray($request):array
+    public function toArray($request): array
     {
         return [
             'id' => $this->id,
@@ -19,7 +19,7 @@ class ReviewResource extends JsonResource
                 'email' => $this->user->email ?? null,
             ],
             'product_id' => $this->product_id,
-            'created_at' => $this->created_at?->format('d.m.Y H:i')
+            'created_at' => $this->created_at?->format('d.m.Y H:i'),
         ];
     }
 }

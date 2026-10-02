@@ -2,9 +2,10 @@
 
 namespace Modules\Color\Database\Factories;
 
-use Modules\Color\Http\Entities\Color;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Modules\Color\Entities\Color;
 
-class ColorFactory extends \Illuminate\Database\Eloquent\Factories\Factory
+class ColorFactory extends Factory
 {
     protected $model = Color::class;
 

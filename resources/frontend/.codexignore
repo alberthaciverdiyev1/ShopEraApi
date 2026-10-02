@@ -1,0 +1,15 @@
+# Frontend-specific .codexignore
+node_modules/
+.svelte-kit/
+build/
+.vite/
+.output/
+package-lock.json
+static/assets/images/
+static/assets/webfonts/
+static/assets/scss/
+.DS_Store
+Thumbs.db
+.env
+.env.*
+!.env.example

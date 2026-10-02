@@ -6,7 +6,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class ReviewListResource extends JsonResource
 {
-    public function toArray($request):array
+    public function toArray($request): array
     {
         return [
             'id' => $this->id,
@@ -14,7 +14,7 @@ class ReviewListResource extends JsonResource
             'comment' => $this->comment,
             'image' => $this->image,
             'status_name' => $this->status ? $this->status->label() : null,
-            'status_code' =>$this->status ? $this->status->name : null,
+            'status_code' => $this->status ? $this->status->name : null,
 
             'product' => $this->product,
             'user' => [
@@ -23,7 +23,7 @@ class ReviewListResource extends JsonResource
                 'email' => $this->user->email ?? null,
             ],
             'product_id' => $this->product_id,
-            'created_at' => $this->created_at?->format('d.m.Y H:i')
+            'created_at' => $this->created_at?->format('d.m.Y H:i'),
         ];
     }
 }

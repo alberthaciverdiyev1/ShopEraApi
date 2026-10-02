@@ -1,0 +1,250 @@
+.register-wrapper {
+    border-radius: 50px;
+    background: $bg-color-1;
+    position: relative;
+
+    .contact-info-area {
+        padding: 100px 10px 70px 100px;
+        @include breakpoint (max-xl) {
+            padding: 50px 30px;
+         }
+        .contact-content {
+            &__title {
+                color: $title-color;
+                font-family: $title-font;
+                font-size: 30px;
+                font-style: normal;
+                font-weight: 700;
+                line-height: 26px;
+            }
+
+            &__subtitle {
+                color: $title-color;
+                font-family: $title-font;
+                font-size: 16px;
+                font-style: normal;
+                font-weight: 400;
+                line-height: 26px;
+                margin-top: 24px;
+            }
+
+            .contact-form-items {
+                margin-top: 26px;
+
+                .form-clt {
+                    span {
+                        color: $title-color;
+                        font-family: $title-font;
+                        font-size: 16px;
+                        font-style: normal;
+                        font-weight: 400;
+                        line-height: 26px;
+
+                    }
+
+                    input,
+                    textarea {
+                        width: 100%;
+                        outline: none;
+                        border: none;
+                        background-color: transparent;
+                        border: 1px solid $white;
+                        color: $white;
+                        padding: 18px 20px;
+                        margin-top: 10px;
+                        border-radius: 5px;
+                        border: 1px solid $border-color-6;
+                        background: $bg-color-3;
+                        color: $text-color3;
+                        font-family: $title-font;
+
+                        @include breakpoint (max-md) {
+                            padding: 14px 20px;
+                        }
+
+                        @include breakpoint (max-sm) {
+                            padding: 12px 18px;
+                        }
+
+                        &::placeholder {
+                            color: $text-color3;
+                            font-family: $title-font;
+                            font-size: 12px;
+                            font-style: normal;
+                            font-weight: 400;
+                            line-height: 26px;
+                        }
+                    }
+
+                    textarea {
+                        padding-bottom: 70px;
+                    }
+                }
+
+                .form-check {
+                    @include flex;
+                    padding: 0;
+                    justify-content: space-between;
+                    padding-top: 6px;
+
+                    input {
+                        color: $title-color;
+                    }
+
+                    .form-check-label {
+                        color: $title-color;
+                        font-family: $title-font;
+                        font-size: 16px;
+                        font-style: normal;
+                        font-weight: 400;
+                        line-height: 26px;
+                        display: flex;
+                        gap: 10px;
+                        margin-left: 14px;
+
+                        @include breakpoint (max-xs) {
+                            flex-wrap: wrap;
+                            gap: 4px;
+                         }
+
+                        span {
+                            color: $title-color;
+                            font-family: $title-font;
+                            font-size: 16px;
+                            font-style: normal;
+                            font-weight: 400;
+                            line-height: 26px;
+                            text-decoration-line: underline;
+                            text-decoration-style: solid;
+                            text-decoration-skip-ink: none;
+                            text-decoration-thickness: auto;
+                            text-underline-offset: auto;
+                            text-underline-position: from-font;
+
+                        }
+                    }
+
+                }
+               
+            }
+
+            .or-border{
+                margin-top: 35px;
+                .border{
+                    height: 1px;
+                    width: 100%;
+                    content: "";
+                    background-color: #E6E6E6;;
+                }
+                p{
+                    background-color: $bg-color-1;
+                    height: 40px;
+                    width: 40px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 50%;
+                    margin: 0 auto;
+                    margin-top: -22px;
+                    font-size: 16px;
+                    font-weight: 600;
+                    color: $black;
+                }
+            }
+
+            .theme-btn{
+                width: 100%;
+                border-radius: 5px;
+                height: 56px;
+            }
+
+            .button-items-1 {
+                display: flex;
+                gap: 20px;
+                margin-top: 30px;
+                justify-content: space-between;
+                flex-wrap: wrap;
+
+                &__google-button {
+                    padding: 16px 80px 16px 20px;
+                    display: flex;
+                    gap: 20px;
+                    border-radius: 5px;
+                    border: 1px solid $border-color-6;
+                    background: $bg-color-3;
+                    @include breakpoint (max-lg) {
+                        padding: 12px 18px;
+                     }
+
+                    img {
+                        width: 20px;
+                        height: 20px;
+
+                    }
+
+                    P {
+                        color: $title-color;
+                        font-family: $title-font;
+                        font-size: 14px;
+                        font-style: normal;
+                        font-weight: 600;
+                        line-height: 26px;
+
+                    }
+
+                }
+
+                &__apple-button {
+                    padding: 16px 80px 16px 20px;
+                    border-radius: 5px;
+                    border: 1px solid $border-color-6;
+                    background: $bg-color-3;
+                    display: flex;
+                    gap: 20px;
+                    @include breakpoint (max-lg) {
+                        padding: 12px 18px;
+                     }
+
+                    img {
+                        width: 20px;
+                        height: 20px;
+
+                    }
+
+                }
+
+            }
+
+            &__logtitle {
+                color: $title-color;
+                font-family: $title-font;
+                font-size: 16px;
+                font-style: normal;
+                font-weight: 500;
+                line-height: 26px;
+                margin-top: 34px;
+
+                a {
+                    color: $theme-color;
+                    font-family: $title-font;
+                    font-size: 16px;
+                    font-style: normal;
+                    font-weight: 500;
+                    line-height: 26px;
+                    margin-left: 4px;
+                }
+            }
+
+        }
+    }
+
+    .register-thumb {
+        margin-left: 10px;
+        img {
+            width: 100%;
+            border-radius: 55px;
+        }
+
+
+    }
+}

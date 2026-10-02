@@ -1,0 +1,153 @@
+//  .top-deals-item-one {
+//      padding: 14px;
+//      background-color: $white;
+//      display: flex;
+//      align-items: center;
+//      gap: 20px;
+//      border-radius: 10px;
+//      border: 1px solid rgba(0, 0, 0, 0.12);
+//      background:  $white;
+//      margin-bottom: 30px;
+
+//      &__thumb {
+//          border-radius: 10px;
+//          border: 1px solid rgba(0, 0, 0, 0.20);
+//          background: $white;
+//          display: flex;
+//          align-items: center;
+//          justify-content: center;
+//          width: 126px;
+//          height: 126px;
+//      }
+
+
+//      &__star-wrap {
+//         display: flex;
+//         align-items: center;
+//         gap: 10px;
+//         margin-bottom: 7px;
+//         .star {
+//             gap: 2px;
+
+//             i { 
+//                 font-size: 13px; 
+//                 color: $orange-color3;
+//             }
+//         }
+
+//         span {
+//             color: #A1A1A1; 
+//             font-family: $body-font;
+//             font-size: 16px;
+//             font-style: normal;
+//             font-weight: 400;
+//             line-height: normal; 
+//             text-transform: capitalize;
+//         }
+//      }
+
+//      &__content {
+//         &-price {
+//            display: flex;
+//            align-items: center;
+//            justify-content: flex-start;
+//            gap: 10px;
+//            margin-bottom: 7px;
+
+//             .offer-price {
+//                 color: $title-color; 
+//                 font-family: $title-font;
+//                 font-size: 16px;
+//                 font-style: normal;
+//                 font-weight: 500;
+//                 line-height: normal;
+//                 text-transform: capitalize;
+//             }
+
+//             .original-price {
+//                 color: #A1A1A1; 
+//                 font-family: $body-font;
+//                 font-size: 16px;
+//                 font-style: normal;
+//                 font-weight: 500;
+//                 line-height: normal;
+//                 text-decoration-line: strikethrough;
+//                 text-transform: capitalize;
+//             }
+//         }
+
+//         &-title {
+//             color: $title-color; 
+//             font-family: $title-font;
+//             font-size: 16px;
+//             font-style: normal;
+//             font-weight: 600;
+//             line-height: normal; 
+//             margin-bottom: 14px;
+//         }
+ 
+
+//         //  &--price {
+//         //      color: $theme-color;
+//         //      font-family: $title-font;
+//         //      font-size: 20px;
+//         //      font-style: normal;
+//         //      font-weight: 500;
+//         //      line-height: normal;
+//         //      text-transform: capitalize;
+//         //      padding-bottom: 8px;
+//         //  }
+
+//         //  &--title {
+//         //      color: #0A111E;
+//         //      font-size: 20px;
+//         //      font-style: normal;
+//         //      font-weight: 500;
+//         //      line-height: normal;
+//         //      padding-bottom: 8px;
+
+//         //      @include breakpoint (max-lg) { 
+//         //         font-size: 16px; 
+//         //      }
+//         //  }
+
+//         //  &--text {
+//         //      color: #A1A1A1;
+//         //      font-size: 14px;
+//         //      font-style: normal;
+//         //      font-weight: 400;
+//         //      line-height: normal;
+//         //      padding-bottom: 10px;
+//         //  } 
+//      }
+
+//      &__icons { 
+//         display: flex;
+//         align-items: center;
+//         gap: 10px;
+//         margin-top: 15px;
+
+//         a {
+//             i {
+//                 width: 36px;
+//                 height: 36px;
+//                 display: flex;
+//                 align-items: center;
+//                 justify-content: center;
+//                 background-color: #F2F2F2;
+//                 font-size: 13px;
+//                 transition: all 0.3s;
+//                 border-radius: 50%;
+    
+//                 &:hover {
+//                     background-color: #FFECEB;
+//                     color: $theme-color;
+//                 }
+//             }
+//         }
+
+//      }
+//  }
+
+
+//  note 

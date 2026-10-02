@@ -1,0 +1,219 @@
+/*
+ * Product artwork comes from the API with arbitrary sizes. The theme's card
+ * thumbs were built for pre-sized assets, so give every thumb a fixed box and
+ * let the image fill it — cards keep the same size no matter what comes back.
+ */
+
+/* ---- Best seller card : 126x126 frame ---- */
+.best-seller-one__thumb {
+	overflow: hidden;
+}
+
+.best-seller-one__thumb img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+/* ---- Featured card : fixed frame, no layout shift ---- */
+.featured-product-item-one__thumb {
+	height: 260px;
+	padding: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+}
+
+.featured-product-item-one__thumb img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+/* Keep card boxes from being stretched by their content. */
+.best-seller-one,
+.featured-product-item-one {
+	overflow: hidden;
+}
+
+/* Long product titles wrap instead of changing the card height. */
+.best-seller-one__content-title a,
+.featured-product-item-one__content h6 a,
+.popular-product-card-item-two__content h6 a {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+/* ---- Shop grid card : fixed artwork frame, equal card heights ---- */
+.best-seller-product-items-two {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+	/* No card padding: the artwork sits flush against the rounded corners. */
+	padding: 0;
+}
+
+/* The text under the artwork keeps its own breathing room. */
+.best-seller-product-items-two__content {
+	padding: 10px;
+}
+
+.best-seller-product-items-two__thumb {
+	height: 260px;
+	overflow: hidden;
+	border-radius: 12px;
+}
+
+.best-seller-product-items-two__thumb img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+}
+
+.best-seller-product-items-two__content {
+	margin-top: auto;
+}
+
+.best-seller-product-items-two__details--title a {
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+/* ---- Card actions: always visible, pinned to the top-right corner ---- */
+.best-seller-one,
+.featured-product-item-one,
+.best-seller-product-items-two,
+.popular-product-card-item-two {
+	position: relative;
+}
+
+.featured-product-item-one__thumb .icon,
+.best-seller-product-items-two .icon-box2,
+.best-seller-one__icons,
+.popular-product-card-item-two .icon {
+	position: absolute !important;
+	top: 12px !important;
+	inset-inline-end: 12px !important;
+	inset-inline-start: auto !important;
+	bottom: auto !important;
+	transform: none !important;
+	opacity: 1 !important;
+	visibility: visible !important;
+	display: flex !important;
+	flex-direction: row;
+	gap: 8px;
+	margin: 0 !important;
+	z-index: 5;
+}
+
+/* Whole card opens the product page; the action buttons sit above it. */
+.card-link {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+}
+
+/* ---- Card action buttons: white circles so the icons stay readable ---- */
+.best-seller-one__icons .fav-btn,
+.best-seller-one__icons .add-to-cart-btn,
+.featured-product-item-one__thumb .icon .fav-btn,
+.featured-product-item-one__thumb .icon .add-to-cart-btn,
+.best-seller-product-items-two .icon-box2 .fav-btn,
+.best-seller-product-items-two .icon-box2 .add-to-cart-btn,
+.popular-product-card-item-two .icon .fav-btn,
+.popular-product-card-item-two .icon .add-to-cart-btn {
+	width: 36px !important;
+	height: 36px !important;
+	background: #fff !important;
+	border: 1px solid #e6e6e6 !important;
+	border-radius: 50% !important;
+	display: flex !important;
+	align-items: center;
+	justify-content: center;
+	color: var(--title) !important;
+	cursor: pointer;
+	padding: 0 !important;
+	line-height: 1;
+	transition: all 0.3s ease-in-out;
+}
+
+.best-seller-one__icons .fav-btn:hover,
+.best-seller-one__icons .add-to-cart-btn:hover,
+.featured-product-item-one__thumb .icon .fav-btn:hover,
+.featured-product-item-one__thumb .icon .add-to-cart-btn:hover,
+.best-seller-product-items-two .icon-box2 .fav-btn:hover,
+.best-seller-product-items-two .icon-box2 .add-to-cart-btn:hover,
+.popular-product-card-item-two .icon .fav-btn:hover,
+.popular-product-card-item-two .icon .add-to-cart-btn:hover {
+	background: var(--theme) !important;
+	color: #fff !important;
+}
+
+/* Favourited / in-cart products fill the whole circle with the theme colour. */
+.best-seller-one__icons .fav-btn.active,
+.best-seller-one__icons .add-to-cart-btn.active,
+.featured-product-item-one__thumb .icon .fav-btn.active,
+.featured-product-item-one__thumb .icon .add-to-cart-btn.active,
+.best-seller-product-items-two .icon-box2 .fav-btn.active,
+.best-seller-product-items-two .icon-box2 .add-to-cart-btn.active,
+.popular-product-card-item-two .icon .fav-btn.active,
+.popular-product-card-item-two .icon .add-to-cart-btn.active {
+	background: var(--theme) !important;
+	border-color: var(--theme) !important;
+	color: #fff !important;
+}
+
+/* ---- Mobile responsive adjustments for cards ---- */
+@media (max-width: 767.98px) {
+	.featured-product-item-one__thumb {
+		height: 176px;
+	}
+
+	.best-seller-product-items-two__thumb {
+		height: 180px;
+		border-radius: 10px;
+	}
+
+	.best-seller-product-items-two__content {
+		padding: 8px 6px;
+	}
+
+	.best-seller-product-items-two__details--subtitle {
+		font-size: 11px;
+		margin-bottom: 2px;
+	}
+
+	.best-seller-product-items-two__details--title a {
+		font-size: 13px;
+		line-height: 1.35;
+	}
+
+	.best-seller-product-items-two__details--price {
+		font-size: 13px;
+		margin-top: 4px;
+	}
+
+	.best-seller-product-items-two .icon-box2 {
+		top: 6px !important;
+		inset-inline-end: 6px !important;
+		gap: 5px !important;
+	}
+
+	.best-seller-product-items-two .icon-box2 .fav-btn,
+	.best-seller-product-items-two .icon-box2 .add-to-cart-btn {
+		width: 30px !important;
+		height: 30px !important;
+		font-size: 12.5px !important;
+	}
+}

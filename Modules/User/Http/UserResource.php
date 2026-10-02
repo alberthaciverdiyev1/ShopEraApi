@@ -8,7 +8,7 @@ use Modules\Setting\Services\SettingService;
 
 class UserResource extends JsonResource
 {
-    public function toArray($request):array
+    public function toArray($request): array
     {
         $settingsService = app(SettingService::class);
         $minimalPurchasePrice = $settingsService->getMinimalPurchasePriceForUser($this->resource);
@@ -17,8 +17,9 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => Str::title($this->name),
             'surname' => Str::title($this->surname),
+            'avatar' => $this->avatar,
             'is_active' => $this->is_active,
-            'is_wholesaler' => (bool)$this->is_wholesaler,
+            'is_wholesaler' => (bool) $this->is_wholesaler,
             'effective_minimal_purchase_price' => $minimalPurchasePrice,
             'wholesale_minimal_purchase_price' => $settingsService->getWholesaleMinimalPurchasePrice(),
             'email' => $this->email,

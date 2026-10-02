@@ -3,9 +3,9 @@
 namespace Modules\Filter\Services;
 
 use Illuminate\Http\JsonResponse;
-use Modules\Filter\Http\Entities\CategoryFilter;
-use Modules\Filter\Http\Entities\Filter;
-use Modules\Filter\Http\Entities\ProductFilter;
+use Modules\Filter\Entities\CategoryFilter;
+use Modules\Filter\Entities\Filter;
+use Modules\Filter\Entities\ProductFilter;
 use Modules\Filter\Http\Resources\FilterResource;
 use Modules\Filter\Http\Resources\ProductFilterResource;
 
@@ -167,6 +167,7 @@ class FilterService
     public function productValues(int $productId): JsonResponse
     {
         $values = ProductFilter::query()
+            ->with('filter')
             ->where('product_id', $productId)
             ->orderBy('filter_id')
             ->get();

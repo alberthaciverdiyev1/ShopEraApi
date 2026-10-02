@@ -40,8 +40,7 @@ class ProductUpdateRequest extends FormRequest
 
             'discount_expire_date' => ['nullable', 'date'],
             'purchase_limit' => ['nullable', 'integer', 'min:0'],
-            'is_pinned' => ['boolean','nullable'],
-
+            'is_pinned' => ['boolean', 'nullable'],
 
             'sku' => ['nullable', 'string', 'max:50'],
             'brand_id' => ['nullable', 'exists:brands,id'],
@@ -81,14 +80,14 @@ class ProductUpdateRequest extends FormRequest
             'existing_images.*.id' => ['required', 'integer', 'exists:product_image,id'],
             'existing_images.*.color_id' => ['nullable', 'integer', 'exists:colors,id'],
 
-            'images'            => ['nullable', 'array'],
+            'images' => ['nullable', 'array'],
 
-            'images.*.file'     => [
+            'images.*.file' => [
                 'required',
                 'file',
                 'image',
                 'mimes:jpg,jpeg,png,webp,gif,svg,bmp,tiff,avif',
-                'max:5120'
+                'max:5120',
             ],
 
             // Nullable, matching the create request. `required` here meant a
@@ -99,18 +98,16 @@ class ProductUpdateRequest extends FormRequest
             'images.*.color_id' => [
                 'nullable',
                 'integer',
-                'exists:colors,id'
+                'exists:colors,id',
             ],
-
 
             'videos' => ['nullable', 'array'],
             'videos.*' => [
                 'file',
-                //'mimes: mp4, mov, avi, webm, mkv, flv, wmv, mpg, mpeg, m4v, 3gp, 3g2, ogv, ts, vob'
+                // 'mimes: mp4, mov, avi, webm, mkv, flv, wmv, mpg, mpeg, m4v, 3gp, 3g2, ogv, ts, vob'
             ],
             'existing_videos' => ['nullable', 'array'],
 
         ];
     }
-
 }

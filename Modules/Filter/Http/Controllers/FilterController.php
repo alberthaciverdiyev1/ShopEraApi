@@ -16,7 +16,7 @@ class FilterController extends Controller
 
     public function __construct(FilterService $service)
     {
-        $this->middleware('auth:sanctum')->except(['list', 'categoryFilters']);
+        $this->middleware('auth:sanctum')->except(['list', 'categoryFilters', 'productValues']);
         $this->middleware('permission:add filter')->only('add');
         $this->middleware('permission:update filter')->only(['update', 'setCategories']);
         $this->middleware('permission:delete filter')->only('delete');

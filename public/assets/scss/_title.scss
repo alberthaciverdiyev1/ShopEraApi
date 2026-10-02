@@ -1,0 +1,204 @@
+/*----------------------------------------------
+    # Title style here
+----------------------------------------------*/
+.section-title {
+	.subtitle {
+		color: $theme-color;
+		font-family: $title-font;
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 1.857;
+		margin-bottom: 15px;
+
+		&.style1 {
+			display: inline-block;
+			padding: 5px 10px;
+			background-color: $white; 
+			color: $theme-color;
+			font-family: $title-color;
+			font-size: 14px;
+			font-style: normal;
+			font-weight: 600;
+			line-height: 26px;
+			text-transform: capitalize;
+			border-radius: 100px;
+			border: 1px solid rgba(255, 64, 53, 0.20);
+		}
+
+		&.style2 {
+			display: inline-block;
+			padding: 3px 10px;
+			background-color: #FFF5F4; 
+			color: $theme-color;
+			font-family: $title-color;
+			font-size: 14px;
+			font-style: normal;
+			font-weight: 600;
+			line-height: 26px;
+			text-transform: capitalize;
+			border-radius: 100px;
+			border: 1px solid rgba(255, 64, 53, 0.20);
+		}
+
+		&.style3 {
+			display: inline-block;
+			padding: 5px 10px;
+			background-color: #E4EBCF;
+			border: none;
+			color: $theme-color;
+			font-family: $title-color;
+			font-size: 14px;
+			font-style: normal;
+			font-weight: 600;
+			line-height: 26px;
+			text-transform: capitalize;
+			border-radius: 100px;
+			-webkit-border-radius: 100px;
+			-moz-border-radius: 100px;
+			-ms-border-radius: 100px;
+			-o-border-radius: 100px;
+		}
+
+		&.style4 {
+			display: inline-block;
+			padding: 5px 10px;
+			background-color: transparent;
+			border: 1px solid $theme-color;
+			color: $theme-color;
+			font-family: $title-color;
+			font-size: 14px;
+			font-style: normal;
+			font-weight: 600;
+			line-height: 26px;
+			text-transform: capitalize;
+			border-radius: 100px;
+			-webkit-border-radius: 100px;
+			-moz-border-radius: 100px;
+			-ms-border-radius: 100px;
+			-o-border-radius: 100px;
+		}
+	}
+
+	.title {
+		color: $title-color;
+		font-family: $title-font;
+		font-size: 30px;
+		font-style: normal;
+		font-weight: 700;
+		line-height: 1.2;
+
+		&.style3 {
+			color: #161616; 
+			font-family: $title-font;
+			font-size: 53.782px;
+			font-style: normal;
+			font-weight: 600;
+			line-height: 60.504px;  
+			text-transform: capitalize;
+
+			@include breakpoint (max-xl) {
+				font-size: 40px;
+				line-height: 1;
+			}
+		}
+
+		&.style4 {
+			color: $title-color; 
+			font-family: $title-font;
+			font-size: 48px;
+			font-style: normal;
+			font-weight: 600;
+			line-height: 50px;  
+			letter-spacing: -1.44px;
+		}
+	}
+
+	&.style-5 {
+		.subtitle {
+			font-size: 16px;
+			font-weight: 400;
+			color: $theme-color;
+			text-transform: capitalize;
+			position: relative;
+			display: inline-block;
+
+			&::before {
+				position: absolute;
+				left: -75px;
+				top: 15px;
+				height: 1px;
+				width: 64px;
+				content: "";
+				background-color: $theme-color;
+			}
+
+			&.before-none {
+				&::before {
+					display: none;
+				}
+			}
+
+			&::after {
+				position: absolute;
+				right: -75px;
+				top: 15px;
+				height: 1px;
+				width: 64px;
+				content: "";
+				background-color: $theme-color;
+			}
+		}
+
+		.title {
+			font-size: 30px;
+			font-weight: 500;
+		}
+	}
+
+	&.style-7 {
+		.subtitle {
+			display: inline-block;
+			padding: 5px 10px;
+			color: $theme-color;
+			font-size: 14px;
+			font-style: normal;
+			font-weight: 600;
+			line-height: 26px;
+			text-transform: capitalize;
+			border-radius: 100px;
+			border: 1px solid $theme-color;
+		}
+
+		h2 {
+			font-size: 30px;
+			font-weight: 700;
+			color: #0A111E;
+		}
+	}
+
+	&.style-6 {
+
+		.subtitle {
+			color: $theme-color;
+			display: inline-block;
+			padding: 5px 10px;
+			background-color: transparent;
+			border: 1px solid $theme-color;
+			color: $theme-color;
+			font-family: $title-color;
+			font-size: 14px;
+			font-style: normal;
+			font-weight: 600;
+			line-height: 26px;
+			text-transform: capitalize;
+			border-radius: 100px;
+
+			&.color {
+				color: $theme-color;
+				border: 1px solid $theme-color;
+			}
+		}
+	}
+}
+
+//>>>>> Section Title End <<<<<// 

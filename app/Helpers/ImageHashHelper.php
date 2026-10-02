@@ -1,12 +1,12 @@
 <?php
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Jenssegers\ImageHash\ImageHash;
 use Jenssegers\ImageHash\Implementations\AverageHash;
 use Jenssegers\ImageHash\Implementations\DifferenceHash;
-use Illuminate\Database\Eloquent\Builder;
-use Modules\Product\Http\Entities\Product;
 
-if (!function_exists('hash_hex_to_signed_bigint')) {
+if (! function_exists('hash_hex_to_signed_bigint')) {
     function hash_hex_to_signed_bigint(string $hex): string
     {
         $hex = strtolower(trim($hex));
@@ -26,11 +26,11 @@ if (!function_exists('hash_hex_to_signed_bigint')) {
     }
 }
 
-if (!function_exists('generate_image_hashes')) {
+if (! function_exists('generate_image_hashes')) {
     function generate_image_hashes(string $path): array
     {
-        $aHasher = new ImageHash(new AverageHash());
-        $dHasher = new ImageHash(new DifferenceHash());
+        $aHasher = new ImageHash(new AverageHash);
+        $dHasher = new ImageHash(new DifferenceHash);
 
         $aHash = $aHasher->hash($path);
         $dHash = $dHasher->hash($path);
@@ -42,15 +42,15 @@ if (!function_exists('generate_image_hashes')) {
     }
 }
 
-if (!function_exists('generateImageEmbedding')) {
+if (! function_exists('generateImageEmbedding')) {
     function generateImageEmbedding(string $path): ?string
     {
         try {
-            $response = \Illuminate\Support\Facades\Http::timeout(15)
+            $response = Http::timeout(15)
                 ->attach('file', file_get_contents($path), 'image.jpg')
                 ->post('http://127.0.0.1:8765/embed/file');
 
-            if (!$response->successful() || !empty($response->json('error'))) {
+            if (! $response->successful() || ! empty($response->json('error'))) {
                 return null;
             }
 
@@ -60,35 +60,36 @@ if (!function_exists('generateImageEmbedding')) {
                 return null;
             }
 
-            return '[' . implode(',', $embedding) . ']';
-        } catch (\Throwable $e) {
+            return '['.implode(',', $embedding).']';
+        } catch (Throwable $e) {
             logger()->warning('Embedding generation failed', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
 }
 
-if (!function_exists('prepare_search_image_for_hash')) {
+if (! function_exists('prepare_search_image_for_hash')) {
     function prepare_search_image_for_hash(string $path): string
     {
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             return $path;
         }
 
         $info = @getimagesize($path);
 
-        if (!$info || empty($info['mime'])) {
+        if (! $info || empty($info['mime'])) {
             return $path;
         }
 
         $source = match ($info['mime']) {
             'image/jpeg' => @imagecreatefromjpeg($path),
-            'image/png'  => @imagecreatefrompng($path),
+            'image/png' => @imagecreatefrompng($path),
             'image/webp' => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($path) : null,
-            default      => null,
+            default => null,
         };
 
-        if (!$source) {
+        if (! $source) {
             return $path;
         }
 
@@ -97,6 +98,7 @@ if (!function_exists('prepare_search_image_for_hash')) {
 
         if ($width < 40 || $height < 40) {
             imagedestroy($source);
+
             return $path;
         }
 
@@ -168,6 +170,7 @@ if (!function_exists('prepare_search_image_for_hash')) {
             ($cropWidth >= $width * 0.98 && $cropHeight >= $height * 0.98)
         ) {
             imagedestroy($source);
+
             return $path;
         }
 
@@ -178,12 +181,13 @@ if (!function_exists('prepare_search_image_for_hash')) {
             'height' => $cropHeight,
         ]);
 
-        if (!$cropped) {
+        if (! $cropped) {
             imagedestroy($source);
+
             return $path;
         }
 
-        $tempPath = storage_path('app/search_hash_prepared_' . uniqid('', true) . '.jpg');
+        $tempPath = storage_path('app/search_hash_prepared_'.uniqid('', true).'.jpg');
 
         imagejpeg($cropped, $tempPath, 92);
 
@@ -194,27 +198,27 @@ if (!function_exists('prepare_search_image_for_hash')) {
     }
 }
 
-if (!function_exists('create_search_image_variants')) {
+if (! function_exists('create_search_image_variants')) {
     function create_search_image_variants(string $path): array
     {
-        if (!file_exists($path)) {
+        if (! file_exists($path)) {
             return [$path];
         }
 
         $info = @getimagesize($path);
 
-        if (!$info || empty($info['mime'])) {
+        if (! $info || empty($info['mime'])) {
             return [$path];
         }
 
         $source = match ($info['mime']) {
             'image/jpeg' => @imagecreatefromjpeg($path),
-            'image/png'  => @imagecreatefrompng($path),
+            'image/png' => @imagecreatefrompng($path),
             'image/webp' => function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($path) : null,
-            default      => null,
+            default => null,
         };
 
-        if (!$source) {
+        if (! $source) {
             return [$path];
         }
 
@@ -223,6 +227,7 @@ if (!function_exists('create_search_image_variants')) {
 
         if ($width < 80 || $height < 80) {
             imagedestroy($source);
+
             return [$path];
         }
 
@@ -245,11 +250,11 @@ if (!function_exists('create_search_image_variants')) {
                 'height' => $h,
             ]);
 
-            if (!$cropped) {
+            if (! $cropped) {
                 return;
             }
 
-            $tempPath = storage_path('app/search_variant_' . uniqid('', true) . '.jpg');
+            $tempPath = storage_path('app/search_variant_'.uniqid('', true).'.jpg');
 
             imagejpeg($cropped, $tempPath, 90);
             imagedestroy($cropped);
@@ -295,25 +300,26 @@ if (!function_exists('create_search_image_variants')) {
     }
 }
 
-if (!function_exists('filterByImage')) {
+if (! function_exists('filterByImage')) {
     function filterByImage($baseQuery, $imageFile, int $limit = 50, float $maxDistance = 0.35)
     {
         $path = is_object($imageFile) ? $imageFile->getRealPath() : $imageFile;
 
-        if (!$path || !file_exists($path)) {
+        if (! $path || ! file_exists($path)) {
             return $baseQuery->whereRaw('1 = 0');
         }
 
         // CLIP service-ə şəkli göndər, embedding al
         try {
-            $response = \Illuminate\Support\Facades\Http::timeout(15)
+            $response = Http::timeout(15)
                 ->attach('file', file_get_contents($path), 'search.jpg')
                 ->post('http://127.0.0.1:8765/embed/file');
 
-            if (!$response->successful() || !empty($response->json('error'))) {
+            if (! $response->successful() || ! empty($response->json('error'))) {
                 logger()->warning('CLIP embed/file failed', [
                     'error' => $response->json('error') ?? $response->status(),
                 ]);
+
                 return $baseQuery->whereRaw('1 = 0');
             }
 
@@ -322,33 +328,34 @@ if (!function_exists('filterByImage')) {
             if (empty($embedding) || count($embedding) !== 512) {
                 return $baseQuery->whereRaw('1 = 0');
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             logger()->error('CLIP service request failed', ['error' => $e->getMessage()]);
+
             return $baseQuery->whereRaw('1 = 0');
         }
 
-        $vectorString = '[' . implode(',', $embedding) . ']';
+        $vectorString = '['.implode(',', $embedding).']';
 
         $tableName = $baseQuery->getModel()->getTable();
 
         // Cosine distance ilə ən yaxın şəkilləri tap
-        $results = \Illuminate\Support\Facades\DB::select("
+        $results = DB::select('
             SELECT DISTINCT ON (product_id) product_id, (embedding <=> ?::vector) AS distance
             FROM product_image
             WHERE embedding IS NOT NULL
               AND (embedding <=> ?::vector) <= ?
             ORDER BY product_id, distance ASC
-        ", [$vectorString, $vectorString, $maxDistance]);
+        ', [$vectorString, $vectorString, $maxDistance]);
 
         if (empty($results)) {
             return $baseQuery->whereRaw('1 = 0');
         }
 
         // Distance-ə görə sırala
-        usort($results, fn($a, $b) => $a->distance <=> $b->distance);
+        usort($results, fn ($a, $b) => $a->distance <=> $b->distance);
 
         $ids = array_slice(
-            array_map(fn($r) => $r->product_id, $results),
+            array_map(fn ($r) => $r->product_id, $results),
             0,
             $limit
         );

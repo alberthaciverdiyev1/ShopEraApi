@@ -3,7 +3,6 @@
 namespace Modules\Product\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class ProductUpdatePricesRequest extends FormRequest
 {
@@ -11,6 +10,7 @@ class ProductUpdatePricesRequest extends FormRequest
     {
         return true;
     }
+
     public function prepareForValidation()
     {
         return $this->merge([
@@ -30,22 +30,22 @@ class ProductUpdatePricesRequest extends FormRequest
 
             'price' => [
                 'required_unless:is_percentage,true',
-                'nullable', 'numeric', 'min:0'
+                'nullable', 'numeric', 'min:0',
             ],
             'percentage' => [
                 'required_if:is_percentage,true',
-                'nullable', 'numeric', 'min:0', 'max:1000'
+                'nullable', 'numeric', 'min:0', 'max:1000',
             ],
 
             'discount_price' => ['nullable', 'numeric', 'min:0'],
-            'discount_percentage' => ['nullable', 'numeric', 'min:0', 'max:100']
+            'discount_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
         ];
     }
 
     public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
-            if (empty($this->input('product_ids')) && !$this->boolean('confirm_all_products')) {
+            if (empty($this->input('product_ids')) && ! $this->boolean('confirm_all_products')) {
                 $validator->errors()->add(
                     'confirm_all_products',
                     'Updating all products requires explicit confirmation.'
@@ -53,5 +53,4 @@ class ProductUpdatePricesRequest extends FormRequest
             }
         });
     }
-
 }

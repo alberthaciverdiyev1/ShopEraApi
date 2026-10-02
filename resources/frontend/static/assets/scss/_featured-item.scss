@@ -1,0 +1,107 @@
+
+
+
+.featured_item_one {
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border-radius: 10px;
+    background-color: $theme-color;
+    &__content {
+        &--title {
+            color: $white; 
+            margin-bottom: 5px;
+        }
+
+        &--text {
+            color: $white; 
+            font-family: $title-font;
+            font-size: 16px; 
+            font-weight: 400;
+            line-height: 1.625;  
+            letter-spacing: -0.16px;
+            text-transform: lowercase;
+            margin-bottom: 15px;
+        }
+    }
+
+    &__thumb {
+        margin-bottom: -68px;
+        img {
+            width: 152px;
+            height: 169px;
+            object-fit: contain;
+           @include breakpoint (max-lg) {
+            max-width: 100%;
+           }
+        }
+
+        &--shape {
+            border-radius: 75px;
+            background: rgba(255, 227, 225, 0.20);
+        }
+    }
+}
+
+
+
+.featured_item_two {
+    padding:40px 8px 36px 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border-radius: 15px;
+    background-color: $theme-color;
+    &__content {
+        &--subtitle {
+            color: $white; 
+            margin-bottom: 5px;
+            font-family:$title-font;
+            font-size: 16px;
+            font-style: normal;
+            font-weight: 500;
+            line-height: 26px; 
+            text-transform: uppercase;
+        }
+        &--title {
+            color: $white; 
+            margin-bottom: 5px;
+            font-family: "Albert Sans";
+            font-size: 20px;
+            font-style: normal;
+            font-weight: 700;
+            line-height: 26px; 
+        }
+
+        &--text {
+            color: $white; 
+            font-family: $title-font;
+            font-size: 16px; 
+            font-weight: 400;
+            line-height: 1.625;  
+            letter-spacing: -0.16px;
+            text-transform: lowercase;
+            margin-bottom: 16px;
+        }
+    }
+
+    &__thumb {
+        margin-bottom: -50px;
+        img {
+            width: 186px;
+            height: 179px;
+            object-fit: contain;
+           @include breakpoint (max-lg) {
+            max-width: 100%;
+           }
+        }
+
+        &--shape {
+            border-radius: 75px;
+            background: rgba(255, 227, 225, 0.20);
+        }
+    }
+}

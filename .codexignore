@@ -1,0 +1,104 @@
+# .codexignore
+# Codex context ignore list for ShopEra.
+
+# Secrets and environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+storage/*.key
+storage/firebase/
+storage/app/firebase/
+
+# Dependencies
+/vendor/
+/node_modules/
+/resources/frontend/node_modules/
+
+# Generated outputs
+/public/build/
+/public/hot
+/public/storage
+/bootstrap/cache/*.php
+/resources/frontend/.svelte-kit/
+/resources/frontend/build/
+/resources/frontend/.vite/
+/resources/frontend/.output/
+
+# Frontend static and large assets
+/resources/frontend/static/assets/images/
+/resources/frontend/static/assets/webfonts/
+/resources/frontend/static/assets/scss/
+/resources/html/assets/
+
+# Media, uploads, binaries
+/public/uploads/
+/public/assets/uploads/
+/storage/app/public/
+/storage/app/private/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.ico
+*.mp4
+*.mov
+*.pdf
+*.zip
+*.tar.gz
+*.sql
+*.sqlite
+*.dump
+
+# Fonts
+*.woff
+*.woff2
+*.ttf
+*.eot
+*.otf
+
+# Logs, caches, test output
+*.log
+/storage/logs/
+/storage/framework/cache/
+/storage/framework/sessions/
+/storage/framework/views/
+/storage/pail/
+.phpunit.result.cache
+/.phpunit.cache/
+bootstrap/cache/
+
+# Lock files
+composer.lock
+package-lock.json
+/resources/frontend/package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# IDE and OS
+/.idea/
+/.vscode/
+/.fleet/
+/.nova/
+/.zed/
+/.claude/
+/.junie/
+.DS_Store
+Thumbs.db
+
+# Temp
+*.pid
+*.seed
+*.cache
+*.tmp
+*.bak
+*.orig
+*.swp
+*~
+
+# VCS
+/.git/

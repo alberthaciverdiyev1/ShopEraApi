@@ -6,15 +6,13 @@ use App\Enums\OrderStatus as OrderStatusEnum;
 use App\Services\Notification\OrderStatusNotifier;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Modules\Order\Http\Entities\Order;
-use Modules\Order\Http\Entities\OrderStatus;
+use Modules\Order\Entities\Order;
+use Modules\Order\Entities\OrderStatus;
 use Modules\Payment\Service\PaymentService;
 
 class PendingPaymentExpiryService
 {
-    public function __construct(private readonly PaymentService $paymentService)
-    {
-    }
+    public function __construct(private readonly PaymentService $paymentService) {}
 
     public function expire(int $hours = 3, int $limit = 200): array
     {
@@ -24,9 +22,9 @@ class PendingPaymentExpiryService
 
         $ids = Order::query()
             ->whereNull('paid_at')
-            ->where(fn($query) => $query->where('payment_type', 'CARD')->orWhereNull('payment_type'))
+            ->where(fn ($query) => $query->where('payment_type', 'CARD')->orWhereNull('payment_type'))
             ->where('created_at', '<=', $cutoff)
-            ->whereHas('latestStatus', fn($query) => $query->where('status', OrderStatusEnum::WAITING_PAYMENT->value))
+            ->whereHas('latestStatus', fn ($query) => $query->where('status', OrderStatusEnum::WAITING_PAYMENT->value))
             ->orderBy('id')
             ->limit($limit)
             ->pluck('id');
@@ -43,14 +41,16 @@ class PendingPaymentExpiryService
         foreach ($ids as $id) {
             $order = Order::with('items')->find($id);
 
-            if (!$order) {
+            if (! $order) {
                 $summary['skipped']++;
+
                 continue;
             }
 
             try {
                 if ($this->paymentService->confirmOrderPaymentIfPaid($order)) {
                     $summary['confirmed_paid']++;
+
                     continue;
                 }
             } catch (\Throwable $e) {
@@ -74,8 +74,9 @@ class PendingPaymentExpiryService
                 DB::transaction(function () use ($id, $cutoff, &$summary) {
                     $lockedOrder = Order::with('items')->whereKey($id)->lockForUpdate()->first();
 
-                    if (!$lockedOrder || $lockedOrder->paid_at || $lockedOrder->created_at->gt($cutoff)) {
+                    if (! $lockedOrder || $lockedOrder->paid_at || $lockedOrder->created_at->gt($cutoff)) {
                         $summary['skipped']++;
+
                         return;
                     }
 
@@ -86,6 +87,7 @@ class PendingPaymentExpiryService
 
                     if ((int) $latestStatus !== OrderStatusEnum::WAITING_PAYMENT->value) {
                         $summary['skipped']++;
+
                         return;
                     }
 
@@ -93,8 +95,8 @@ class PendingPaymentExpiryService
                         DB::table('products')
                             ->where('id', $item->product_id)
                             ->update([
-                                'stock_count' => DB::raw('stock_count + ' . (int) $item->quantity),
-                                'sales_count' => DB::raw('GREATEST(sales_count - ' . (int) $item->quantity . ', 0)'),
+                                'stock_count' => DB::raw('stock_count + '.(int) $item->quantity),
+                                'sales_count' => DB::raw('GREATEST(sales_count - '.(int) $item->quantity.', 0)'),
                                 'updated_at' => now(),
                             ]);
                     }
@@ -109,7 +111,7 @@ class PendingPaymentExpiryService
                         ]);
 
                     DB::table('used_promo_codes')
-                        ->where(fn($query) => $query
+                        ->where(fn ($query) => $query
                             ->where('transaction_id', $lockedOrder->transaction_id)
                             ->orWhere('order_id', $lockedOrder->id)
                         )
@@ -163,9 +165,9 @@ class PendingPaymentExpiryService
 
         $summary['remaining'] = Order::query()
             ->whereNull('paid_at')
-            ->where(fn($query) => $query->where('payment_type', 'CARD')->orWhereNull('payment_type'))
+            ->where(fn ($query) => $query->where('payment_type', 'CARD')->orWhereNull('payment_type'))
             ->where('created_at', '<=', $cutoff)
-            ->whereHas('latestStatus', fn($query) => $query->where('status', OrderStatusEnum::WAITING_PAYMENT->value))
+            ->whereHas('latestStatus', fn ($query) => $query->where('status', OrderStatusEnum::WAITING_PAYMENT->value))
             ->count();
 
         return $summary;

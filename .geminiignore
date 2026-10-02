@@ -1,0 +1,105 @@
+# .geminiignore
+# Antigravity / Gemini Code Assist ignore list for ShopEra
+# Prevents token bloat, keeps secrets safe, and ignores generated/vendor files.
+
+# --- Sırlar ve Ortam Dosyaları (Güvenlik) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+storage/*.key
+storage/firebase/
+storage/app/firebase/
+
+# --- Bağımlılıklar (Vendor & Node) ---
+/vendor/
+/node_modules/
+/resources/frontend/node_modules/
+
+# --- Derlenmiş Çıktılar ve Build Dizinleri ---
+/public/build/
+/public/hot
+/public/storage
+/bootstrap/cache/*.php
+/resources/frontend/.svelte-kit/
+/resources/frontend/build/
+/resources/frontend/.vite/
+/resources/frontend/.output/
+
+# --- Frontend Statik ve Büyük Medya Varlıkları ---
+/resources/frontend/static/assets/images/
+/resources/frontend/static/assets/webfonts/
+/resources/frontend/static/assets/scss/
+/resources/html/assets/
+
+# --- Medya, Yüklemeler ve Büyük İkili (Binary) Dosyalar ---
+/public/uploads/
+/public/assets/uploads/
+/storage/app/public/
+/storage/app/private/
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.ico
+*.mp4
+*.mov
+*.pdf
+*.zip
+*.tar.gz
+*.sql
+*.sqlite
+*.dump
+
+# --- Web Fontları ---
+*.woff
+*.woff2
+*.ttf
+*.eot
+*.otf
+
+# --- Loglar, Önbellek ve Test Çıktıları ---
+*.log
+/storage/logs/
+/storage/framework/cache/
+/storage/framework/sessions/
+/storage/framework/views/
+/storage/pail/
+.phpunit.result.cache
+/.phpunit.cache/
+bootstrap/cache/
+
+# --- Kilit (Lock) Dosyaları ---
+composer.lock
+package-lock.json
+/resources/frontend/package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# --- IDE ve İşletim Sistemi ---
+/.idea/
+/.vscode/
+/.fleet/
+/.nova/
+/.zed/
+/.claude/
+/.junie/
+.DS_Store
+Thumbs.db
+
+# --- Geçici / Çöp Dosyalar ---
+*.pid
+*.seed
+*.cache
+*.tmp
+*.bak
+*.orig
+*.swp
+*~
+
+# --- Versiyon Kontrolü ---
+/.git/

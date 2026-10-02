@@ -3,9 +3,9 @@
 namespace Modules\Product\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Modules\Product\Http\Entities\Product;
-use Modules\Product\Http\Entities\Review;
-use Modules\User\Http\Entities\User;
+use Modules\Product\Entities\Product;
+use Modules\Product\Entities\Review;
+use Modules\User\Entities\User;
 
 class ReviewFactory extends Factory
 {

@@ -21,8 +21,8 @@ class BasketAddRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_id' => ['required', 'integer','exists:products,id'],
-            'user_id' => ['required', 'integer','exists:users,id'],
+            'product_id' => ['required', 'integer', 'exists:products,id'],
+            'user_id' => ['required', 'integer', 'exists:users,id'],
             'quantity' => ['required', 'integer', 'min:1'],
             'gender' => ['nullable'],
             'size_id' => ['nullable'],

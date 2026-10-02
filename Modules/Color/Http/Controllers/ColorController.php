@@ -2,22 +2,18 @@
 
 namespace Modules\Color\Http\Controllers;
 
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Color\Http\Requests\ColorAddRequest;
 use Modules\Color\Http\Requests\ColorUpdateRequest;
 use Modules\Color\Services\ColorService;
-use Nwidart\Modules\Facades\Module;
 
 class ColorController extends Controller
 {
-
     private ColorService $service;
 
     public function __construct(ColorService $service)
     {
-        $this->middleware('permission:view colors')->only('list');
         $this->middleware('permission:add color')->only('add');
         $this->middleware('permission:details color')->only('details');
         $this->middleware('permission:update color')->only('update');
@@ -25,7 +21,6 @@ class ColorController extends Controller
 
         $this->service = $service;
     }
-
 
     /**
      * Display a listing of the resource.
@@ -58,7 +53,6 @@ class ColorController extends Controller
     {
         return $this->service->update($request, $id);
     }
-
 
     /**
      * Remove the specified resource from storage.

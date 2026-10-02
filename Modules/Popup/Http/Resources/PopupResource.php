@@ -9,11 +9,14 @@ class PopupResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $type = $this->type ?: ($this->video ? 'video' : 'image');
+
         return [
             "id" => $this->id,
-            "image" => $this->image ?: ($this->video ?? ''),
+            "type" => $type,
+            "image" => $this->image,
             "video" => $this->video,
-            "show_on_home_page" => $this->show_on_home_page
+            "show_on_home_page" => (bool) $this->show_on_home_page,
         ];
     }
 }

@@ -4,7 +4,8 @@ namespace Modules\Setting\Services;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
-use Modules\Setting\Http\Entities\Setting;
+use App\Support\TenantContext;
+use Modules\Setting\Entities\Setting;
 use Modules\Setting\Http\Resources\SettingResource;
 
 class SettingService
@@ -21,7 +22,7 @@ class SettingService
      */
     public function list(): JsonResponse
     {
-        $cacheKey = 'settings_list';
+        $cacheKey = TenantContext::cacheKey('settings_list');
 
         $data = Cache::remember(
             $cacheKey,
@@ -43,14 +44,15 @@ class SettingService
             function () use ($validated) {
                 $setting = $this->model->first();
                 $setting->update($validated);
+
                 return $setting->refresh();
             },
             'Setting updated successfully.',
             SettingResource::class
         );
 
-        Cache::forget('settings_list');
-        Cache::forget('settings_first');
+        Cache::forget(TenantContext::cacheKey('settings_list'));
+        Cache::forget(TenantContext::cacheKey('settings_first'));
 
         return $setting;
     }
@@ -58,6 +60,7 @@ class SettingService
     public function getSettingFieldData(string $field)
     {
         $setting = $this->firstSetting();
+
         return $setting?->{$field};
     }
 
@@ -70,14 +73,14 @@ class SettingService
     {
         $setting = $this->firstSetting();
 
-        return (float)($setting?->minimal_purchase_price ?? 15);
+        return (float) ($setting?->minimal_purchase_price ?? 15);
     }
 
     public function getWholesaleMinimalPurchasePrice(): float
     {
         $setting = $this->firstSetting();
 
-        return (float)($setting?->wholesale_minimal_purchase_price ?? 100);
+        return (float) ($setting?->wholesale_minimal_purchase_price ?? 100);
     }
 
     public function getStoreCommissionPercent(): float
@@ -125,7 +128,7 @@ class SettingService
     private function firstSetting(): ?Setting
     {
         return Cache::remember(
-            'settings_first',
+            TenantContext::cacheKey('settings_first'),
             config('cache.setting_list_cache_time', 3600),
             fn () => $this->model->first()
         );

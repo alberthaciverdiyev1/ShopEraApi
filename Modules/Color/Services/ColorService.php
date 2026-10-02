@@ -2,31 +2,24 @@
 
 namespace Modules\Color\Services;
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Storage;
-use Modules\Color\Http\Entities\Color;
+use Modules\Color\Entities\Color;
 use Modules\Color\Http\Transformers\ColorResource;
 
 class ColorService
 {
     private Color $model;
 
-    /**
-     * @param Color $model
-     */
-    function __construct(Color $model)
+    public function __construct(Color $model)
     {
         $this->model = $model;
     }
 
-    /**
-     * @param $request
-     * @return JsonResponse
-     */
     public function list($request): JsonResponse
     {
         $params = $request->all();
-        $perPage = max(1, min((int)($params['per_page'] ?? $params['limit'] ?? 20), 500));
+        $perPage = max(1, min((int) ($params['per_page'] ?? $params['limit'] ?? 20), 500));
         $query = $this->model->query()->select(['id', 'name', 'hex', 'is_active', 'sort_order']);
         $query = filterLike($query, ['name'], $params);
 
@@ -43,17 +36,17 @@ class ColorService
 
         return responseHelper(__('Colors retrieved successfully.'), 200, ColorResource::collection($data));
 
-//        return response()->json([
-//            'success' => 200,
-//            'message' => __('Colors retrieved successfully.'),
-//            'data' => ColorResource::collection($data),
-//            'meta' => [
-//                'current_page' => $data->currentPage(),
-//                'last_page' => $data->lastPage(),
-//                'per_page' => $data->perPage(),
-//                'total' => $data->total(),
-//            ],
-//        ]);
+        //        return response()->json([
+        //            'success' => 200,
+        //            'message' => __('Colors retrieved successfully.'),
+        //            'data' => ColorResource::collection($data),
+        //            'meta' => [
+        //                'current_page' => $data->currentPage(),
+        //                'last_page' => $data->lastPage(),
+        //                'per_page' => $data->perPage(),
+        //                'total' => $data->total(),
+        //            ],
+        //        ]);
     }
 
     /**
@@ -66,7 +59,7 @@ class ColorService
 
             return responseHelper(__('Colors retrieved successfully.'), 200, ColorResource::make($color));
 
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        } catch (ModelNotFoundException $e) {
             return responseHelper(__('Colors not found.'), 403, []);
         }
     }
@@ -82,14 +75,13 @@ class ColorService
         $validated['sort_order'] = $maxSortOrder + 1;
 
         $color = handleTransaction(
-            fn() => $this->model->create($validated)->refresh(),
+            fn () => $this->model->create($validated)->refresh(),
             'Color added successfully.',
             ColorResource::class
         );
 
         return $color;
     }
-
 
     /**
      * Update color
@@ -102,6 +94,7 @@ class ColorService
             function () use ($validated, $id) {
                 $color = $this->model->findOrFail($id);
                 $color->update($validated);
+
                 return $color->refresh();
             },
             'Color updated successfully.',
@@ -121,6 +114,7 @@ class ColorService
                 $color = $this->model->findOrFail($id);
                 $color->products()->detach();
                 $color->delete();
+
                 return $color;
             },
             'Color deleted successfully.'

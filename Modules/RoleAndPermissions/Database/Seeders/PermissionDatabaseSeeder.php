@@ -3,8 +3,8 @@
 namespace Modules\RoleAndPermissions\Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class PermissionDatabaseSeeder extends Seeder
 {
@@ -13,116 +13,25 @@ class PermissionDatabaseSeeder extends Seeder
     public function run(): void
     {
         $allPermissions = [
-//            'banner' => [
-//                //     'view banners',
-//                'add banner',
-//                'delete banner',
-//            ],
-//            'brands' => [
-//                //  'view brands',
-//                'add brand',
-//                'details brand',
-//                'update brand',
-//                'delete brand',
-//            ],
-//            'categories' => [
-//                //  'view categories',
-//                // 'view categories-with-products',
-//                'add category',
-//                'details category',
-//                'update category',
-//                'delete category',
-//            ],
-//            'colors' => [
-//                'view colors',
-//                'add color',
-//                'details color',
-//                'update color',
-//                'delete color',
-//            ],
-//            'delivery' => [
-//                'view deliveries',
-//                'add delivery',
-//                'details delivery',
-//                'update delivery',
-//                'delete delivery',
-//            ],
-//            'faqs' => [
-//                'view faqs',
-//                'add faq',
-//                'update faq',
-//                'delete faq',
-//            ],
-//            'legal-terms' => [
-//                'view legal-terms',
-//                'update legal-terms',
-//            ],
-//            'notifications' => [
-//                'view notifications',
-//                'send notification'
-//            ],
-//            'orders' => [
-//                'view orders',
-//                'view orders-admin',
-//                'details order',
-//                'basket order',
-//                'buy-one order',
-//                'update order',
-//                'delete order',
-//                'completed-orders',
-//                'download-receipt',
-//                'view-receipt'
-//            ],
-//            'balance' => [
-//                'view balances',
-//                'deposit balance',
-//                'withdraw balance',
-//                'get-balance balance',
-//                'history balance',
-//            ],
-//            'products' => [
-//                //'view products',
-//                'add product',
-//                //    'details product',
-//                'update product',
-//                'delete product',
-//                'statistics product',
-//                'details-admin product',
-//            ],
-//            'reviews' => [
-//                'view reviews',
-//                'add review',
-//                'delete review',
-//            ],
-//            'promo-codes' => [
-//                'view promo-codes',
-//                'check promo-code',
-//                'add promo-code',
-//                'details promo-code',
-//                'update promo-code',
-//                'delete promo-code',
-//                'check-promo-code-with-price',
-//            ],
-//            'roles-and-permissions' => [
-//                'manage-permissions',
-//                'manage-roles',
-//            ],
-//            'settings' => [
-//                'view setting',
-//                'update setting',
-//            ],
-//            'sizes' => [
-//                'view sizes',
-//                'add size',
-//                'details size',
-//                'update size',
-//                'delete size',
-//            ],
-//            'users' => [
-//                'view users',
-//                'details user',
-//                'update user',
-//            ],
+            // Bu seeder her izni developer/admin/user/manager rollerine verir,
+            // ona görə yalnız alıcıya aid izinlər buradadır (admin-only
+            // olanlar — məsələn `view orders-admin` — qəsdən yoxdur).
+            'orders' => [
+                'view orders',
+                'basket order',
+                'buy-one order',
+                'completed-orders',
+                'view-receipt',
+                'download-receipt',
+            ],
+            'reviews' => [
+                'view reviews',
+                'add review',
+            ],
+            'theme' => [
+                'view theme',
+                'update theme',
+            ],
             'chat' => [
                 'full chat access',
             ],
@@ -133,7 +42,7 @@ class PermissionDatabaseSeeder extends Seeder
                 'add popup',
                 'delete popup',
                 'active popup',
-            ]
+            ],
         ];
 
         $developerRole = Role::firstOrCreate([
@@ -168,24 +77,23 @@ class PermissionDatabaseSeeder extends Seeder
             }
         }
 
-//        foreach ($allPermissions as $group => $groupPermissions) {
-//            foreach ($groupPermissions as $permissionName) {
-//
-//                $permission = Permission::where('name', $permissionName)
-//                    ->where('guard_name', $this->guard)
-//                    ->first();
-//
-//                if (!$permission) {
-//                    continue;
-//                }
-//
-//                $developerRole->givePermissionTo($permission);
-//                $adminRole->givePermissionTo($permission);
-//                $userRole->givePermissionTo($permission);
-//                $managerRole->givePermissionTo($permission);
-//            }
-//        }
-
+        //        foreach ($allPermissions as $group => $groupPermissions) {
+        //            foreach ($groupPermissions as $permissionName) {
+        //
+        //                $permission = Permission::where('name', $permissionName)
+        //                    ->where('guard_name', $this->guard)
+        //                    ->first();
+        //
+        //                if (!$permission) {
+        //                    continue;
+        //                }
+        //
+        //                $developerRole->givePermissionTo($permission);
+        //                $adminRole->givePermissionTo($permission);
+        //                $userRole->givePermissionTo($permission);
+        //                $managerRole->givePermissionTo($permission);
+        //            }
+        //        }
 
         app('cache')->forget('spatie.permission.cache');
     }

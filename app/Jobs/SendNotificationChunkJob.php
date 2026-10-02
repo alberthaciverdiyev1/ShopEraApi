@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Jobs\Concerns\TenantAware;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -11,7 +12,7 @@ use Modules\Notification\Services\SendNotificationService;
 
 class SendNotificationChunkJob implements ShouldQueue
 {
-    use Dispatchable, Queueable, SerializesModels;
+    use Dispatchable, Queueable, SerializesModels, TenantAware;
 
     public int $tries = 1;
 
@@ -32,6 +33,7 @@ class SendNotificationChunkJob implements ShouldQueue
         public ?string $imageUrl = null,
         public ?string $url = null
     ) {
+        $this->captureTenant();
     }
 
     public function handle(SendNotificationService $service): void

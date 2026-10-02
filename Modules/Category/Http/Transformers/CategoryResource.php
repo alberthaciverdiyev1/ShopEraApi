@@ -17,6 +17,7 @@ class CategoryResource extends JsonResource
             'parent_id' => $this->parent_id,
             'is_active' => $this->is_active,
             'sort_order' => $this->sort_order,
+            'products_count' => $this->whenCounted('products'),
             'children' => self::collection($this->whenLoaded('children')),
             'products' => ProductResource::collection($this->whenLoaded('products')),
         ];

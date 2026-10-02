@@ -1,0 +1,206 @@
+.brand-title {
+    font-size: 18px;
+    color: $text-color;
+    font-weight: 400;
+    text-align: center;
+    margin-bottom: 50px;
+
+    b {
+        color: $theme-color;
+    }
+}
+
+.brand-section {
+    .mycustom-marque {
+        position: relative;
+
+        .left-shape {
+            position: absolute;
+            top: 0;
+            left: 0px;
+            width: 175.149px;
+            height: 68px;
+            background: linear-gradient(-90deg, rgba(255, 255, 255, 0.00) 30.38%, #FFF 100%);
+            z-index: 3;
+        }
+
+        .right-shape {
+            position: absolute;
+            top: 0;
+            right: 0px;
+            width: 175.149px;
+            height: 68px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.00) 30.38%, #FFF 100%);
+            z-index: 3;
+        }
+    }
+
+    .style-border {
+        border-bottom: 2px solid transparent;
+        border-image: linear-gradient(90deg, rgba(139, 144, 150, 0.05) 14.72%, #D8DFE9 44%, rgba(121, 125, 131, 0.05) 85%);
+        border-bottom: 2px solid transparent;
+        border-image-slice: 2;
+        padding-bottom: 45px;
+    }
+}
+
+.brand-title-2 {
+    padding: 10px 20px;
+    line-height: 1;
+    background-color: $white;
+    display: inline-block;
+    border-radius: 46px;
+    box-shadow: 0px 1px 2px 0px rgba(45, 54, 67, 0.05);
+    margin-bottom: 60px;
+
+    @include breakpoint (max-sm) {
+        padding: 10px 8px; 
+    }
+
+    h6 {
+        font-size: 15px;
+        color: $text-color;
+        font-weight: 500;
+        font-family: $body-font;
+
+        @include breakpoint (max-sm){
+            font-size: 13px;
+        }
+    }
+}
+
+.brand-wrapper {
+    &.style4 {
+        position: relative; 
+        padding: 60px 40px 50px;
+        border: 1px solid #EEE3FA;
+        border-radius: 30px;
+        -webkit-border-radius: 30px;
+        -moz-border-radius: 30px;
+        -ms-border-radius: 30px;
+        -o-border-radius: 30px;
+
+        .brand-title-2 {
+            position: absolute;
+            top: -17px;
+            left: 67px;
+
+            @include breakpoint (max-md) {
+                position: absolute;
+                top: -17px;
+                left: 8px;
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+.scrolling-wrap {
+	overflow: hidden;
+	white-space: nowrap;
+	display: flex;
+	gap: 20px;
+    background-color: #141415;
+    padding: 30px 0;
+    border-radius: 40px;
+    background: linear-gradient(90deg, #FF4035 0%, #E9CF10 100%);
+	&.bg-2 {
+		background-color: $theme-color;
+	}
+
+	&.bg-3 {
+		background-color: #F1EAFF;
+
+		.comm {
+			.cmn-textslide {
+				font-size: 22px;
+				font-weight: 500;
+				line-height: 32px;
+				text-transform: capitalize;
+				color: $title-color
+			}
+		}
+	}
+
+	&.style-2 {
+		background-color: transparent;
+		padding: 0;
+		justify-content: space-between;
+		gap: 70px;
+		
+		.comm {
+			gap: 70px;
+		}
+	}
+
+	.comm {
+		display: flex;
+		align-items: center;
+		animation: scroll 60s linear infinite;
+		gap: 30px;
+		cursor: pointer;
+
+		.cmn-textslide {
+			font-size: 20px;
+			font-weight: 500;
+			line-height: 32px;
+			text-transform: uppercase;
+            color: $white;
+            font-family: $title-font;
+		}
+		// .text-custom-storke {
+		// 	-webkit-text-stroke: 1px rgb(255, 247, 247);
+		// 	-webkit-text-fill-color: transparent;
+		// }
+	}
+
+	&:hover {
+		.comm {
+			animation-play-state: paused;
+		}
+	}
+
+	@include breakpoint (max-xxl) {
+		.comm {
+			gap: 20px;
+		}
+	}
+
+	@include breakpoint (max-lg) {
+		gap: 14px;
+		.comm {
+			gap: 14px;
+		}
+	}
+
+	@include breakpoint (max-sm) {
+		.comm {
+			gap: 12px;
+		}
+	}
+}
+
+
+@keyframes scroll {
+	0% {
+		transform: translateX(0);
+	}
+	100% {
+		transform: translateX(-100%);
+	}
+}
+@keyframes scroll2 {
+	0% {
+		transform: translateX(0%);
+	}
+	100% {
+		transform: translateX(-200%);
+	}
+}

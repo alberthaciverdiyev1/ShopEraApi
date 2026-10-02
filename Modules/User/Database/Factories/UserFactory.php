@@ -4,18 +4,19 @@ namespace Modules\User\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
-use Modules\Product\Http\Entities\Product;
+use Modules\Product\Entities\Product;
+use Modules\User\Entities\User;
 
 class UserFactory extends Factory
 {
-    protected $model = \Modules\User\Http\Entities\User::class;
+    protected $model = User::class;
 
     public function definition()
     {
         return [
-            'name'              => $this->faker->name(),
-            'email'             => $this->faker->unique()->safeEmail(),
-            'password'          => bcrypt('123456'),
+            'name' => $this->faker->name(),
+            'email' => $this->faker->unique()->safeEmail(),
+            'password' => bcrypt('123456'),
             'email_verified_at' => Carbon::now(),
         ];
     }

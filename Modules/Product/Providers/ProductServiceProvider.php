@@ -4,6 +4,8 @@ namespace Modules\Product\Providers;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Modules\Product\Console\GenerateMissingProductImageEmbeddings;
+use Modules\Product\Console\GenerateMissingProductImageHashes;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -44,8 +46,8 @@ class ProductServiceProvider extends ServiceProvider
     protected function registerCommands(): void
     {
         $this->commands([
-            \Modules\Product\Console\GenerateMissingProductImageHashes::class,
-            \Modules\Product\Console\GenerateMissingProductImageEmbeddings::class,
+            GenerateMissingProductImageHashes::class,
+            GenerateMissingProductImageEmbeddings::class,
         ]);
     }
 
@@ -132,7 +134,7 @@ class ProductServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(array_merge($this->getPublishableViewPaths(), [$sourcePath]), $this->nameLower);
 
-        Blade::componentNamespace(config('modules.namespace').'\\' . $this->name . '\\View\\Components', $this->nameLower);
+        Blade::componentNamespace(config('modules.namespace').'\\'.$this->name.'\\View\\Components', $this->nameLower);
     }
 
     /**

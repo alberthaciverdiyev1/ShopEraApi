@@ -4,7 +4,7 @@ namespace Modules\User\Services;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Modules\Product\Http\Entities\Product;
+use Modules\Product\Entities\Product;
 use Modules\Product\Http\Resources\ProductResource;
 
 class FavoriteService
@@ -24,7 +24,7 @@ class FavoriteService
         $user = Auth::user();
 
         $favorites = $user->favorites()
-            ->with(['brand', 'category', 'images','colors','sizes'])
+            ->with(['brand', 'category', 'images', 'colors', 'sizes'])
             ->withAvg('reviews', 'rate')
             ->withCount('reviews')
             ->orderBy('user_favorites.created_at', 'desc')
@@ -34,6 +34,7 @@ class FavoriteService
             $product->is_favorite = true;
             $product->rate = ($product->reviews_avg_rate !== null) ? round($product->reviews_avg_rate, 2) : 0;
             $product->rate_count = $product->reviews_count;
+
             return $product;
         });
 
@@ -48,7 +49,7 @@ class FavoriteService
         $user = Auth::user();
 
         $product = $this->product->find($productId);
-        if (!$product) {
+        if (! $product) {
             return responseHelper(__('Product not found.'), 403);
         }
 
@@ -68,16 +69,17 @@ class FavoriteService
 
         $product = $this->product->find($productId);
 
-        if (!$product) {
+        if (! $product) {
             return responseHelper(__('Product not found.'), 403);
         }
 
         if ($user->favorites()->where('product_id', $product->id)->exists()) {
             $user->favorites()->detach($product->id);
+
             return responseHelper(__('Product removed from favorites.'), 200);
         }
+
         return responseHelper(__('Product was not in favorites.'), 200);
 
     }
-
 }

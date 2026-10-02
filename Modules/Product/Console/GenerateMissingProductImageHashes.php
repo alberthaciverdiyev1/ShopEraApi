@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Modules\Product\Http\Entities\ProductImage;
+use Modules\Product\Entities\ProductImage;
 
 class GenerateMissingProductImageHashes extends Command
 {
@@ -69,9 +69,10 @@ class GenerateMissingProductImageHashes extends Command
                 try {
                     $tempPath = $this->getImageTempPath($image);
 
-                    if (!$tempPath || !file_exists($tempPath)) {
+                    if (! $tempPath || ! file_exists($tempPath)) {
                         $skipped++;
                         $bar->advance();
+
                         continue;
                     }
 
@@ -82,10 +83,11 @@ class GenerateMissingProductImageHashes extends Command
                     if (empty($hashes['ahash']) || empty($hashes['dhash'])) {
                         $failed++;
                         $bar->advance();
+
                         continue;
                     }
 
-                    if (!$dryRun) {
+                    if (! $dryRun) {
                         $image->update([
                             'ahash' => $hashes['ahash'],
                             'dhash' => $hashes['dhash'],
@@ -128,17 +130,17 @@ class GenerateMissingProductImageHashes extends Command
     {
         $imagePath = $image->image_path;
 
-        if (!$imagePath) {
+        if (! $imagePath) {
             return null;
         }
 
         $tempDir = storage_path('app/temp_product_hashes');
 
-        if (!is_dir($tempDir)) {
+        if (! is_dir($tempDir)) {
             mkdir($tempDir, 0755, true);
         }
 
-        $tempPath = $tempDir . '/product_image_' . $image->id . '_' . md5($imagePath) . '.jpg';
+        $tempPath = $tempDir.'/product_image_'.$image->id.'_'.md5($imagePath).'.jpg';
 
         $cdnBaseUrl = rtrim(config('filesystems.disks.bunnycdn.pull_zone'), '/');
 
@@ -147,6 +149,7 @@ class GenerateMissingProductImageHashes extends Command
 
             if ($relativePath && Storage::disk('bunnycdn')->exists($relativePath)) {
                 file_put_contents($tempPath, Storage::disk('bunnycdn')->get($relativePath));
+
                 return $tempPath;
             }
 
@@ -154,6 +157,7 @@ class GenerateMissingProductImageHashes extends Command
 
             if ($response->successful()) {
                 file_put_contents($tempPath, $response->body());
+
                 return $tempPath;
             }
 
@@ -164,6 +168,7 @@ class GenerateMissingProductImageHashes extends Command
 
         if (Storage::disk('bunnycdn')->exists($relativePath)) {
             file_put_contents($tempPath, Storage::disk('bunnycdn')->get($relativePath));
+
             return $tempPath;
         }
 
