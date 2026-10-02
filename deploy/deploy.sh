@@ -149,10 +149,20 @@ if [ ! -L public/storage ]; then
 fi
 
 # 6) Cache
-info "Cache yenile (optimize:clear + optimize)"
-"$PHP_BIN" artisan optimize:clear >/dev/null 2>&1 || true
+# NOT: `optimize:clear` içindeki `cache:clear` tenant host->db haritasını
+# (file cache: tenant_map) siler; bu yüzden hedefli temizlik yapıyoruz.
+info "Cache yenile (config/route/view + optimize)"
+"$PHP_BIN" artisan config:clear >/dev/null 2>&1 || true
+"$PHP_BIN" artisan route:clear >/dev/null 2>&1 || true
+"$PHP_BIN" artisan view:clear >/dev/null 2>&1 || true
 "$PHP_BIN" artisan optimize
 ok "config/route/view cache"
+
+# 7) Manager'dan entitlement/tema ve tenant host->db haritasini yenile.
+# MANAGER_URL yoksa komut uyarip basariyla doner; bu yuzden fatal degil.
+info "manager:sync (entitlement + tenant map)"
+"$PHP_BIN" artisan manager:sync || warn "manager:sync basarisiz (atlandi)"
+ok "manager:sync"
 
 if "$PHP_BIN" artisan list --raw 2>/dev/null | grep -q '^manager:sync$'; then
     info "Tenant haritasi yenileniyor (manager:sync)"
@@ -160,7 +170,7 @@ if "$PHP_BIN" artisan list --raw 2>/dev/null | grep -q '^manager:sync$'; then
     ok "tenant map"
 fi
 
-# 7) Izinler (yalnizca root iken)
+# 8) Izinler (yalnizca root iken)
 if [ "$(id -u)" -eq 0 ] && [ -f deploy/scripts/fix-permissions.sh ]; then
     info "Izinler duzeltiliyor"
     APP_DIR="$APP_DIR" APP_USER="$APP_USER" APP_GROUP="$APP_GROUP" \
@@ -168,7 +178,7 @@ if [ "$(id -u)" -eq 0 ] && [ -f deploy/scripts/fix-permissions.sh ]; then
     ok "permissions"
 fi
 
-# 8) Servisleri yenile
+# 9) Servisleri yenile
 restart_queue
 restart_storefront
 reload_php_fpm
