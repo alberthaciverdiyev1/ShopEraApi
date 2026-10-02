@@ -62,6 +62,28 @@ class FeatureController extends Controller
         return $this->tableResponse();
     }
 
+    public function duplicate(Feature $feature)
+    {
+        $base = $feature->key;
+        $key = $base.'_copy';
+        $i = 2;
+        while (Feature::query()->where('key', $key)->exists()) {
+            $key = $base.'_copy'.$i++;
+        }
+
+        Feature::query()->create([
+            'key' => $key,
+            'name' => $feature->name.' (copy)',
+            'type' => $feature->type->value,
+            'default_value' => $feature->default_value,
+            'group' => $feature->group,
+            'description' => $feature->description,
+            'sort_order' => ($feature->sort_order ?? 0) + 1,
+        ]);
+
+        return $this->tableResponse();
+    }
+
     private function rules(?Feature $feature = null): array
     {
         return [

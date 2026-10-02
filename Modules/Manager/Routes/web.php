@@ -39,6 +39,7 @@ Route::middleware(['auth:owner', EnsureOwner::class])->group(function () {
 
     // Feature catalogue
     Route::resource('features', FeatureController::class)->except(['show']);
+    Route::post('features/{feature}/duplicate', [FeatureController::class, 'duplicate'])->name('features.duplicate');
 
     // Themes (presets)
     Route::resource('themes', ThemeController::class)->except(['show']);

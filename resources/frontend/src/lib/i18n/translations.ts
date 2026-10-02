@@ -9,7 +9,6 @@ export type Locale = 'az' | 'en' | 'ru' | 'tr';
 
 export const defaultLocale: Locale = 'az';
 
-// Base list of every supported locale (used for validation).
 export const languages: { value: Locale; label: string }[] = [
 	{ value: 'az', label: 'Azərbaycanca' },
 	{ value: 'en', label: 'English' },
@@ -17,8 +16,6 @@ export const languages: { value: Locale; label: string }[] = [
 	{ value: 'tr', label: 'Türkçe' }
 ];
 
-// UI list: each language is enabled/disabled by its feature flag
-// (lang_az, lang_en, lang_ru, lang_tr). A missing flag means enabled.
 export const languageOptions = derived(features, ($features) =>
 	languages.map((language) => ({
 		...language,

@@ -13,6 +13,7 @@
                     <td class="px-4 py-3">{{ $feature->group ?? '—' }}</td>
                     <td class="px-4 py-3">
                         <div class="flex justify-end gap-1">
+                            <button hx-post="{{ route('manager.features.duplicate', $feature) }}" hx-target="#feature-table" hx-swap="innerHTML" class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-brand-600" title="Kopyala">⧉</button>
                             <button hx-get="{{ route('manager.features.edit', $feature) }}" hx-target="#modal-root" hx-swap="innerHTML" class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-brand-600">✎</button>
                             <button hx-delete="{{ route('manager.features.destroy', $feature) }}" hx-target="#feature-table" hx-swap="innerHTML" hx-confirm="Silinsin?" class="rounded-lg p-2 text-gray-500 hover:bg-rose-50 hover:text-rose-600">🗑</button>
                         </div>

@@ -18,11 +18,6 @@ class FeatureSeeder extends Seeder
             // Feature kataloqu boşdur — feature'lar Manager panelindən əl ilə əlavə olunur.
         ];
 
-        $keys = array_column($features, 0);
-
-        // Remove anything that is not part of the real capability set.
-        Feature::query()->whereNotIn('key', $keys)->delete();
-
         foreach ($features as $i => [$key, $name, $type, $default, $group]) {
             Feature::query()->updateOrCreate(
                 ['key' => $key],
