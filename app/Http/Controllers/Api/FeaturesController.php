@@ -14,9 +14,9 @@ use Illuminate\Routing\Controller;
 class FeaturesController extends Controller
 {
     private const DEFAULTS = [
-        'online_payment' => true,
-        'cash_on_delivery' => true,
-        'whatsapp_orders' => true,
+        'buy_with_card' => true,
+        'buy_with_cash' => true,
+        'buy_with_whatsapp' => true,
         'phone_orders' => false,
     ];
 

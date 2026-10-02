@@ -42,10 +42,11 @@
         {/if}
     {/await}
 
-    {#await data.promoBlocks then blocks}
-        <MarqueeSection blocks={blocks}/>
-    {/await}
-
+    {#if features.show_ads ?? false}
+        {#await data.promoBlocks then blocks}
+            <MarqueeSection blocks={blocks}/>
+        {/await}
+    {/if}
     <CategorySection/>
 
     {#await Promise.all([data.latestProducts, data.popularProducts, data.saleProducts, data.middleBanners])}

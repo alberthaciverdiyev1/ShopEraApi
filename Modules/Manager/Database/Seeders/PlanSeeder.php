@@ -21,9 +21,9 @@ class PlanSeeder extends Seeder
         $plans = [
             'free' => [
                 'name' => 'Free', 'price' => 0, 'sort_order' => 0,
-                'on' => ['products', 'categories', 'subdomain', 'theme_selection', 'whatsapp_orders', 'contact_page'],
+                'on' => ['products', 'categories', 'subdomain', 'theme_selection', 'buy_with_whatsapp', 'contact_page'],
                 'off' => [
-                    'site_orders', 'online_payment', 'custom_domain', 'dark_light_theme',
+                    'site_orders', 'buy_with_card', 'custom_domain', 'dark_light_theme',
                     'promo_codes', 'shipping_settings', 'google_analytics', 'custom_code',
                     'multi_language', 'chat',
                 ],
@@ -39,8 +39,8 @@ class PlanSeeder extends Seeder
                 'name' => 'Premium', 'price' => 29, 'sort_order' => 1,
                 'on' => [
                     'products', 'categories', 'subdomain', 'theme_selection', 'dark_light_theme',
-                    'online_payment', 'custom_domain', 'promo_codes', 'shipping_settings',
-                    'google_analytics', 'site_orders', 'whatsapp_orders', 'multi_language', 'chat', 'contact_page',
+                    'buy_with_card', 'custom_domain', 'promo_codes', 'shipping_settings',
+                    'google_analytics', 'site_orders', 'buy_with_whatsapp', 'multi_language', 'chat', 'contact_page',
                 ],
                 'off' => ['custom_code'],
                 'values' => [
@@ -55,8 +55,8 @@ class PlanSeeder extends Seeder
                 'name' => 'Business', 'price' => 99, 'sort_order' => 2,
                 'on' => [
                     'products', 'categories', 'subdomain', 'theme_selection', 'dark_light_theme',
-                    'online_payment', 'custom_domain', 'promo_codes', 'shipping_settings',
-                    'google_analytics', 'site_orders', 'whatsapp_orders', 'multi_language',
+                    'buy_with_card', 'custom_domain', 'promo_codes', 'shipping_settings',
+                    'google_analytics', 'site_orders', 'buy_with_whatsapp', 'multi_language',
                     'custom_code', 'chat', 'contact_page',
                 ],
                 'off' => [],
