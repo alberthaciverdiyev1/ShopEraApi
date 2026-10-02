@@ -43,7 +43,7 @@
 				<div class="col-lg-4 col-md-6">
 					<div class="footer-brand-box">
 						<a href="/" class="footer-logo d-inline-block mb-3">
-							<img src={$settings.logo_url || '/assets/images/logo/logo.svg?v=20261002'} alt="Snaker Logo" width="165" height="32" />
+							<img src={$settings.logo_url || '/assets/images/logo/logo.svg?v=20261002'} alt="Snaker Logo" class="footer-logo-img" />
 						</a>
 						<p class="brand-desc mb-4">
 							{$translate('Snaker brings together the latest collections of electronics, fashion, home, and lifestyle products in a modern ecommerce platform.')}
@@ -404,5 +404,10 @@
 		.widget-title {
 			margin-bottom: 16px;
 		}
+	}
+	.footer-logo-img {
+		height: 34px;
+		width: auto;
+		display: block;
 	}
 </style>

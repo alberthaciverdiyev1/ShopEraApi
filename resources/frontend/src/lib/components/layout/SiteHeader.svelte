@@ -85,7 +85,7 @@
                     <div class="header-left">
                         <div class="logo">
                             <a href="/" class="header-logo">
-                                <img src={$settings.logo_url || '/assets/images/logo/logo.svg?v=20261002'} alt="logo-img">
+                                <img src={$settings.logo_url || '/assets/images/logo/logo.svg?v=20261002'} alt="logo-img" class="header-logo-img">
                             </a>
                         </div>
                         <div class="header-cataegory-item">
@@ -769,5 +769,10 @@
 		:global(.header-right .wishlist-icon i) {
 			font-size: 20px !important;
 		}
+	}
+	.header-logo-img {
+		height: 40px;
+		width: auto;
+		display: block;
 	}
 </style>

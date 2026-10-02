@@ -71,7 +71,7 @@
 
 	.best-seller-one__thumb a {
 		display: block;
-		aspect-ratio: 1 / 1;
+		height: 260px;
 		border-radius: 12px;
 		overflow: hidden;
 	}
@@ -156,5 +156,10 @@
 		background: var(--theme);
 		border-color: var(--theme);
 		color: #fff;
+	}
+	@media (max-width: 767.98px) {
+		.best-seller-one__thumb a {
+			height: 180px;
+		}
 	}
 </style>
