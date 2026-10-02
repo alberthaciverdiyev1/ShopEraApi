@@ -18,7 +18,7 @@ Route::middleware('guest:admin')->group(function () {
     Route::post('login', [Admin\AuthController::class, 'login'])->name('login.attempt');
 });
 
-Route::middleware(['admin.auth', 'subscribed'])->group(function () {
+Route::middleware(['admin.auth', 'subscribed', 'admin.menu'])->group(function () {
     Route::post('logout', [Admin\AuthController::class, 'logout'])->name('logout');
 
     Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');

@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Popup\Entities\Popup;
 
-class PopupController extends ResourceController
+class   PopupController extends ResourceController
 {
     protected string $title = 'Popup';
 

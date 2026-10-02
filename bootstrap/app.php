@@ -58,6 +58,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.auth' => AdminAuthenticate::class,
             'subscribed' => EnsureSubscriptionActive::class,
             'feature' => EnsureFeatureEnabled::class,
+            'admin.menu' => \App\Http\Middleware\EnforceAdminMenuAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
