@@ -171,7 +171,25 @@ class OwnerController extends Controller
             'status' => ['required', Rule::in(['active', 'trial', 'suspended', 'cancelled'])],
             'notes' => ['nullable', 'string'],
             'domains' => ['nullable', 'array'],
-            'domains.*' => ['nullable', 'string', 'max:190'],
+            'domains.*' => [
+                'nullable', 'string', 'max:190',
+                function (string $attribute, mixed $value, \Closure $fail) use ($owner) {
+                    $host = strtolower(trim((string) $value));
+
+                    if ($host === '') {
+                        return;
+                    }
+
+                    $taken = Domain::query()
+                        ->where('host', $host)
+                        ->when($owner?->id, fn ($q) => $q->where('site_owner_id', '!=', $owner->id))
+                        ->exists();
+
+                    if ($taken) {
+                        $fail("Bu domen başqa sahibə bağlıdır: {$host}");
+                    }
+                },
+            ],
             'plan_id' => ['nullable', 'exists:control.plans,id'],
             'sub_status' => ['nullable', Rule::in(['trialing', 'active', 'past_due', 'cancelled', 'expired'])],
             'sub_price' => ['nullable', 'numeric', 'min:0'],
