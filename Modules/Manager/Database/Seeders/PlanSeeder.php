@@ -42,7 +42,7 @@ class PlanSeeder extends Seeder
                     'online_payment', 'custom_domain', 'promo_codes', 'shipping_settings',
                     'google_analytics', 'site_orders', 'whatsapp_orders', 'multi_language',
                 ],
-                'off' => ['custom_code', 'api_access'],
+                'off' => ['custom_code'],
                 'values' => [
                     'product_variants' => '2', 'stock_tracking' => '2', 'branding' => '1', 'seo' => '2',
                     'color_customization' => '1', 'font_customization' => '1', 'component_selection' => '1',

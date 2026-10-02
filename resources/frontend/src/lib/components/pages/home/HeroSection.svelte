@@ -138,7 +138,7 @@
         z-index: 2;
         max-width: 560px;
     }
-    
+
     h1 {
         margin: 26px 0 22px;
         color: #08111f;
