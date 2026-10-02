@@ -15,6 +15,18 @@
             <div><span class="text-gray-500">Admin e-poçt:</span> <span class="font-medium">{{ $cs['admin_email'] }}</span></div>
             <div><span class="text-gray-500">Admin şifrə:</span> <span class="font-mono font-semibold">{{ $cs['admin_password'] }}</span></div>
         </div>
+
+        {{-- Executed command + its terminal output --}}
+        @if (! empty($cs['command']))
+            <div class="mt-4 rounded-lg bg-gray-950 p-3 font-mono text-[11px] leading-relaxed text-gray-100">
+                <div class="text-emerald-400">$ {{ $cs['command'] }}</div>
+                @if (! empty($cs['output']))
+                    <pre class="mt-2 max-h-72 overflow-auto whitespace-pre-wrap">{{ $cs['output'] }}</pre>
+                @endif
+                <div class="mt-1 {{ ($cs['exit_code'] ?? 0) === 0 ? 'text-emerald-400' : 'text-amber-400' }}">exit code: {{ $cs['exit_code'] ?? '-' }}</div>
+            </div>
+        @endif
+
         <p class="mt-3 text-xs text-gray-500">Bu məlumatları kopyala və saxla — şifrə yalnız bir dəfə göstərilir.</p>
     </div>
 @endif

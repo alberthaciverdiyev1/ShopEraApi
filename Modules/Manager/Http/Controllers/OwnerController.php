@@ -77,7 +77,9 @@ class OwnerController extends Controller
 
         session()->flash('created_store', [
             'provisioned' => $provision['ok'],
-            'provision' => $provision,
+            'command' => $provision['command'] ?? null,
+            'exit_code' => $provision['exit_code'] ?? null,
+            'output' => $provision['output'] ?? null,
             'database' => $owner->db_name,
             'storage_root' => $owner->storageRoot(),
             'admin_email' => $owner->email,
@@ -153,6 +155,13 @@ class OwnerController extends Controller
             return ['ok' => false, 'message' => 'Provision üçün domen yoxdur.'];
         }
 
+        $command = 'php artisan tenant:provision '.$host
+            .' --database='.$owner->db_name
+            .' --admin-email='.$owner->email
+            .' --admin-name='.$owner->name
+            .' --admin-phone='.(string) $owner->phone
+            .' --admin-password=********';
+
         try {
             $code = Artisan::call('tenant:provision', [
                 'host' => $host,
@@ -163,9 +172,9 @@ class OwnerController extends Controller
                 '--admin-phone' => (string) $owner->phone,
             ]);
 
-            return ['ok' => $code === 0, 'output' => Artisan::output()];
+            return ['ok' => $code === 0, 'command' => $command, 'exit_code' => $code, 'output' => Artisan::output()];
         } catch (\Throwable $e) {
-            return ['ok' => false, 'message' => $e->getMessage()];
+            return ['ok' => false, 'command' => $command, 'exit_code' => 1, 'output' => $e->getMessage()];
         }
     }
 
