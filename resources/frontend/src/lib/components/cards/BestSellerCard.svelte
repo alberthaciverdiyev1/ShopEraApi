@@ -56,7 +56,7 @@
 		position: relative;
 		height: 100%;
 		min-height: 0;
-		padding: 10px;
+		padding: 0;
 		border: 1px solid rgba(15, 23, 42, 0.08);
 		border-radius: 14px;
 		background: #ffffff;
@@ -84,7 +84,7 @@
 	}
 
 	.best-seller-one__content {
-		padding: 0;
+		padding: 0 12px 12px;
 	}
 
 	.best-seller-one__content-title {
