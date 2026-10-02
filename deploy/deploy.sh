@@ -41,7 +41,7 @@ warn() { printf '\033[1;33m  !!\033[0m %s\n' "$*" >&2; }
 has() { command -v "$1" >/dev/null 2>&1; }
 
 unit_exists() {
-    has systemctl && systemctl list-unit-files 2>/dev/null | grep -q "^$1\.service"
+    has systemctl && systemctl cat "$1.service" >/dev/null 2>&1
 }
 
 resolve_php_fpm() {
