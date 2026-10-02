@@ -119,6 +119,9 @@ class OwnerController extends Controller
 
     public function destroy(SiteOwner $owner)
     {
+        // Free the domains too, otherwise their hosts stay bound to a
+        // soft-deleted owner and can never be reused.
+        $owner->domains()->delete();
         $owner->delete();
 
         return redirect()->route('manager.owners.index')->with('status', __('Sahib silindi.'));
@@ -195,7 +198,7 @@ class OwnerController extends Controller
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'company' => ['nullable', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('control.site_owners', 'email')->ignore($owner?->id)],
+            'email' => ['required', 'email', 'max:255', Rule::unique('control.site_owners', 'email')->ignore($owner?->id)->whereNull('deleted_at')],
             'phone' => ['nullable', 'string', 'max:40'],
             'theme_id' => ['nullable', 'exists:control.themes,id'],
             'status' => ['required', Rule::in(['active', 'trial', 'suspended', 'cancelled'])],
