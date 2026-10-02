@@ -88,7 +88,7 @@
        </div>
     </div>
    <div class="col-xl-6 offset-xl-0 col-md-8 offset-md-2 d-none d-sm-block">
-    <div class="register-thumb">
+    <div class="">
         <img src="/assets/images/register/loginThumb.jpg" alt="register-thumb">
     </div>
  </div>
