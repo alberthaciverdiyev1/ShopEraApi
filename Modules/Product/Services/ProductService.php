@@ -1123,4 +1123,46 @@ class ProductService
             );
         });
     }
+
+    /** Admin listing query for product story videos (status + text filters). */
+    public function storyVideoQuery(\Illuminate\Http\Request $request): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = ProductVideo::query()->with('product.images')->latest('id');
+
+        if ($request->filled('status')) {
+            $request->query('status') === 'active'
+                ? $query->where('is_story_hidden', false)
+                : $query->where('is_story_hidden', true);
+        }
+
+        if (($term = trim((string) $request->query('q', ''))) !== '') {
+            $query->where(function ($inner) use ($term) {
+                $inner->where('video_path', 'like', "%{$term}%")
+                    ->orWhere('product_id', $term)
+                    ->orWhereHas('product', fn ($p) => $p->where('title->az', 'like', "%{$term}%"));
+            });
+        }
+
+        return $query;
+    }
+
+    public function setStoryVideoActive(int $id, bool $active): void
+    {
+        ProductVideo::query()->findOrFail($id)->update([
+            'is_story_hidden' => ! $active,
+            'story_expires_at' => $active ? now()->addDay() : null,
+        ]);
+    }
+
+    public function removeStoryVideo(int $id): void
+    {
+        $video = ProductVideo::query()->findOrFail($id);
+        $raw = $video->getRawOriginal('video_path');
+
+        if ($raw && ! Str::startsWith($raw, 'http')) {
+            Storage::disk('public')->delete($raw);
+        }
+
+        $video->delete();
+    }
 }
