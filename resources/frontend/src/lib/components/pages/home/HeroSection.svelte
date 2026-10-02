@@ -138,24 +138,7 @@
         z-index: 2;
         max-width: 560px;
     }
-
-    .hero-kicker {
-        display: inline-flex;
-        align-items: center;
-        gap: 9px;
-        padding: 9px 14px;
-        border-radius: 999px;
-        background: rgba(255, 255, 255, 0.72);
-        color: #0a111e;
-        font-size: 14px;
-        font-weight: 700;
-        text-transform: uppercase;
-    }
-
-    .hero-kicker i {
-        color: var(--theme);
-    }
-
+    
     h1 {
         margin: 26px 0 22px;
         color: #08111f;
@@ -401,11 +384,6 @@
             max-width: none;
             text-align: left;
             justify-self: stretch;
-        }
-
-        .hero-kicker {
-            padding: 7px 11px;
-            font-size: 12px;
         }
 
         h1 {

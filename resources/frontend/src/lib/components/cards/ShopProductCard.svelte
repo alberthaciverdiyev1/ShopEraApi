@@ -58,6 +58,22 @@
 <style>
 	.best-seller-product-items-two__thumb {
 		position: relative;
+		height: 260px;
+		overflow: hidden;
+		border-radius: 12px 12px 0 0;
+	}
+
+	.best-seller-product-items-two__thumb img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+
+	@media (max-width: 767.98px) {
+		.best-seller-product-items-two__thumb {
+			height: 180px;
+		}
 	}
 
 	/* Rating badge sits ON the photo, right above the category line. */
