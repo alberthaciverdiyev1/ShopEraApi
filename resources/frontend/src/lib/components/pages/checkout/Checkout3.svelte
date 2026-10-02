@@ -873,7 +873,7 @@
 										<h5 class="fw-bold mb-1">{$translate('Central Store')}</h5>
 										<p class="text-muted mb-2">
 											<i class="fa-solid fa-location-dot text-danger me-1"></i>
-											{$translate('Bakı şəhəri, Nizami küçəsi 45, ShopEra Showroom')}
+											{$translate('Bakı şəhəri, Nizami küçəsi 45, Snaker Showroom')}
 										</p>
 										<div class="small text-muted mb-2">
 											<i class="fa-regular fa-clock me-1"></i>

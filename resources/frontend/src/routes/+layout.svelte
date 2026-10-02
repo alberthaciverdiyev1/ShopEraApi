@@ -90,7 +90,7 @@
 	<link rel="stylesheet" href="/assets/css/meanmenu.css" />
 	<link rel="stylesheet" href="/assets/css/nice-select.css" />
 	<link rel="stylesheet" href="/assets/css/main.css" />
-	<link rel="stylesheet" href="/assets/css/shopera-theme.css" />
+	<link rel="stylesheet" href="/assets/css/snaker-theme.css" />
 </svelte:head>
 
 <MouseCursor />

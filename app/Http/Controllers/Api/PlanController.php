@@ -9,7 +9,7 @@ use Illuminate\Routing\Controller;
 
 /**
  * The storefront's plan view: subscription status plus the numeric limits
- * mirrored from Manager.ShopEra and current usage against them.
+ * mirrored from Manager.Snaker and current usage against them.
  */
 class PlanController extends Controller
 {

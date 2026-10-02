@@ -5,7 +5,7 @@
 </script>
 
 <svelte:head>
-	<title>{$translate('Details Two')} — ShopEra</title>
+	<title>{$translate('Details Two')} — Snaker</title>
 </svelte:head>
 <Breadcrumb title="Shop details page 02" />
 <ShopDetails3 />

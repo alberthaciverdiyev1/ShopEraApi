@@ -15,8 +15,8 @@
 </script>
 
 <svelte:head>
-	<title>ShopEra — {$translate('Home')}</title>
-	<meta name="description" content="ShopEra — multipurpose ecommerce" />
+	<title>Snaker — {$translate('Home')}</title>
+	<meta name="description" content="Snaker — multipurpose ecommerce" />
 </svelte:head>
 
 {#if data.features?.stories !== false}

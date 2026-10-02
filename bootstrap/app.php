@@ -39,6 +39,17 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->append([TrustProxies::class]);
 
+        // Unauthenticated users are sent to the manager login on control hosts,
+        // otherwise to the storefront admin login.
+        $middleware->redirectGuestsTo(function (Request $request): string {
+            $controlHosts = array_map('strtolower', (array) config('tenant.control_hosts', []));
+            if ($controlHosts !== [] && in_array(strtolower($request->getHost()), $controlHosts, true)) {
+                return route('manager.login');
+            }
+
+            return route('admin.login');
+        });
+
         $middleware->alias([
             'role' => RoleMiddleware::class,
             'permission' => PermissionMiddleware::class,
@@ -57,6 +68,12 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     'message' => __('Unauthenticated'),
                 ], 401);
+            }
+
+            // Manager panel: send unauthenticated visitors to its own login.
+            $controlHosts = array_map('strtolower', (array) config('tenant.control_hosts', []));
+            if ($controlHosts !== [] && in_array(strtolower($request->getHost()), $controlHosts, true)) {
+                return redirect()->guest(route('manager.login'));
             }
         });
     })->create();

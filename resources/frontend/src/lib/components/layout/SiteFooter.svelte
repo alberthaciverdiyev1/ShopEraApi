@@ -34,7 +34,7 @@
 	const currentYear = new Date().getFullYear();
 </script>
 
-<footer class="shopera-footer">
+<footer class="snaker-footer">
 	<!-- Main Footer Columns -->
 	<div class="footer-main">
 		<div class="container">
@@ -43,10 +43,10 @@
 				<div class="col-lg-4 col-md-6">
 					<div class="footer-brand-box">
 						<a href="/" class="footer-logo d-inline-block mb-3">
-							<img src="/assets/images/logo/white-logo.svg" alt="ShopEra Logo" width="165" height="32" />
+							<img src="/assets/images/logo/white-logo.svg" alt="Snaker Logo" width="165" height="32" />
 						</a>
 						<p class="brand-desc mb-4">
-							{$translate('ShopEra brings together the latest collections of electronics, fashion, home, and lifestyle products in a modern ecommerce platform.')}
+							{$translate('Snaker brings together the latest collections of electronics, fashion, home, and lifestyle products in a modern ecommerce platform.')}
 						</p>
 
 						<div class="contact-compact mb-4">
@@ -154,7 +154,7 @@
 			<div class="row align-items-center gy-3">
 				<div class="col-md-5 text-center text-md-start">
 					<p class="copyright-text mb-0">
-						© {currentYear} <a href="/" class="text-white fw-bold text-decoration-none">ShopEra</a>. {$translate('All rights reserved.')}
+						© {currentYear} <a href="/" class="text-white fw-bold text-decoration-none">Snaker</a>. {$translate('All rights reserved.')}
 					</p>
 				</div>
 				<div class="col-md-3 text-center">
@@ -172,7 +172,7 @@
 </footer>
 
 <style>
-	.shopera-footer {
+	.snaker-footer {
 		background: linear-gradient(180deg, #111827 0%, #0a0e17 100%);
 		color: #94a3b8;
 		font-family: 'Albert Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;

@@ -50,7 +50,7 @@
 			});
 		}
 
-		const storeEmail = contactInfo?.email?.trim() || 'support@shopera.az';
+		const storeEmail = contactInfo?.email?.trim() || 'support@snaker.store';
 		items.push({
 			icon: 'fa-regular fa-envelope',
 			label: 'Email',
@@ -139,7 +139,7 @@
 
 		if (list.length === 0) {
 			return [
-				{ label: 'Instagram', icon: 'fa-brands fa-instagram', href: 'https://www.instagram.com/shopera.az' },
+				{ label: 'Instagram', icon: 'fa-brands fa-instagram', href: 'https://www.instagram.com/snaker.store' },
 				{ label: 'Facebook', icon: 'fa-brands fa-facebook-f', href: 'https://www.facebook.com/' },
 				{ label: 'X (Twitter)', icon: 'fa-brands fa-x-twitter', href: 'https://x.com/' },
 				{ label: 'LinkedIn', icon: 'fa-brands fa-linkedin-in', href: 'https://www.linkedin.com/' }

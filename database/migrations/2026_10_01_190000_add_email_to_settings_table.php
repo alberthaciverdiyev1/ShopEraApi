@@ -17,7 +17,7 @@ return new class extends Migration
         });
 
         // Set default store email for existing setting row
-        DB::table('settings')->whereNull('email')->update(['email' => 'support@shopera.az']);
+        DB::table('settings')->whereNull('email')->update(['email' => 'support@snaker.store']);
     }
 
     /**

@@ -6,7 +6,7 @@ içerikleri mevcut projedeki İngilizce konvansiyonunu korur.
 
 ## Proje Özeti
 
-**ShopEra.az** — Laravel 12 tabanlı, çok dilli (az/en/ru/tr) bir e-ticaret ve
+**Snaker.az** — Laravel 12 tabanlı, çok dilli (az/en/ru/tr) bir e-ticaret ve
 pazaryeri (marketplace) backend'i. Uygulama API-first çalışır; mobil uygulamalar ve
 web arayüzü aynı REST API'yi tüketir. Kod tabanı **nwidart/laravel-modules** ile
 modüler monolith olarak organize edilmiştir.
@@ -165,7 +165,7 @@ aynı projeyi kullanır; ayrım instance değil, entitlement'larla yapılır.
   `TENANCY_ENABLED` (varsayılan `true`) kapalıysa devre dışı kalır. Map boşsa
   (henüz `manager:sync` çalışmamış) production dışında merkezi DB'ye düşer;
   production'da eşleşmeyen host her zaman 404 (yanlış tenant'a sızma yok).
-- **Harita kaynağı:** Manager.ShopEra. `php artisan manager:sync` `/api/v1/tenants`
+- **Harita kaynağı:** Manager.Snaker. `php artisan manager:sync` `/api/v1/tenants`
   yanıtını `tenant_map` + `tenant_metadata` olarak cache'ler (3600 sn). Bir tenant
   birden çok host (custom domain + subdomain) bildirebilir; hepsi aynı DB'ye gider.
 - **DB adı:** `App\Support\TenantDatabase::nameFor($host)` — tek doğruluk kaynağı

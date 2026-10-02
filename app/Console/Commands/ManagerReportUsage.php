@@ -12,12 +12,12 @@ use Modules\Category\Entities\Category;
 use Modules\Product\Entities\Product;
 use Modules\User\Entities\User;
 
-/** Pushes current usage counters to Manager.ShopEra (limits dashboard). */
+/** Pushes current usage counters to Manager.Snaker (limits dashboard). */
 class ManagerReportUsage extends Command
 {
     protected $signature = 'manager:report-usage';
 
-    protected $description = 'Report usage (products, categories, staff, storage) to Manager.ShopEra';
+    protected $description = 'Report usage (products, categories, staff, storage) to Manager.Snaker';
 
     public function handle(): int
     {

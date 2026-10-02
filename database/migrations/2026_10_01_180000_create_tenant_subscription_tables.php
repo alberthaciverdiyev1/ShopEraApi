@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 /**
  * Local snapshot of this instance's subscription, feature entitlements and
- * promo blocks, mirrored from Manager.ShopEra (source of truth) by manager:sync
+ * promo blocks, mirrored from Manager.Snaker (source of truth) by manager:sync
  * and the manager webhook. Kept in the tenant's own database so every site
  * reads its own plan even when one codebase serves many hosts (free plan).
  */

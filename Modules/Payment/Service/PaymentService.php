@@ -46,7 +46,7 @@ class PaymentService
     //                <head>
     //                    <meta charset="UTF-8">
     //                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    //                    <title>Ödəniş Üsulu - ShopEra</title>
+    //                    <title>Ödəniş Üsulu - Snaker</title>
     //                    <style>
     //                        body { background: #f8f9fa; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; font-family: 'Inter', sans-serif; }
     //                        .payment-card { background: #fff; padding: 2.5rem; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); width: 100%; max-width: 400px; text-align: center; border: 1px solid #edf2f7; }
@@ -74,7 +74,7 @@ class PaymentService
     //                </head>
     //                <body>
     //                    <div class="payment-card">
-    //                        <img src="{$assetsUrl}/images/logo.png" alt="ShopEra" class="payment-logo">
+    //                        <img src="{$assetsUrl}/images/logo.png" alt="Snaker" class="payment-logo">
     //                        <div class="price-badge">{$price} AZN</div>
     //                        <h2 class="payment-title">Ödəniş üsulunu seçin</h2>
     //                        <p class="payment-subtitle">Təhlükəsiz ödəniş üçün aşağıdakı üsullardan birini seçin.</p>
@@ -183,7 +183,7 @@ class PaymentService
                 <head>
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Ödəniş - ShopEra</title>
+                    <title>Ödəniş - Snaker</title>
                     <style>
                         body { background: #f8f9fa; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; font-family: sans-serif; }
                         .payment-card { background: #fff; padding: 2.5rem; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); width: 90%; max-width: 400px; text-align: center; }

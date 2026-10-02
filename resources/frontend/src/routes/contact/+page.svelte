@@ -9,7 +9,7 @@
 </script>
 
 <svelte:head>
-	<title>{$translate('Contact')} — ShopEra</title>
+	<title>{$translate('Contact')} — Snaker</title>
 </svelte:head>
 <Breadcrumb title="Contact" />
 <Contact4 contactInfo={data.contactInfo} />

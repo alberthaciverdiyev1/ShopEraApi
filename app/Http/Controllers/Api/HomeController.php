@@ -8,7 +8,7 @@ use Modules\Product\Entities\Product;
 use Modules\Product\Http\Resources\ProductResource;
 
 /**
- * The home screen in one call: ShopEra's own catalogue.
+ * The home screen in one call: Snaker's own catalogue.
  *
  * This is a new endpoint rather than a change to /api/product or
  * /api/category/with-products. Those are what the builds already on the App
@@ -27,7 +27,7 @@ class HomeController extends Controller
     }
 
     /**
-     * The house catalogue — the products ShopEra sells itself.
+     * The house catalogue — the products Snaker sells itself.
      */
     private function houseProducts(Request $request, int $limit): array
     {

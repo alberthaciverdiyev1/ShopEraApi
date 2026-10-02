@@ -10,7 +10,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Pulls subscriptions, entitlements and the theme from Manager.ShopEra and
+ * Pulls subscriptions, entitlements and the theme from Manager.Snaker and
  * mirrors them into each tenant's own database. A single codebase serves every
  * host — free and paid plans alike — each on its own database.
  */
@@ -18,7 +18,7 @@ class ManagerSync extends Command
 {
     protected $signature = 'manager:sync {--host= : Sync a single host only}';
 
-    protected $description = 'Sync subscriptions, entitlements and theme from Manager.ShopEra';
+    protected $description = 'Sync subscriptions, entitlements and theme from Manager.Snaker';
 
     /** @var array<string,array{storage_root?:?string}> host => metadata */
     private array $metadata = [];

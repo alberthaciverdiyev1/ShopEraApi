@@ -1,12 +1,12 @@
 # GEMINI.md
 
-Bu dosya, Antigravity ve Gemini Code Assist araçlarının **ShopEra** projesinde çalışırken uyması gereken kuralları, mimari yapıyı, kodlama standartlarını ve geliştirme kılavuzlarını tanımlar.
+Bu dosya, Antigravity ve Gemini Code Assist araçlarının **Snaker** projesinde çalışırken uyması gereken kuralları, mimari yapıyı, kodlama standartlarını ve geliştirme kılavuzlarını tanımlar.
 
 ---
 
 ## 1. Proje Genel Bakışı
 
-**ShopEra** — Laravel 12 tabanlı, modüler monolit mimarisine sahip çok dilli (`az`, `en`, `ru`, `tr`) bir e-ticaret ve pazaryeri (marketplace) platformudur.
+**Snaker** — Laravel 12 tabanlı, modüler monolit mimarisine sahip çok dilli (`az`, `en`, `ru`, `tr`) bir e-ticaret ve pazaryeri (marketplace) platformudur.
 Proje iki ana katmandan oluşur:
 1. **Backend (API-first)**: Laravel 12 + `nwidart/laravel-modules` ile yapılandırılmış REST API. Mobil uygulamalar ve web ön yüzü aynı REST API'yi tüketir.
 2. **Frontend**: `resources/frontend/` dizininde yer alan, **Svelte 5 (Runes mode)**, **SvelteKit 2**, **TypeScript** ve **Vite 8** ile geliştirilen modern mağaza ön yüzü.
@@ -21,7 +21,7 @@ Proje iki ana katmandan oluşur:
 ## 2. Dizin Yapısı
 
 ```
-ShopEra/
+Snaker/
 ├── GEMINI.md                     # Ana Antigravity proje kuralları
 ├── AGENTS.md                     # Çoklu ajan yönergeleri
 ├── .geminiignore                 # Antigravity bağlam dışı bırakma listesi
@@ -129,7 +129,7 @@ Frontend `resources/frontend/` dizininde yaşar ve **Svelte 5** mimarisiyle yaz�
 - Şablonun orijinal jQuery bağımlılıkları `$lib/theme/behaviors.ts` içinde saf TypeScript/DOM ile yeniden yazılmıştır (`initPageBehaviors()`). Yeni DOM widget'ları eklerken bu yaklaşım sürdürülmelidir.
 - Sayfa geçişlerinde `afterNavigate` kancası ile görsel maskeler ve dinamik widget'lar yeniden tetiklenmelidir.
 
-> Svelte tarafı ile ilgili daha detaylı kılavuz için: [`resources/frontend/GEMINI.md`](file:///home/albert/Workspace/FoxSoft/ShopEra/resources/frontend/GEMINI.md) dosyasına başvurun.
+> Svelte tarafı ile ilgili daha detaylı kılavuz için: [`resources/frontend/GEMINI.md`](file:///home/albert/Workspace/FoxSoft/Snaker/resources/frontend/GEMINI.md) dosyasına başvurun.
 
 ---
 

@@ -11,9 +11,9 @@ class DeleteAccountHtml
 <html lang="az">
 <head>
     <meta charset="UTF-8">
-    <title>ShopEra – Hesabın silinməsi</title>
+    <title>Snaker – Hesabın silinməsi</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="ShopEra hesabınızın və şəxsi məlumatlarınızın silinməsi üçün müraciət formu.">
+    <meta name="description" content="Snaker hesabınızın və şəxsi məlumatlarınızın silinməsi üçün müraciət formu.">
     <style>
         :root {
             --bg: #020617;
@@ -295,13 +295,13 @@ class DeleteAccountHtml
 <div class="shell">
     <div class="card" role="form" aria-labelledby="title">
         <div class="logo-row">
-            <img src="https://shopera.az/assets/images/logo-white.png" alt="ShopEra Logo">
+            <img src="https://snaker.store/assets/images/logo-white.png" alt="Snaker Logo">
             <span class="tag">Hesabın silinməsi</span>
         </div>
 
-        <h1 id="title">ShopEra hesabının silinməsi</h1>
+        <h1 id="title">Snaker hesabının silinməsi</h1>
         <p class="subtitle">
-            Buradan ShopEra hesabınızın və şəxsi məlumatlarınızın silinməsi üçün müraciət göndərə bilərsiniz.
+            Buradan Snaker hesabınızın və şəxsi məlumatlarınızın silinməsi üçün müraciət göndərə bilərsiniz.
         </p>
 
         <div class="info-box">
@@ -338,7 +338,7 @@ class DeleteAccountHtml
                     Silinmə istəyi göndər <span aria-hidden="true">↗</span>
                 </button>
 
-                <button type="button" class="button-secondary" onclick="window.location.href='https://shopera.az';">
+                <button type="button" class="button-secondary" onclick="window.location.href='https://snaker.store';">
                     <span>Ana səhifəyə qayıt</span>
                 </button>
 
@@ -350,8 +350,8 @@ class DeleteAccountHtml
 
         <p class="footer-note">
             Məxfilik siyasətimiz haqqında daha ətraflı:
-            <a href="https://shopera.az/#məxfilik-siyasəti" target="_blank" rel="noopener noreferrer">
-                ShopEra Məxfilik siyasəti
+            <a href="https://snaker.store/#məxfilik-siyasəti" target="_blank" rel="noopener noreferrer">
+                Snaker Məxfilik siyasəti
             </a>.
         </p>
     </div>

@@ -5,7 +5,7 @@
 </script>
 
 <svelte:head>
-	<title>{$translate('Privacy Policy')} — ShopEra</title>
+	<title>{$translate('Privacy Policy')} — Snaker</title>
 </svelte:head>
 
 <Breadcrumb title="Privacy Policy" />

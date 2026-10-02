@@ -82,7 +82,7 @@ const en = {
 	'Price: low to high': 'Price: low to high',
 	'Price: high to low': 'Price: high to low',
 	'Best selling': 'Best selling',
-	'ShopEra brings together the latest collections of electronics, fashion, home, and lifestyle products in a modern ecommerce platform.': 'ShopEra brings together the latest collections of electronics, fashion, home, and lifestyle products in a modern ecommerce platform.',
+	'Snaker brings together the latest collections of electronics, fashion, home, and lifestyle products in a modern ecommerce platform.': 'Snaker brings together the latest collections of electronics, fashion, home, and lifestyle products in a modern ecommerce platform.',
 	'Baku, Azerbaijan': 'Baku, Azerbaijan',
 	'Customer Service': 'Customer Service',
 	'Track Order': 'Track Order',

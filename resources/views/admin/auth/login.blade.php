@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Giriş — ShopEra Admin</title>
+    <title>Giriş — Snaker Admin</title>
     @vite(['resources/admin/app.ts'])
 </head>
 <body class="flex min-h-screen items-center justify-center bg-gray-900 p-4">
@@ -11,7 +11,7 @@
         <div class="mb-6 flex items-center gap-3">
             <span class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-600 text-xl font-black text-white">S</span>
             <div>
-                <p class="text-lg font-bold text-gray-800">ShopEra Admin</p>
+                <p class="text-lg font-bold text-gray-800">Snaker Admin</p>
                 <p class="text-xs text-gray-400">İdarə panelinə giriş</p>
             </div>
         </div>

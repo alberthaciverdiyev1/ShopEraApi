@@ -49,18 +49,6 @@ return [
         'ollama_url' => env('OLLAMA_BASE_URL', 'http://localhost:11434'),
         'model' => env('OLLAMA_MODEL', 'llava'),
     ],
-    'app_links' => [
-        'android_package_name' => env('ANDROID_APP_PACKAGE_NAME', 'com.app.shopera'),
-        'android_sha256_cert_fingerprints' => array_values(array_filter(array_map(
-            'trim',
-            explode(',', (string) env('ANDROID_APP_CERT_SHA256', ''))
-        ))),
-        'ios_app_ids' => array_values(array_filter(array_map(
-            'trim',
-            explode(',', (string) env('IOS_APP_IDS', 'ZM73R29G8N.shopera'))
-        ))),
-    ],
-
     'manager' => [
         'url' => env('MANAGER_URL'),
         'token' => env('MANAGER_TOKEN'),

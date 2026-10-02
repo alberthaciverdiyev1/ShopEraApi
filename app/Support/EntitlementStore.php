@@ -7,7 +7,7 @@ use App\Models\TenantPromoBlock;
 use App\Models\TenantSubscription;
 
 /**
- * Persists a Manager.ShopEra entitlements payload into the currently active
+ * Persists a Manager.Snaker entitlements payload into the currently active
  * (tenant) database. Callers must set the target connection first — either via
  * ResolveTenant (web) or manager:sync (cli/tenant map).
  */

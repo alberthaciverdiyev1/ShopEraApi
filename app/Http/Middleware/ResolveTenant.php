@@ -22,6 +22,21 @@ class ResolveTenant
             return $next($request);
         }
 
+        // Control-plane hosts (the manager panel) never resolve a tenant DB;
+        // they always talk to the central `control` database.
+        $controlHosts = array_map('strtolower', (array) config('tenant.control_hosts', []));
+        if ($controlHosts !== [] && in_array(strtolower($request->getHost()), $controlHosts, true)) {
+            config([
+                'tenant.current_host' => null,
+                'tenant.current_database' => null,
+                'tenant.current_storage_root' => null,
+            ]);
+            config(['database.default' => 'control']);
+            DB::setDefaultConnection('control');
+
+            return $next($request);
+        }
+
         $host = $request->getHost();
         $database = $this->databaseFor($host);
 

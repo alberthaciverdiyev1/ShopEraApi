@@ -1,4 +1,4 @@
-# ShopEra — Host kurulumu (Docker'sız)
+# Snaker — Host kurulumu (Docker'sız)
 
 Proje (API + Svelte) ve Manager host üzerinde çalışır. Önkoşullar: PHP 8.3-FPM,
 Node 20+, PostgreSQL, nginx. Domain'ler Cloudflare arkasında; TLS Cloudflare'de
@@ -12,7 +12,7 @@ Uygulama, paylaşımlı `global-postgres` konteynerini kullanır (host portu `54
 DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1        # global-postgres host'a 5432 olarak açık
 DB_PORT=5432
-DB_DATABASE=shopera      # merkezi DB; tenant DB'leri de bu sunucuda açılır
+DB_DATABASE=snaker      # merkezi DB; tenant DB'leri de bu sunucuda açılır
 DB_USERNAME=<global-postgres kullanıcısı>
 DB_PASSWORD=<global-postgres şifresi>
 ```
@@ -23,7 +23,7 @@ DB_PASSWORD=<global-postgres şifresi>
 > `global-postgres` imajını `pgvector/pgvector:pg17` (contrib dâhil) yapın ya da
 > sunucuya `unaccent` + `pg_trgm` eklentilerini kurun. Veri volume'ü korunur.
 
-## 1. ShopEra API (Laravel)
+## 1. Snaker API (Laravel)
 
 ```bash
 composer install --no-dev --optimize-autoloader
@@ -32,20 +32,20 @@ cp .env.example .env && php artisan key:generate
 php artisan migrate --force
 php artisan db:seed --force            # merkezi/tek-kurulum
 php artisan storage:link
-sudo APP_DIR=/var/www/ShopEra APP_USER=www-data APP_GROUP=www-data bash deploy/scripts/fix-permissions.sh
+sudo APP_DIR=/var/www/Snaker APP_USER=www-data APP_GROUP=www-data bash deploy/scripts/fix-permissions.sh
 php artisan config:cache && php artisan route:cache && php artisan view:cache
 ```
 
 ### nginx (catch-all — çok-tenant için şart)
-Hazır template: `deploy/nginx/shopera-catch-all.conf`. Bu blok default vhost
+Hazır template: `deploy/nginx/snaker-catch-all.conf`. Bu blok default vhost
 olmalıdır; Cloudflare'de əlavə etdiyiniz hər subdomain/custom domain eyni origin'ə
-gəlsə, nginx dəyişmədən ShopEra tenantı `Host` header-dən tapacaq.
+gəlsə, nginx dəyişmədən Snaker tenantı `Host` header-dən tapacaq.
 
 ```nginx
 server {
     listen 80 default_server;
     server_name _;                     # her Host'u karşıla; tenant Host'tan çözülür
-    root /var/www/ShopEra/public;
+    root /var/www/Snaker/public;
     index index.php;
     client_max_body_size 100m;
 
@@ -59,8 +59,8 @@ server {
 
 ### Kuyruk worker (supervisor)
 ```ini
-[program:shopera-worker]
-command=php /var/www/ShopEra/artisan queue:work --sleep=1 --tries=1 --timeout=600
+[program:snaker-worker]
+command=php /var/www/Snaker/artisan queue:work --sleep=1 --tries=1 --timeout=600
 autostart=true
 autorestart=true
 numprocs=1
@@ -69,24 +69,24 @@ user=www-data
 
 ### Scheduler (cron)
 ```cron
-* * * * * www-data cd /var/www/ShopEra && php artisan schedule:run >> /dev/null 2>&1
+* * * * * www-data cd /var/www/Snaker && php artisan schedule:run >> /dev/null 2>&1
 ```
 
 ## 2. Svelte storefront (SvelteKit adapter-node)
 
 ```bash
-cd /var/www/ShopEra/resources/frontend
+cd /var/www/Snaker/resources/frontend
 npm ci && npm run build
 ```
 
 systemd servisi:
 ```ini
 [Unit]
-Description=ShopEra storefront
+Description=Snaker storefront
 After=network.target
 
 [Service]
-WorkingDirectory=/var/www/ShopEra/resources/frontend
+WorkingDirectory=/var/www/Snaker/resources/frontend
 Environment=PORT=3000
 Environment=HOST=127.0.0.1
 Environment=HOST_HEADER=x-forwarded-host
@@ -110,7 +110,7 @@ Ayrı bir Laravel kurulumu (aynı host veya ayrı sunucu):
 ```bash
 composer install --no-dev --optimize-autoloader
 php artisan key:generate
-# .env: DB_DATABASE=manager_shopera, MANAGER_* , CLOUDFLARE_* (aşağıda)
+# .env: DB_DATABASE=manager_snaker, MANAGER_* , CLOUDFLARE_* (aşağıda)
 php artisan migrate --force && php artisan db:seed --force
 sudo APP_DIR=/var/www/Manager.Shopera APP_USER=www-data APP_GROUP=www-data bash deploy/scripts/fix-permissions.sh
 php artisan config:cache && php artisan route:cache
@@ -123,7 +123,7 @@ php artisan config:cache && php artisan route:cache
 ```
 CLOUDFLARE_ENABLED=true
 CLOUDFLARE_API_TOKEN=<Zone:Read + DNS:Edit>
-CLOUDFLARE_BASE_DOMAIN=shopera.az
+CLOUDFLARE_BASE_DOMAIN=snaker.store
 CLOUDFLARE_DNS_TARGET=<origin IP | <tunnel>.cfargotunnel.com>
 CLOUDFLARE_DNS_TYPE=A            # tunnel kullanıyorsanız CNAME
 CLOUDFLARE_PROXIED=true

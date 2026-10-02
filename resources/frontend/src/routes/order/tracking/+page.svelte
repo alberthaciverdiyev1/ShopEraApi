@@ -5,7 +5,7 @@
 </script>
 
 <svelte:head>
-	<title>{$translate('Order Tracking')} — ShopEra</title>
+	<title>{$translate('Order Tracking')} — Snaker</title>
 </svelte:head>
 <Breadcrumb title="Order tracking" parent="User Dashboard" />
 <OrderTracking4 />

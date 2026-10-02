@@ -50,6 +50,16 @@ return [
             'driver' => 'session',
             'provider' => 'admin_users',
         ],
+
+        /*
+         * The manager (SaaS operator) panel. Session based, backed by the
+         * central `control` database owners table. Access is gated by the
+         * `owner` spatie role.
+         */
+        'owner' => [
+            'driver' => 'session',
+            'provider' => 'owners',
+        ],
     ],
 
     /*
@@ -78,6 +88,11 @@ return [
         'admin_users' => [
             'driver' => 'eloquent',
             'model' => Modules\User\Entities\User::class,
+        ],
+
+        'owners' => [
+            'driver' => 'eloquent',
+            'model' => Modules\Manager\Entities\Owner::class,
         ],
 
         // 'users' => [

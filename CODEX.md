@@ -1,10 +1,10 @@
 # CODEX.md
 
-Bu dosya, Codex'in ShopEra deposunda calisirken uymasi gereken proje kurallarini ozetler. Daha ayrintili mimari bilgi icin `GEMINI.md`, frontend kurallari icin `resources/frontend/CODEX.md` ve `resources/frontend/GEMINI.md` dosyalarina bak.
+Bu dosya, Codex'in Snaker deposunda calisirken uymasi gereken proje kurallarini ozetler. Daha ayrintili mimari bilgi icin `GEMINI.md`, frontend kurallari icin `resources/frontend/CODEX.md` ve `resources/frontend/GEMINI.md` dosyalarina bak.
 
 ## Proje Ozeti
 
-ShopEra, Laravel 12 tabanli moduler monolit bir e-ticaret ve marketplace API'si ile `resources/frontend/` altindaki SvelteKit 2 + Svelte 5 frontend uygulamasindan olusur.
+Snaker, Laravel 12 tabanli moduler monolit bir e-ticaret ve marketplace API'si ile `resources/frontend/` altindaki SvelteKit 2 + Svelte 5 frontend uygulamasindan olusur.
 
 - Backend: PHP 8.3+, Laravel 12, `nwidart/laravel-modules`, Sanctum, Spatie Permission, Spatie Translatable.
 - Frontend: SvelteKit 2, Svelte 5 Runes, TypeScript, Vite, Bootstrap tema varliklari.

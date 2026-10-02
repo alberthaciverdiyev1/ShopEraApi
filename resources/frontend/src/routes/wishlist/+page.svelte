@@ -13,7 +13,7 @@
 </script>
 
 <svelte:head>
-	<title>{$translate('Wishlist')} — ShopEra</title>
+	<title>{$translate('Wishlist')} — Snaker</title>
 </svelte:head>
 <Breadcrumb title="İstək Siyahısı" />
 <Wishlist4 />

@@ -51,7 +51,7 @@
 <aside class="sidebar sticky top-0 h-screen w-64 shrink-0 overflow-y-auto border-r border-gray-200 bg-white transition-all duration-200 dark:border-gray-700 dark:bg-gray-800">
     <div class="flex h-16 items-center gap-2 border-b border-gray-200 px-4 dark:border-gray-700">
         <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-lg font-black text-white">S</span>
-        <span class="brand-text text-lg font-bold text-gray-800 dark:text-white">ShopEra <span class="font-normal text-gray-400">Admin</span></span>
+        <span class="brand-text text-lg font-bold text-gray-800 dark:text-white">Snaker <span class="font-normal text-gray-400">Admin</span></span>
     </div>
 
     <nav class="space-y-4 px-3 py-4">

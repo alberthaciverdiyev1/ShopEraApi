@@ -8,7 +8,7 @@
 </script>
 
 <svelte:head>
-	<title>{product ? product.title : 'Product'} — ShopEra</title>
+	<title>{product ? product.title : 'Product'} — Snaker</title>
 </svelte:head>
 
 <Breadcrumb title="Product details" />

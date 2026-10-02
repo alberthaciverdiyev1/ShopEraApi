@@ -6,7 +6,7 @@ use App\Models\TenantSubscription;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Reads the instance subscription snapshot mirrored from Manager.ShopEra into
+ * Reads the instance subscription snapshot mirrored from Manager.Snaker into
  * the tenant's own database. Unknown/unsynced → treated as usable (fail-open).
  */
 class Subscription

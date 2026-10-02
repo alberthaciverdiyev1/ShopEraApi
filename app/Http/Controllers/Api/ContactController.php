@@ -29,7 +29,7 @@ class ContactController extends Controller
 
         $data = [
             'address' => $setting?->address ?? 'Bakı, Azərbaycan',
-            'email' => $setting?->email ?? 'support@shopera.az',
+            'email' => $setting?->email ?? 'support@snaker.store',
             'phone' => $setting?->phone_number_1 ?? ($phones[0] ?? null),
             'phones' => $phones,
             'whatsapp_number' => $setting?->whatsapp_number ?? null,

@@ -20,19 +20,19 @@ Route::get('/user', function (Request $request) {
  */
 Route::get('/home', [HomeController::class, 'index'])->name('api.home');
 
-// Public feature flags for the storefront (from Manager.ShopEra entitlements).
+// Public feature flags for the storefront (from Manager.Snaker entitlements).
 Route::get('/features', [FeaturesController::class, 'index'])->name('api.features');
 
 // Subscription status for the storefront (read-only mode, notices).
 Route::get('/subscription', [SubscriptionController::class, 'show'])->name('api.subscription');
 
-// Plan limits + current usage, mirrored from Manager.ShopEra entitlements.
+// Plan limits + current usage, mirrored from Manager.Snaker entitlements.
 Route::get('/plan', [PlanController::class, 'index'])->name('api.plan');
 
-// Offer / ad blocks managed in Manager.ShopEra (Free plan only).
+// Offer / ad blocks managed in Manager.Snaker (Free plan only).
 Route::get('/promo-blocks', [PromoBlockController::class, 'index'])->name('api.promo-blocks');
 
-// Signed refresh events pushed by Manager.ShopEra.
+// Signed refresh events pushed by Manager.Snaker.
 Route::post('/manager/webhook', [ManagerWebhookController::class, 'handle'])->name('api.manager.webhook');
 
 // Contact info and form submission

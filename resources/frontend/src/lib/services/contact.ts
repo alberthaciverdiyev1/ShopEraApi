@@ -30,7 +30,7 @@ export async function fetchContactInfo(fetcher?: typeof fetch): Promise<ApiConta
 		const data = await apiGet<ApiContactInfo>('/contact', {}, fetcher);
 		return data ?? {
 			address: 'Bakı, Azərbaycan',
-			email: 'support@shopera.az',
+			email: 'support@snaker.store',
 			phone: null,
 			phones: [],
 			whatsapp_number: null,
@@ -42,7 +42,7 @@ export async function fetchContactInfo(fetcher?: typeof fetch): Promise<ApiConta
 		console.error('Failed to load contact info:', error);
 		return {
 			address: 'Bakı, Azərbaycan',
-			email: 'support@shopera.az',
+			email: 'support@snaker.store',
 			phone: null,
 			phones: [],
 			whatsapp_number: null,

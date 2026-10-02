@@ -7,7 +7,7 @@ use App\Support\ManagerClient;
 use Modules\Setting\Entities\ThemeColor;
 
 /**
- * Theme is owned by Manager.ShopEra: the instance lists the available themes
+ * Theme is owned by Manager.Snaker: the instance lists the available themes
  * and asks the Manager to switch. The selected palette is mirrored locally so
  * the storefront's own /api/theme keeps working.
  */

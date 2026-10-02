@@ -35,10 +35,10 @@ class ContentDatabaseSeeder extends Seeder
             [
                 'type' => 'about',
                 'html' => [
-                    'az' => '<h1>Haqqımızda</h1><p>ShopEra — gündəlik ehtiyaclar, ev, mətbəx və geyim kateqoriyalarında seçilmiş məhsulları bir araya gətirən onlayn mağazadır.</p><h3>Missiyamız</h3><p>Keyfiyyətli məhsulları sərfəli qiymətə və sürətli çatdırılma ilə təqdim etmək.</p><h3>Nə üçün biz?</h3><p>Geniş çeşid, etibarlı xidmət və müştəri məmnuniyyəti.</p>',
-                    'en' => '<h1>About Us</h1><p>ShopEra is an online store bringing together selected products across daily needs, home, kitchen and fashion.</p><h3>Our mission</h3><p>To offer quality products at fair prices with fast delivery.</p><h3>Why us</h3><p>Wide selection, reliable service and customer satisfaction.</p>',
-                    'ru' => '<h1>О нас</h1><p>ShopEra — интернет-магазин, объединяющий отборные товары для повседневных нужд, дома, кухни и моды.</p><h3>Наша миссия</h3><p>Предлагать качественные товары по доступным ценам с быстрой доставкой.</p><h3>Почему мы</h3><p>Широкий ассортимент, надёжный сервис и довольные клиенты.</p>',
-                    'tr' => '<h1>Hakkımızda</h1><p>ShopEra; günlük ihtiyaçlar, ev, mutfak ve giyim kategorilerinde seçkin ürünleri bir araya getiren online mağazadır.</p><h3>Misyonumuz</h3><p>Kaliteli ürünleri uygun fiyatla ve hızlı teslimatla sunmak.</p><h3>Neden biz</h3><p>Geniş ürün yelpazesi, güvenilir hizmet ve müşteri memnuniyeti.</p>',
+                    'az' => '<h1>Haqqımızda</h1><p>Snaker — gündəlik ehtiyaclar, ev, mətbəx və geyim kateqoriyalarında seçilmiş məhsulları bir araya gətirən onlayn mağazadır.</p><h3>Missiyamız</h3><p>Keyfiyyətli məhsulları sərfəli qiymətə və sürətli çatdırılma ilə təqdim etmək.</p><h3>Nə üçün biz?</h3><p>Geniş çeşid, etibarlı xidmət və müştəri məmnuniyyəti.</p>',
+                    'en' => '<h1>About Us</h1><p>Snaker is an online store bringing together selected products across daily needs, home, kitchen and fashion.</p><h3>Our mission</h3><p>To offer quality products at fair prices with fast delivery.</p><h3>Why us</h3><p>Wide selection, reliable service and customer satisfaction.</p>',
+                    'ru' => '<h1>О нас</h1><p>Snaker — интернет-магазин, объединяющий отборные товары для повседневных нужд, дома, кухни и моды.</p><h3>Наша миссия</h3><p>Предлагать качественные товары по доступным ценам с быстрой доставкой.</p><h3>Почему мы</h3><p>Широкий ассортимент, надёжный сервис и довольные клиенты.</p>',
+                    'tr' => '<h1>Hakkımızda</h1><p>Snaker; günlük ihtiyaçlar, ev, mutfak ve giyim kategorilerinde seçkin ürünleri bir araya getiren online mağazadır.</p><h3>Misyonumuz</h3><p>Kaliteli ürünleri uygun fiyatla ve hızlı teslimatla sunmak.</p><h3>Neden biz</h3><p>Geniş ürün yelpazesi, güvenilir hizmet ve müşteri memnuniyeti.</p>',
                 ],
             ],
         ];

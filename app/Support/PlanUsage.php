@@ -9,7 +9,7 @@ use Modules\Product\Entities\Product;
 use Modules\User\Entities\User;
 
 /**
- * Current consumption for the plan limits mirrored from Manager.ShopEra.
+ * Current consumption for the plan limits mirrored from Manager.Snaker.
  * Keys match Features::LIMIT_KEYS so usage and limit line up one-to-one.
  */
 class PlanUsage

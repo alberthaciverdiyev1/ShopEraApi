@@ -1,7 +1,7 @@
 # AGENTS.md (Frontend Scope)
 
 Bu dosya `resources/frontend/` dizini kapsamındaki alt ajanlar (subagents) için hızlı başvuru özetidir.
-Detaylı kılavuz için lütfen [`GEMINI.md`](file:///home/albert/Workspace/FoxSoft/ShopEra/resources/frontend/GEMINI.md) dosyasına bakın.
+Detaylı kılavuz için lütfen [`GEMINI.md`](file:///home/albert/Workspace/FoxSoft/Snaker/resources/frontend/GEMINI.md) dosyasına bakın.
 
 ## Temel Kurallar
 1. **Svelte 5 Runes Zorunludur**: `$state`, `$derived`, `$derived.by`, `$props`, `$effect`. Svelte 4 sözdizimi kullanılamaz.

@@ -5,7 +5,7 @@
 </script>
 
 <svelte:head>
-	<title>{$translate('Left Sidebar')} — ShopEra</title>
+	<title>{$translate('Left Sidebar')} — Snaker</title>
 </svelte:head>
 <Breadcrumb title="Blog Left Sidebar" />
 <BlogClassic3 />

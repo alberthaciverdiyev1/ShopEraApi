@@ -1,7 +1,7 @@
 {
     "name": "nwidart/story",
     "description": "",
-    "authors": [{"name": "ShopEra"}],
+    "authors": [{"name": "Snaker"}],
     "autoload": {
         "psr-4": {
             "Modules\\Story\\": "app/"

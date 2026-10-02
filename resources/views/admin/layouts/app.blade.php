@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'Panel' }} — ShopEra Admin</title>
+    <title>{{ $title ?? 'Panel' }} — Snaker Admin</title>
     @vite(['resources/admin/app.ts'])
 </head>
 <body class="bg-gray-50 text-gray-900 antialiased dark:bg-gray-900 dark:text-gray-100"

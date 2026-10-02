@@ -6,13 +6,13 @@ use App\Models\TenantEntitlement;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Reads the instance's feature entitlements mirrored from Manager.ShopEra into
+ * Reads the instance's feature entitlements mirrored from Manager.Snaker into
  * the tenant's own database. Until a sync has ever happened, features are
  * treated as enabled so a fresh install is never locked out (fail-open).
  */
 class Features
 {
-    /** Numeric limits defined in Manager.ShopEra's feature catalogue. */
+    /** Numeric limits defined in Manager.Snaker's feature catalogue. */
     public const LIMIT_KEYS = [
         'max_products',
         'max_categories',
@@ -67,7 +67,7 @@ class Features
 
     /**
      * Numeric plan limits (max_products, max_categories, max_staff,
-     * max_orders, storage_gb) as mirrored from Manager.ShopEra.
+     * max_orders, storage_gb) as mirrored from Manager.Snaker.
      *
      * A null value means "unlimited" — either the limit was never synced
      * (fail-open) or the plan leaves that dimension uncapped.

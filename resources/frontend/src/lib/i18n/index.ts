@@ -2,7 +2,7 @@ import { browser } from '$app/environment';
 import { derived, get, writable } from 'svelte/store';
 import { defaultLocale, languages, messages, type Locale } from './translations';
 
-const storageKey = 'shopera_locale';
+const storageKey = 'snaker_locale';
 const allowedLocales = new Set<Locale>(languages.map((language) => language.value));
 
 function normalizeLocale(value: string | null | undefined): Locale {

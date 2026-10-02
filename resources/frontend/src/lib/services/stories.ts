@@ -25,7 +25,7 @@ export interface ApiStoryVideo {
 export const storyVideos = writable<ApiStoryVideo[]>([]);
 export const viewedStoryIds = writable<Set<number>>(new Set());
 
-const VIEWED_STORAGE_KEY = 'shopera_viewed_stories';
+const VIEWED_STORAGE_KEY = 'snaker_viewed_stories';
 
 export function initViewedStories(): void {
 	if (typeof window === 'undefined') return;

@@ -421,7 +421,7 @@ class OrderService
                     'id' => 0,
                     'city' => __('Take From Store'),
                     'town_village_district' => '',
-                    'street_building_number' => __('ShopEra'),
+                    'street_building_number' => __('Snaker'),
                     'unit_floor_apartment' => '',
                 ];
                 break;
@@ -907,7 +907,7 @@ class OrderService
                     ];
                 }
             } elseif ($addressType === 'TAKE_FROM_STORE') {
-                $deliveryCity = 'ShopEra';
+                $deliveryCity = 'Snaker';
                 $deliveryPrice = 0;
                 $freeFrom = 0;
                 $deliveryInfoData = [

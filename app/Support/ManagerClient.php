@@ -6,7 +6,7 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 
 /**
- * Small client for the Manager.ShopEra control-plane.
+ * Small client for the Manager.Snaker control-plane.
  * Prefers the per-instance bearer token; falls back to the legacy shared key
  * (with an explicit ?host= so one shared instance can resolve per-owner data).
  */

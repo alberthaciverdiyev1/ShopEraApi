@@ -40,7 +40,7 @@ class NotificationDatabaseSeeder extends Seeder
                     'data' => $item['data'],
                     'source' => 'system',
                     'user_id' => null,
-                    'icon' => 'https://logo.clearbit.com/shopera.az?size=128',
+                    'icon' => 'https://logo.clearbit.com/snaker.store?size=128',
                     'image' => 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1200&q=80',
                     'url' => $item['data']['deeplink'] ?? null,
                 ]
@@ -64,7 +64,7 @@ class NotificationDatabaseSeeder extends Seeder
                         'data' => $item[2],
                         'source' => 'system',
                         'all' => false,
-                        'icon' => 'https://logo.clearbit.com/shopera.az?size=128',
+                        'icon' => 'https://logo.clearbit.com/snaker.store?size=128',
                     ]
                 );
             }

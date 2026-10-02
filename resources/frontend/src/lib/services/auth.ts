@@ -10,7 +10,7 @@ export interface AuthUser {
 	avatar?: string | null;
 }
 
-const USER_KEY = 'shopera_user';
+const USER_KEY = 'snaker_user';
 
 export const user = writable<AuthUser | null>(null);
 export const isLoggedIn = derived(user, (value) => value !== null);

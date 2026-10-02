@@ -10,7 +10,7 @@
     <div class="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div class="border-b border-gray-200 px-5 py-3 dark:border-gray-700">
             <p class="font-semibold text-gray-800 dark:text-white">Mövcud temalar</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">Temalar Manager.ShopEra tərəfindən idarə olunur. Seçdiyin tema ana səhifədə tətbiq olunur.</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Temalar Manager.Snaker tərəfindən idarə olunur. Seçdiyin tema ana səhifədə tətbiq olunur.</p>
         </div>
 
         <div class="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3">

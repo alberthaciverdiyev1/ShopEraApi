@@ -38,7 +38,7 @@
 			{#if isVideo && popup.video}
 				<video src={popup.video} autoplay muted loop playsinline controls></video>
 			{:else if popup.image}
-				<img src={popup.image} alt="ShopEra popup" />
+				<img src={popup.image} alt="Snaker popup" />
 			{/if}
 		</div>
 	</div>

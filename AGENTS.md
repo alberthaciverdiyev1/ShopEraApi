@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Bu dosya, Antigravity, subagent'lar (araştırma, kod yazma, test) ve diğer otonom AI ajanlarının ShopEra deposunda çalışırken uyması gereken temel protokolleri tanımlar. Detaylı teknik yönergeler ve mimari standartlar için [`GEMINI.md`](file:///home/albert/Workspace/FoxSoft/ShopEra/GEMINI.md) ve [`resources/frontend/GEMINI.md`](file:///home/albert/Workspace/FoxSoft/ShopEra/resources/frontend/GEMINI.md) dosyalarına başvurun.
+Bu dosya, Antigravity, subagent'lar (araştırma, kod yazma, test) ve diğer otonom AI ajanlarının Snaker deposunda çalışırken uyması gereken temel protokolleri tanımlar. Detaylı teknik yönergeler ve mimari standartlar için [`GEMINI.md`](file:///home/albert/Workspace/FoxSoft/Snaker/GEMINI.md) ve [`resources/frontend/GEMINI.md`](file:///home/albert/Workspace/FoxSoft/Snaker/resources/frontend/GEMINI.md) dosyalarına başvurun.
 
 ---
 
@@ -9,7 +9,7 @@ Bu dosya, Antigravity, subagent'lar (araştırma, kod yazma, test) ve diğer oto
 ### Frontend Odaklı Görevler (`resources/frontend/`)
 - **Öncelikli Teknoloji**: SvelteKit 2 + **Svelte 5 (Runes zorunlu)** + TypeScript.
 - **Kesin Kural**: Svelte 4 / legacy kalıplar (`export let`, `$:`, `<slot />`, `on:click`) KULLANILMAZ.
-- **Kılavuz**: Tüm Svelte geliştirme kuralları için [`resources/frontend/GEMINI.md`](file:///home/albert/Workspace/FoxSoft/ShopEra/resources/frontend/GEMINI.md) incelenmelidir.
+- **Kılavuz**: Tüm Svelte geliştirme kuralları için [`resources/frontend/GEMINI.md`](file:///home/albert/Workspace/FoxSoft/Snaker/resources/frontend/GEMINI.md) incelenmelidir.
 - **Doğrulama**: Değişiklik sonrası `npm --prefix resources/frontend run check` çalıştırılmalıdır.
 
 ### Backend Odaklı Görevler (`app/`, `Modules/`)

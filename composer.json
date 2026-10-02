@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "foxsoft/shopera",
+    "name": "foxsoft/snaker",
     "type": "project",
-    "description": "ShopEra — Laravel e-commerce platform",
+    "description": "Snaker — Laravel e-commerce platform",
     "keywords": [
         "laravel",
         "framework"

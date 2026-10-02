@@ -14,7 +14,7 @@ class PromoCodeDatabaseSeeder extends Seeder
     {
         $codes = [
             ['WELCOME10', 10, 1000, true],
-            ['SHOPERA15', 15, 500, true],
+            ['SNAKER15', 15, 500, true],
             ['SUMMER20', 20, 300, true],
             ['BLACKFRIDAY30', 30, 200, true],
             ['RAMADAN25', 25, 400, true],

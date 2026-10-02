@@ -1,4 +1,4 @@
-# ShopEra — Devir Teslim / Kalan İşler
+# Snaker — Devir Teslim / Kalan İşler
 
 Bu dosya, oturum kesildiğinde kaldığı yerden devam edebilmek için yazıldı.
 Aşağıdaki "Yapıldı" bölümü **tekrar yapılmamalı**, "Kalan" bölümü öncelik sırasıyla ilerlemeli.
@@ -9,7 +9,7 @@ Aşağıdaki "Yapıldı" bölümü **tekrar yapılmamalı**, "Kalan" bölümü �
 
 ```bash
 # Backend (Laravel, port 8000)
-cd /home/albert/Workspace/FoxSoft/ShopEra
+cd /home/albert/Workspace/FoxSoft/Snaker
 php artisan serve
 
 # Kuyruk + zamanlayıcı (ayrı terminaller)
@@ -22,8 +22,8 @@ cd resources/frontend && npm run dev -- --host
 
 > Proje Docker kullanmaz; host'ta PHP-FPM/nginx ile çalışır (diğer FoxSoft projeleri gibi).
 
-- **API adresi:** uygulamadan `/api` (Vite proxy → global nginx-proxy, `Host: shopera.test`)
-  - Doğrudan: `http://shopera.test/api/...` veya `curl -H "Host: shopera.test" http://127.0.0.1/api/...`
+- **API adresi:** uygulamadan `/api` (Vite proxy → global nginx-proxy, `Host: snaker.test`)
+  - Doğrudan: `http://snaker.test/api/...` veya `curl -H "Host: snaker.test" http://127.0.0.1/api/...`
 - **Test kullanıcısı:** `alberthaciverdiyev55@gmail.com` / `123456` (telefon: `0500000001`)
 - **Tema API'si:** `GET /api/theme` (public), `PUT /api/theme` (admin + `update theme` yetkisi)
 
@@ -162,7 +162,7 @@ Ayrı bir **React admin paneli** düşünülüyor (Svelte vitrin değil).
 6. **Animasyonlar:** WOW (giriş animasyonları) devre dışı — `src/lib/theme/animations.css`
    `.wow` öğelerini görünür tutar; `wow.js` bağımlılığı package.json'da duruyor ama import edilmiyor.
 7. **`migrate:fresh`** bu şemada tabloları düşüremiyor; bunun yerine
-   `DROP DATABASE shopera` + `CREATE DATABASE` + `migrate --seed` kullan.
+   `DROP DATABASE snaker` + `CREATE DATABASE` + `migrate --seed` kullan.
 8. **Süreçler:** test için headless Chrome süreçleri arka planda kalabilir (`pkill -x chrome`).
 
 ---

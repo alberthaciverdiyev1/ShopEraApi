@@ -30,7 +30,7 @@
 						stroke-width="1.3"
 					/>
 				</svg>
-				{blog.author_name ? `${blog.author_name}` : 'ShopEra'}
+				{blog.author_name ? `${blog.author_name}` : 'Snaker'}
 			</li>
 			{#if blog.category}
 				<li>

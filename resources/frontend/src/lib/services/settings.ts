@@ -28,18 +28,18 @@ type SettingsPayload =
 	| undefined;
 
 export const fallbackSettings: ApiStoreSettings = {
-	email: 'support@shopera.az',
+	email: 'support@snaker.store',
 	address: 'Bakı, Azərbaycan',
 	phone_number_1: '+994 (12) 555-00-00',
-	instagram_url: 'https://instagram.com/shopera.az',
-	tiktok_url: 'https://tiktok.com/@shopera.az',
+	instagram_url: 'https://instagram.com/snaker.store',
+	tiktok_url: 'https://tiktok.com/@snaker.store',
 	whatsapp_number: '994709990569',
 	google_map_url: null,
-	facebook_url: 'https://facebook.com/shopera.az',
-	twitter_url: 'https://x.com/shopera_az',
-	youtube_url: 'https://youtube.com/@shopera',
-	telegram_url: 'https://t.me/shopera_az',
-	linkedin_url: 'https://linkedin.com/company/shopera'
+	facebook_url: 'https://facebook.com/snaker.store',
+	twitter_url: 'https://x.com/snaker_az',
+	youtube_url: 'https://youtube.com/@snaker',
+	telegram_url: 'https://t.me/snaker_az',
+	linkedin_url: 'https://linkedin.com/company/snaker'
 };
 
 export const settings = writable<ApiStoreSettings>(fallbackSettings);

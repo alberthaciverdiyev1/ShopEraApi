@@ -1,6 +1,6 @@
 import { apiGet } from '$lib/utils/api';
 
-/** Keys of the numeric limits defined in Manager.ShopEra. */
+/** Keys of the numeric limits defined in Manager.Snaker. */
 export interface ApiPlanLimits {
 	max_products?: number | null;
 	max_categories?: number | null;

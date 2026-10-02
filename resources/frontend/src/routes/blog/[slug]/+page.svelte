@@ -56,7 +56,7 @@
 </script>
 
 <svelte:head>
-	<title>{blog?.title ? `${blog.title} — ShopEra` : 'Blog Details — ShopEra'}</title>
+	<title>{blog?.title ? `${blog.title} — Snaker` : 'Blog Details — Snaker'}</title>
 </svelte:head>
 
 <Breadcrumb title={blog?.title || 'Blog Details'} />

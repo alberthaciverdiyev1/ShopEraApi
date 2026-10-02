@@ -4,7 +4,7 @@
 </script>
 
 <svelte:head>
-	<title>{$translate('Catalog')} — ShopEra</title>
+	<title>{$translate('Catalog')} — Snaker</title>
 </svelte:head>
 
 <MobileCategoryCatalog />

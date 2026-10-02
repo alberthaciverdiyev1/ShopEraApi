@@ -6,14 +6,14 @@ Bu dosya, `resources/frontend/` dizini altındaki SvelteKit 2 + Svelte 5 uygulam
 
 ## 1. Mimari Genel Bakış
 
-ShopEra frontend katmanı, modern bir headless e-ticaret ön yüzüdür:
+Snaker frontend katmanı, modern bir headless e-ticaret ön yüzüdür:
 - **Framework**: SvelteKit 2 (`@sveltejs/kit` ^2.63)
 - **Reactivity Motoru**: **Svelte 5** (`svelte` ^5.56) — **Runes Modu Kesinlikle Zorunludur**
 - **Tip Sistemi**: TypeScript (`typescript` ^6.0, `svelte-check` ^4.6)
 - **Derleme Aracı**: Vite 8 (`vite` ^8.0)
 - **CSS / UI**: Bootstrap 5.3 + FontAwesome + Tema Varlıkları + `$lib/theme/cards.css`
 - **Etkileşim Kütüphaneleri**: Swiper 14, Fancyapps UI 6 (SSR uyumlu dinamik import)
-- **Backend API Proxy**: `vite.config.ts` üzerinden geliştirme ortamında Docker nginx proxy'sine yönlendirilir (`host: shopera.test`, `target: http://127.0.0.1:80`).
+- **Backend API Proxy**: `vite.config.ts` üzerinden geliştirme ortamında Docker nginx proxy'sine yönlendirilir (`host: snaker.test`, `target: http://127.0.0.1:80`).
 
 ---
 
@@ -81,7 +81,7 @@ src/
 ## 4. API Entegrasyon Prensip ve Kalıpları
 
 ### 4.1. `$lib/api.ts` Kullanımı
-ShopEra backend'i tüm cevapları `{ success, message, data, meta }` formatında döndürür.
+Snaker backend'i tüm cevapları `{ success, message, data, meta }` formatında döndürür.
 Frontend içinde doğrudan `fetch` yazılmamalı, daima `$lib/api.ts` fonksiyonları kullanılmalıdır:
 
 ```typescript

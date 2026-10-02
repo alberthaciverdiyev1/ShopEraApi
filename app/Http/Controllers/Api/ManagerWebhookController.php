@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Receives signed events from Manager.ShopEra:
+ * Receives signed events from Manager.Snaker:
  *   - tenant.provision → create + migrate the owner's own database
  *   - anything else    → refresh entitlements/theme (manager:sync)
  */

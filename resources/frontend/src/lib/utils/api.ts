@@ -7,7 +7,7 @@ import { browser } from '$app/environment';
 const ssrBase =
 	typeof process !== 'undefined' && process.env.INTERNAL_API_URL
 		? process.env.INTERNAL_API_URL
-		: 'http://shopera-web/api';
+		: 'http://snaker-web/api';
 
 export const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) || (browser ? '/api' : ssrBase);
 
@@ -29,7 +29,7 @@ function buildQuery(query: Query): string {
 	return search.toString();
 }
 
-export const TOKEN_KEY = 'shopera_token';
+export const TOKEN_KEY = 'snaker_token';
 
 function authHeaders(): Record<string, string> {
 	const token = typeof localStorage !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null;

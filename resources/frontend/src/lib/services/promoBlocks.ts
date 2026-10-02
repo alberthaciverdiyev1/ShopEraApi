@@ -14,7 +14,7 @@ export interface ApiPromoBlock {
 	badge?: string | null;
 }
 
-/** Offer/ad blocks from Manager.ShopEra (Free plan only). */
+/** Offer/ad blocks from Manager.Snaker (Free plan only). */
 export async function fetchPromoBlocks(fetcher?: Fetcher): Promise<ApiPromoBlock[]> {
 	try {
 		const blocks = await apiGet<ApiPromoBlock[]>('/promo-blocks', {}, fetcher);

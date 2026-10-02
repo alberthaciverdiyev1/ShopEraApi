@@ -1,5 +1,5 @@
 /*
- * ShopEra global theme layer.
+ * Snaker global theme layer.
  *
  * This file is intentionally linked after the template's main.css so admin
  * palette variables and our shared UI scale win on every route.
@@ -450,3 +450,49 @@ input[type="submit"].theme-btn,
 		font-size: 12.5px !important;
 	}
 }
+
+/* ==========================================================================
+   FontAwesome X (formerly Twitter) Icon Polyfill
+   FontAwesome 6.0.0 lacks the fa-x-twitter glyph. This provides the official
+   SVG mask for all instances of .fa-x-twitter, .fa-twitter, etc.
+   ========================================================================== */
+.fa-x-twitter,
+.fa-brands.fa-x-twitter,
+.fab.fa-x-twitter,
+.fa-brands.fa-twitter,
+.fab.fa-twitter,
+i.fa-x-twitter,
+i.fa-twitter {
+	display: inline-flex !important;
+	align-items: center;
+	justify-content: center;
+	width: 1em;
+	height: 1em;
+	vertical-align: -0.125em;
+	line-height: 1;
+	box-sizing: content-box;
+}
+
+.fa-x-twitter:before,
+.fa-x-twitter::before,
+.fa-brands.fa-x-twitter:before,
+.fa-brands.fa-x-twitter::before,
+.fab.fa-x-twitter:before,
+.fab.fa-x-twitter::before,
+.fa-brands.fa-twitter:before,
+.fa-brands.fa-twitter::before,
+.fab.fa-twitter:before,
+.fab.fa-twitter::before,
+i.fa-x-twitter:before,
+i.fa-x-twitter::before,
+i.fa-twitter:before,
+i.fa-twitter::before {
+	content: "" !important;
+	display: block;
+	width: 1em;
+	height: 1em;
+	background-color: currentColor;
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23000' d='M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z'/%3E%3C/svg%3E") no-repeat center / contain;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='%23000' d='M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z'/%3E%3C/svg%3E") no-repeat center / contain;
+}
+

@@ -22,4 +22,11 @@ return [
     // Central (non-tenant) routes that must keep working when no tenant
     // database matches the incoming host (e.g. the signed Manager webhook).
     'central_paths' => ['api/manager/webhook', 'up'],
+
+    // Hosts that serve the manager (SaaS operator) panel. Requests to these
+    // hosts bypass tenant resolution and use the `control` connection.
+    'control_hosts' => array_values(array_filter(array_map(
+        'trim',
+        explode(',', (string) env('MANAGER_HOSTS', 'manager.snaker.store'))
+    ))),
 ];

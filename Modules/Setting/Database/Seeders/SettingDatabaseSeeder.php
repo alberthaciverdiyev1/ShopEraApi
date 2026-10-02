@@ -8,20 +8,20 @@ use Modules\Setting\Entities\Setting;
 class SettingDatabaseSeeder extends Seeder
 {
     /**
-     * Store-wide configuration for ShopEra.az.
+     * Store-wide configuration for Snaker.az.
      */
     public function run(): void
     {
         Setting::updateOrCreate(
             ['id' => 1],
             [
-                'instagram_url' => 'https://www.instagram.com/shopera.az',
-                'facebook_url' => 'https://www.facebook.com/shopera.az',
-                'twitter_url' => 'https://x.com/shopera_az',
-                'youtube_url' => 'https://www.youtube.com/@shopera',
-                'telegram_url' => 'https://t.me/shopera_az',
-                'linkedin_url' => 'https://www.linkedin.com/company/shopera',
-                'tiktok_url' => 'https://www.tiktok.com/@shopera.az',
+                'instagram_url' => 'https://www.instagram.com/snaker.store',
+                'facebook_url' => 'https://www.facebook.com/snaker.store',
+                'twitter_url' => 'https://x.com/snaker_az',
+                'youtube_url' => 'https://www.youtube.com/@snaker',
+                'telegram_url' => 'https://t.me/snaker_az',
+                'linkedin_url' => 'https://www.linkedin.com/company/snaker',
+                'tiktok_url' => 'https://www.tiktok.com/@snaker.store',
                 'whatsapp_number' => '994709990569',
                 'phone_number_1' => '0709990569',
                 'phone_number_2' => '0123100707',

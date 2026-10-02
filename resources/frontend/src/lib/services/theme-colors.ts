@@ -4,7 +4,7 @@ import { apiGet, apiPut } from '$lib/utils/api';
 /** `{ "--theme": "#06B6D4", ... }` as delivered by `GET /api/theme`. */
 export const themeColors = writable<Record<string, string>>({});
 
-const CACHE_KEY = 'shopera_theme';
+const CACHE_KEY = 'snaker_theme';
 
 function hexToRgb(value: string): string | null {
 	const clean = value.trim().replace('#', '');
