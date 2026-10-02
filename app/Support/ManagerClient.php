@@ -65,7 +65,7 @@ class ManagerClient
             return match ($method) {
                 'put' => $request->put($url, $payload),
                 'post' => $request->post($url, $payload),
-                default => $request->get($url, $payload),
+                default => $payload === [] ? $request->get($url) : $request->get($url, $payload),
             };
         } catch (\Throwable) {
             return null;
