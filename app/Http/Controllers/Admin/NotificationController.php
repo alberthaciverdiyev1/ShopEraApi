@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Support\TenantContext;
 use Illuminate\Http\Request;
-use Modules\Notification\Entities\Notification;
 use Modules\Notification\Services\NotificationService;
 
 class NotificationController extends AdminController
@@ -17,17 +16,7 @@ class NotificationController extends AdminController
     {
         $this->requirePermission('view notifications');
 
-        $query = Notification::query()->with('users')->latest('id');
-
-        if ($request->query('source', 'admin') !== 'all') {
-            $query->where('source', 'admin');
-        }
-
-        if (($term = trim((string) $request->query('q', ''))) !== '') {
-            $query->where(fn ($inner) => $inner->where('title', 'like', "%{$term}%")->orWhere('body', 'like', "%{$term}%"));
-        }
-
-        $rows = $query->paginate(20)->withQueryString();
+        $rows = $this->service->adminQuery($request)->paginate(20)->withQueryString();
 
         if ($this->isHtmx($request)) {
             return view('admin.pages.notifications._table', ['rows' => $rows]);
@@ -78,7 +67,7 @@ class NotificationController extends AdminController
     {
         $this->requirePermission('view notifications');
 
-        Notification::query()->findOrFail($id)->delete();
+        $this->service->remove($id);
 
         return back()->with('status', __('Bildiriş silindi.'));
     }

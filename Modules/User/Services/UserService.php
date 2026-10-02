@@ -409,4 +409,24 @@ class UserService
     {
         return (new DeleteAccountHtml)();
     }
+
+    /** Team members: users holding any non-customer role. */
+    public function teamQuery(\Illuminate\Http\Request $request): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = $this->user->newQuery()
+            ->with('roles')
+            ->whereHas('roles', fn ($q) => $q->where('name', '!=', 'user'))
+            ->latest('id');
+
+        if (($term = trim((string) $request->query('q', ''))) !== '') {
+            $query->where(function ($inner) use ($term) {
+                $inner->where('name', 'like', "%{$term}%")
+                    ->orWhere('surname', 'like', "%{$term}%")
+                    ->orWhere('email', 'like', "%{$term}%")
+                    ->orWhere('phone', 'like', "%{$term}%");
+            });
+        }
+
+        return $query;
+    }
 }

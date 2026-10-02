@@ -208,4 +208,25 @@ class NotificationService
             return false;
         }
     }
+
+    /** Admin listing query (source + text filters). */
+    public function adminQuery(\Illuminate\Http\Request $request): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = $this->model->newQuery()->with('users')->latest('id');
+
+        if ($request->query('source', 'admin') !== 'all') {
+            $query->where('source', 'admin');
+        }
+
+        if (($term = trim((string) $request->query('q', ''))) !== '') {
+            $query->where(fn ($inner) => $inner->where('title', 'like', "%{$term}%")->orWhere('body', 'like', "%{$term}%"));
+        }
+
+        return $query;
+    }
+
+    public function remove(int $id): void
+    {
+        $this->model->newQuery()->findOrFail($id)->delete();
+    }
 }
