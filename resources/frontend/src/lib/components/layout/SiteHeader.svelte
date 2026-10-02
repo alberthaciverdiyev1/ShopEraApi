@@ -85,7 +85,7 @@
                     <div class="header-left">
                         <div class="logo">
                             <a href="/" class="header-logo">
-                                <img src={$settings.logo_url || '/assets/images/logo/logo.svg'} alt="logo-img">
+                                <img src={$settings.logo_url || '/assets/images/logo/logo.svg?v=20261002'} alt="logo-img">
                             </a>
                         </div>
                         <div class="header-cataegory-item">
