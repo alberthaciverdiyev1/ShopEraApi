@@ -70,10 +70,6 @@ class FeatureSeeder extends Seeder
             ['push_notifications', 'Push bildiriş (FCM)', 'bool', '0', 'Marketinq & Əlaqə'],
             ['sms', 'SMS (OTP)', 'bool', '1', 'Marketinq & Əlaqə'],
 
-            // ── Marketplace (Setting: store/marketplace) ──
-            ['marketplace', 'Marketplace (çox satıcı)', 'bool', '0', 'Marketplace'],
-            ['store_commission', 'Komissiya idarəsi', 'bool', '0', 'Marketplace'],
-            ['store_settings', 'Mağaza parametrləri', 'bool', '0', 'Marketplace'],
 
             // ── İstifadəçi (User) ──
             ['users', 'İstifadəçilər', 'bool', '1', 'İstifadəçi'],

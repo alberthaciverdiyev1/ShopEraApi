@@ -15,7 +15,7 @@
                 <label class="mb-1 block text-sm font-medium text-gray-700">Tip</label>
                 <select name="type" class="{{ $input }}">
                     <option value="bool" @selected(old('type', $feature?->type?->value) === 'bool')>bool</option>
-                    <option value="limit" @selected(old('type', $feature?->type?->value) === 'limit')>limit</option>
+                    <option value="limit" @selected(old('type', $feature?->type?->value) === 'limit')>number (limit)</option>
                 </select>
             </div>
             <div class="col-span-1"><label class="mb-1 block text-sm font-medium text-gray-700">Default</label><input name="default_value" value="{{ old('default_value', $feature?->default_value) }}" class="{{ $input }}"></div>
