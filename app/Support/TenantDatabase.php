@@ -34,7 +34,11 @@ class TenantDatabase
     {
         $default = (string) config('database.default');
 
-        return $default === 'tenant' ? 'pgsql' : $default;
+        // Admin/DDL operations (CREATE DATABASE, pg_database lookups) must use
+        // the ShopEra central connection with CREATEDB rights — never the
+        // per-tenant connection, nor the Manager `control` connection whose
+        // user may lack CREATEDB.
+        return in_array($default, ['tenant', 'control'], true) ? 'pgsql' : $default;
     }
 
     /**
