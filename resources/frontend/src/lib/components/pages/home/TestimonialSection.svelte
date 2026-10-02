@@ -10,7 +10,7 @@
 	<section class="testimonial-section fix section-padding margin-bottom-40">
 		<div class="container">
 			<div class="section-title">
-				<h2 class="title">What our client say</h2>
+				<h2 class="title">{$translate('What our client say')}</h2>
 			</div>
 			<div class="swiper testimonial-slider-one">
 				<div class="swiper gt-slider" id="featuredReviewSlider" use:slider

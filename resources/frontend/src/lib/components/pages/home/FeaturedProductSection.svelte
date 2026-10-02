@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { translate } from '$lib/i18n';
 	import ShopProductCard from '$lib/components/cards/ShopProductCard.svelte';
 	import { fetchProducts, type ApiProduct } from '$lib/services/products';
 
@@ -24,7 +25,7 @@
 			<div class="featured-product-wrapper style1">
 				<div class="top-deals-wrapper style1 text-center mb-30">
 					<div class="section-title">
-						<h2 class="title">Our featured products</h2>
+						<h2 class="title">{$translate('Our featured products')}</h2>
 					</div>
 				</div>
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { translate } from '$lib/i18n';
 	import { onMount } from 'svelte';
 	import { basketItems, basketTotal, loadBasket, removeBasketItem, updateBasketItem } from '$lib/services/basket';
 	import { isLoggedIn } from '$lib/services/auth';
@@ -49,13 +50,13 @@
 	<div class="container">
 		{#if !$isLoggedIn}
 			<div class="text-center py-5">
-				<p class="text-muted mb-3">Please sign in to see your cart.</p>
-				<Button href="/login">Login</Button>
+				<p class="text-muted mb-3">{$translate('Please sign in to see your cart.')}</p>
+				<Button href="/login">{$translate('Login')}</Button>
 			</div>
 		{:else if $basketItems.length === 0}
 			<div class="text-center py-5">
-				<p class="text-muted mb-3">Your cart is empty.</p>
-				<Button href="/shop">Continue shopping</Button>
+				<p class="text-muted mb-3">{$translate('Your cart is empty.')}</p>
+				<Button href="/shop">{$translate('Continue shopping')}</Button>
 			</div>
 		{:else}
 			<div class="row g-4 align-items-start">
@@ -63,10 +64,10 @@
 				<div class="col-lg-8 col-12">
 					<div class="cart-table-card cart-list-card">
 						<div class="cart-list-head">
-							<span>Product</span>
-							<span>Price</span>
-							<span>Quantity</span>
-							<span>Total</span>
+							<span>{$translate('Product')}</span>
+							<span>{$translate('Price')}</span>
+							<span>{$translate('Quantity')}</span>
+							<span>{$translate('Total')}</span>
 							<span></span>
 						</div>
 
@@ -156,16 +157,16 @@
 				<!-- Sağ Tərəf: Cart Totals Paneli -->
 				<div class="col-lg-4 col-12">
 					<div class="cart-totals-card">
-						<h3 class="totals-title">Cart Totals</h3>
+						<h3 class="totals-title">{$translate('Cart Totals')}</h3>
 						<div class="totals-body">
 							<div class="totals-row">
-								<span class="totals-label">Subtotal</span>
+								<span class="totals-label">{$translate('Subtotal')}</span>
 								<span class="totals-val">${Number($basketTotal).toFixed(2)}</span>
 							</div>
 							<div class="totals-divider"></div>
 
 							<div class="totals-row total-highlight">
-								<span class="totals-label">Total</span>
+								<span class="totals-label">{$translate('Total')}</span>
 								<span class="totals-val total-price">${Number($basketTotal).toFixed(2)}</span>
 							</div>
 						</div>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { translate } from '$lib/i18n';
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { user, isLoggedIn, logout } from '$lib/services/auth';
@@ -79,56 +80,56 @@
 <div class="row g-4 account-dashboard-grid">
 <div class="col-xl-3">
     <div class="dashboard-navigation-sidebar">
-        <h3>Navigation</h3>
+        <h3>{$translate('Navigation')}</h3>
         <div>
             <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist"
                 aria-orientation="vertical">
                 <button class="nav-link" class:active={tab === 'dashboard'}
                     id="v-pills-dashboard-tab" type="button" role="tab" aria-controls="v-pills-dashboard"
                     aria-selected={tab === 'dashboard'} onclick={() => (tab = 'dashboard')}> <i
-                        class="fa-sharp fa-solid fa-grid-2"></i>Dashboard</button>
+                        class="fa-sharp fa-solid fa-grid-2"></i>{$translate('Dashboard')}</button>
 
                 <button class="nav-link" class:active={tab === 'order-history'}
                     id="v-pills-order-history-tab" type="button" role="tab" aria-controls="v-pills-order-history"
                     aria-selected={tab === 'order-history'} onclick={() => (tab = 'order-history')}> <i
-                        class="fa-solid fa-sync"></i>Order History</button>
+                        class="fa-solid fa-sync"></i>{$translate('Order History')}</button>
 
                 <button class="nav-link" class:active={tab === 'order-details'}
                     id="v-pills-order-details-tab" type="button" role="tab" aria-controls="v-pills-order-details"
                     aria-selected={tab === 'order-details'} onclick={() => (tab = 'order-details')}><i
-                        class="fa-solid fa-list"></i>Order Details</button>
+                        class="fa-solid fa-list"></i>{$translate('Order Details')}</button>
 
                 {#if features?.chat !== false}
                     <button class="nav-link" class:active={tab === 'messages'}
                         id="v-pills-messages-tab" type="button" role="tab" aria-controls="v-pills-messages"
                         aria-selected={tab === 'messages'} onclick={() => (tab = 'messages')}><i
-                            class="fa-solid fa-comments"></i>Messages</button>
+                            class="fa-solid fa-comments"></i>{$translate('Messages')}</button>
                 {/if}
 
                 <button class="nav-link" class:active={tab === 'wishlist'}
                     id="v-pills-wishlist-tab" type="button" role="tab" aria-controls="v-pills-wishlist"
                     aria-selected={tab === 'wishlist'} onclick={() => (tab = 'wishlist')}><i
-                        class="fa-light fa-heart"></i>Wishlist</button>
+                        class="fa-light fa-heart"></i>{$translate('Wishlist')}</button>
 
                 <button class="nav-link" class:active={tab === 'addresses'}
                     id="v-pills-addresses-tab" type="button" role="tab" aria-controls="v-pills-addresses"
                     aria-selected={tab === 'addresses'} onclick={() => (tab = 'addresses')}><i
-                        class="fa-solid fa-location-dot"></i>Addresses</button>
+                        class="fa-solid fa-location-dot"></i>{$translate('Addresses')}</button>
 
                 <button class="nav-link" class:active={tab === 'plan'}
                     id="v-pills-plan-tab" type="button" role="tab" aria-controls="v-pills-plan"
                     aria-selected={tab === 'plan'} onclick={() => (tab = 'plan')}><i
-                        class="fa-solid fa-gauge-high"></i>Plan & Limits</button>
+                        class="fa-solid fa-gauge-high"></i>{$translate('Plan & Limits')}</button>
 
                 <button class="nav-link" class:active={tab === 'settings'}
                     id="v-pills-settings-tab" type="button" role="tab" aria-controls="v-pills-settings"
                     aria-selected={tab === 'settings'} onclick={() => (tab = 'settings')}><i
-                        class="fa-regular fa-gear"></i>Settings</button>
+                        class="fa-regular fa-gear"></i>{$translate('Settings')}</button>
 
                 <button class="nav-link" class:active={tab === 'logout'}
                     id="v-pills-logout-tab" type="button" role="tab" aria-controls="v-pills-logout"
                     aria-selected={tab === 'logout'} onclick={() => (tab = 'logout')}><i
-                        class="fa-solid fa-sign-out-alt"></i>Log Out</button>
+                        class="fa-solid fa-sign-out-alt"></i>{$translate('Log Out')}</button>
             </div>
         </div>
     </div>
@@ -280,8 +281,8 @@
                         <table class="wishlist_table">
                             <thead>
                                 <tr>
-                                    <th class="cart-col-image">Product</th>
-                                    <th class="cart-col-price">Price</th>
+                                    <th class="cart-col-image">{$translate('Product')}</th>
+                                    <th class="cart-col-price">{$translate('Price')}</th>
                                     <th class="cart-col-total">Sub total</th>
                                     <th class="cart-col-stock">Stock</th>
                                 </tr>
@@ -386,7 +387,7 @@
                 <div class="mb-3">
                     <i class="fa-solid fa-arrow-right-from-bracket fs-1 text-danger"></i>
                 </div>
-                <h4>Log Out</h4>
+                <h4>{$translate('Log Out')}</h4>
                 <p class="text-muted">Are you sure you want to log out of your account?</p>
                 <div class="d-flex justify-content-center gap-2 mt-3">
                     <button type="button" class="theme-btn" onclick={async () => { await logout(); goto('/login'); }}>

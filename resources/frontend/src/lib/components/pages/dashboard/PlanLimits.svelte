@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { translate } from '$lib/i18n';
 	import { onMount } from 'svelte';
 	import {
 		fetchPlan,
@@ -25,16 +26,16 @@
 
 <div class="plan-limits">
 	<div class="plan-header">
-		<h3>Plan & Limits</h3>
+		<h3>{$translate('Plan & Limits')}</h3>
 		{#if plan?.plan}
 			<span class="plan-badge" class:blocked={plan.usable === false}>{plan.plan}</span>
 		{/if}
 	</div>
 
 	{#if loading}
-		<p class="text-muted">Loading plan…</p>
+		<p class="text-muted">{$translate('Loading plan…')}</p>
 	{:else if !plan}
-		<p class="text-muted">Plan information is not available yet.</p>
+		<p class="text-muted">{$translate('Plan information is not available yet.')}</p>
 	{:else}
 		{#if plan.ends_at}
 			<p class="plan-meta">Renews / ends on {new Date(plan.ends_at).toLocaleDateString()}</p>

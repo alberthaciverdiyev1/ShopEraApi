@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { translate } from '$lib/i18n';
 	import { onMount } from 'svelte';
 	import { isLoggedIn } from '$lib/services/auth';
 	import Button from '$lib/components/ui/Button.svelte';
@@ -167,7 +168,7 @@
 			<h3 class="address-heading mb-1">
 				<i class="fa-solid fa-location-dot me-2 text-danger"></i>My Addresses
 			</h3>
-			<p class="text-muted mb-0">Manage your delivery addresses.</p>
+			<p class="text-muted mb-0">{$translate('Manage your delivery addresses.')}</p>
 		</div>
 
 		{#if !showForm}
@@ -209,7 +210,7 @@
 				<form onsubmit={saveAddress}>
 					<div class="row g-3">
 						<div class="col-md-6">
-							<label for="address_full_name" class="form-label">Full Name <span class="text-danger">*</span></label>
+							<label for="address_full_name" class="form-label">{$translate('Full Name')} <span class="text-danger">*</span></label>
 							<input
 								type="text"
 								id="address_full_name"
@@ -221,7 +222,7 @@
 						</div>
 
 						<div class="col-md-6">
-							<label for="address_phone" class="form-label">Contact Number <span class="text-danger">*</span></label>
+							<label for="address_phone" class="form-label">{$translate('Contact Number')} <span class="text-danger">*</span></label>
 							<input
 								type="tel"
 								id="address_phone"
@@ -233,7 +234,7 @@
 						</div>
 
 						<div class="col-md-6">
-							<label for="address_city" class="form-label">City <span class="text-danger">*</span></label>
+							<label for="address_city" class="form-label">{$translate('City')} <span class="text-danger">*</span></label>
 							<select
 								id="address_city"
 								class="form-select"
@@ -247,7 +248,7 @@
 						</div>
 
 						<div class="col-md-6">
-							<label for="address_district" class="form-label">District / Town <span class="text-danger">*</span></label>
+							<label for="address_district" class="form-label">{$translate('District / Town')} <span class="text-danger">*</span></label>
 							<input
 								type="text"
 								id="address_district"
@@ -259,7 +260,7 @@
 						</div>
 
 						<div class="col-md-8">
-							<label for="address_street" class="form-label">Street & Building <span class="text-danger">*</span></label>
+							<label for="address_street" class="form-label">{$translate('Street & Building')} <span class="text-danger">*</span></label>
 							<input
 								type="text"
 								id="address_street"
@@ -271,7 +272,7 @@
 						</div>
 
 						<div class="col-md-4">
-							<label for="address_unit" class="form-label">Apt / Floor / Unit <span class="text-danger">*</span></label>
+							<label for="address_unit" class="form-label">{$translate('Apt / Floor / Unit')} <span class="text-danger">*</span></label>
 							<input
 								type="text"
 								id="address_unit"
@@ -313,17 +314,17 @@
 	{#if loading}
 		<div class="text-center py-5">
 			<div class="spinner-border text-danger" role="status">
-				<span class="visually-hidden">Loading addresses...</span>
+				<span class="visually-hidden">{$translate('Loading addresses...')}</span>
 			</div>
-			<p class="text-muted mt-2">Loading addresses...</p>
+			<p class="text-muted mt-2">{$translate('Loading addresses...')}</p>
 		</div>
 	{:else if addresses.length === 0 && !showForm}
 		<div class="empty-address-card text-center py-5">
 			<div class="empty-icon mb-3">
 				<i class="fa-light fa-map-location-dot"></i>
 			</div>
-			<h4>No Addresses Saved</h4>
-			<p class="text-muted mb-3">You have not added any delivery addresses yet.</p>
+			<h4>{$translate('No Addresses Saved')}</h4>
+			<p class="text-muted mb-3">{$translate('You have not added any delivery addresses yet.')}</p>
 			<button type="button" class="theme-btn" onclick={startAdd}>
 				<i class="fa-solid fa-plus me-1"></i> Add Your First Address
 			</button>

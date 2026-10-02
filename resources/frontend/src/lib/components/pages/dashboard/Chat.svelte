@@ -106,7 +106,7 @@
 <div class="chat-panel">
 	<div class="chat-head">
 		<div>
-			<h3 class="panel-title">Mesajlar</h3>
+			<h3 class="panel-title">{$translate('Mesajlar')}</h3>
 			<p class="chat-subtitle">{$translate('Dəstək komandası ilə söhbət')}</p>
 		</div>
 		<button type="button" class="refresh-btn" title={$translate('Yenilə')} onclick={() => refresh()}>

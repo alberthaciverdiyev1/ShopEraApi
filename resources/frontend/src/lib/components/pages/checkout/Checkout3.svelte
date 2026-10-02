@@ -451,10 +451,10 @@
 				<div class="col-lg-6 text-center">
 					<div class="card shadow-sm border-0 p-5 rounded-4">
 						<i class="fa-light fa-user-lock text-danger display-4 mb-3"></i>
-						<h3 class="fw-bold mb-2">Sign In Required</h3>
-						<p class="text-muted mb-4">Please log in to your account to select a delivery address and complete your checkout.</p>
+						<h3 class="fw-bold mb-2">{$translate('Sign In Required')}</h3>
+						<p class="text-muted mb-4">{$translate('Please log in to your account to select a delivery address and complete your checkout.')}</p>
 						<div>
-							<a href="/login?redirect=/checkout" class="theme-btn">Log In to Continue</a>
+							<a href="/login?redirect=/checkout" class="theme-btn">{$translate('Log In to Continue')}</a>
 						</div>
 					</div>
 				</div>
@@ -466,7 +466,7 @@
 						<div class="success-icon mb-4">
 							<i class="fa-solid fa-circle-check text-success display-2"></i>
 						</div>
-						<h3 class="fw-bold mb-2">Order Confirmed!</h3>
+						<h3 class="fw-bold mb-2">{$translate('Order Confirmed!')}</h3>
 						<p class="text-muted mb-3">
 							Thank you for your purchase. Your order has been placed successfully.
 						</p>
@@ -476,8 +476,8 @@
 							</div>
 						{/if}
 						<div class="d-flex justify-content-center gap-3">
-							<a href="/order/history" class="btn btn-outline-dark px-4 py-2">View Orders</a>
-							<a href="/shop" class="theme-btn py-2 px-4">Continue Shopping</a>
+							<a href="/order/history" class="btn btn-outline-dark px-4 py-2">{$translate('View Orders')}</a>
+							<a href="/shop" class="theme-btn py-2 px-4">{$translate('Continue Shopping')}</a>
 						</div>
 					</div>
 				</div>
@@ -606,7 +606,7 @@
 
 							<!-- Saved Address Dropdown & Preview -->
 							<div class="d-flex justify-content-between align-items-center mb-3">
-								<h5 class="fw-bold mb-0">Delivery Address</h5>
+								<h5 class="fw-bold mb-0">{$translate('Delivery Address')}</h5>
 								{#if savedAddresses.length > 0}
 									{#if selectedAddressId}
 										<button
@@ -634,11 +634,11 @@
 							{#if addressLoading}
 								<div class="text-center py-4">
 									<div class="spinner-border text-danger spinner-border-sm" role="status"></div>
-									<span class="ms-2 text-muted">Loading addresses...</span>
+									<span class="ms-2 text-muted">{$translate('Loading addresses...')}</span>
 								</div>
 							{:else if savedAddresses.length > 0}
 								<div class="address-select-box mb-4">
-									<label for="checkout_address_select" class="form-label small fw-semibold text-muted text-uppercase mb-2">Select Delivery Address</label>
+									<label for="checkout_address_select" class="form-label small fw-semibold text-muted text-uppercase mb-2">{$translate('Select Delivery Address')}</label>
 									<select
 										id="checkout_address_select"
 										class="form-select address-select"
@@ -668,8 +668,8 @@
 								<div class="address-warning mb-4" role="alert">
 									<i class="fa-light fa-circle-exclamation"></i>
 									<div>
-										<strong>No delivery address found.</strong>
-										<span>Add an address below before placing your order.</span>
+										<strong>{$translate('No delivery address found.')}</strong>
+										<span>{$translate('Add an address below before placing your order.')}</span>
 									</div>
 								</div>
 							{/if}
@@ -686,7 +686,7 @@
 									<form onsubmit={saveAndUseAddress}>
 										<div class="row g-3">
 											<div class="col-md-6 form-group">
-												<label class="form-label small fw-semibold text-secondary">Full Name <span class="text-danger">*</span></label>
+												<label class="form-label small fw-semibold text-secondary">{$translate('Full Name')} <span class="text-danger">*</span></label>
 												<input
 													type="text"
 													class="form-control"
@@ -697,7 +697,7 @@
 											</div>
 
 											<div class="col-md-6 form-group">
-												<label class="form-label small fw-semibold text-secondary">Phone Number <span class="text-danger">*</span></label>
+												<label class="form-label small fw-semibold text-secondary">{$translate('Phone Number')} <span class="text-danger">*</span></label>
 												<input
 													type="tel"
 													class="form-control"
@@ -708,7 +708,7 @@
 											</div>
 
 											<div class="col-md-6 form-group">
-												<label class="form-label small fw-semibold text-secondary">City / Region <span class="text-danger">*</span></label>
+												<label class="form-label small fw-semibold text-secondary">{$translate('City / Region')} <span class="text-danger">*</span></label>
 												<select
 													class="form-select"
 													bind:value={activeAddressForm.city}
@@ -722,7 +722,7 @@
 											</div>
 
 											<div class="col-md-6 form-group">
-												<label class="form-label small fw-semibold text-secondary">Rayon / District <span class="text-danger">*</span></label>
+												<label class="form-label small fw-semibold text-secondary">{$translate('Rayon / District')} <span class="text-danger">*</span></label>
 												<input
 													type="text"
 													class="form-control"
@@ -733,7 +733,7 @@
 											</div>
 
 											<div class="col-md-8 form-group">
-												<label class="form-label small fw-semibold text-secondary">Street & Building <span class="text-danger">*</span></label>
+												<label class="form-label small fw-semibold text-secondary">{$translate('Street & Building')} <span class="text-danger">*</span></label>
 												<input
 													type="text"
 													class="form-control"
@@ -744,7 +744,7 @@
 											</div>
 
 											<div class="col-md-4 form-group">
-												<label class="form-label small fw-semibold text-secondary">Apartment / Unit</label>
+												<label class="form-label small fw-semibold text-secondary">{$translate('Apartment / Unit')}</label>
 												<input
 													type="text"
 													class="form-control"
@@ -754,7 +754,7 @@
 											</div>
 
 											<div class="col-md-12 form-group">
-												<label class="form-label small fw-semibold text-secondary">Address Label (Optional)</label>
+												<label class="form-label small fw-semibold text-secondary">{$translate('Address Label (Optional)')}</label>
 												<input
 													type="text"
 													class="form-control"
@@ -889,7 +889,7 @@
 
 						<!-- Order Notes (Shared) -->
 						<div class="form-group mb-4">
-							<label for="order_notes" class="form-label fw-bold">Order Notes (Optional)</label>
+							<label for="order_notes" class="form-label fw-bold">{$translate('Order Notes (Optional)')}</label>
 							<textarea
 								id="order_notes"
 								rows="3"
@@ -904,7 +904,7 @@
 				<!-- Right Column: Order Summary & Payment -->
 				<div class="col-lg-5">
 					<div class="card border p-4 rounded-4 shadow-sm mb-4">
-						<h4 class="fw-bold mb-3">Order Summary</h4>
+						<h4 class="fw-bold mb-3">{$translate('Order Summary')}</h4>
 
 						<!-- Basket Items List -->
 						<div class="order-items-list mb-3" style="max-height: 280px; overflow-y: auto;">
@@ -995,7 +995,7 @@
 						<!-- Calculation Breakdown -->
 						<div class="price-breakdown border-top pt-3 mb-4">
 							<div class="d-flex justify-content-between mb-2">
-								<span class="text-muted">Subtotal</span>
+								<span class="text-muted">{$translate('Subtotal')}</span>
 								<span class="fw-semibold">
 									₼{Number(preview?.main_amount ?? $basketTotal).toFixed(2)}
 								</span>
@@ -1003,7 +1003,7 @@
 
 							{#if preview && preview.discount_amount > 0}
 								<div class="d-flex justify-content-between mb-2 text-success">
-									<span>Discount</span>
+									<span>{$translate('Discount')}</span>
 									<span class="fw-semibold">-₼{Number(preview.discount_amount).toFixed(2)}</span>
 								</div>
 							{/if}
@@ -1027,7 +1027,7 @@
 									{:else if deliveryMethod === 'TAKE_FROM_STORE'}
 										<span class="text-success fw-bold">{$translate('Free')}</span>
 									{:else}
-										<span class="text-muted small">Select options</span>
+										<span class="text-muted small">{$translate('Select options')}</span>
 									{/if}
 								</span>
 							</div>
@@ -1039,7 +1039,7 @@
 							{/if}
 
 							<div class="d-flex justify-content-between pt-3 border-top mt-2">
-								<span class="h5 fw-bold mb-0">Total</span>
+								<span class="h5 fw-bold mb-0">{$translate('Total')}</span>
 								<span class="h5 fw-bold text-danger mb-0">
 									{#if preview}
 										₼{Number(preview.total).toFixed(2)}
@@ -1058,7 +1058,7 @@
 
 						<!-- Payment Methods Selection -->
 						<div class="payment-methods mb-4">
-							<h6 class="fw-bold mb-3">Payment Method</h6>
+							<h6 class="fw-bold mb-3">{$translate('Payment Method')}</h6>
 							<div class="d-flex flex-column gap-2">
 								<label
 									class="card p-3 border cursor-pointer d-flex flex-row align-items-center justify-content-between"
