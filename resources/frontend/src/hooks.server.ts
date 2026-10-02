@@ -1,7 +1,7 @@
 import type { Handle } from '@sveltejs/kit';
 
 /**
- * Multi-tenant SSR fix.
+ * Multi-tenant SSR fix + edge caching.
  *
  * During SSR the API is reached through INTERNAL_API_URL (http://snaker-web/api),
  * so Laravel would see the internal container host and could not resolve the
@@ -9,8 +9,28 @@ import type { Handle } from '@sveltejs/kit';
  * and scheme in X-Forwarded-* headers; Laravel (behind a trusted proxy) picks
  * the tenant database from that host.
  *
- * Browser calls go to same-origin /api via nginx, so they need no help.
+ * Public pages also get CDN cache headers so Cloudflare can serve them from the
+ * edge instead of a slow round-trip to the origin. User-specific pages
+ * (cart, checkout, dashboard, settings, wishlist, login/register) are NOT cached.
  */
+const PUBLIC_PREFIXES = [
+	'/',
+	'/shop',
+	'/about',
+	'/faq',
+	'/terms',
+	'/privacy',
+	'/blog',
+	'/contact',
+	'/categories',
+	'/look-book',
+	'/order/tracking'
+];
+
+function isCacheable(pathname: string): boolean {
+	return PUBLIC_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/'));
+}
+
 export const handle: Handle = async ({ event, resolve }) => {
 	const originalFetch = event.fetch;
 
@@ -22,5 +42,15 @@ export const handle: Handle = async ({ event, resolve }) => {
 		return originalFetch(input, { ...init, headers });
 	};
 
-	return resolve(event);
+	const response = await resolve(event);
+
+	if (event.request.method === 'GET' && isCacheable(event.url.pathname) && !event.url.searchParams.has('_data')) {
+		// Browser: revalidate; CDN (Cloudflare s-maxage): serve from edge.
+		response.headers.set(
+			'Cache-Control',
+			'public, max-age=0, s-maxage=300, stale-while-revalidate=600'
+		);
+	}
+
+	return response;
 };
