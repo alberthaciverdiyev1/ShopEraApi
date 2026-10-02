@@ -8,14 +8,12 @@
 	let lastName = $state('');
 	let email = $state('');
 	let phone = $state('');
-	let selectedSubject = $state('General Inquiry');
 	let message = $state('');
 
 	let submitting = $state(false);
 	let successMessage = $state<string | null>(null);
 	let errorMessage = $state<string | null>(null);
 
-	const subjects = ['General Inquiry', 'Order support', 'Return request', 'Partnership'];
 
 	const contactItems = $derived.by(() => {
 		const items: Array<{
@@ -176,7 +174,6 @@
 				last_name: lastName.trim() || undefined,
 				email: email.trim(),
 				phone: phone.trim() || undefined,
-				subject: selectedSubject,
 				message: message.trim()
 			});
 
@@ -307,25 +304,6 @@
 						/>
 					</label>
 				</div>
-
-				<fieldset class="subject-group">
-					<legend>{$translate('Select Subject?')}</legend>
-					<div class="subject-options">
-						{#each subjects as subject}
-							<label class:active={selectedSubject === subject}>
-								<input
-									type="radio"
-									name="subject"
-									value={subject}
-									checked={selectedSubject === subject}
-									onchange={() => (selectedSubject = subject)}
-									disabled={submitting}
-								/>
-								<span>{$translate(subject)}</span>
-							</label>
-						{/each}
-					</div>
-				</fieldset>
 
 				<label class="message-field">
 					<span>{$translate('Message')} <span class="required-star">*</span></span>

@@ -114,5 +114,14 @@ class PlanSeeder extends Seeder
 
             $plan->features()->sync($sync);
         }
+
+        // Drop plans that are no longer part of the product (e.g. basic/pro).
+        Plan::query()->whereNotIn('slug', ['free', 'premium', 'business'])->get()->each(function (Plan $plan) {
+            if ($plan->subscriptions()->exists()) {
+                $plan->update(['is_active' => false]);
+            } else {
+                $plan->delete();
+            }
+        });
     }
 }

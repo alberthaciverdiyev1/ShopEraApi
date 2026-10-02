@@ -12,6 +12,7 @@
 
 	import MouseCursor from '$lib/components/layout/MouseCursor.svelte';
 	import BackToTop from '$lib/components/layout/BackToTop.svelte';
+	import NavProgress from '$lib/components/layout/NavProgress.svelte';
 	import SiteHeader from '$lib/components/layout/SiteHeader.svelte';
 	import SubscriptionNotice from '$lib/components/layout/SubscriptionNotice.svelte';
 	import { loadFeatures, features } from '$lib/services/features';
@@ -106,6 +107,7 @@
 	<link rel="stylesheet" href="/assets/css/snaker-theme.css" />
 </svelte:head>
 
+<NavProgress />
 <MouseCursor />
 <BackToTop />
 {#if $features.chat !== false}
