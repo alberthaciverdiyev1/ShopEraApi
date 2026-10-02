@@ -24,7 +24,17 @@
 
 	onMount(() => {
 		loadFeatures();
-		loadSettings();
+		// Apply the admin-managed favicon, falling back to the static one.
+		loadSettings().then((s) => {
+			if (!s.favicon_url) return;
+			let link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+			if (!link) {
+				link = document.createElement('link');
+				link.rel = 'icon';
+				document.head.appendChild(link);
+			}
+			link.href = s.favicon_url;
+		});
 		let dispose: (() => void) | undefined;
 
 		(async () => {

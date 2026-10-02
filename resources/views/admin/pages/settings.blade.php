@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 
 @section('content')
-    <form method="POST" action="{{ route('admin.settings.update') }}" class="pb-20">
+    <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data" class="pb-20">
         @csrf @method('PUT')
 
         <div class="space-y-5">
@@ -22,7 +22,18 @@
                             <div style="grid-column: span {{ $col }} / span {{ $col }}" class="min-w-0">
                                 <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">{{ $label }}</label>
 
-                                @if ($type === 'translatable_textarea')
+                                @if ($type === 'image')
+                                    <input type="file" name="{{ $name }}" accept="image/*"
+                                           class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm">
+                                    @if ($value)
+                                        <div class="mt-2 flex items-center gap-3">
+                                            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($value) }}" alt="" class="h-10 rounded ring-1 ring-gray-200">
+                                            <label class="flex items-center gap-1 text-xs text-gray-500">
+                                                <input type="checkbox" name="remove_{{ $name }}" value="1"> Sil
+                                            </label>
+                                        </div>
+                                    @endif
+                                @elseif ($type === 'translatable_textarea')
                                     <div data-lang-tabs>
                                         <div class="mb-3 flex gap-1 rounded-lg bg-gray-100 p-1">
                                             @foreach ($locales as $i => $locale)

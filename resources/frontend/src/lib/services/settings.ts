@@ -13,6 +13,8 @@ export interface ApiStoreSettings {
 	phone_number_3?: string | null;
 	phone_number_4?: string | null;
 	address?: string | null;
+	logo_url?: string | null;
+	favicon_url?: string | null;
 	facebook_url?: string | null;
 	twitter_url?: string | null;
 	youtube_url?: string | null;
@@ -30,6 +32,8 @@ type SettingsPayload =
 export const fallbackSettings: ApiStoreSettings = {
 	email: 'support@snaker.store',
 	address: 'Bakı, Azərbaycan',
+	logo_url: null,
+	favicon_url: null,
 	phone_number_1: '+994 (12) 555-00-00',
 	instagram_url: 'https://instagram.com/snaker.store',
 	tiktok_url: 'https://tiktok.com/@snaker.store',
