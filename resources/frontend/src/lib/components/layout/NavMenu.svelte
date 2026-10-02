@@ -19,7 +19,7 @@
 		{ href: '/', labelKey: 'Home' },
 		{ href: '/shop', labelKey: 'Shop' },
 		{ href: '/about', labelKey: 'About' },
-		// { href: '/blog', labelKey: 'Blog' },
+		{ href: '/blog', labelKey: 'Blog' },
 		{ href: '/contact', labelKey: 'Contact' }
 	];
 

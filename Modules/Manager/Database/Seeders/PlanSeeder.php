@@ -21,11 +21,11 @@ class PlanSeeder extends Seeder
         $plans = [
             'free' => [
                 'name' => 'Free', 'price' => 0, 'sort_order' => 0,
-                'on' => ['products', 'categories', 'subdomain', 'theme_selection', 'whatsapp_orders'],
+                'on' => ['products', 'categories', 'subdomain', 'theme_selection', 'whatsapp_orders', 'contact_page'],
                 'off' => [
                     'site_orders', 'online_payment', 'custom_domain', 'dark_light_theme',
                     'promo_codes', 'shipping_settings', 'google_analytics', 'custom_code',
-                    'multi_language',
+                    'multi_language', 'chat',
                 ],
                 'values' => [
                     'product_variants' => '1', 'stock_tracking' => '1', 'branding' => '0', 'seo' => '1',
@@ -40,7 +40,7 @@ class PlanSeeder extends Seeder
                 'on' => [
                     'products', 'categories', 'subdomain', 'theme_selection', 'dark_light_theme',
                     'online_payment', 'custom_domain', 'promo_codes', 'shipping_settings',
-                    'google_analytics', 'site_orders', 'whatsapp_orders', 'multi_language',
+                    'google_analytics', 'site_orders', 'whatsapp_orders', 'multi_language', 'chat', 'contact_page',
                 ],
                 'off' => ['custom_code'],
                 'values' => [
@@ -57,7 +57,7 @@ class PlanSeeder extends Seeder
                     'products', 'categories', 'subdomain', 'theme_selection', 'dark_light_theme',
                     'online_payment', 'custom_domain', 'promo_codes', 'shipping_settings',
                     'google_analytics', 'site_orders', 'whatsapp_orders', 'multi_language',
-                    'custom_code', 
+                    'custom_code', 'chat', 'contact_page',
                 ],
                 'off' => [],
                 'values' => [
