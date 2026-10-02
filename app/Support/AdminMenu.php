@@ -4,12 +4,29 @@ namespace App\Support;
 
 /**
  * Single source of truth for the admin sidebar: each item may declare a
- *
- * `feature` and/or `plan`. Used by the sidebar (to hide) AND by the
- * EnforceAdminMenuAccess middleware (to block direct URL access).
+ * `feature` and/or `plan`. Used by the sidebar (to grey out items the owner is
+ * not entitled to) AND by the EnforceAdminMenuAccess middleware (to block
+ * direct URL access).
  */
 class AdminMenu
 {
+    /**
+     * Is the owner entitled to this menu item? Locked items stay visible in the
+     * sidebar as info-only rows with a "Premium" badge, but are not clickable.
+     */
+    public static function unlocked(array $item): bool
+    {
+        if (isset($item['feature']) && ! Features::enabled($item['feature'])) {
+            return false;
+        }
+
+        if (isset($item['plan']) && ! plan($item['plan'])) {
+            return false;
+        }
+
+        return true;
+    }
+
     /** @return array<string,array<int,array<string,string>>> */
     public static function groups(): array
     {
