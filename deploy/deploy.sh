@@ -133,6 +133,14 @@ if [ "$SKIP_FRONTEND" != "1" ]; then
         ( cd resources/frontend && "$NPM_BIN" run build )
         ok "resources/frontend/build"
     fi
+
+    # Mirror storefront static assets (images, media, css, fonts) into Laravel's
+    # public/assets so images ship with every deploy — not just code.
+    if [ -d resources/frontend/static/assets ]; then
+        info "Statik gor4seller/assets senkronize ediliyor (public/assets)"
+        rsync -a --delete resources/frontend/static/assets/ public/assets/
+        ok "public/assets"
+    fi
 else
     warn "storefront build atlandi (SKIP_FRONTEND=1)"
 fi
