@@ -8,7 +8,7 @@
     import {basketCount, basketItems, basketTotal, removeBasketItem} from '$lib/services/basket';
     import {favoriteProducts, favoritesCount, removeFavorite} from '$lib/services/favorites';
     import {productImage, productTitle, productUrl} from '$lib/services/products';
-    import {languages, locale, setLocale, translate, type Locale} from '$lib/i18n';
+    import {languageOptions, locale, setLocale, translate, type Locale} from '$lib/i18n';
     import {features} from '$lib/services/features';
     import {phoneHref, primaryPhone, settings} from '$lib/services/settings';
 
@@ -49,7 +49,7 @@
                                 value={$locale}
                                 onchange={(event) => setLocale(event.currentTarget.value as Locale)}
                             >
-                                {#each languages as language (language.value)}
+                                {#each $languageOptions as language (language.value)}
                                     {#if language.status}
                                         <option value={language.value}>{language.label}</option>
                                     {/if}

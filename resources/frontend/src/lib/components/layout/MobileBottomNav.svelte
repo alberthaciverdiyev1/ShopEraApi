@@ -5,7 +5,7 @@
 	import { isLoggedIn, logout, user } from '$lib/services/auth';
 	import { basketCount } from '$lib/services/basket';
 	import { favoritesCount } from '$lib/services/favorites';
-	import { languages, locale, setLocale, translate, type Locale } from '$lib/i18n';
+	import { languageOptions, locale, setLocale, translate, type Locale } from '$lib/i18n';
 
 	type NavItem = {
 		href: string;
@@ -179,7 +179,7 @@
 				value={$locale}
 				onchange={(event) => setLocale(event.currentTarget.value as Locale)}
 			>
-				{#each languages as language (language.value)}
+				{#each $languageOptions as language (language.value)}
 					<option value={language.value}>{language.label}</option>
 				{/each}
 			</select>

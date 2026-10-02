@@ -1,6 +1,6 @@
 import { browser } from '$app/environment';
 import { derived, get, writable } from 'svelte/store';
-import { defaultLocale, languages, messages, type Locale } from './translations';
+import { defaultLocale, languages, languageOptions, messages, type Locale } from './translations';
 
 const storageKey = 'snaker_locale';
 const allowedLocales = new Set<Locale>(languages.map((language) => language.value));
@@ -42,5 +42,5 @@ export function setLocale(value: Locale) {
 	document.documentElement.lang = next;
 }
 
-export { languages };
+export { languages, languageOptions };
 export type { Locale };
