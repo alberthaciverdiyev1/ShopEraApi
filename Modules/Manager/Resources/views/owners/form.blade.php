@@ -4,7 +4,7 @@
     @php $cs = session('created_store'); @endphp
     <div class="mb-5 rounded-xl border {{ $cs['provisioned'] ? 'border-emerald-300 bg-emerald-50' : 'border-amber-300 bg-amber-50' }} p-5">
         <p class="mb-3 font-semibold {{ $cs['provisioned'] ? 'text-emerald-800' : 'text-amber-800' }}">
-            {{ $cs['provisioned'] ? '✅ Mağaza hazırdır' : '⚠️ Mağaza yaradıldı, amma provision (webhook) alınmadı' }}
+            {{ $cs['provisioned'] ? '✅ Mağaza hazırdır' : '⚠️ Mağaza yaradıldı, amma DB provision alınmadı' }}
         </p>
         <div class="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
             <div><span class="text-gray-500">Sayt URL:</span>
@@ -14,17 +14,6 @@
             <div><span class="text-gray-500">Storage:</span> <span class="font-mono text-xs">public/{{ $cs['storage_root'] }}</span></div>
             <div><span class="text-gray-500">Admin e-poçt:</span> <span class="font-medium">{{ $cs['admin_email'] }}</span></div>
             <div><span class="text-gray-500">Admin şifrə:</span> <span class="font-mono font-semibold">{{ $cs['admin_password'] }}</span></div>
-            <div class="sm:col-span-2"><span class="text-gray-500">İnteqrasiya tokeni:</span> <span class="font-mono text-xs">{{ $cs['token'] }}</span></div>
-            @if (! $cs['provisioned'] && ! empty($cs['provision']))
-                <div class="sm:col-span-2 rounded-lg bg-white/70 p-3 text-xs">
-                    <div><span class="text-gray-500">Webhook URL:</span> <span class="font-mono">{{ $cs['provision']['url'] ?? '-' }}</span></div>
-                    <div><span class="text-gray-500">Status:</span> <span class="font-mono">{{ $cs['provision']['status'] ?? '-' }}</span></div>
-                    <div><span class="text-gray-500">Səbəb:</span> <span class="font-mono">{{ $cs['provision']['message'] ?? '-' }}</span></div>
-                    @if (! empty($cs['provision']['body']))
-                        <pre class="mt-2 max-h-32 overflow-auto whitespace-pre-wrap rounded bg-gray-950 p-2 text-[11px] text-gray-100">{{ $cs['provision']['body'] }}</pre>
-                    @endif
-                </div>
-            @endif
         </div>
         <p class="mt-3 text-xs text-gray-500">Bu məlumatları kopyala və saxla — şifrə yalnız bir dəfə göstərilir.</p>
     </div>
@@ -101,18 +90,11 @@
                 {{-- Domains --}}
                 <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
                     <p class="mb-4 font-semibold text-gray-800">Domenlər</p>
-                    <p class="mb-3 text-xs text-gray-500">Boş buraxılsa avtomatik subdomain yaradılır. Birinci domen əsas sayılır (məs. redbull.shopera.test).</p>
+                    <p class="mb-3 text-xs text-gray-500">Boş buraxılsa avtomatik subdomain yaradılır. Birinci domen əsas sayılır (məs. redbull.snaker.store).</p>
                     @for ($i = 0; $i < max(3, count($hosts)); $i++)
                         <input name="domains[{{ $i }}]" value="{{ old("domains.$i", $hosts[$i] ?? '') }}"
                                placeholder="subdomain.{{ config('manager.base_domain') }}" class="{{ $input }} mb-2">
                     @endfor
-                </div>
-
-                <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-                    <p class="mb-2 font-semibold text-gray-800">İnteqrasiya</p>
-                    <label class="{{ $label }}">Instance URL</label>
-                    <input name="instance_url" value="{{ old('instance_url', $owner?->instance_url) }}" placeholder="https://magaza.shopera.test" class="{{ $input }}">
-                    <p class="mt-2 text-xs text-gray-500">Manager dəyişiklikləri bu ünvana webhook ilə göndərir.</p>
                 </div>
 
 {{-- Theme --}}
@@ -161,31 +143,4 @@
         </div>
     </form>
 
-    @if ($isEdit)
-        <div class="mx-auto max-w-6xl rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-            <p class="mb-3 font-semibold text-gray-800">İnteqrasiya açarları</p>
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div>
-                    <label class="mb-1 block text-xs font-medium text-gray-600">API token (MANAGER_TOKEN)</label>
-                    <div class="flex gap-2">
-                        <input readonly value="{{ $owner->api_token }}" class="block w-full rounded-lg border border-gray-300 bg-gray-100 p-2.5 font-mono text-xs">
-                        <form method="POST" action="{{ route('manager.owners.token', $owner) }}">
-                            @csrf
-                            <button class="whitespace-nowrap rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50" onclick="return confirm('Köhnə token işləməyəcək. Yenilənsin?')">Yenilə</button>
-                        </form>
-                    </div>
-                </div>
-                <div>
-                    <label class="mb-1 block text-xs font-medium text-gray-600">Webhook secret (MANAGER_WEBHOOK_SECRET)</label>
-                    <div class="flex gap-2">
-                        <input readonly value="{{ $owner->webhook_secret }}" class="block w-full rounded-lg border border-gray-300 bg-gray-100 p-2.5 font-mono text-xs">
-                        <form method="POST" action="{{ route('manager.owners.secret', $owner) }}">
-                            @csrf
-                            <button class="whitespace-nowrap rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50" onclick="return confirm('Webhook secret yenilənsin?')">Yenilə</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
 @endsection
