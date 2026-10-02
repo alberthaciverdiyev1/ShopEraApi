@@ -17,7 +17,10 @@ export interface ApiFeatures {
 	promo_codes?: boolean;
 	pickup_points?: boolean;
 	fast_delivery?: boolean;
-	multi_language?: boolean;
+    lang_az?: boolean;
+    lang_en?: boolean;
+    lang_ru?: boolean;
+    lang_tr?: boolean;
 	faq?: boolean;
 	legal_terms?: boolean;
 	contact_page?: boolean;

@@ -1,31 +1,31 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import NavMenu from '$lib/components/layout/NavMenu.svelte';
-	import CategoryMenu from '$lib/components/layout/CategoryMenu.svelte';
-	import NavbarSearch from '$lib/components/layout/NavbarSearch.svelte';
-	import { goto } from '$app/navigation';
-	import { isLoggedIn, logout, user } from '$lib/services/auth';
-	import { basketCount, basketItems, basketTotal, removeBasketItem } from '$lib/services/basket';
-	import { favoriteProducts, favoritesCount, removeFavorite } from '$lib/services/favorites';
-	import { productImage, productTitle, productUrl } from '$lib/services/products';
-	import { languages, locale, setLocale, translate, type Locale } from '$lib/i18n';
-	import { features } from '$lib/services/features';
-	import { phoneHref, primaryPhone, settings } from '$lib/services/settings';
+    import {onMount} from 'svelte';
+    import NavMenu from '$lib/components/layout/NavMenu.svelte';
+    import CategoryMenu from '$lib/components/layout/CategoryMenu.svelte';
+    import NavbarSearch from '$lib/components/layout/NavbarSearch.svelte';
+    import {goto} from '$app/navigation';
+    import {isLoggedIn, logout, user} from '$lib/services/auth';
+    import {basketCount, basketItems, basketTotal, removeBasketItem} from '$lib/services/basket';
+    import {favoriteProducts, favoritesCount, removeFavorite} from '$lib/services/favorites';
+    import {productImage, productTitle, productUrl} from '$lib/services/products';
+    import {languages, locale, setLocale, translate, type Locale} from '$lib/i18n';
+    import {features} from '$lib/services/features';
+    import {phoneHref, primaryPhone, settings} from '$lib/services/settings';
 
-	const headerPhone = $derived(primaryPhone($settings));
+    const headerPhone = $derived(primaryPhone($settings));
 
-	onMount(() => {
-		const header = document.getElementById('header-sticky');
-		const onScroll = () => header?.classList.toggle('sticky', window.scrollY > 250);
-		window.addEventListener('scroll', onScroll, { passive: true });
-		onScroll();
-		return () => window.removeEventListener('scroll', onScroll);
-	});
+    onMount(() => {
+        const header = document.getElementById('header-sticky');
+        const onScroll = () => header?.classList.toggle('sticky', window.scrollY > 250);
+        window.addEventListener('scroll', onScroll, {passive: true});
+        onScroll();
+        return () => window.removeEventListener('scroll', onScroll);
+    });
 
-	async function handleLogout() {
-		await logout();
-		await goto('/');
-	}
+    async function handleLogout() {
+        await logout();
+        await goto('/');
+    }
 </script>
 
 <!-- Header Section -->
@@ -38,30 +38,32 @@
                 <a href={phoneHref(headerPhone)}>{headerPhone}</a>
             </div>
             <div class="lang">
-                {#if $features.multi_language !== false}
-                <div class="language">
-                    <i class="icon-earth"></i>
+                {#if $features.lang_az || $features.lang_en || $features.lang_ru || $features.lang_tr}
+                    <div class="language">
+                        <i class="icon-earth"></i>
 
-                    <div class="form">
-                        <select
-							class="single-select w-100"
-							aria-label={$translate('Language')}
-							value={$locale}
-							onchange={(event) => setLocale(event.currentTarget.value as Locale)}
-						>
-							{#each languages as language (language.value)}
-								<option value={language.value}>{language.label}</option>
-							{/each}
-                        </select>
+                        <div class="form">
+                            <select
+                                class="single-select w-100"
+                                aria-label={$translate('Language')}
+                                value={$locale}
+                                onchange={(event) => setLocale(event.currentTarget.value as Locale)}
+                            >
+                                {#each languages as language (language.value)}
+                                    {#if language.status}
+                                        <option value={language.value}>{language.label}</option>
+                                    {/if}
+                                {/each}
+                            </select>
+                        </div>
                     </div>
-                </div>
                 {/if}
 
                 <div class="user">
                     {#if $isLoggedIn}
                         <a href="/dashboard" class="d-inline-flex align-items-center">
                             {#if $user?.avatar}
-                                <img src={$user.avatar} alt={$user?.name ?? 'User'} class="header-avatar me-2" />
+                                <img src={$user.avatar} alt={$user?.name ?? 'User'} class="header-avatar me-2"/>
                             {:else}
                                 <i class="fa-solid fa-user"></i>
                             {/if}
@@ -85,45 +87,51 @@
                     <div class="header-left">
                         <div class="logo">
                             <a href="/" class="header-logo">
-                                <img src={$settings.logo_url || '/assets/images/logo/logo.svg?v=20261002'} alt="logo-img" class="header-logo-img">
+                                <img src={$settings.logo_url || '/assets/images/logo/logo.svg?v=20261002'}
+                                     alt="logo-img" class="header-logo-img">
                             </a>
                         </div>
                         <div class="header-cataegory-item">
                             <ul class="header-cataegory">
                                 <li>
-                                     <a href="#">
-                                         <span class="left-icon"><i class="icon-app"></i></span>
-                                         {$translate('All Categories')}
-                                         <span class="right-icon"><i class="fa-regular fa-chevron-down"></i></span>
-                                     </a>
+                                    <a href="#">
+                                        <span class="left-icon"><i class="icon-app"></i></span>
+                                        {$translate('All Categories')}
+                                        <span class="right-icon"><i class="fa-regular fa-chevron-down"></i></span>
+                                    </a>
                                 </li>
                             </ul>
-<CategoryMenu />
+                            <CategoryMenu/>
                         </div>
                     </div>
                     <div class="header-right d-flex justify-content-end align-items-center">
                         <div class="mean__menu-wrapper d-none d-xl-block">
                             <div class="main-menu">
                                 <nav id="mobile-menu">
-<NavMenu />
+                                    <NavMenu/>
                                 </nav>
                             </div>
                         </div>
-                        <NavbarSearch />
+                        <NavbarSearch/>
                         <div class="menu-cart">
                             <div class="cart-box">
                                 {#if $basketItems.length}
                                     <ul class="mini-cart-list">
                                         {#each $basketItems.slice(0, 10) as item (item.id)}
                                             <li class="mini-cart-item">
-                                                <a href={item.product ? productUrl(item.product) : '/cart'} class="mini-cart-thumb">
-                                                    <img src={item.product ? productImage(item.product) : ''} alt={item.product ? productTitle(item.product) : $translate('Product')}>
+                                                <a href={item.product ? productUrl(item.product) : '/cart'}
+                                                   class="mini-cart-thumb">
+                                                    <img src={item.product ? productImage(item.product) : ''}
+                                                         alt={item.product ? productTitle(item.product) : $translate('Product')}>
                                                 </a>
                                                 <div class="cart-product">
-                                                    <a href={item.product ? productUrl(item.product) : '/cart'} class="mini-cart-title">
+                                                    <a href={item.product ? productUrl(item.product) : '/cart'}
+                                                       class="mini-cart-title">
                                                         {item.product ? productTitle(item.product) : $translate('Product')}
                                                     </a>
-                                                    <span class="mini-cart-price">{Number(item.retail_total ?? 0).toFixed(2)}$ × {item.quantity}</span>
+                                                    <span
+                                                        class="mini-cart-price">{Number(item.retail_total ?? 0).toFixed(2)}
+                                                        $ × {item.quantity}</span>
                                                 </div>
                                                 <button
                                                     type="button"
@@ -151,8 +159,10 @@
                                     </div>
                                 {:else}
                                     <div class="shopping-items text-center py-4">
-                                        <p class="text-muted mb-3" style="font-size: 14px;">{$translate('Your cart is empty.')}</p>
-                                        <a href="/shop" class="theme-btn" style="padding: 10px 20px; font-size: 13px;">{$translate('Start shopping')}</a>
+                                        <p class="text-muted mb-3"
+                                           style="font-size: 14px;">{$translate('Your cart is empty.')}</p>
+                                        <a href="/shop" class="theme-btn"
+                                           style="padding: 10px 20px; font-size: 13px;">{$translate('Start shopping')}</a>
                                     </div>
                                 {/if}
                             </div>
@@ -166,57 +176,59 @@
 
                         <!-- Wishlist (Sevimlilər) Dropdown -->
                         {#if $features.favorites !== false}
-                        <div class="menu-wishlist menu-cart">
-                            <div class="cart-box wishlist-box">
-                                {#if $favoriteProducts.length}
-                                    <ul class="mini-cart-list">
-                                        {#each $favoriteProducts.slice(0, 10) as item (item.id)}
-                                            <li class="mini-cart-item">
-                                                <a href={productUrl(item)} class="mini-cart-thumb">
-                                                    <img src={productImage(item)} alt={productTitle(item)}>
-                                                </a>
-                                                <div class="cart-product">
-                                                    <a href={productUrl(item)} class="mini-cart-title">
-                                                        {productTitle(item)}
+                            <div class="menu-wishlist menu-cart">
+                                <div class="cart-box wishlist-box">
+                                    {#if $favoriteProducts.length}
+                                        <ul class="mini-cart-list">
+                                            {#each $favoriteProducts.slice(0, 10) as item (item.id)}
+                                                <li class="mini-cart-item">
+                                                    <a href={productUrl(item)} class="mini-cart-thumb">
+                                                        <img src={productImage(item)} alt={productTitle(item)}>
                                                     </a>
-                                                    <span class="mini-cart-price">
+                                                    <div class="cart-product">
+                                                        <a href={productUrl(item)} class="mini-cart-title">
+                                                            {productTitle(item)}
+                                                        </a>
+                                                        <span class="mini-cart-price">
                                                         ${Number(item.discount || item.price).toFixed(2)}
                                                     </span>
-                                                </div>
-                                                <button
-                                                    type="button"
-                                                    class="mini-cart-remove"
-                                                    onclick={() => removeFavorite(item.id)}
-                                                    aria-label={$translate('Remove favorite')}
-                                                    title={$translate('Remove favorite')}
-                                                >
-                                                    <i class="fa-solid fa-xmark"></i>
-                                                </button>
-                                            </li>
-                                        {/each}
-                                    </ul>
-                                    <div class="shopping-items d-flex align-items-center justify-content-between">
-                                        <span>{$translate('Wishlist')} : {$favoritesCount}</span>
-                                    </div>
-                                    <div class="cart-button mb-4">
-                                        <a href="/wishlist" class="theme-btn btn-wishlist-all">
-                                            {$translate('View all')}
-                                        </a>
-                                    </div>
-                                {:else}
-                                    <div class="shopping-items text-center py-4">
-                                        <p class="text-muted mb-3" style="font-size: 14px;">{$translate('Your wishlist is empty.')}</p>
-                                        <a href="/shop" class="theme-btn" style="padding: 10px 20px; font-size: 13px;">{$translate('Browse products')}</a>
-                                    </div>
-                                {/if}
+                                                    </div>
+                                                    <button
+                                                        type="button"
+                                                        class="mini-cart-remove"
+                                                        onclick={() => removeFavorite(item.id)}
+                                                        aria-label={$translate('Remove favorite')}
+                                                        title={$translate('Remove favorite')}
+                                                    >
+                                                        <i class="fa-solid fa-xmark"></i>
+                                                    </button>
+                                                </li>
+                                            {/each}
+                                        </ul>
+                                        <div class="shopping-items d-flex align-items-center justify-content-between">
+                                            <span>{$translate('Wishlist')} : {$favoritesCount}</span>
+                                        </div>
+                                        <div class="cart-button mb-4">
+                                            <a href="/wishlist" class="theme-btn btn-wishlist-all">
+                                                {$translate('View all')}
+                                            </a>
+                                        </div>
+                                    {:else}
+                                        <div class="shopping-items text-center py-4">
+                                            <p class="text-muted mb-3"
+                                               style="font-size: 14px;">{$translate('Your wishlist is empty.')}</p>
+                                            <a href="/shop" class="theme-btn"
+                                               style="padding: 10px 20px; font-size: 13px;">{$translate('Browse products')}</a>
+                                        </div>
+                                    {/if}
+                                </div>
+                                <a class="cart-icon wishlist-icon" href="/wishlist" aria-label={$translate('Wishlist')}>
+                                    <i class="fa-regular fa-heart"></i>
+                                    {#if $isLoggedIn && $favoritesCount > 0}
+                                        <span class="cart-count">{$favoritesCount}</span>
+                                    {/if}
+                                </a>
                             </div>
-                            <a class="cart-icon wishlist-icon" href="/wishlist" aria-label={$translate('Wishlist')}>
-                                <i class="fa-regular fa-heart"></i>
-                                {#if $isLoggedIn && $favoritesCount > 0}
-                                    <span class="cart-count">{$favoritesCount}</span>
-                                {/if}
-                            </a>
-                        </div>
                         {/if}
 
                     </div>
@@ -227,552 +239,553 @@
 </header>
 
 <style>
-	.header-avatar {
-		width: 20px;
-		height: 20px;
-		border-radius: 50%;
-		object-fit: cover;
-		vertical-align: middle;
-	}
-
-	.user-logout {
-		background: none;
-		border: 0;
-		padding: 0;
-		margin-inline-start: 12px;
-		color: inherit;
-		font: inherit;
-		cursor: pointer;
-		opacity: 0.75;
-	}
-
-	.user-logout:hover {
-		opacity: 1;
-	}
-
-	:global(.header-top-one) {
-		display: grid !important;
-		grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr);
-		align-items: center !important;
-		gap: 18px;
-		min-height: 50px;
-		padding-top: 7px !important;
-		padding-bottom: 7px !important;
-		background: #0a111e !important;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-	}
-
-	:global(.header-top-one .phone-icon) {
-		width: fit-content;
-		min-height: 34px;
-		padding: 0 12px;
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: 999px;
-		background: rgba(255, 255, 255, 0.03);
-	}
-
-	:global(.header-top-one .phone-icon i) {
-		color: var(--theme) !important;
-	}
-
-	:global(.header-top-one .phone-icon a) {
-		color: rgba(255, 255, 255, 0.92) !important;
-		font-weight: 600 !important;
-		font-size: 14px !important;
-		text-transform: none !important;
-		letter-spacing: 0 !important;
-	}
-
-	:global(.header-top-one .lang) {
-		justify-self: end;
-		align-items: center;
-		gap: 12px;
-		margin-left: auto;
-	}
-
-	:global(.header-top-one .lang .language) {
-		margin: 0 !important;
-		padding: 0 16px 0 0 !important;
-		border-right: 1px solid rgba(255, 255, 255, 0.16) !important;
-	}
-
-	:global(.header-top-one .language) {
-		display: inline-flex;
-		align-items: center;
-		gap: 8px;
-		min-height: 34px;
-	}
-
-	:global(.header-top-one .language .form) {
-		display: flex;
-		align-items: center;
-		height: 34px;
-		min-width: 96px;
-	}
-
-	:global(.header-top-one .language .nice-select) {
-		display: flex !important;
-		align-items: center !important;
-		height: 34px !important;
-		min-height: 34px !important;
-		padding: 0 28px 0 0 !important;
-		border: 0 !important;
-		background: transparent !important;
-		color: var(--white) !important;
-		font-size: 13.5px !important;
-		line-height: 34px !important;
-	}
-
-	:global(.header-top-one .language select.single-select) {
-		display: none !important;
-	}
-
-	:global(.header-top-one .language .nice-select .current) {
-		display: inline-flex;
-		align-items: center;
-		height: 34px;
-		line-height: 34px;
-	}
-
-	:global(.header-top-one .language .nice-select::after) {
-		top: 50% !important;
-		right: 6px !important;
-		margin-top: -4px !important;
-	}
-
-	:global(.header-top-one .language .nice-select.open .list) {
-		top: 100%;
-		margin-top: 8px;
-		min-width: 168px;
-		padding: 6px;
-		border: 1px solid rgba(15, 23, 42, 0.12);
-		border-radius: 12px;
-		background: #ffffff;
-		box-shadow: 0 18px 38px rgba(15, 23, 42, 0.18);
-		z-index: 1000;
-	}
-
-	:global(.header-top-one .language .nice-select .option) {
-		min-height: 34px;
-		padding: 0 12px;
-		border-radius: 8px;
-		color: #0f172a !important;
-		font-size: 13.5px;
-		font-weight: 600;
-		line-height: 34px;
-	}
-
-	:global(.header-top-one .language .nice-select .option:hover),
-	:global(.header-top-one .language .nice-select .option.focus),
-	:global(.header-top-one .language .nice-select .option.selected.focus),
-	:global(.header-top-one .language .nice-select .option.selected) {
-		background: rgba(var(--theme-rgb), 0.1) !important;
-		color: var(--theme) !important;
-	}
-
-	:global(.header-top-one .lang .user) {
-		display: inline-flex !important;
-		align-items: center !important;
-		min-height: 34px;
-	}
-
-	:global(.header-top-one .lang .user a) {
-		display: inline-flex !important;
-		align-items: center !important;
-		gap: 7px;
-		min-height: 34px;
-		padding: 0 12px;
-		border-radius: 999px;
-		background: rgba(255, 255, 255, 0.05);
-		color: rgba(255, 255, 255, 0.94) !important;
-		font-size: 13.5px !important;
-		letter-spacing: 0 !important;
-	}
-
-	:global(.header-top-one .lang .user a i) {
-		margin: 0 !important;
-		color: var(--theme);
-	}
-
-	:global(.header-1 .header-cataegory-item) {
-		margin-left: 22px;
-	}
-
-	:global(.header-1 .header-cataegory-item .header-cataegory) {
-		min-width: 232px !important;
-		padding: 0 18px !important;
-		border-color: rgba(15, 23, 42, 0.12) !important;
-		background: #ffffff !important;
-		box-shadow: none !important;
-	}
-
-	:global(.header-1 .header-cataegory > li > a) {
-		display: inline-flex !important;
-		align-items: center !important;
-		gap: 12px;
-		min-height: 50px !important;
-		padding: 0 !important;
-		border: 0 !important;
-		border-radius: 0 !important;
-		background: transparent !important;
-		color: #0f172a !important;
-		font-size: 15px !important;
-		font-weight: 650 !important;
-		letter-spacing: 0 !important;
-		text-transform: none !important;
-		white-space: nowrap !important;
-		box-shadow: none !important;
-	}
-
-	:global(.header-1 .header-cataegory-item .header-cataegory:hover) {
-		border-color: rgba(var(--theme-rgb), 0.45) !important;
-		background: color-mix(in srgb, var(--theme) 5%, #fff) !important;
-	}
-
-	:global(.header-1 .header-cataegory .left-icon) {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 18px;
-		height: 18px;
-		margin: 0 !important;
-		color: var(--theme) !important;
-		font-size: 16px !important;
-	}
-
-	:global(.header-1 .header-cataegory .right-icon) {
-		margin-left: 2px !important;
-		color: #0f172a !important;
-		font-size: 13px !important;
-	}
-
-	:global(.header-1 .header-cataegory-item > .sub-cataegory) {
-		top: calc(100% + 10px) !important;
-		min-width: 250px !important;
-		padding: 8px !important;
-		border: 1px solid rgba(15, 23, 42, 0.1) !important;
-		border-radius: 12px !important;
-		background: #ffffff !important;
-		box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12) !important;
-	}
-
-	:global(.header-1 .header-cataegory-item:hover > .sub-cataegory) {
-		visibility: visible !important;
-		opacity: 1 !important;
-		transform: translateY(0) !important;
-	}
-
-	:global(.header-1 .header-cataegory-item > .sub-cataegory::before) {
-		content: '';
-		position: absolute;
-		right: 0;
-		bottom: 100%;
-		left: 0;
-		height: 12px;
-	}
-
-	:global(.header-1 .header-cataegory-item .sub-cataegory li) {
-		position: relative;
-	}
-
-	:global(.header-1 .header-cataegory-item .sub-cataegory li a) {
-		display: flex !important;
-		align-items: center !important;
-		justify-content: space-between !important;
-		min-height: 40px;
-		padding: 0 12px !important;
-		border: 0 !important;
-		border-radius: 8px;
-		color: #334155 !important;
-		font-size: 14px !important;
-		font-weight: 600 !important;
-		line-height: 1.25;
-	}
-
-	:global(.header-1 .header-cataegory-item .sub-cataegory li:hover > a) {
-		background: rgba(var(--theme-rgb), 0.08) !important;
-		color: var(--theme) !important;
-	}
-
-	:global(.header-1 .header-cataegory-item .sub-cataegory li .sub-cataegory) {
-		inset-inline-start: calc(100% - 1px) !important;
-		top: 0 !important;
-		min-width: 230px !important;
-		padding: 8px !important;
-		border: 1px solid rgba(15, 23, 42, 0.1) !important;
-		border-radius: 12px !important;
-		background: #ffffff !important;
-		box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12) !important;
-		visibility: hidden !important;
-		opacity: 0 !important;
-		transform: translateY(0) !important;
-	}
-
-	:global(.header-1 .header-cataegory-item .sub-cataegory li:hover > .sub-cataegory) {
-		visibility: visible !important;
-		opacity: 1 !important;
-	}
-
-	:global(.header-1 .header-cataegory-item .sub-cataegory li .sub-cataegory::before) {
-		content: '';
-		position: absolute;
-		top: 0;
-		right: 100%;
-		width: 12px;
-		height: 100%;
-	}
-
-	:global(.header-1 .header-main) {
-		gap: 22px;
-	}
-
-	:global(.header-1 .header-main .header-left),
-	:global(.header-1 .header-main .header-right) {
-		min-width: 0;
-	}
-
-	:global(.header-1 .header-main .header-right) {
-		flex: 1 1 auto;
-		gap: 20px;
-	}
-
-	:global(.header-1 .header-main .header-right .mean__menu-wrapper) {
-		margin-right: 20px !important;
-		min-width: 0;
-	}
-
-	:global(.header-1 .header-main .main-menu ul) {
-		display: flex;
-		align-items: center;
-		flex-wrap: nowrap;
-		gap: 18px;
-	}
-
-	:global(.header-1 .header-main .main-menu ul li) {
-		margin-inline-end: 0 !important;
-	}
-
-	:global(.header-1 .header-main .main-menu ul li a) {
-		white-space: nowrap;
-		letter-spacing: 0 !important;
-	}
-
-	@media (min-width: 1200px) and (max-width: 1329.98px) {
-		:global(.header-1 .header-cataegory-item) {
-			margin-left: 18px;
-		}
-
-		:global(.header-1 .header-cataegory-item .header-cataegory) {
-			min-width: 218px !important;
-			padding: 0 16px !important;
-		}
-
-		:global(.header-1 .header-main .main-menu ul) {
-			gap: 14px;
-		}
-
-		:global(.header-1 .header-main .main-menu ul li a) {
-			font-size: 14px !important;
-		}
-
-		:global(.header-main .header-right .search-icon),
-		:global(.header-right .cart-icon),
-		:global(.header-right .wishlist-icon) {
-			font-size: 17px !important;
-		}
-	}
-
-	@media (max-width: 991.98px) {
-		:global(.header-top-one) {
-			grid-template-columns: 1fr auto;
-		}
-	}
-
-	@media (max-width: 767.98px) {
-		:global(.header-top-one) {
-			display: none !important;
-		}
-	}
-
-	.cart-icon {
-		position: relative;
-	}
-
-	:global(.header-1 .menu-cart .cart-icon::before),
-	:global(.header-top-wrapper .menu-cart .cart-icon::before),
-	:global(.header-top-wrapper .menu-cart-items .cart-icon::before),
-	:global(.menu-cart .cart-icon::before),
-	:global(.cart-icon::before) {
-		display: none !important;
-		content: none !important;
-	}
-
-	.cart-count {
-		position: absolute;
-		top: -6px;
-		inset-inline-end: -8px;
-		min-width: 18px;
-		height: 18px;
-		padding: 0 5px;
-		border-radius: 9px;
-		background: var(--theme);
-		color: #fff;
-		font-size: 11px;
-		line-height: 18px;
-		text-align: center;
-	}
-
-	/* Mini Cart & Wishlist Dropdown Styles */
-	:global(.header-1 .menu-cart .cart-box) {
-		width: 320px;
-		right: 0 !important;
-		left: auto !important;
-		border-radius: 12px;
-		padding: 12px 18px 0;
-	}
-
-	.mini-cart-list {
-		list-style: none;
-		padding: 0;
-		margin: 0;
-		max-height: 380px;
-		overflow-y: auto;
-	}
-
-	.mini-cart-list::-webkit-scrollbar {
-		width: 4px;
-	}
-
-	.mini-cart-list::-webkit-scrollbar-thumb {
-		background: #e2e8f0;
-		border-radius: 4px;
-	}
-
-	.btn-view-all,
-	.btn-checkout-header {
-		white-space: nowrap;
-		padding: 10px 16px !important;
-		font-size: 13.5px !important;
-		line-height: 1.4;
-	}
-
-	.btn-wishlist-all {
-		display: block;
-		width: 100%;
-		text-align: center;
-		padding: 11px 20px !important;
-		font-size: 14px !important;
-		line-height: 1.4;
-	}
-
-	.mini-cart-item {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		padding: 10px 0;
-		border-bottom: 1px solid #edf0f5;
-	}
-
-	.mini-cart-thumb {
-		flex-shrink: 0;
-		display: block;
-		width: 52px;
-		height: 52px;
-		border-radius: 8px;
-		overflow: hidden;
-		background: #f8f9fa;
-		border: 1px solid #edf0f5;
-	}
-
-	:global(.header-1 .menu-cart .cart-box ul li img),
-	:global(.header-1 .menu-cart .cart-box img),
-	.mini-cart-thumb img {
-		width: 52px !important;
-		height: 52px !important;
-		min-width: 52px !important;
-		max-width: 52px !important;
-		object-fit: cover !important;
-		border-radius: 8px !important;
-		display: block;
-	}
-
-	.mini-cart-item .cart-product {
-		flex: 1;
-		min-width: 0;
-	}
-
-	.mini-cart-title {
-		display: block;
-		font-size: 14px;
-		font-weight: 600;
-		color: #1e2532;
-		white-space: nowrap;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		line-height: 1.3;
-		text-decoration: none;
-	}
-
-	.mini-cart-title:hover {
-		color: #ef3e2e;
-	}
-
-	/* Disable old pseudo-element icon from main.css */
-	:global(.header-1 .menu-cart .cart-box ul li a::after) {
-		display: none !important;
-	}
-
-	.mini-cart-price {
-		display: block;
-		font-size: 13px !important;
-		color: #64748b !important;
-		font-weight: 500 !important;
-		margin-top: 3px;
-	}
-
-	.mini-cart-remove {
-		background: none;
-		border: none;
-		width: 26px;
-		height: 26px;
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		color: #94a3b8;
-		font-size: 13px;
-		cursor: pointer;
-		flex-shrink: 0;
-		transition: background-color 0.15s, color 0.15s;
-		padding: 0;
-	}
-
-	.mini-cart-remove:hover {
-		background-color: #feebe9;
-		color: #ef3e2e;
-	}
-
-	@media (max-width: 1199.98px) {
-		:global(.header-1 .container-fluid) {
-			padding-inline: 8px !important;
-		}
-
-		:global(.header-main .header-right .mean__menu-wrapper) {
-			display: none !important;
-		}
-
-		:global(.header-main .header-right) {
-			gap: 12px;
-		}
-
-		:global(.header-right .cart-icon i),
-		:global(.header-right .wishlist-icon i) {
-			font-size: 20px !important;
-		}
-	}
-	.header-logo-img {
-		height: 40px;
-		width: auto;
-		display: block;
-	}
+    .header-avatar {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        object-fit: cover;
+        vertical-align: middle;
+    }
+
+    .user-logout {
+        background: none;
+        border: 0;
+        padding: 0;
+        margin-inline-start: 12px;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+        opacity: 0.75;
+    }
+
+    .user-logout:hover {
+        opacity: 1;
+    }
+
+    :global(.header-top-one) {
+        display: grid !important;
+        grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr);
+        align-items: center !important;
+        gap: 18px;
+        min-height: 50px;
+        padding-top: 7px !important;
+        padding-bottom: 7px !important;
+        background: #0a111e !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    :global(.header-top-one .phone-icon) {
+        width: fit-content;
+        min-height: 34px;
+        padding: 0 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    :global(.header-top-one .phone-icon i) {
+        color: var(--theme) !important;
+    }
+
+    :global(.header-top-one .phone-icon a) {
+        color: rgba(255, 255, 255, 0.92) !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+        text-transform: none !important;
+        letter-spacing: 0 !important;
+    }
+
+    :global(.header-top-one .lang) {
+        justify-self: end;
+        align-items: center;
+        gap: 12px;
+        margin-left: auto;
+    }
+
+    :global(.header-top-one .lang .language) {
+        margin: 0 !important;
+        padding: 0 16px 0 0 !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.16) !important;
+    }
+
+    :global(.header-top-one .language) {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 34px;
+    }
+
+    :global(.header-top-one .language .form) {
+        display: flex;
+        align-items: center;
+        height: 34px;
+        min-width: 96px;
+    }
+
+    :global(.header-top-one .language .nice-select) {
+        display: flex !important;
+        align-items: center !important;
+        height: 34px !important;
+        min-height: 34px !important;
+        padding: 0 28px 0 0 !important;
+        border: 0 !important;
+        background: transparent !important;
+        color: var(--white) !important;
+        font-size: 13.5px !important;
+        line-height: 34px !important;
+    }
+
+    :global(.header-top-one .language select.single-select) {
+        display: none !important;
+    }
+
+    :global(.header-top-one .language .nice-select .current) {
+        display: inline-flex;
+        align-items: center;
+        height: 34px;
+        line-height: 34px;
+    }
+
+    :global(.header-top-one .language .nice-select::after) {
+        top: 50% !important;
+        right: 6px !important;
+        margin-top: -4px !important;
+    }
+
+    :global(.header-top-one .language .nice-select.open .list) {
+        top: 100%;
+        margin-top: 8px;
+        min-width: 168px;
+        padding: 6px;
+        border: 1px solid rgba(15, 23, 42, 0.12);
+        border-radius: 12px;
+        background: #ffffff;
+        box-shadow: 0 18px 38px rgba(15, 23, 42, 0.18);
+        z-index: 1000;
+    }
+
+    :global(.header-top-one .language .nice-select .option) {
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 8px;
+        color: #0f172a !important;
+        font-size: 13.5px;
+        font-weight: 600;
+        line-height: 34px;
+    }
+
+    :global(.header-top-one .language .nice-select .option:hover),
+    :global(.header-top-one .language .nice-select .option.focus),
+    :global(.header-top-one .language .nice-select .option.selected.focus),
+    :global(.header-top-one .language .nice-select .option.selected) {
+        background: rgba(var(--theme-rgb), 0.1) !important;
+        color: var(--theme) !important;
+    }
+
+    :global(.header-top-one .lang .user) {
+        display: inline-flex !important;
+        align-items: center !important;
+        min-height: 34px;
+    }
+
+    :global(.header-top-one .lang .user a) {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 7px;
+        min-height: 34px;
+        padding: 0 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.94) !important;
+        font-size: 13.5px !important;
+        letter-spacing: 0 !important;
+    }
+
+    :global(.header-top-one .lang .user a i) {
+        margin: 0 !important;
+        color: var(--theme);
+    }
+
+    :global(.header-1 .header-cataegory-item) {
+        margin-left: 22px;
+    }
+
+    :global(.header-1 .header-cataegory-item .header-cataegory) {
+        min-width: 232px !important;
+        padding: 0 18px !important;
+        border-color: rgba(15, 23, 42, 0.12) !important;
+        background: #ffffff !important;
+        box-shadow: none !important;
+    }
+
+    :global(.header-1 .header-cataegory > li > a) {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 12px;
+        min-height: 50px !important;
+        padding: 0 !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        color: #0f172a !important;
+        font-size: 15px !important;
+        font-weight: 650 !important;
+        letter-spacing: 0 !important;
+        text-transform: none !important;
+        white-space: nowrap !important;
+        box-shadow: none !important;
+    }
+
+    :global(.header-1 .header-cataegory-item .header-cataegory:hover) {
+        border-color: rgba(var(--theme-rgb), 0.45) !important;
+        background: color-mix(in srgb, var(--theme) 5%, #fff) !important;
+    }
+
+    :global(.header-1 .header-cataegory .left-icon) {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 18px;
+        height: 18px;
+        margin: 0 !important;
+        color: var(--theme) !important;
+        font-size: 16px !important;
+    }
+
+    :global(.header-1 .header-cataegory .right-icon) {
+        margin-left: 2px !important;
+        color: #0f172a !important;
+        font-size: 13px !important;
+    }
+
+    :global(.header-1 .header-cataegory-item > .sub-cataegory) {
+        top: calc(100% + 10px) !important;
+        min-width: 250px !important;
+        padding: 8px !important;
+        border: 1px solid rgba(15, 23, 42, 0.1) !important;
+        border-radius: 12px !important;
+        background: #ffffff !important;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12) !important;
+    }
+
+    :global(.header-1 .header-cataegory-item:hover > .sub-cataegory) {
+        visibility: visible !important;
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+    }
+
+    :global(.header-1 .header-cataegory-item > .sub-cataegory::before) {
+        content: '';
+        position: absolute;
+        right: 0;
+        bottom: 100%;
+        left: 0;
+        height: 12px;
+    }
+
+    :global(.header-1 .header-cataegory-item .sub-cataegory li) {
+        position: relative;
+    }
+
+    :global(.header-1 .header-cataegory-item .sub-cataegory li a) {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        min-height: 40px;
+        padding: 0 12px !important;
+        border: 0 !important;
+        border-radius: 8px;
+        color: #334155 !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        line-height: 1.25;
+    }
+
+    :global(.header-1 .header-cataegory-item .sub-cataegory li:hover > a) {
+        background: rgba(var(--theme-rgb), 0.08) !important;
+        color: var(--theme) !important;
+    }
+
+    :global(.header-1 .header-cataegory-item .sub-cataegory li .sub-cataegory) {
+        inset-inline-start: calc(100% - 1px) !important;
+        top: 0 !important;
+        min-width: 230px !important;
+        padding: 8px !important;
+        border: 1px solid rgba(15, 23, 42, 0.1) !important;
+        border-radius: 12px !important;
+        background: #ffffff !important;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12) !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        transform: translateY(0) !important;
+    }
+
+    :global(.header-1 .header-cataegory-item .sub-cataegory li:hover > .sub-cataegory) {
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    :global(.header-1 .header-cataegory-item .sub-cataegory li .sub-cataegory::before) {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 100%;
+        width: 12px;
+        height: 100%;
+    }
+
+    :global(.header-1 .header-main) {
+        gap: 22px;
+    }
+
+    :global(.header-1 .header-main .header-left),
+    :global(.header-1 .header-main .header-right) {
+        min-width: 0;
+    }
+
+    :global(.header-1 .header-main .header-right) {
+        flex: 1 1 auto;
+        gap: 20px;
+    }
+
+    :global(.header-1 .header-main .header-right .mean__menu-wrapper) {
+        margin-right: 20px !important;
+        min-width: 0;
+    }
+
+    :global(.header-1 .header-main .main-menu ul) {
+        display: flex;
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: 18px;
+    }
+
+    :global(.header-1 .header-main .main-menu ul li) {
+        margin-inline-end: 0 !important;
+    }
+
+    :global(.header-1 .header-main .main-menu ul li a) {
+        white-space: nowrap;
+        letter-spacing: 0 !important;
+    }
+
+    @media (min-width: 1200px) and (max-width: 1329.98px) {
+        :global(.header-1 .header-cataegory-item) {
+            margin-left: 18px;
+        }
+
+        :global(.header-1 .header-cataegory-item .header-cataegory) {
+            min-width: 218px !important;
+            padding: 0 16px !important;
+        }
+
+        :global(.header-1 .header-main .main-menu ul) {
+            gap: 14px;
+        }
+
+        :global(.header-1 .header-main .main-menu ul li a) {
+            font-size: 14px !important;
+        }
+
+        :global(.header-main .header-right .search-icon),
+        :global(.header-right .cart-icon),
+        :global(.header-right .wishlist-icon) {
+            font-size: 17px !important;
+        }
+    }
+
+    @media (max-width: 991.98px) {
+        :global(.header-top-one) {
+            grid-template-columns: 1fr auto;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        :global(.header-top-one) {
+            display: none !important;
+        }
+    }
+
+    .cart-icon {
+        position: relative;
+    }
+
+    :global(.header-1 .menu-cart .cart-icon::before),
+    :global(.header-top-wrapper .menu-cart .cart-icon::before),
+    :global(.header-top-wrapper .menu-cart-items .cart-icon::before),
+    :global(.menu-cart .cart-icon::before),
+    :global(.cart-icon::before) {
+        display: none !important;
+        content: none !important;
+    }
+
+    .cart-count {
+        position: absolute;
+        top: -6px;
+        inset-inline-end: -8px;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        border-radius: 9px;
+        background: var(--theme);
+        color: #fff;
+        font-size: 11px;
+        line-height: 18px;
+        text-align: center;
+    }
+
+    /* Mini Cart & Wishlist Dropdown Styles */
+    :global(.header-1 .menu-cart .cart-box) {
+        width: 320px;
+        right: 0 !important;
+        left: auto !important;
+        border-radius: 12px;
+        padding: 12px 18px 0;
+    }
+
+    .mini-cart-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 380px;
+        overflow-y: auto;
+    }
+
+    .mini-cart-list::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .mini-cart-list::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 4px;
+    }
+
+    .btn-view-all,
+    .btn-checkout-header {
+        white-space: nowrap;
+        padding: 10px 16px !important;
+        font-size: 13.5px !important;
+        line-height: 1.4;
+    }
+
+    .btn-wishlist-all {
+        display: block;
+        width: 100%;
+        text-align: center;
+        padding: 11px 20px !important;
+        font-size: 14px !important;
+        line-height: 1.4;
+    }
+
+    .mini-cart-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+        border-bottom: 1px solid #edf0f5;
+    }
+
+    .mini-cart-thumb {
+        flex-shrink: 0;
+        display: block;
+        width: 52px;
+        height: 52px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #f8f9fa;
+        border: 1px solid #edf0f5;
+    }
+
+    :global(.header-1 .menu-cart .cart-box ul li img),
+    :global(.header-1 .menu-cart .cart-box img),
+    .mini-cart-thumb img {
+        width: 52px !important;
+        height: 52px !important;
+        min-width: 52px !important;
+        max-width: 52px !important;
+        object-fit: cover !important;
+        border-radius: 8px !important;
+        display: block;
+    }
+
+    .mini-cart-item .cart-product {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .mini-cart-title {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #1e2532;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.3;
+        text-decoration: none;
+    }
+
+    .mini-cart-title:hover {
+        color: #ef3e2e;
+    }
+
+    /* Disable old pseudo-element icon from main.css */
+    :global(.header-1 .menu-cart .cart-box ul li a::after) {
+        display: none !important;
+    }
+
+    .mini-cart-price {
+        display: block;
+        font-size: 13px !important;
+        color: #64748b !important;
+        font-weight: 500 !important;
+        margin-top: 3px;
+    }
+
+    .mini-cart-remove {
+        background: none;
+        border: none;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #94a3b8;
+        font-size: 13px;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: background-color 0.15s, color 0.15s;
+        padding: 0;
+    }
+
+    .mini-cart-remove:hover {
+        background-color: #feebe9;
+        color: #ef3e2e;
+    }
+
+    @media (max-width: 1199.98px) {
+        :global(.header-1 .container-fluid) {
+            padding-inline: 8px !important;
+        }
+
+        :global(.header-main .header-right .mean__menu-wrapper) {
+            display: none !important;
+        }
+
+        :global(.header-main .header-right) {
+            gap: 12px;
+        }
+
+        :global(.header-right .cart-icon i),
+        :global(.header-right .wishlist-icon i) {
+            font-size: 20px !important;
+        }
+    }
+
+    .header-logo-img {
+        height: 40px;
+        width: auto;
+        display: block;
+    }
 </style>
