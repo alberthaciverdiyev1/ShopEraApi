@@ -35,6 +35,7 @@ class ManagerWebhookController extends Controller
         if ($event === 'tenant.provision') {
             $hosts = (array) $request->input('hosts', []);
             $database = (string) $request->input('database', '');
+            $storageRoot = (string) $request->input('storage_root', '');
             $provisioned = [];
 
             $admin = [];
@@ -51,6 +52,9 @@ class ManagerWebhookController extends Controller
                 $args = ['host' => $host];
                 if ($database !== '') {
                     $args['--database'] = $database;
+                }
+                if ($storageRoot !== '') {
+                    $args['--storage-root'] = $storageRoot;
                 }
 
                 Artisan::call('tenant:provision', array_merge($args, $admin));

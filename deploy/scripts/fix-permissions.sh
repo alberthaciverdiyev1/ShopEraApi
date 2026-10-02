@@ -4,7 +4,6 @@ set -euo pipefail
 APP_DIR="${APP_DIR:-/var/www/ShopEra}"
 APP_USER="${APP_USER:-www-data}"
 APP_GROUP="${APP_GROUP:-www-data}"
-CLI_USER="${CLI_USER:-${SUDO_USER:-$USER}}"
 
 if [ "$(id -u)" -ne 0 ]; then
     echo "Run as root: sudo APP_DIR=$APP_DIR bash deploy/scripts/fix-permissions.sh" >&2

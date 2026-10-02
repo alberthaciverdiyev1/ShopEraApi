@@ -8,6 +8,7 @@ use Database\Seeders\TenantDatabaseSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Modules\User\Entities\User;
 
 /**
@@ -19,6 +20,7 @@ class TenantProvision extends Command
     protected $signature = 'tenant:provision {host} {--seed : Run full demo seeders}
         {--fresh : Drop and recreate}
         {--database= : Explicit tenant database name from Manager}
+        {--storage-root= : Explicit tenant storage root from Manager}
         {--admin-email= : Create a store admin with this e-mail}
         {--admin-password= : Password for the store admin}
         {--admin-name= : Name for the store admin}
@@ -31,6 +33,7 @@ class TenantProvision extends Command
         $host = (string) $this->argument('host');
         $database = (string) ($this->option('database') ?: $this->databaseFor($host));
         $database = $this->sanitizeDatabase($database);
+        $storageRoot = $this->sanitizeStorageRoot((string) ($this->option('storage-root') ?: $this->storageRootFor($host)));
 
         $admin = DB::connection(TenantDatabase::centralConnection());
         $previous = config('database.default');
@@ -51,6 +54,11 @@ class TenantProvision extends Command
             }
 
             config(['database.connections.tenant.database' => $database]);
+            config([
+                'tenant.current_host' => $host,
+                'tenant.current_database' => $database,
+                'tenant.current_storage_root' => $storageRoot,
+            ]);
             DB::purge('tenant');
             DB::setDefaultConnection('tenant');
 
@@ -71,6 +79,8 @@ class TenantProvision extends Command
             if ($email = $this->option('admin-email')) {
                 $this->createAdmin($email, (string) $this->option('admin-password'), (string) $this->option('admin-name'), (string) $this->option('admin-phone'));
             }
+
+            $this->prepareStorage($storageRoot);
         } finally {
             // A freshly created database must be resolvable immediately, even
             // when the host is not yet present in the Manager map cache.
@@ -80,6 +90,11 @@ class TenantProvision extends Command
             // (the webhook runs tenant:provision inside a live HTTP request).
             DB::setDefaultConnection($previous);
             DB::purge('tenant');
+            config([
+                'tenant.current_host' => null,
+                'tenant.current_database' => null,
+                'tenant.current_storage_root' => null,
+            ]);
         }
 
         $this->info("Tenant {$host} → {$database} ready.");
@@ -131,5 +146,59 @@ class TenantProvision extends Command
         }
 
         return $database;
+    }
+
+    private function storageRootFor(string $host): string
+    {
+        $host = strtolower(preg_replace('/:\d+$/', '', $host));
+        $parts = array_values(array_filter(explode('.', $host)));
+        $slug = count($parts) > 2 && $parts[0] !== 'www' ? $parts[0] : $host;
+
+        return $this->sanitizeStorageRoot($slug);
+    }
+
+    private function sanitizeStorageRoot(string $storageRoot): string
+    {
+        $storageRoot = trim(preg_replace('/[^a-zA-Z0-9\-]+/', '-', strtolower($storageRoot)), '-');
+
+        if ($storageRoot === '') {
+            throw new \InvalidArgumentException('Tenant storage root cannot be empty.');
+        }
+
+        return $storageRoot;
+    }
+
+    private function prepareStorage(string $storageRoot): void
+    {
+        $disk = Storage::disk('public');
+        $directories = [
+            $storageRoot,
+            "{$storageRoot}/avatars",
+            "{$storageRoot}/banner",
+            "{$storageRoot}/brands",
+            "{$storageRoot}/categories",
+            "{$storageRoot}/notifications",
+            "{$storageRoot}/photos",
+            "{$storageRoot}/products",
+            "{$storageRoot}/sizes",
+            "{$storageRoot}/videos",
+        ];
+
+        foreach ($directories as $directory) {
+            if (! $disk->exists($directory)) {
+                $disk->makeDirectory($directory);
+            }
+
+            $absolute = storage_path('app/public/'.$directory);
+            if (is_dir($absolute)) {
+                @chmod($absolute, 02775);
+            }
+        }
+
+        if (! is_link(public_path('storage')) && ! file_exists(public_path('storage'))) {
+            $this->callSilent('storage:link');
+        }
+
+        $this->info("Storage root public/{$storageRoot} ready.");
     }
 }

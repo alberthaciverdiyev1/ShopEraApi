@@ -32,6 +32,7 @@ cp .env.example .env && php artisan key:generate
 php artisan migrate --force
 php artisan db:seed --force            # merkezi/tek-kurulum
 php artisan storage:link
+sudo APP_DIR=/var/www/ShopEra APP_USER=www-data APP_GROUP=www-data bash deploy/scripts/fix-permissions.sh
 php artisan config:cache && php artisan route:cache && php artisan view:cache
 ```
 
@@ -111,6 +112,7 @@ composer install --no-dev --optimize-autoloader
 php artisan key:generate
 # .env: DB_DATABASE=manager_shopera, MANAGER_* , CLOUDFLARE_* (aşağıda)
 php artisan migrate --force && php artisan db:seed --force
+sudo APP_DIR=/var/www/Manager.Shopera APP_USER=www-data APP_GROUP=www-data bash deploy/scripts/fix-permissions.sh
 php artisan config:cache && php artisan route:cache
 ```
 
