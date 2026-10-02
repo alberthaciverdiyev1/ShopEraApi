@@ -77,11 +77,12 @@
             <TestimonialSection featured={featuredReviews}/>
         {/await}
     {/if}
+    {#if features.show_ads ?? false}
 
-    {#await data.promoBlocks then blocks}
-        <PromoBlocksSection blocks={blocks}/>
-    {/await}
-
+        {#await data.promoBlocks then blocks}
+            <PromoBlocksSection blocks={blocks}/>
+        {/await}
+    {/if}
     {#if true}
         {#await data.recentBlogs then blogs}
             {#if (blogs?.length ?? 0) > 0}
@@ -95,8 +96,9 @@
     {/if}
 {/await}
 
-<PopupModal/>
-
+{#if $features.popup ?? false}
+    <PopupModal/>
+{/if}
 <style>
     .home-loader {
         display: flex;
