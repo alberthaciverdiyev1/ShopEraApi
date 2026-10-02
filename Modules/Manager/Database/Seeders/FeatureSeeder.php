@@ -18,6 +18,10 @@ class FeatureSeeder extends Seeder
             ['buy_with_card', 'Kartla ödəniş', 'bool', '1', 'Sifariş & Ödəniş'],
             ['buy_with_cash', 'Qapıda nağd ödəniş', 'bool', '1', 'Sifariş & Ödəniş'],
             ['buy_with_whatsapp', 'WhatsApp ilə sifariş', 'bool', '1', 'Sifariş & Ödəniş'],
+            ['delivery_prices', 'Çatdırılma qiymətləri', 'bool', '1', 'Çatdırılma'],
+            ['delivery_cities', 'Çatdırılma şəhərləri', 'bool', '1', 'Çatdırılma'],
+            ['pickup_points', 'Gəl al nöqtələri', 'bool', '1', 'Çatdırılma'],
+            ['delivery_info', 'Çatdırılma məlumatları', 'bool', '1', 'Çatdırılma'],
         ];
 
         foreach ($features as $i => [$key, $name, $type, $default, $group]) {
