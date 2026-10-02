@@ -5,6 +5,7 @@ namespace Modules\Manager\Services;
 use App\Support\EntitlementStore;
 use App\Support\TenantDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Modules\Manager\Entities\PromoBlock;
 use Modules\Manager\Entities\SiteOwner;
 
@@ -45,6 +46,7 @@ class EntitlementWriter
                 DB::purge('tenant');
                 DB::setDefaultConnection('tenant');
 
+                $step = microtime(true);
                 $payload = $this->payload($owner, $h);
 
                 EntitlementStore::persist($payload, $h);
@@ -54,6 +56,14 @@ class EntitlementWriter
                 app(\App\Http\Controllers\Admin\ThemeController::class)->storePalette($payload['theme'] ?? []);
 
                 $pushed[] = $h;
+
+                Log::info('manager.entitlements.push', [
+                    'owner' => $owner->id,
+                    'host' => $h,
+                    'database' => $database,
+                    'features' => count($payload['features'] ?? []),
+                    'ms' => (int) round((microtime(true) - $step) * 1000),
+                ]);
             }
         } finally {
             DB::setDefaultConnection($previous);

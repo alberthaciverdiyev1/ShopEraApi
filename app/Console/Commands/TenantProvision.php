@@ -8,6 +8,7 @@ use Database\Seeders\TenantDatabaseSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Modules\User\Entities\User;
 
@@ -38,8 +39,12 @@ class TenantProvision extends Command
         $admin = DB::connection(TenantDatabase::centralConnection());
         $previous = config('database.default');
         $safe = str_replace('"', '', $database);
+        $started = microtime(true);
+
+        Log::info('tenant.provision.start', ['host' => $host, 'database' => $database]);
 
         try {
+            $t = microtime(true);
             if ($this->option('fresh')) {
                 $admin->statement('DROP DATABASE IF EXISTS "'.$safe.'"');
             }
@@ -52,6 +57,7 @@ class TenantProvision extends Command
             } else {
                 $this->warn("Database {$database} already exists.");
             }
+            Log::info('tenant.provision.database', ['database' => $database, 'created' => ! $exists, 'ms' => $this->ms($t)]);
 
             config(['database.connections.tenant.database' => $database]);
             config([
@@ -62,25 +68,35 @@ class TenantProvision extends Command
             DB::purge('tenant');
             DB::setDefaultConnection('tenant');
 
+            $t = microtime(true);
             $this->call('migrate', ['--database' => 'tenant', '--force' => true]);
+            Log::info('tenant.provision.migrate', ['database' => $database, 'ms' => $this->ms($t)]);
 
             // Always seed the essentials (roles, permissions, settings, theme…).
+            $t = microtime(true);
             $this->call('db:seed', [
                 '--class' => TenantDatabaseSeeder::class,
                 '--database' => 'tenant',
                 '--force' => true,
             ]);
+            Log::info('tenant.provision.seed_essentials', ['database' => $database, 'ms' => $this->ms($t)]);
 
             // Optional full demo dataset.
             if ($this->option('seed')) {
+                $t = microtime(true);
                 $this->call('db:seed', ['--database' => 'tenant', '--force' => true]);
+                Log::info('tenant.provision.seed_demo', ['database' => $database, 'ms' => $this->ms($t)]);
             }
 
             if ($email = $this->option('admin-email')) {
+                $t = microtime(true);
                 $this->createAdmin($email, (string) $this->option('admin-password'), (string) $this->option('admin-name'), (string) $this->option('admin-phone'));
+                Log::info('tenant.provision.admin', ['email' => $email, 'ms' => $this->ms($t)]);
             }
 
+            $t = microtime(true);
             $this->prepareStorage($storageRoot);
+            Log::info('tenant.provision.storage', ['root' => $storageRoot, 'ms' => $this->ms($t)]);
         } finally {
             // A freshly created database must be resolvable immediately, even
             // when the host is not yet present in the Manager map cache.
@@ -98,8 +114,19 @@ class TenantProvision extends Command
         }
 
         $this->info("Tenant {$host} → {$database} ready.");
+        Log::info('tenant.provision.done', [
+            'host' => $host,
+            'database' => $database,
+            'total_ms' => (int) round((microtime(true) - $started) * 1000),
+        ]);
 
         return self::SUCCESS;
+    }
+
+    /** Milliseconds elapsed since $start. */
+    private function ms(float $start): int
+    {
+        return (int) round((microtime(true) - $start) * 1000);
     }
 
     private function createAdmin(string $email, string $password, string $name, string $phone = ''): void

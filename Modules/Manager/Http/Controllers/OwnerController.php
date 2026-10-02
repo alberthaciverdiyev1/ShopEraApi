@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -48,20 +49,31 @@ class OwnerController extends Controller
 
     public function store(Request $request)
     {
+        $started = microtime(true);
+        Log::info('manager.owner.create.start', ['email' => $request->input('email')]);
+
         $data = $this->validated($request);
 
         $adminPassword = Str::password(10);
 
-        $owner = SiteOwner::query()->create($data['owner']);
-        $this->syncDomains($owner, $data['domains'] ?? []);
-        $this->ensureTenantIdentity($owner);
-        $this->syncSubscription($owner, $request);
-        $this->syncOverrides($owner, $request->input('overrides', []));
+        $owner = $this->timed('record', fn () => SiteOwner::query()->create($data['owner']));
+        $this->timed('domains', fn () => $this->syncDomains($owner, $data['domains'] ?? []));
+        $this->timed('identity', fn () => $this->ensureTenantIdentity($owner));
+        $this->timed('subscription', fn () => $this->syncSubscription($owner, $request));
+        $this->timed('overrides', fn () => $this->syncOverrides($owner, $request->input('overrides', [])));
 
         $owner->load('domains');
+        $host = $owner->domains->first()?->host;
 
-        $provision = $this->provision($owner, $adminPassword);
-        $this->writer->push($owner);
+        $provision = $this->timed('provision', fn () => $this->provision($owner, $adminPassword), ['host' => $host, 'database' => $owner->db_name]);
+        $this->timed('push', fn () => $this->writer->push($owner), ['owner' => $owner->id]);
+
+        Log::info('manager.owner.create.done', [
+            'owner' => $owner->id,
+            'db' => $owner->db_name,
+            'provisioned' => $provision['ok'] ?? false,
+            'total_ms' => (int) round((microtime(true) - $started) * 1000),
+        ]);
 
         session()->flash('created_store', [
             'provisioned' => $provision['ok'],
@@ -110,6 +122,24 @@ class OwnerController extends Controller
         $owner->delete();
 
         return redirect()->route('manager.owners.index')->with('status', __('Sahib silindi.'));
+    }
+
+    /**
+     * Runs a step and logs its name + duration so the create flow can be
+     * watched live (php artisan pail).
+     */
+    private function timed(string $step, \Closure $callback, array $context = []): mixed
+    {
+        $start = microtime(true);
+        Log::info("manager.owner.{$step}.start", $context);
+
+        try {
+            return $callback();
+        } finally {
+            Log::info("manager.owner.{$step}.done", $context + [
+                'ms' => (int) round((microtime(true) - $start) * 1000),
+            ]);
+        }
     }
 
     private function provision(SiteOwner $owner, string $adminPassword): array
