@@ -59,7 +59,15 @@
             <div>
                 <p class="nav-group-title px-2 pb-1 text-xs font-semibold uppercase text-gray-400 dark:text-gray-500">{{ $group }}</p>
                 <ul class="space-y-0.5">
-                    @foreach (collect($items)->filter(fn ($i) => ! isset($i['feature']) || \App\Support\Features::enabled($i['feature'])) as $item)
+                    @foreach (collect($items)->filter(function ($i) {
+                        if (isset($i['feature']) && ! \App\Support\Features::enabled($i['feature'])) {
+                            return false;
+                        }
+                        if (isset($i['plan']) && ! plan($i['plan'])) {
+                            return false;
+                        }
+                        return true;
+                    }) as $item)
                         <li>
                             <a href="{{ route($item['route']) }}" title="{{ $item['label'] }}"
                                class="nav-link flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition {{ $isActive($item['match'])
