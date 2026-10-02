@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { slider } from '$lib/theme/slider';
+	import { translate } from '$lib/i18n';
 	import type { ApiFeaturedReview } from '$lib/services/reviews';
 
 	let { featured = [] }: { featured?: ApiFeaturedReview[] } = $props();
