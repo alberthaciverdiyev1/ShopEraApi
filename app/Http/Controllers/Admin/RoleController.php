@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
+use Modules\RoleAndPermissions\Services\PermissionService;
+use Modules\RoleAndPermissions\Services\RoleService;
 
 class RoleController extends AdminController
 {
@@ -13,19 +13,18 @@ class RoleController extends AdminController
 
     private string $guard = 'sanctum';
 
+    private function roles(): RoleService
+    {
+        return app(RoleService::class);
+    }
+
     public function index()
     {
         $this->requirePermission('manage-roles');
 
-        $roles = Role::query()
-            ->where('guard_name', $this->guard)
-            ->withCount(['permissions', 'users'])
-            ->orderBy('id')
-            ->get();
-
         return view('admin.pages.roles.index', [
             'title' => $this->title,
-            'roles' => $roles,
+            'roles' => $this->roles()->rolesWithCounts($this->guard),
         ]);
     }
 
@@ -36,7 +35,7 @@ class RoleController extends AdminController
         return view('admin.pages.roles.form', [
             'title' => 'Rol əlavə et',
             'role' => null,
-            'permissions' => $this->permissionGroups(),
+            'permissions' => app(PermissionService::class)->groupedByGuard($this->guard),
         ]);
     }
 
@@ -44,12 +43,10 @@ class RoleController extends AdminController
     {
         $this->requirePermission('manage-roles');
 
-        $role = Role::query()->where('guard_name', $this->guard)->with('permissions')->findOrFail($id);
-
         return view('admin.pages.roles.form', [
             'title' => 'Rolu redaktə et',
-            'role' => $role,
-            'permissions' => $this->permissionGroups(),
+            'role' => $this->roles()->findWithPermissions($id, $this->guard),
+            'permissions' => app(PermissionService::class)->groupedByGuard($this->guard),
         ]);
     }
 
@@ -63,8 +60,7 @@ class RoleController extends AdminController
             'permissions.*' => ['exists:permissions,id'],
         ]);
 
-        $role = Role::create(['name' => $data['name'], 'guard_name' => $this->guard]);
-        $role->syncPermissions($data['permissions'] ?? []);
+        $this->roles()->createRole($data['name'], $this->guard, $data['permissions'] ?? []);
 
         return redirect()->route('admin.roles.index')->with('status', __('Rol yaradıldı.'));
     }
@@ -73,7 +69,7 @@ class RoleController extends AdminController
     {
         $this->requirePermission('manage-roles');
 
-        $role = Role::query()->where('guard_name', $this->guard)->findOrFail($id);
+        $role = $this->roles()->findWithPermissions($id, $this->guard);
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:190', Rule::unique('roles', 'name')->where('guard_name', $this->guard)->ignore($role->id)],
@@ -81,8 +77,7 @@ class RoleController extends AdminController
             'permissions.*' => ['exists:permissions,id'],
         ]);
 
-        $role->update(['name' => $data['name']]);
-        $role->syncPermissions($data['permissions'] ?? []);
+        $this->roles()->updateRole($role, $data['name'], $data['permissions'] ?? []);
 
         return redirect()->route('admin.roles.index')->with('status', __('Rol yeniləndi.'));
     }
@@ -91,26 +86,8 @@ class RoleController extends AdminController
     {
         $this->requirePermission('manage-roles');
 
-        $role = Role::query()->where('guard_name', $this->guard)->findOrFail($id);
-
-        abort_if(in_array($role->name, ['admin', 'developer', 'manager'], true), 403, 'Bu rol silinə bilməz.');
-
-        $role->delete();
+        $this->roles()->deleteRole($id, $this->guard);
 
         return back()->with('status', __('Rol silindi.'));
-    }
-
-    private function permissionGroups(): array
-    {
-        return Permission::query()
-            ->where('guard_name', $this->guard)
-            ->orderBy('name')
-            ->get()
-            ->groupBy(function (Permission $permission) {
-                $parts = explode(' ', $permission->name);
-
-                return end($parts);
-            })
-            ->all();
     }
 }

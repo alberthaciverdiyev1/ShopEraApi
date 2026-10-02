@@ -154,4 +154,45 @@ class RoleService
     {
         return User::with('roles')->get();
     }
+
+    /** Roles of a guard with counts, for the admin index. */
+    public function rolesWithCounts(string $guard = 'sanctum')
+    {
+        return \Spatie\Permission\Models\Role::query()
+            ->where('guard_name', $guard)
+            ->withCount(['permissions', 'users'])
+            ->orderBy('id')
+            ->get();
+    }
+
+    public function findWithPermissions(int $id, string $guard = 'sanctum')
+    {
+        return \Spatie\Permission\Models\Role::query()
+            ->where('guard_name', $guard)
+            ->with('permissions')
+            ->findOrFail($id);
+    }
+
+    public function createRole(string $name, string $guard = 'sanctum', array $permissions = [])
+    {
+        $role = \Spatie\Permission\Models\Role::create(['name' => $name, 'guard_name' => $guard]);
+        $role->syncPermissions($permissions);
+
+        return $role;
+    }
+
+    public function updateRole(\Spatie\Permission\Models\Role $role, string $name, array $permissions = []): void
+    {
+        $role->update(['name' => $name]);
+        $role->syncPermissions($permissions);
+    }
+
+    public function deleteRole(int $id, string $guard = 'sanctum'): void
+    {
+        $role = $this->findWithPermissions($id, $guard);
+
+        abort_if(in_array($role->name, ['admin', 'developer', 'manager'], true), 403, 'Bu rol silinə bilməz.');
+
+        $role->delete();
+    }
 }

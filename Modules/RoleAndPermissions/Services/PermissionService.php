@@ -67,4 +67,19 @@ class PermissionService
 
         return responseHelper(__('Permission deleted successfully.'), 200);
     }
+
+    /** Permissions of a guard grouped by their last word (for the form). */
+    public function groupedByGuard(string $guard = 'sanctum'): array
+    {
+        return \Spatie\Permission\Models\Permission::query()
+            ->where('guard_name', $guard)
+            ->orderBy('name')
+            ->get()
+            ->groupBy(function (\Spatie\Permission\Models\Permission $permission) {
+                $parts = explode(' ', $permission->name);
+
+                return end($parts);
+            })
+            ->all();
+    }
 }
