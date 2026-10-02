@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import { apiGet } from '$lib/utils/api';
+import { cachedGet } from '$lib/utils/api-cache';
 
 export interface ApiCategory {
 	id: number;
@@ -60,7 +60,7 @@ export async function loadCategories(force = false): Promise<void> {
 
 	try {
 		// `all=1` returns every category flat (parents aren't returned with children loaded).
-		const flat = await apiGet<ApiCategory[]>('/category', { all: 1 });
+		const flat = await cachedGet<ApiCategory[]>('/category', { all: 1 });
 		categories.set(buildTree(flat));
 	} catch (error) {
 		categoriesError.set(error instanceof Error ? error.message : 'Failed to load categories');

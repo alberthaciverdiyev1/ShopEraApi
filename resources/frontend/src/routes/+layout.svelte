@@ -16,6 +16,7 @@
 	import SubscriptionNotice from '$lib/components/layout/SubscriptionNotice.svelte';
 	import { loadFeatures, features } from '$lib/services/features';
 	import { loadSettings } from '$lib/services/settings';
+	import { startVersionWatch } from '$lib/utils/api-cache';
 	import MobileBottomNav from '$lib/components/layout/MobileBottomNav.svelte';
 	import FloatingLiveChat from '$lib/components/layout/FloatingLiveChat.svelte';
 	import SiteFooter from '$lib/components/layout/SiteFooter.svelte';
@@ -46,6 +47,7 @@
 			dispose = () => Fancybox.destroy();
 		})();
 
+		startVersionWatch();
 		initAuth();
 		initLocale();
 		loadBasket();
@@ -79,6 +81,7 @@
 	}
 
 	afterNavigate(() => {
+		startVersionWatch();
 		initAuth();
 		loadBasket();
 		loadFavorites();

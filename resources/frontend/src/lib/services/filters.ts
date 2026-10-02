@@ -1,4 +1,4 @@
-import { apiGet } from '$lib/utils/api';
+import { cachedGet } from '$lib/utils/api-cache';
 
 export type FilterType = 'select' | 'radio' | 'checkbox' | 'input' | 'number' | 'range' | string;
 
@@ -27,6 +27,6 @@ export function filterChoices(filter: FilterDefinition): string[] {
 /** Filters that exist for the given category (needs one — there is no global list). */
 export async function fetchCategoryFilters(categoryId: number | null): Promise<FilterDefinition[]> {
 	if (!categoryId) return [];
-	const filters = await apiGet<FilterDefinition[]>('/category-filters', { category_id: categoryId });
+	const filters = await cachedGet<FilterDefinition[]>('/category-filters', { category_id: categoryId });
 	return Array.isArray(filters) ? filters : [];
 }

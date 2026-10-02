@@ -1,4 +1,5 @@
 import { apiGet, apiGetWithMeta } from '$lib/utils/api';
+import { cachedGet } from '$lib/utils/api-cache';
 import type { ApiProduct } from '$lib/services/products';
 
 export interface ShopMeta {
@@ -63,7 +64,7 @@ export interface ApiBrand {
 }
 
 export async function fetchBrands(): Promise<ApiBrand[]> {
-	const brands = await apiGet<ApiBrand[]>('/brand');
+	const brands = await cachedGet<ApiBrand[]>('/brand');
 	return Array.isArray(brands) ? brands : [];
 }
 
@@ -94,6 +95,6 @@ const EMPTY_FACETS: ShopFacets = {
 /** Facets for the sidebar — scoped to a category (and its children) when given. */
 export async function fetchShopFilters(categoryIds: number[] = []): Promise<ShopFacets> {
 	const query = categoryIds.length ? { category_ids: categoryIds } : undefined;
-	const facets = await apiGet<ShopFacets>('/product/filters', query);
+	const facets = await cachedGet<ShopFacets>('/product/filters', query);
 	return { ...EMPTY_FACETS, ...(facets ?? {}) };
 }

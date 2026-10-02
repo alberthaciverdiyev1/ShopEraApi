@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\ContactController;
+use App\Http\Controllers\Api\DataVersionController;
 use App\Http\Controllers\Api\FeaturesController;
 use App\Http\Controllers\Api\HomeController;
 use App\Http\Controllers\Api\PlanController;
@@ -18,6 +19,9 @@ Route::get('/user', function (Request $request) {
  * /api/category/with-products keep the exact shape the published apps parse.
  */
 Route::get('/home', [HomeController::class, 'index'])->name('api.home');
+
+// Cheap revision token for the storefront's in-memory cache.
+Route::get('/data-version', [DataVersionController::class, 'index'])->name('api.data-version');
 
 // Public feature flags for the storefront (from Manager.Snaker entitlements).
 Route::get('/features', [FeaturesController::class, 'index'])->name('api.features');

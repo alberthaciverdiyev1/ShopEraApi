@@ -2,7 +2,8 @@ import { fetchFeatures, type ApiFeatures } from '$lib/services/features';
 import { fetchFeaturedReviews } from '$lib/services/reviews';
 import { fetchPromoBlocks } from '$lib/services/promoBlocks';
 import { fetchBanners } from '$lib/services/banners';
-import { fetchProducts } from '$lib/services/products';
+import { fetchProducts, type ApiProduct } from '$lib/services/products';
+import { cachedGet } from '$lib/utils/api-cache';
 import { fetchRecentBlogs } from '$lib/services/blog';
 
 /**
@@ -12,8 +13,9 @@ import { fetchRecentBlogs } from '$lib/services/blog';
  */
 export function load({ fetch }: { fetch: typeof globalThis.fetch }) {
 	const list = <T>(promise: Promise<T[]>): Promise<T[]> => promise.catch(() => []);
-	const products = (orderBy: string, perPage: number, extra: Record<string, unknown> = {}) =>
-		list(fetchProducts({ order_by: orderBy, order_type: 'desc', per_page: perPage, ...extra }, fetch));
+	// Home product rows are cached in memory (browser) to avoid re-fetching.
+	const products = (orderBy: string, perPage: number, extra: Record<string, string | number> = {}) =>
+		cachedGet<ApiProduct[]>('/product', { order_by: orderBy, order_type: 'desc', per_page: perPage, ...extra }, fetch).catch(() => []);
 
 	return {
 		features: fetchFeatures(fetch).catch((): ApiFeatures => ({})),
