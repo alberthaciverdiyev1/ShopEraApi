@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Modules\Blog\Entities\Blog;
+use Modules\Blog\Services\BlogService;
 
 class BlogController extends ResourceController
 {
@@ -61,12 +62,6 @@ class BlogController extends ResourceController
 
     private function uniqueSlug(string $base, ?int $ignoreId = null): string
     {
-        $slug = $base;
-        $i = 1;
-        while (Blog::query()->where('slug', $slug)->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))->exists()) {
-            $slug = $base.'-'.(++$i);
-        }
-
-        return $slug;
+        return app(BlogService::class)->uniqueSlug($base, $ignoreId);
     }
 }

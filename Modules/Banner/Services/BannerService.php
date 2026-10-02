@@ -101,4 +101,16 @@ class BannerService
             return responseHelper(__('Banner deleted successfully'), 200);
         }, 'Error occurred while deleting banner');
     }
+
+    /** Product select options: [id => label]. */
+    public function productOptions(): array
+    {
+        $options = ['' => '— Məhsul seçilməyib —'];
+
+        foreach (\Modules\Product\Entities\Product::query()->orderByDesc('id')->limit(500)->get() as $product) {
+            $options[$product->id] = admin_label($product, 'title', '#'.$product->id);
+        }
+
+        return $options;
+    }
 }

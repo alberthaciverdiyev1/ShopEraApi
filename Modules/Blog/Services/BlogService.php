@@ -158,4 +158,19 @@ class BlogService
 
         return responseHelper(__('Blog categories retrieved successfully.'), 200, $categories);
     }
+
+    /** Unique slug for the admin form (appends -2, -3, … if taken). */
+    public function uniqueSlug(string $base, ?int $ignoreId = null): string
+    {
+        $slug = $base;
+        $i = 1;
+
+        while ($this->model->newQuery()->where('slug', $slug)
+            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+            ->exists()) {
+            $slug = $base.'-'.(++$i);
+        }
+
+        return $slug;
+    }
 }

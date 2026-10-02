@@ -23,4 +23,16 @@ class StoryService
 
         return responseHelper(__('Stories retrieved successfully.'), 200, StoryResource::collection($stories));
     }
+
+    /** Product select options: [id => label]. */
+    public function productOptions(): array
+    {
+        $options = ['' => '— Məhsula bağlı deyil —'];
+
+        foreach (\Modules\Product\Entities\Product::query()->orderByDesc('id')->limit(1000)->get() as $product) {
+            $options[$product->id] = admin_label($product, 'title', '#'.$product->id);
+        }
+
+        return $options;
+    }
 }

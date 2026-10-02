@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use Modules\Banner\Entities\Banner;
-use Modules\Product\Entities\Product;
+use Modules\Banner\Services\BannerService;
 
 class BannerController extends ResourceController
 {
@@ -38,12 +38,7 @@ class BannerController extends ResourceController
     protected function resolveOptions(array $field): array
     {
         if ($field['name'] === 'product_id') {
-            $options = ['' => '— Məhsul seçilməyib —'];
-            foreach (Product::query()->orderByDesc('id')->limit(500)->get() as $product) {
-                $options[$product->id] = admin_label($product, 'title', '#'.$product->id);
-            }
-
-            return $options;
+            return app(BannerService::class)->productOptions();
         }
 
         return parent::resolveOptions($field);

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Modules\Product\Entities\Product;
 use Modules\Story\Entities\Story;
+use Modules\Story\Services\StoryService;
 
 class StoryController extends ResourceController
 {
@@ -33,23 +33,13 @@ class StoryController extends ResourceController
 
     protected function columnMaps(): array
     {
-        $map = [];
-        foreach (Product::query()->orderByDesc('id')->limit(1000)->get() as $product) {
-            $map[$product->id] = admin_label($product, 'title', '#'.$product->id);
-        }
-
-        return ['product_id' => $map];
+        return ['product_id' => app(StoryService::class)->productOptions()];
     }
 
     protected function resolveOptions(array $field): array
     {
         if ($field['name'] === 'product_id') {
-            $options = ['' => '— Məhsula bağlı deyil —'];
-            foreach (Product::query()->orderByDesc('id')->limit(1000)->get() as $product) {
-                $options[$product->id] = admin_label($product, 'title', '#'.$product->id);
-            }
-
-            return $options;
+            return app(StoryService::class)->productOptions();
         }
 
         return parent::resolveOptions($field);
