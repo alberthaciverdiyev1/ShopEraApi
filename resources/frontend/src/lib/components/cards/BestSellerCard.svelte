@@ -64,6 +64,7 @@
 	}
 
 	.best-seller-one__thumb {
+		display: block;
 		width: 100%;
 		height: auto;
 		margin: 0 0 10px;
@@ -71,8 +72,9 @@
 
 	.best-seller-one__thumb a {
 		display: block;
+		width: 100%;
 		height: 260px;
-		border-radius: 12px;
+		border-radius: 0;
 		overflow: hidden;
 	}
 
