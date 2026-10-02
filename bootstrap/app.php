@@ -37,6 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
             ResolveTenant::class,
             SetLocaleFromHeader::class,
         ]);
+        $middleware->api(append: [\App\Http\Middleware\CachePublicApi::class]);
         $middleware->append([TrustProxies::class]);
 
         // Unauthenticated users are sent to the manager login on control hosts,
