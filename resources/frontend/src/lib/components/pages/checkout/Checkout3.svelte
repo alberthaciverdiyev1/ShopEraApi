@@ -3,6 +3,7 @@
 	import { isLoggedIn, user } from '$lib/services/auth';
 	import { basketItems, basketLoading, basketTotal, loadBasket } from '$lib/services/basket';
 	import { appliedPromo, applyPromoCode, clearPromo } from '$lib/services/promo';
+
 	import {
 		CITIES,
 		fetchAddresses,
@@ -27,23 +28,13 @@
 	} from '$lib/services/delivery';
 	import { locale, translate } from '$lib/i18n';
 	import { apiGet } from '$lib/utils/api';
-	import { fetchFeatures, features, type ApiFeatures } from '$lib/services/features';
+	import { features } from '$lib/services/features';
 
-	let featureSet = $state<ApiFeatures | null>(null);
-	const canCard = true;
-	const canCash = true;
-	const canWhatsapp = true;
-
-	onMount(async () => {
-		featureSet = await fetchFeatures();
-		if (paymentType === 'CARD' && !canCard) {
-			paymentType = canCash ? 'CASH' : 'WHATSAPP';
-		} else if (paymentType === 'CASH' && !canCash) {
-			paymentType = canCard ? 'CARD' : 'WHATSAPP';
-		} else if (paymentType === 'WHATSAPP' && !canWhatsapp) {
-			paymentType = canCard ? 'CARD' : 'CASH';
-		}
-	});
+	// Payment methods are gated by the shared feature flags (loaded once in the
+	// layout) — no per-page /features request.
+	const canCard = $derived($features.buy_with_card !== false);
+	const canCash = $derived($features.buy_with_cash !== false);
+	const canWhatsapp = $derived($features.buy_with_whatsapp !== false);
 
 	let waBusy = $state(false);
 	let waError = $state('');
@@ -102,6 +93,16 @@
 	let previewError = $state<string | null>(null);
 
 	let paymentType = $state<'CARD' | 'CASH' | 'WHATSAPP'>('CARD');
+
+	$effect(() => {
+		if (paymentType === 'CARD' && !canCard) {
+			paymentType = canCash ? 'CASH' : 'WHATSAPP';
+		} else if (paymentType === 'CASH' && !canCash) {
+			paymentType = canCard ? 'CARD' : 'WHATSAPP';
+		} else if (paymentType === 'WHATSAPP' && !canWhatsapp) {
+			paymentType = canCard ? 'CARD' : 'CASH';
+		}
+	});
 	let orderNotes = $state('');
 
 	let promoCodeInput = $state('');

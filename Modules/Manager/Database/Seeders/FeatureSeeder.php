@@ -15,7 +15,9 @@ class FeatureSeeder extends Seeder
     {
         // key, name, type(bool|limit), default, group
         $features = [
-            // Feature kataloqu boşdur — feature'lar Manager panelindən əl ilə əlavə olunur.
+            ['buy_with_card', 'Kartla ödəniş', 'bool', '1', 'Sifariş & Ödəniş'],
+            ['buy_with_cash', 'Qapıda nağd ödəniş', 'bool', '1', 'Sifariş & Ödəniş'],
+            ['buy_with_whatsapp', 'WhatsApp ilə sifariş', 'bool', '1', 'Sifariş & Ödəniş'],
         ];
 
         foreach ($features as $i => [$key, $name, $type, $default, $group]) {
