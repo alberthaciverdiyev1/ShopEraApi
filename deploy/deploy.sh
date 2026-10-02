@@ -27,8 +27,9 @@ SKIP_ASSETS="${SKIP_ASSETS:-0}"         # 1 => root Vite build'ini atla
 SKIP_FRONTEND="${SKIP_FRONTEND:-0}"     # 1 => Svelte build'ini atla
 RUN_MIGRATIONS="${RUN_MIGRATIONS:-1}"   # 0 => migrate atla
 
-PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-php8.3-fpm}"
-QUEUE_PROGRAM="${QUEUE_PROGRAM:-shopera-worker}"        # supervisor program adi
+PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-}"                  # bos => otomatik algila
+QUEUE_SERVICE="${QUEUE_SERVICE:-shopera-worker}"        # systemd unit (varsa)
+QUEUE_PROGRAM="${QUEUE_PROGRAM:-}"                      # supervisor program adi (opsiyonel)
 STOREFRONT_SERVICE="${STOREFRONT_SERVICE:-shopera-storefront}"  # systemd unit
 
 # ── Yardimcilar ──────────────────────────────────────────────────────────────
@@ -42,6 +43,14 @@ unit_exists() {
     has systemctl && systemctl list-unit-files 2>/dev/null | grep -q "^$1\.service"
 }
 
+resolve_php_fpm() {
+    [ -n "$PHP_FPM_SERVICE" ] && return 0
+    for candidate in php8.4-fpm php8.3-fpm php8.2-fpm; do
+        if unit_exists "$candidate"; then PHP_FPM_SERVICE="$candidate"; return 0; fi
+    done
+    PHP_FPM_SERVICE="php8.3-fpm"
+}
+
 reload_php_fpm() {
     if unit_exists "$PHP_FPM_SERVICE"; then
         info "PHP-FPM yenileniyor: $PHP_FPM_SERVICE"
@@ -53,13 +62,15 @@ reload_php_fpm() {
 }
 
 restart_queue() {
-    [ -n "$QUEUE_PROGRAM" ] || return 0
-    if has supervisorctl; then
-        info "Kuyruk worker yenileniyor: $QUEUE_PROGRAM"
+    if [ -n "$QUEUE_SERVICE" ] && unit_exists "$QUEUE_SERVICE"; then
+        info "Kuyruk worker yenileniyor: $QUEUE_SERVICE"
+        systemctl restart "$QUEUE_SERVICE" && ok "queue"
+    elif [ -n "$QUEUE_PROGRAM" ] && has supervisorctl; then
+        info "Kuyruk worker yenileniyor (supervisor): $QUEUE_PROGRAM"
         supervisorctl restart "$QUEUE_PROGRAM" >/dev/null 2>&1 && ok "queue" \
             || warn "supervisor program bulunamadi: $QUEUE_PROGRAM (atlandi)"
     else
-        warn "supervisorctl yok (queue atlandi)"
+        warn "kuyruk servisi bulunamadi (queue atlandi)"
     fi
 }
 
@@ -75,6 +86,7 @@ restart_storefront() {
 # ── Baslangic ────────────────────────────────────────────────────────────────
 [ -d "$APP_DIR" ] || { warn "APP_DIR bulunamadi: $APP_DIR"; exit 1; }
 cd "$APP_DIR"
+resolve_php_fpm
 
 echo "──────────────────────────────────────────────"
 echo " ShopEra deploy  •  $(date '+%Y-%m-%d %H:%M:%S')"
