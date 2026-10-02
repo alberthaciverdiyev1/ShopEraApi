@@ -51,15 +51,6 @@ class ManagerSync extends Command
                         continue;
                     }
 
-                    config(['database.connections.tenant.database' => $database]);
-                    config([
-                        'tenant.current_host' => $host,
-                        'tenant.current_database' => $database,
-                        'tenant.current_storage_root' => $this->metadata[$host]['storage_root'] ?? null,
-                    ]);
-                    DB::purge('tenant');
-                    DB::setDefaultConnection('tenant');
-
                     $response = ManagerClient::get('/api/v1/entitlements', [], $host !== '' ? $host : null);
 
                     if (! $response || ! $response->ok()) {
@@ -69,6 +60,16 @@ class ManagerSync extends Command
                     }
 
                     $data = $response->json('data') ?? [];
+
+                    config(['database.connections.tenant.database' => $database]);
+                    config([
+                        'tenant.current_host' => $host,
+                        'tenant.current_database' => $database,
+                        'tenant.current_storage_root' => $this->metadata[$host]['storage_root'] ?? null,
+                    ]);
+                    DB::purge('tenant');
+                    DB::setDefaultConnection('tenant');
+
                     EntitlementStore::persist($data, $host);
                     app(ThemeController::class)->storePalette($data['theme'] ?? []);
                     TenantDatabase::forgetExistence($database);
