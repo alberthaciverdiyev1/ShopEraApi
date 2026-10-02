@@ -32,6 +32,7 @@ Route::middleware(['auth:owner', EnsureOwner::class])->group(function () {
     Route::resource('owners', OwnerController::class)->except(['show']);
     Route::put('owners/{owner}/features', [OwnerController::class, 'updateFeatures'])->name('owners.features');
     Route::post('owners/{owner}/password', [OwnerController::class, 'updatePassword'])->name('owners.password');
+    Route::post('owners/{owner}/push', [OwnerController::class, 'push'])->name('owners.push');
 
     // Plans & the feature matrix
     Route::get('plans', [PlanController::class, 'index'])->name('plans.index');

@@ -180,6 +180,19 @@ class OwnerController extends Controller
         }
     }
 
+    public function push(SiteOwner $owner)
+    {
+        $owner->load(['domains', 'currentSubscription.plan.features', 'ownerFeatures.feature', 'theme']);
+
+        $hosts = $this->writer->push($owner);
+
+        if ($hosts === []) {
+            return back()->with('status', __('Heç bir tenant bazası tapılmadı.'));
+        }
+
+        return back()->with('status', __('Məlumatlar bazaya yazıldı: :hosts', ['hosts' => implode(', ', $hosts)]));
+    }
+
     public function updatePassword(Request $request, SiteOwner $owner)
     {
         $data = $request->validate(['password' => ['required', 'string', 'min:6']]);
