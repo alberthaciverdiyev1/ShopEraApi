@@ -1,22 +1,8 @@
 <script lang="ts">
-	import { navigating } from '$app/state';
-
-	let visible = $state(false);
-	let timer: ReturnType<typeof setTimeout> | undefined;
-
-	$effect(() => {
-		if (navigating) {
-			timer = setTimeout(() => (visible = true), 120);
-		} else {
-			clearTimeout(timer);
-			visible = false;
-		}
-
-		return () => clearTimeout(timer);
-	});
+	import { navigating } from '$app/stores';
 </script>
 
-{#if visible}
+{#if $navigating}
 	<div class="nav-progress" role="status" aria-live="polite" aria-label="Loading">
 		<div class="nav-progress__bar"></div>
 	</div>
