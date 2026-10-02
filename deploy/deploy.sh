@@ -26,6 +26,7 @@ PULL="${PULL:-0}"                       # 1 => once origin/<branch>'i cek
 SKIP_ASSETS="${SKIP_ASSETS:-0}"         # 1 => root Vite build'ini atla
 SKIP_FRONTEND="${SKIP_FRONTEND:-0}"     # 1 => Svelte build'ini atla
 RUN_MIGRATIONS="${RUN_MIGRATIONS:-1}"   # 0 => migrate atla
+STOREFRONT_MODE="${STOREFRONT_MODE:-ssr}"   # ssr (adapter-node) | static (adapter-static)
 
 PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-}"                  # bos => otomatik algila
 QUEUE_SERVICE="${QUEUE_SERVICE:-shopera-worker}"        # systemd unit (varsa)
@@ -118,12 +119,19 @@ else
     warn "asset build atlandi (SKIP_ASSETS=1)"
 fi
 
-# 4) Svelte storefront (build + public/storefront'e publish)
+# 4) Svelte storefront
 if [ "$SKIP_FRONTEND" != "1" ]; then
-    info "Svelte storefront (npm ci + build + publish)"
     ( cd resources/frontend && "$NPM_BIN" ci --no-audit --no-fund )
-    "$PHP_BIN" artisan storefront:deploy
-    ok "public/storefront"
+
+    if [ "$STOREFRONT_MODE" = "static" ]; then
+        info "Svelte storefront (static build → public/storefront)"
+        "$PHP_BIN" artisan storefront:deploy
+        ok "public/storefront"
+    else
+        info "Svelte storefront (adapter-node SSR build)"
+        ( cd resources/frontend && "$NPM_BIN" run build )
+        ok "resources/frontend/build"
+    fi
 else
     warn "storefront build atlandi (SKIP_FRONTEND=1)"
 fi
