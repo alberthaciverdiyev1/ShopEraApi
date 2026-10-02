@@ -38,7 +38,6 @@
                 <a href={phoneHref(headerPhone)}>{headerPhone}</a>
             </div>
             <div class="lang">
-                {#if $features.lang_az || $features.lang_en || $features.lang_ru || $features.lang_tr}
                     <div class="language">
                         <i class="icon-earth"></i>
 
@@ -57,7 +56,6 @@
                             </select>
                         </div>
                     </div>
-                {/if}
 
                 <div class="user">
                     {#if $isLoggedIn}
