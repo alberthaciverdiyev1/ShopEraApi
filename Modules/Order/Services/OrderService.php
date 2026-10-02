@@ -273,6 +273,60 @@ class OrderService
         );
     }
 
+    /**
+     * Admin order list query with status + free-text (id / customer) filters.
+     */
+    public function adminQuery(Request $request): Builder
+    {
+        $query = $this->model->query()->with(['user', 'latestStatus', 'items'])->latest('id');
+
+        if ($request->filled('status') && is_numeric($request->query('status'))) {
+            $status = (int) $request->query('status');
+            $query->whereHas('latestStatus', fn ($q) => $q->where('status', $status));
+        }
+
+        if (($term = trim((string) $request->query('q', ''))) !== '') {
+            $query->where(function ($inner) use ($term) {
+                if (is_numeric($term)) {
+                    $inner->orWhere('id', (int) $term);
+                }
+
+                $inner->orWhereHas('user', function ($user) use ($term) {
+                    $user->where('name', 'like', "%{$term}%")
+                        ->orWhere('surname', 'like', "%{$term}%")
+                        ->orWhere('phone', 'like', "%{$term}%");
+                });
+            });
+        }
+
+        return $query;
+    }
+
+    /**
+     * Order shown on the admin detail page, with everything the view needs.
+     */
+    public function adminFind(int $id): Order
+    {
+        return $this->model->query()
+            ->with([
+                'user',
+                'address',
+                'latestStatus',
+                'statuses' => fn ($q) => $q->orderByDesc('id'),
+                'items.product.images',
+                'items.product.category',
+            ])
+            ->findOrFail($id);
+    }
+
+    public function adminDelete(int $id): void
+    {
+        $order = $this->model->query()->with('items')->findOrFail($id);
+
+        $order->items()->delete();
+        $order->delete();
+    }
+
     public function details(int $id): JsonResponse
     {
         try {

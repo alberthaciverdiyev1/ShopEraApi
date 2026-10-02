@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Enums\OrderStatus as OrderStatusEnum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Modules\Order\Entities\Order;
-use Modules\Order\Entities\OrderStatus;
 use Modules\Order\Http\Requests\OrderUpdateRequest;
 use Modules\Order\Services\OrderService;
 
@@ -20,27 +18,7 @@ class OrderController extends AdminController
     {
         $this->requirePermission('view orders-admin');
 
-        $query = Order::query()->with(['user', 'latestStatus', 'items'])->latest('id');
-
-        if ($request->filled('status') && is_numeric($request->query('status'))) {
-            $status = (int) $request->query('status');
-            $query->whereHas('latestStatus', fn ($q) => $q->where('status', $status));
-        }
-
-        if (($term = trim((string) $request->query('q', ''))) !== '') {
-            $query->where(function ($inner) use ($term) {
-                if (is_numeric($term)) {
-                    $inner->orWhere('id', (int) $term);
-                }
-                $inner->orWhereHas('user', function ($user) use ($term) {
-                    $user->where('name', 'like', "%{$term}%")
-                        ->orWhere('surname', 'like', "%{$term}%")
-                        ->orWhere('phone', 'like', "%{$term}%");
-                });
-            });
-        }
-
-        $rows = $query->paginate(20)->withQueryString();
+        $rows = $this->service->adminQuery($request)->paginate(20)->withQueryString();
 
         if ($this->isHtmx($request)) {
             return view('admin.pages.orders._table', $this->tableData($rows, $request));
@@ -57,16 +35,7 @@ class OrderController extends AdminController
     {
         $this->requirePermission('view orders-admin');
 
-        $order = Order::query()
-            ->with([
-                'user',
-                'address',
-                'latestStatus',
-                'statuses' => fn ($q) => $q->orderByDesc('id'),
-                'items.product.images',
-                'items.product.category',
-            ])
-            ->findOrFail($id);
+        $order = $this->service->adminFind($id);
 
         return view('admin.pages.orders.show', [
             'title' => 'Sifariş #'.$order->id,
@@ -79,7 +48,6 @@ class OrderController extends AdminController
     {
         $this->requirePermission('update order');
 
-        $order = Order::query()->findOrFail($id);
         $admin = admin_user();
 
         // OrderService authorises writes against auth()->user(); authenticate the
@@ -94,7 +62,7 @@ class OrderController extends AdminController
             $form->setRedirector(app('redirect'));
             $form->validateResolved();
 
-            $response = $this->service->update($order->id, $form);
+            $response = $this->service->update($id, $form);
         } finally {
             if ($previous) {
                 Auth::guard('web')->setUser($previous);
@@ -113,16 +81,14 @@ class OrderController extends AdminController
             ]));
         }
 
-        return redirect()->route('admin.orders.show', $order->id)->with('status', $message);
+        return redirect()->route('admin.orders.show', $id)->with('status', $message);
     }
 
     public function destroy(int $id)
     {
         $this->requirePermission('delete order');
 
-        $order = Order::query()->with('items')->findOrFail($id);
-        $order->items()->delete();
-        $order->delete();
+        $this->service->adminDelete($id);
 
         return redirect()->route('admin.orders.index')->with('status', __('Sifariş silindi.'));
     }

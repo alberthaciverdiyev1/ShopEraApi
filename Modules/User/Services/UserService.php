@@ -4,17 +4,22 @@ namespace Modules\User\Services;
 
 use App\Helpers\DeleteAccountHtml;
 use App\Helpers\PhoneHelper;
+use App\Support\TenantContext;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use App\Support\TenantContext;
+use Modules\Order\Entities\Order;
 use Modules\User\Entities\OtpEmail;
 use Modules\User\Entities\User;
 use Modules\User\Http\UserResource;
+use Spatie\Permission\Models\Role;
 use Symfony\Component\HttpFoundation\Response as StatusCode;
 
 class UserService
@@ -411,7 +416,7 @@ class UserService
     }
 
     /** Team members: users holding any non-customer role. */
-    public function teamQuery(\Illuminate\Http\Request $request): \Illuminate\Database\Eloquent\Builder
+    public function teamQuery(Request $request): Builder
     {
         $query = $this->user->newQuery()
             ->with('roles')
@@ -428,5 +433,82 @@ class UserService
         }
 
         return $query;
+    }
+
+    /**
+     * Admin user list with the search + role filters used by the panel.
+     */
+    public function adminQuery(Request $request): Builder
+    {
+        $query = $this->user->newQuery()->with('roles')->latest('id');
+
+        if (($term = trim((string) $request->query('q', ''))) !== '') {
+            $query->where(function ($inner) use ($term) {
+                $inner->where('name', 'like', "%{$term}%")
+                    ->orWhere('surname', 'like', "%{$term}%")
+                    ->orWhere('email', 'like', "%{$term}%")
+                    ->orWhere('phone', 'like', "%{$term}%");
+            });
+        }
+
+        if ($request->filled('role')) {
+            $query->whereHas('roles', fn ($q) => $q->where('name', $request->query('role')));
+        }
+
+        return $query;
+    }
+
+    /**
+     * User shown on the admin detail page with everything the view needs.
+     *
+     * @return array{user: User, recentOrders: Collection, ordersCount: int}
+     */
+    public function adminDetails(int $id): array
+    {
+        $user = $this->user->newQuery()
+            ->with(['roles', 'permissions', 'balance'])
+            ->findOrFail($id);
+
+        return [
+            'user' => $user,
+            'recentOrders' => Order::query()->where('user_id', $user->id)->latest('id')->limit(10)->get(),
+            'ordersCount' => Order::query()->where('user_id', $user->id)->count(),
+        ];
+    }
+
+    /** Role names available on the given guard, for the filter/select boxes. */
+    public function roleNames(string $guard): Collection
+    {
+        return Role::query()->where('guard_name', $guard)->orderBy('name')->pluck('name');
+    }
+
+    /** Prevents an admin from blocking or deleting their own account. */
+    private function forbidSelf(int $id, string $message): void
+    {
+        abort_if($id === Auth::guard('admin')->id(), 403, $message);
+    }
+
+    public function adminSetActive(int $id, bool $active): void
+    {
+        $this->forbidSelf($id, 'Öz hesabınızı bloklaya bilməzsiniz.');
+
+        $this->user->newQuery()->findOrFail($id)->update(['is_active' => $active]);
+    }
+
+    public function adminSyncRoles(int $id, array $roles): void
+    {
+        $this->user->newQuery()->findOrFail($id)->syncRoles($roles);
+    }
+
+    public function adminChangePassword(int $id, string $password): void
+    {
+        $this->user->newQuery()->findOrFail($id)->update(['password' => Hash::make($password)]);
+    }
+
+    public function adminDelete(int $id): void
+    {
+        $this->forbidSelf($id, 'Öz hesabınızı silə bilməzsiniz.');
+
+        $this->user->newQuery()->findOrFail($id)->delete();
     }
 }

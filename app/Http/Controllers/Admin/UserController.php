@@ -3,9 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Modules\User\Entities\User;
-use Spatie\Permission\Models\Role;
+use Modules\User\Services\UserService;
 
 class UserController extends AdminController
 {
@@ -13,26 +11,16 @@ class UserController extends AdminController
 
     private string $guard = 'sanctum';
 
+    private function service(): UserService
+    {
+        return app(UserService::class);
+    }
+
     public function index(Request $request)
     {
         $this->requirePermission('view users');
 
-        $query = User::query()->with('roles')->latest('id');
-
-        if (($term = trim((string) $request->query('q', ''))) !== '') {
-            $query->where(function ($inner) use ($term) {
-                $inner->where('name', 'like', "%{$term}%")
-                    ->orWhere('surname', 'like', "%{$term}%")
-                    ->orWhere('email', 'like', "%{$term}%")
-                    ->orWhere('phone', 'like', "%{$term}%");
-            });
-        }
-
-        if ($request->filled('role')) {
-            $query->whereHas('roles', fn ($q) => $q->where('name', $request->query('role')));
-        }
-
-        $rows = $query->paginate(20)->withQueryString();
+        $rows = $this->service()->adminQuery($request)->paginate(20)->withQueryString();
 
         if ($this->isHtmx($request)) {
             return view('admin.pages.users._table', ['rows' => $rows]);
@@ -41,7 +29,7 @@ class UserController extends AdminController
         return view('admin.pages.users.index', [
             'title' => $this->title,
             'rows' => $rows,
-            'roles' => Role::query()->where('guard_name', $this->guard)->orderBy('name')->pluck('name'),
+            'roles' => $this->service()->roleNames($this->guard),
             'filters' => $request->only(['q', 'role']),
         ]);
     }
@@ -50,32 +38,23 @@ class UserController extends AdminController
     {
         $this->requirePermission('view users');
 
-        $user = User::query()
-            ->with(['roles', 'permissions', 'balance'])
-            ->findOrFail($id);
+        $details = $this->service()->adminDetails($id);
+        $user = $details['user'];
 
-        return view('admin.pages.users.show', [
+        return view('admin.pages.users.show', array_merge($details, [
             'title' => trim($user->name.' '.$user->surname),
-            'user' => $user,
-            'roles' => Role::query()->where('guard_name', $this->guard)->orderBy('name')->pluck('name'),
-            'recentOrders' => \Modules\Order\Entities\Order::query()->where('user_id', $user->id)->latest('id')->limit(10)->get(),
-            'ordersCount' => \Modules\Order\Entities\Order::query()->where('user_id', $user->id)->count(),
-        ]);
+            'roles' => $this->service()->roleNames($this->guard),
+        ]));
     }
 
     public function updateStatus(Request $request, int $id)
     {
         $this->requirePermission('update user');
 
-        $user = User::query()->findOrFail($id);
-
-        abort_if($user->id === admin_user()?->id, 403, 'Öz hesabınızı bloklaya bilməzsiniz.');
-
-        $user->update(['is_active' => $request->boolean('is_active')]);
+        $this->service()->adminSetActive($id, $request->boolean('is_active'));
 
         return back()->with('status', __('İstifadəçi statusu yeniləndi.'));
     }
-
 
     public function updateRoles(Request $request, int $id)
     {
@@ -86,8 +65,7 @@ class UserController extends AdminController
             'roles.*' => ['string', 'exists:roles,name'],
         ]);
 
-        $user = User::query()->findOrFail($id);
-        $user->syncRoles($data['roles'] ?? []);
+        $this->service()->adminSyncRoles($id, $data['roles'] ?? []);
 
         return back()->with('status', __('Rollar yeniləndi.'));
     }
@@ -100,7 +78,7 @@ class UserController extends AdminController
             'password' => ['required', 'string', 'min:6', 'confirmed'],
         ]);
 
-        User::query()->findOrFail($id)->update(['password' => Hash::make($data['password'])]);
+        $this->service()->adminChangePassword($id, $data['password']);
 
         return back()->with('status', __('Şifrə yeniləndi.'));
     }
@@ -109,11 +87,7 @@ class UserController extends AdminController
     {
         $this->requirePermission('destroy user');
 
-        $user = User::query()->findOrFail($id);
-
-        abort_if($user->id === admin_user()?->id, 403, 'Öz hesabınızı silə bilməzsiniz.');
-
-        $user->delete();
+        $this->service()->adminDelete($id);
 
         return redirect()->route('admin.users.index')->with('status', __('İstifadəçi silindi.'));
     }

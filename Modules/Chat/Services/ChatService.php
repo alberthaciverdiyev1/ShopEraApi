@@ -2,7 +2,10 @@
 
 namespace Modules\Chat\Services;
 
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Modules\Chat\Entities\Conversation;
@@ -200,6 +203,82 @@ class ChatService
         });
 
         return responseHelper(__('Message deleted successfully.'), 200);
+    }
+
+    /**
+     * Admin inbox: conversations with a per-row unread count, newest first.
+     */
+    public function adminConversationQuery(Request $request): Builder
+    {
+        $query = $this->conversation
+            ->with('user')
+            ->withCount([
+                'messages as unread_count' => fn ($q) => $q->where('sender_type', 'user')->where('is_read', false),
+            ])
+            ->orderByDesc('unread_count')
+            ->orderByDesc('last_message_at');
+
+        if (($term = trim((string) $request->query('q', ''))) !== '') {
+            $query->whereHas('user', function ($user) use ($term) {
+                $user->where('name', 'like', "%{$term}%")
+                    ->orWhere('surname', 'like', "%{$term}%")
+                    ->orWhere('phone', 'like', "%{$term}%")
+                    ->orWhere('email', 'like', "%{$term}%");
+            });
+        }
+
+        return $query;
+    }
+
+    /**
+     * Conversations shown beside an opened thread (without the search filter).
+     */
+    public function adminRecentConversations(): LengthAwarePaginator
+    {
+        return $this->conversation
+            ->with('user')
+            ->withCount(['messages as unread_count' => fn ($q) => $q->where('sender_type', 'user')->where('is_read', false)])
+            ->orderByDesc('last_message_at')
+            ->paginate(20);
+    }
+
+    /**
+     * Opens a thread: marks the customer's messages read and returns the
+     * conversation together with its full message list.
+     *
+     * @return array{conversation: Conversation, messages: Collection}
+     */
+    public function adminOpenConversation(int $conversationId): array
+    {
+        $conversation = $this->conversation->with('user')->findOrFail($conversationId);
+
+        $this->message
+            ->where('conversation_id', $conversation->id)
+            ->where('sender_type', 'user')
+            ->where('is_read', false)
+            ->update(['is_read' => true]);
+
+        return [
+            'conversation' => $conversation,
+            'messages' => $this->adminMessages($conversation->id),
+        ];
+    }
+
+    /**
+     * Full message list of a thread (oldest first).
+     */
+    public function adminMessages(int $conversationId): Collection
+    {
+        return $this->message
+            ->where('conversation_id', $conversationId)
+            ->with('attachments')
+            ->orderBy('id')
+            ->get();
+    }
+
+    public function adminFindConversation(int $conversationId): Conversation
+    {
+        return $this->conversation->findOrFail($conversationId);
     }
 
     public function conversationList(Request $request)

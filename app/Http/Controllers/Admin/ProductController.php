@@ -11,24 +11,29 @@ use Illuminate\Support\Str;
 use Modules\Banner\Entities\Banner;
 use Modules\Brand\Entities\Brand;
 use Modules\Category\Entities\Category;
-use Modules\Filter\Entities\Filter;
-use Modules\Filter\Entities\ProductFilter;
 use Modules\Color\Entities\Color;
+use Modules\Filter\Entities\ProductFilter;
+use Modules\Filter\Services\FilterService;
 use Modules\Product\Entities\Product;
 use Modules\Product\Entities\ProductImage;
 use Modules\Product\Entities\ProductVideo;
+use Modules\Product\Services\ProductService;
 use Modules\Size\Entities\Size;
 
 class ProductController extends AdminController
 {
     protected string $title = 'Məhsullar';
 
+    private function service(): ProductService
+    {
+        return app(ProductService::class);
+    }
 
     public function index(Request $request)
     {
         $this->requirePermission('view products');
 
-        $rows = $this->query($request)->paginate(20)->withQueryString();
+        $rows = $this->service()->adminQuery($request)->paginate(20)->withQueryString();
 
         if ($this->isHtmx($request)) {
             return view('admin.pages.products._table', ['rows' => $rows]);
@@ -48,14 +53,10 @@ class ProductController extends AdminController
     {
         $this->requirePermission('view products');
 
-        $product = Product::query()
-            ->with(['images', 'colors', 'sizes', 'category', 'brand', 'videos'])
-            ->withAvg('reviews', 'rate')
-            ->withCount('reviews')
-            ->findOrFail($id);
+        $product = $this->service()->adminFind($id);
 
         return view('admin.pages.products.show', [
-            'title' => admin_label($product, 'title', '#' . $product->id),
+            'title' => admin_label($product, 'title', '#'.$product->id),
             'product' => $product,
         ]);
     }
@@ -64,18 +65,16 @@ class ProductController extends AdminController
     {
         $this->requirePermission('update product');
 
-        $product = Product::query()->with(['images', 'colors', 'sizes', 'videos', 'productFilters', 'category'])->findOrFail($id);
+        $product = $this->service()->adminFindForEdit($id);
         $banner = Banner::query()->where('product_id', $product->id)->latest('id')->first();
 
         $currentMain = $product->category?->parent_id ?? $product->category_id;
         $currentChildren = $currentMain ? Category::query()->where('parent_id', $currentMain)->orderBy('id')->get() : collect();
 
-        $filters = $product->category_id
-            ? Filter::query()->whereHas('categories', fn($q) => $q->where('categories.id', $product->category_id))->orderBy('id')->get()
-            : collect();
+        $filters = app(FilterService::class)->forCategory($product->category_id);
 
         return view('admin.pages.products.edit', [
-            'title' => 'Redaktə: ' . admin_label($product, 'title', '#' . $product->id),
+            'title' => 'Redaktə: '.admin_label($product, 'title', '#'.$product->id),
             'product' => $product,
             'bannerType' => $banner?->type,
             'mainCategories' => Category::query()->whereNull('parent_id')->orderBy('id')->get(),
@@ -101,9 +100,7 @@ class ProductController extends AdminController
         $currentMain = old('main_category_id') ?: null;
         $currentChildren = $currentMain ? Category::query()->where('parent_id', $currentMain)->orderBy('id')->get() : collect();
 
-        $filters = $oldCategory
-            ? Filter::query()->whereHas('categories', fn($q) => $q->where('categories.id', $oldCategory))->orderBy('id')->get()
-            : collect();
+        $filters = app(FilterService::class)->forCategory($oldCategory);
 
         return view('admin.pages.products.create', [
             'title' => 'Yeni məhsul',
@@ -169,14 +166,14 @@ class ProductController extends AdminController
             'banner_type' => ['nullable', 'in:big,middle,small'],
         ]);
 
-        $product = new Product();
+        $product = new Product;
         $product->fill([
             'user_id' => admin_user()->id,
             'price' => $data['price'],
             'discount' => $data['discount'] ?? null,
             'stock_count' => $data['stock_count'],
             'weight' => $data['weight'] ?? null,
-            'sku' => !empty($data['sku']) ? $data['sku'] : $this->nextSku(),
+            'sku' => ! empty($data['sku']) ? $data['sku'] : $this->service()->nextSku(),
             'category_id' => $data['category_id'] ?? null,
             'brand_id' => $data['brand_id'] ?? null,
             'gender' => $data['gender'] ?? null,
@@ -187,30 +184,18 @@ class ProductController extends AdminController
             'is_suggest' => $request->boolean('is_suggest'),
             'approval_status' => $data['approval_status'] ?? 'approved',
         ]);
-        $product->title = array_filter($data['title'] ?? [], fn($v) => $v !== null && $v !== '');
-        $product->description = array_filter($data['description'] ?? [], fn($v) => $v !== null && $v !== '');
+        $product->title = array_filter($data['title'] ?? [], fn ($v) => $v !== null && $v !== '');
+        $product->description = array_filter($data['description'] ?? [], fn ($v) => $v !== null && $v !== '');
         $product->save();
 
         $product->colors()->sync(array_map('intval', $request->input('colors', [])));
-        $this->syncSizes($product, (array)$request->input('size_ids', []), (array)$request->input('sizes', []));
+        $this->syncSizes($product, (array) $request->input('size_ids', []), (array) $request->input('sizes', []));
         $this->syncImages($product, $request);
         $this->syncVideos($product, $request);
         $this->syncFilters($product, $request);
         $this->syncBanner($product, $request->input('banner_type'));
 
         return redirect()->route('admin.products.show', $product->id)->with('status', __('Məhsul əlavə edildi.'));
-    }
-
-    private function nextSku(): string
-    {
-        $last = Product::query()->whereNotNull('sku')->orderByDesc('id')->value('sku');
-        $next = ($last && preg_match('/P(\d+)/', $last, $m)) ? ((int)$m[1] + 1) : 1;
-        do {
-            $sku = 'P' . str_pad((string)$next, 6, '0', STR_PAD_LEFT);
-            $next++;
-        } while (Product::query()->where('sku', $sku)->exists());
-
-        return $sku;
     }
 
     public function update(Request $request, int $id)
@@ -261,7 +246,7 @@ class ProductController extends AdminController
             'banner_type' => ['nullable', 'in:big,middle,small'],
         ]);
 
-        $oldStock = (int)$product->stock_count;
+        $oldStock = (int) $product->stock_count;
 
         $product->fill([
             'price' => $data['price'],
@@ -280,20 +265,20 @@ class ProductController extends AdminController
             'approval_status' => $data['approval_status'] ?? $product->approval_status,
         ]);
 
-        $product->title = array_merge($product->getTranslations('title'), array_filter($data['title'] ?? [], fn($v) => $v !== null));
-        $product->description = array_merge($product->getTranslations('description'), array_filter($data['description'] ?? [], fn($v) => $v !== null));
+        $product->title = array_merge($product->getTranslations('title'), array_filter($data['title'] ?? [], fn ($v) => $v !== null));
+        $product->description = array_merge($product->getTranslations('description'), array_filter($data['description'] ?? [], fn ($v) => $v !== null));
         $product->save();
 
         $product->colors()->sync(array_map('intval', $request->input('colors', [])));
 
-        $this->syncSizes($product, (array)$request->input('size_ids', []), (array)$request->input('sizes', []));
+        $this->syncSizes($product, (array) $request->input('size_ids', []), (array) $request->input('sizes', []));
         $this->syncImages($product, $request);
         $this->syncVideos($product, $request);
         $this->syncFilters($product, $request);
         $this->syncBanner($product, $request->input('banner_type'));
 
         $message = 'Məhsul yeniləndi.';
-        if ($oldStock <= 0 && (int)$product->stock_count > 0) {
+        if ($oldStock <= 0 && (int) $product->stock_count > 0) {
             $message = 'Məhsul yeniləndi. Stok bərpa olundu — abunəçilərə bildiriş göndərilə bilər.';
         }
 
@@ -304,18 +289,7 @@ class ProductController extends AdminController
     {
         $this->requirePermission('delete product');
 
-        $product = Product::query()->with('images')->findOrFail($id);
-
-        foreach ($product->images as $image) {
-            if ($image->getRawOriginal('image_path') && !Str::startsWith($image->getRawOriginal('image_path'), 'http')) {
-                Storage::disk('public')->delete($image->getRawOriginal('image_path'));
-            }
-        }
-
-        $product->colors()->detach();
-        $product->sizes()->detach();
-        $product->images()->delete();
-        $product->delete();
+        $this->service()->adminDelete($id);
 
         return redirect()->route('admin.products.index')->with('status', __('Məhsul silindi.'));
     }
@@ -327,7 +301,7 @@ class ProductController extends AdminController
         $image = ProductImage::query()->findOrFail($imageId);
         $raw = $image->getRawOriginal('image_path');
 
-        if ($raw && !Str::startsWith($raw, 'http')) {
+        if ($raw && ! Str::startsWith($raw, 'http')) {
             Storage::disk('public')->delete($raw);
         }
 
@@ -361,18 +335,18 @@ class ProductController extends AdminController
         ]);
 
         $query = Product::query();
-        if (!empty($data['category_id'])) {
+        if (! empty($data['category_id'])) {
             $query->where('category_id', $data['category_id']);
         }
-        if (!empty($data['brand_id'])) {
+        if (! empty($data['brand_id'])) {
             $query->where('brand_id', $data['brand_id']);
         }
 
         $updated = 0;
         $query->orderBy('id')->chunkById(200, function ($products) use ($data, &$updated) {
             foreach ($products as $product) {
-                $price = (float)$product->price;
-                $delta = $data['mode'] === 'percentage' ? $price * ((float)$data['value'] / 100) : (float)$data['value'];
+                $price = (float) $product->price;
+                $delta = $data['mode'] === 'percentage' ? $price * ((float) $data['value'] / 100) : (float) $data['value'];
                 $newPrice = $data['type'] === 'increment' ? $price + $delta : $price - $delta;
                 $product->price = max(0, round($newPrice, 2));
                 $product->save();
@@ -383,37 +357,6 @@ class ProductController extends AdminController
         return redirect()->route('admin.products.prices')->with('status', __(':count məhsulun qiyməti yeniləndi.', ['count' => $updated]));
     }
 
-    private function query(Request $request)
-    {
-        $query = Product::query()->with(['images', 'category', 'brand'])->latest('id');
-
-        if (($term = trim((string)$request->query('q', ''))) !== '') {
-            $query->where(function ($inner) use ($term) {
-                $inner->where('title->az', 'like', "%{$term}%")
-                    ->orWhere('sku', 'like', "%{$term}%");
-                if (is_numeric($term)) {
-                    $inner->orWhere('id', (int)$term);
-                }
-            });
-        }
-
-        foreach (['category_id', 'brand_id'] as $filter) {
-            if ($request->filled($filter)) {
-                $query->where($filter, $request->query($filter));
-            }
-        }
-
-        if ($request->filled('is_active')) {
-            $query->where('is_active', $request->boolean('is_active'));
-        }
-
-        if ($request->filled('approval_status')) {
-            $query->where('approval_status', $request->query('approval_status'));
-        }
-
-        return $query;
-    }
-
     public function destroyVideo(int $id)
     {
         $this->requirePermission('update product');
@@ -421,7 +364,7 @@ class ProductController extends AdminController
         $video = ProductVideo::query()->findOrFail($id);
         $raw = $video->getRawOriginal('video_path');
 
-        if ($raw && !Str::startsWith($raw, 'http')) {
+        if ($raw && ! Str::startsWith($raw, 'http')) {
             Storage::disk('public')->delete($raw);
         }
 
@@ -434,11 +377,11 @@ class ProductController extends AdminController
     {
         $delete = array_map('intval', $request->input('delete_videos', []));
 
-        if (!empty($delete)) {
+        if (! empty($delete)) {
             $product->videos()->whereIn('id', $delete)->get()
                 ->each(function (ProductVideo $video) {
                     $raw = $video->getRawOriginal('video_path');
-                    if ($raw && !Str::startsWith($raw, 'http')) {
+                    if ($raw && ! Str::startsWith($raw, 'http')) {
                         Storage::disk('public')->delete($raw);
                     }
                     $video->delete();
@@ -455,15 +398,15 @@ class ProductController extends AdminController
     {
         ProductFilter::query()->where('product_id', $product->id)->delete();
 
-        foreach ((array)$request->input('filters', []) as $filterId => $value) {
+        foreach ((array) $request->input('filters', []) as $filterId => $value) {
             if ($value === null || $value === '') {
                 continue;
             }
 
             ProductFilter::query()->create([
                 'product_id' => $product->id,
-                'filter_id' => (int)$filterId,
-                'value' => (string)$value,
+                'filter_id' => (int) $filterId,
+                'value' => (string) $value,
             ]);
         }
     }
@@ -482,7 +425,7 @@ class ProductController extends AdminController
         $images = $product->images()->orderBy('id')->take(2)->get();
         $first = $images->first();
 
-        if (!$first) {
+        if (! $first) {
             return;
         }
 
@@ -508,8 +451,8 @@ class ProductController extends AdminController
         $sync = [];
 
         foreach ($sizeIds as $sizeId) {
-            $sizeId = (int)$sizeId;
-            $row = (array)($prices[$sizeId] ?? []);
+            $sizeId = (int) $sizeId;
+            $row = (array) ($prices[$sizeId] ?? []);
             $pivot = $existing->get($sizeId)?->pivot;
 
             $pick = function (string $field) use ($row, $pivot, $product) {
@@ -535,11 +478,11 @@ class ProductController extends AdminController
     {
         $delete = array_map('intval', $request->input('delete_images', []));
 
-        if (!empty($delete)) {
+        if (! empty($delete)) {
             $product->images()->whereIn('id', $delete)->get()
                 ->each(function (ProductImage $image) {
                     $raw = $image->getRawOriginal('image_path');
-                    if ($raw && !Str::startsWith($raw, 'http')) {
+                    if ($raw && ! Str::startsWith($raw, 'http')) {
                         Storage::disk('public')->delete($raw);
                     }
                     $image->delete();

@@ -5,8 +5,10 @@ namespace Modules\Product\Services;
 use App\Enums\Gender;
 use App\Helpers\TranslateHelper as Translate;
 use App\Support\DbExtensions;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -1125,7 +1127,7 @@ class ProductService
     }
 
     /** Admin listing query for product story videos (status + text filters). */
-    public function storyVideoQuery(\Illuminate\Http\Request $request): \Illuminate\Database\Eloquent\Builder
+    public function storyVideoQuery(Request $request): Builder
     {
         $query = ProductVideo::query()->with('product.images')->latest('id');
 
@@ -1164,5 +1166,89 @@ class ProductService
         }
 
         $video->delete();
+    }
+
+    /** Admin product listing query with the panel's search + facet filters. */
+    public function adminQuery(Request $request): Builder
+    {
+        $query = $this->model->newQuery()->with(['images', 'category', 'brand'])->latest('id');
+
+        if (($term = trim((string) $request->query('q', ''))) !== '') {
+            $query->where(function ($inner) use ($term) {
+                $inner->where('title->az', 'like', "%{$term}%")
+                    ->orWhere('sku', 'like', "%{$term}%");
+
+                if (is_numeric($term)) {
+                    $inner->orWhere('id', (int) $term);
+                }
+            });
+        }
+
+        foreach (['category_id', 'brand_id'] as $filter) {
+            if ($request->filled($filter)) {
+                $query->where($filter, $request->query($filter));
+            }
+        }
+
+        if ($request->filled('is_active')) {
+            $query->where('is_active', $request->boolean('is_active'));
+        }
+
+        if ($request->filled('approval_status')) {
+            $query->where('approval_status', $request->query('approval_status'));
+        }
+
+        return $query;
+    }
+
+    /** Product shown on the admin detail page. */
+    public function adminFind(int $id): Product
+    {
+        return $this->model->newQuery()
+            ->with(['images', 'colors', 'sizes', 'category', 'brand', 'videos'])
+            ->withAvg('reviews', 'rate')
+            ->withCount('reviews')
+            ->findOrFail($id);
+    }
+
+    /** Product loaded for the edit form (filters + banner handled separately). */
+    public function adminFindForEdit(int $id): Product
+    {
+        return $this->model->newQuery()
+            ->with(['images', 'colors', 'sizes', 'videos', 'productFilters', 'category'])
+            ->findOrFail($id);
+    }
+
+    /** Deletes a product along with its images, colors and sizes. */
+    public function adminDelete(int $id): void
+    {
+        $product = $this->model->newQuery()->with('images')->findOrFail($id);
+
+        foreach ($product->images as $image) {
+            $raw = $image->getRawOriginal('image_path');
+
+            if ($raw && ! Str::startsWith($raw, 'http')) {
+                Storage::disk('public')->delete($raw);
+            }
+        }
+
+        $product->colors()->detach();
+        $product->sizes()->detach();
+        $product->images()->delete();
+        $product->delete();
+    }
+
+    /** Next free `P000001`-style SKU. */
+    public function nextSku(): string
+    {
+        $last = $this->model->newQuery()->whereNotNull('sku')->orderByDesc('id')->value('sku');
+        $next = ($last && preg_match('/P(\d+)/', $last, $m)) ? ((int) $m[1] + 1) : 1;
+
+        do {
+            $sku = 'P'.str_pad((string) $next, 6, '0', STR_PAD_LEFT);
+            $next++;
+        } while ($this->model->newQuery()->where('sku', $sku)->exists());
+
+        return $sku;
     }
 }
