@@ -32,6 +32,13 @@
                 {#if discountPercent > 0}<Badge text={`-${discountPercent}%`} variant="off" />{/if}
                 <div class="best-seller-product-items-two__thumb">
                     <img src={productImage(product)} alt={productTitle(product)} loading="lazy">
+                    {#if product.rate}
+                        <div class="card-rating">
+                            <i class="fa-solid fa-star"></i>
+                            <b>{Number(product.rate).toFixed(1)}</b>
+                            <span>({product.rate_count ?? 0})</span>
+                        </div>
+                    {/if}
                 </div>
                 <div class="best-seller-product-items-two__content">
                     <div class="best-seller-product-items-two__details">
@@ -49,6 +56,39 @@
             </div>
 
 <style>
+	.best-seller-product-items-two__thumb {
+		position: relative;
+	}
+
+	/* Rating badge sits ON the photo, right above the category line. */
+	.card-rating {
+		position: absolute;
+		left: 10px;
+		bottom: 10px;
+		z-index: 6;
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		padding: 4px 10px;
+		border-radius: 999px;
+		background: rgba(15, 23, 42, 0.72);
+		backdrop-filter: blur(4px);
+		color: #fff;
+		font-size: 12px;
+		font-weight: 700;
+		line-height: 1;
+	}
+
+	.card-rating i {
+		color: #fbbf24;
+		font-size: 11px;
+	}
+
+	.card-rating span {
+		color: #cbd5e1;
+		font-weight: 600;
+	}
+
 	.best-seller-product-items-two :global(.best-seller-product-items-two__badge1) {
 		top: 12px !important;
 		left: 12px !important;
