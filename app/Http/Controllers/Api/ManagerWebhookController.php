@@ -57,7 +57,17 @@ class ManagerWebhookController extends Controller
                     $args['--storage-root'] = $storageRoot;
                 }
 
-                Artisan::call('tenant:provision', array_merge($args, $admin));
+                $exitCode = Artisan::call('tenant:provision', array_merge($args, $admin));
+                if ($exitCode !== 0) {
+                    return response()->json([
+                        'ok' => false,
+                        'event' => $event,
+                        'host' => $host,
+                        'message' => 'Tenant provision command failed.',
+                        'output' => Artisan::output(),
+                    ], 500);
+                }
+
                 $provisioned[] = $host;
 
                 // Always clear the existence flag (explicit or derived name).
@@ -70,7 +80,16 @@ class ManagerWebhookController extends Controller
             DB::purge('tenant');
 
             // Refresh the host → database map so ResolveTenant knows the new tenant.
-            Artisan::call('manager:sync');
+            $syncExitCode = Artisan::call('manager:sync');
+            if ($syncExitCode !== 0) {
+                return response()->json([
+                    'ok' => false,
+                    'event' => $event,
+                    'provisioned' => $provisioned,
+                    'message' => 'Tenant was provisioned, but manager sync failed.',
+                    'output' => Artisan::output(),
+                ], 500);
+            }
 
             return response()->json(['ok' => true, 'event' => $event, 'provisioned' => $provisioned]);
         }
@@ -83,7 +102,16 @@ class ManagerWebhookController extends Controller
             ?: $request->getHost()
         );
 
-        Artisan::call('manager:sync', ['--host' => $host]);
+        $syncExitCode = Artisan::call('manager:sync', ['--host' => $host]);
+        if ($syncExitCode !== 0) {
+            return response()->json([
+                'ok' => false,
+                'event' => $event,
+                'host' => $host,
+                'message' => 'Manager sync failed.',
+                'output' => Artisan::output(),
+            ], 500);
+        }
 
         return response()->json(['ok' => true, 'event' => $event]);
     }

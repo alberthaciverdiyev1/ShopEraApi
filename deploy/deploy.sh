@@ -134,6 +134,12 @@ info "Cache yenile (optimize:clear + optimize)"
 "$PHP_BIN" artisan optimize
 ok "config/route/view cache"
 
+if "$PHP_BIN" artisan list --raw 2>/dev/null | grep -q '^manager:sync$'; then
+    info "Tenant haritasi yenileniyor (manager:sync)"
+    "$PHP_BIN" artisan manager:sync || warn "manager:sync basarisiz; tenant map cache bos kalabilir"
+    ok "tenant map"
+fi
+
 # 7) Izinler (yalnizca root iken)
 if [ "$(id -u)" -eq 0 ] && [ -f deploy/scripts/fix-permissions.sh ]; then
     info "Izinler duzeltiliyor"
