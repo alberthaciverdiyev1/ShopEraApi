@@ -167,4 +167,47 @@ class ReviewService
             'Review deleted successfully.'
         );
     }
+
+    /** Admin listing query with status + text filters. */
+    public function adminQuery(\Illuminate\Http\Request $request): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = $this->model->newQuery()->with(['user', 'product.images'])->latest('id');
+
+        if ($request->filled('status') && is_numeric($request->query('status'))) {
+            $query->where('status', (int) $request->query('status'));
+        }
+
+        if (($term = trim((string) $request->query('q', ''))) !== '') {
+            $query->where(function ($inner) use ($term) {
+                $inner->where('comment', 'like', "%{$term}%")
+                    ->orWhereHas('product', fn ($p) => $p->where('title->az', 'like', "%{$term}%"));
+            });
+        }
+
+        return $query;
+    }
+
+    public function setStatus(int $id, int $status): void
+    {
+        $this->model->newQuery()->findOrFail($id)->update(['status' => $status]);
+    }
+
+    /** Toggles the home-page feature flag; only approved reviews can be featured. */
+    public function toggleFeatured(int $id): bool
+    {
+        $review = $this->model->newQuery()->findOrFail($id);
+        $featured = ! $review->is_featured;
+
+        $review->update([
+            'is_featured' => $featured,
+            'status' => $featured ? \App\Enums\ReviewStatus::APPROVED->value : $review->status->value,
+        ]);
+
+        return $featured;
+    }
+
+    public function remove(int $id): void
+    {
+        $this->model->newQuery()->findOrFail($id)->delete();
+    }
 }
