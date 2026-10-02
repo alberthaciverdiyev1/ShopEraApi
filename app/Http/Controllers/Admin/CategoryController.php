@@ -4,9 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\AbstractPaginator;
-use App\Support\Features;
 use Modules\Category\Entities\Category;
+use Modules\Category\Services\CategoryService;
 
 class CategoryController extends ResourceController
 {
@@ -38,6 +37,11 @@ class CategoryController extends ResourceController
     /** Categories are shown as a tree, so paginate generously. */
     protected int $perPage = 200;
 
+    private function service(): CategoryService
+    {
+        return app(CategoryService::class);
+    }
+
     public function index(Request $request)
     {
         $rows = $this->listingQuery($request)->paginate($this->perPage)->withQueryString();
@@ -56,19 +60,7 @@ class CategoryController extends ResourceController
     /** Grouped ordering so children immediately follow their parent. */
     protected function listingQuery(Request $request): Builder
     {
-        $query = Category::query();
-
-        if (($term = trim((string) $request->query('q', ''))) !== '') {
-            $escaped = addcslashes($term, '%_\\');
-
-            return $query->where(function (Builder $inner) use ($escaped) {
-                foreach ($this->locales() as $locale) {
-                    $inner->orWhere("name->{$locale}", 'like', "%{$escaped}%");
-                }
-            })->orderBy('id');
-        }
-
-        return $query->orderByRaw('COALESCE(parent_id, id)')->orderBy('id');
+        return $this->service()->adminQuery($request, $this->locales());
     }
 
     protected function tableView(): string
@@ -79,43 +71,15 @@ class CategoryController extends ResourceController
     protected function tableData($rows): array
     {
         return [
-            'nodes' => $this->buildTree($rows),
+            'nodes' => $this->service()->treeNodes($rows),
             'route' => $this->route,
         ];
-    }
-
-    /** Flatten the rows into a depth-annotated list so children sit under parents. */
-    private function buildTree($rows): array
-    {
-        $items = $rows instanceof AbstractPaginator ? $rows->getCollection() : collect($rows);
-        $byParent = $items->groupBy(fn (Category $category) => $category->parent_id ?? 0);
-        $withChildren = $items->pluck('parent_id')->filter()->unique()->flip();
-
-        $nodes = [];
-        $walk = function (int $parentId, int $depth, string $chain) use (&$walk, &$nodes, $byParent, $withChildren) {
-            foreach ($byParent->get($parentId, collect()) as $category) {
-                $nodes[] = [
-                    'category' => $category,
-                    'depth' => $depth,
-                    'chain' => trim($chain),
-                    'hasChildren' => $withChildren->has($category->id) || ($byParent->get($category->id, collect())->isNotEmpty()),
-                ];
-                $walk((int) $category->id, $depth + 1, $chain.' '.$category->id);
-            }
-        };
-        $walk(0, 0, '');
-
-        return $nodes;
     }
 
     /** Subcategory options for a chosen parent (used by the product form). */
     public function children(Request $request)
     {
-        $parentId = $request->integer('parent_id') ?: null;
-        $parent = $parentId ? Category::query()->find($parentId) : null;
-        $children = $parentId
-            ? Category::query()->where('parent_id', $parentId)->orderBy('id')->get()
-            : collect();
+        [$parent, $children] = $this->service()->childrenFor($request->integer('parent_id') ?: null);
 
         return view('admin.pages.products._subcategories', [
             'parent' => $parent,
@@ -126,23 +90,13 @@ class CategoryController extends ResourceController
 
     protected function columnMaps(): array
     {
-        $map = [];
-        foreach (Category::query()->orderBy('id')->get() as $category) {
-            $map[$category->id] = admin_label($category, 'name', '#'.$category->id);
-        }
-
-        return ['parent_id' => $map];
+        return ['parent_id' => $this->service()->parentOptions()];
     }
 
     protected function resolveOptions(array $field): array
     {
         if ($field['name'] === 'parent_id') {
-            $options = ['' => '— Ana kateqoriya —'];
-            foreach (Category::query()->orderBy('id')->get() as $category) {
-                $options[$category->id] = admin_label($category, 'name', '#'.$category->id);
-            }
-
-            return $options;
+            return $this->service()->parentOptions();
         }
 
         return parent::resolveOptions($field);

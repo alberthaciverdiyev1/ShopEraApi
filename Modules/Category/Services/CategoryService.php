@@ -354,4 +354,70 @@ class CategoryService
             'Category deleted successfully.'
         );
     }
+
+    /** Admin listing query: tree order (children after parent) with optional q=. */
+    public function adminQuery(\Illuminate\Http\Request $request, array $locales): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = $this->model->newQuery();
+        $term = trim((string) $request->query('q', ''));
+
+        if ($term !== '') {
+            $escaped = addcslashes($term, '%_\\');
+
+            return $query->where(function ($inner) use ($escaped, $locales) {
+                foreach ($locales as $locale) {
+                    $inner->orWhere("name->{$locale}", 'like', "%{$escaped}%");
+                }
+            })->orderBy('id');
+        }
+
+        return $query->orderByRaw('COALESCE(parent_id, id)')->orderBy('id');
+    }
+
+    /** Flatten rows into depth-annotated nodes so children follow parents. */
+    public function treeNodes($rows): array
+    {
+        $items = $rows instanceof \Illuminate\Pagination\AbstractPaginator ? $rows->getCollection() : collect($rows);
+        $byParent = $items->groupBy(fn (Category $c) => $c->parent_id ?? 0);
+        $withChildren = $items->pluck('parent_id')->filter()->unique()->flip();
+
+        $nodes = [];
+        $walk = function (int $parentId, int $depth, string $chain) use (&$walk, &$nodes, $byParent, $withChildren) {
+            foreach ($byParent->get($parentId, collect()) as $category) {
+                $nodes[] = [
+                    'category' => $category,
+                    'depth' => $depth,
+                    'chain' => trim($chain),
+                    'hasChildren' => $withChildren->has($category->id) || $byParent->get($category->id, collect())->isNotEmpty(),
+                ];
+                $walk((int) $category->id, $depth + 1, $chain.' '.$category->id);
+            }
+        };
+        $walk(0, 0, '');
+
+        return $nodes;
+    }
+
+    /** Parent select options: [id => label] with a blank entry. */
+    public function parentOptions(): array
+    {
+        $options = ['' => '— Ana kateqoriya —'];
+
+        foreach ($this->model->newQuery()->orderBy('id')->get() as $category) {
+            $options[$category->id] = admin_label($category, 'name', '#'.$category->id);
+        }
+
+        return $options;
+    }
+
+    /** [parent, children] for the product form subcategory snippet. */
+    public function childrenFor(?int $parentId): array
+    {
+        $parent = $parentId ? $this->model->newQuery()->find($parentId) : null;
+        $children = $parentId
+            ? $this->model->newQuery()->where('parent_id', $parentId)->orderBy('id')->get()
+            : collect();
+
+        return [$parent, $children];
+    }
 }
