@@ -67,7 +67,7 @@ abstract class ResourceController extends AdminController
 
         return view('admin.resources.index', array_merge($this->tableData($rows), [
             'title' => $this->title,
-            'fields' => $this->fields,
+            'fields' => $this->visibleFields(),
             'searchable' => $this->searchable !== [],
             'activeColumn' => $this->activeColumn,
             'filters' => $request->only(['q', 'is_active']),
@@ -78,7 +78,7 @@ abstract class ResourceController extends AdminController
     {
         return view($this->formView(), [
             'item' => null,
-            'fields' => $this->fields,
+            'fields' => $this->visibleFields(),
             'route' => $this->route,
             'title' => $this->title,
             'locales' => $this->locales(),
@@ -92,7 +92,7 @@ abstract class ResourceController extends AdminController
 
         return view($this->formView(), [
             'item' => $item,
-            'fields' => $this->fields,
+            'fields' => $this->visibleFields(),
             'route' => $this->route,
             'title' => $this->title,
             'locales' => $this->locales(),
@@ -178,7 +178,7 @@ abstract class ResourceController extends AdminController
     {
         $rules = [];
 
-        foreach ($this->fields as $field) {
+        foreach ($this->visibleFields() as $field) {
             $name = $field['name'];
             $type = $field['type'] ?? 'text';
             $base = $field['rules'] ?? [];
@@ -241,7 +241,7 @@ abstract class ResourceController extends AdminController
 
     protected function prepareData(array $data, Request $request, ?Model $item): array
     {
-        foreach ($this->fields as $field) {
+        foreach ($this->visibleFields() as $field) {
             $name = $field['name'];
             $type = $field['type'] ?? 'text';
 
@@ -346,7 +346,7 @@ abstract class ResourceController extends AdminController
         return response()
             ->view($this->formView(), [
                 'item' => $item,
-                'fields' => $this->fields,
+                'fields' => $this->visibleFields(),
                 'route' => $this->route,
                 'title' => $this->title,
                 'locales' => $this->locales(),
@@ -380,12 +380,35 @@ abstract class ResourceController extends AdminController
         return 'admin.resources._form';
     }
 
+
+    /**
+     * Fields the controller decides to show: a field is hidden when its
+     * `feature` flag is off or its `plan` does not match. Hidden fields are
+     * also skipped by validation/saving (buildRules/prepareData use this).
+     *
+     * Declare per field: ['name' => 'x', 'feature' => 'chat'] or ['plan' => ['premium','business']].
+     */
+    protected function visibleFields(): array
+    {
+        return array_values(array_filter($this->fields, function (array $field): bool {
+            if (! empty($field['feature']) && ! feature($field['feature'])) {
+                return false;
+            }
+
+            if (! empty($field['plan']) && ! plan($field['plan'])) {
+                return false;
+            }
+
+            return true;
+        }));
+    }
+
     /** @return array<string,array<int|string,mixed>> Options for select fields. */
     protected function optionsMap(): array
     {
         $map = [];
 
-        foreach ($this->fields as $field) {
+        foreach ($this->visibleFields() as $field) {
             if (in_array($field['type'] ?? 'text', ['select', 'multiselect'], true)) {
                 $map[$field['name']] = $this->resolveOptions($field);
             }
