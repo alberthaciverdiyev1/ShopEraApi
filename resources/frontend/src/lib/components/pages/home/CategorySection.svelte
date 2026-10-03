@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { slider } from '$lib/theme/slider';
 	import { categories, categoryName, loadCategories } from '$lib/services/categories';
+    import {translate} from "$lib/i18n";
 
 	onMount(() => loadCategories());
 </script>
@@ -26,7 +27,7 @@
 										</div>
 										<div class="product-box-items-one__content">
 											<h6>{categoryName(category)}</h6>
-											<p>{category.products_count ?? 0} items</p>
+											<p>{category.products_count ?? 0}  {$translate("Product").toLowerCase()}</p>
 										</div>
 									</a>
 								</div>
