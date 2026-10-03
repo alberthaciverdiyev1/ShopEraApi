@@ -35,6 +35,11 @@
 	const canCard = $derived($features.online_payment !== false);
 	const canCash = $derived($features.cash_on_delivery !== false);
 	const canWhatsapp = $derived($features.whatsapp_orders !== false);
+	// Delivery + promo capabilities come from the same entitlement store.
+	const canCourier = $derived($features.delivery_prices !== false);
+	const canPickup = $derived($features.pickup_points !== false);
+	const canFastDelivery = $derived($features.fast_delivery !== false);
+	const canPromo = $derived($features.promo_codes !== false);
 
 	let waBusy = $state(false);
 	let waError = $state('');
@@ -103,6 +108,20 @@
 			paymentType = canCard ? 'CARD' : 'CASH';
 		}
 	});
+
+	// Keep the chosen delivery method inside what the plan allows.
+	$effect(() => {
+		if (deliveryMethod === 'COURIER' && !canCourier) {
+			deliveryMethod = canPickup ? 'PICKUP_POINT' : 'TAKE_FROM_STORE';
+		} else if (deliveryMethod === 'PICKUP_POINT' && !canPickup) {
+			deliveryMethod = canCourier ? 'COURIER' : 'TAKE_FROM_STORE';
+		}
+	});
+
+	// A promo applied before the entitlement changed must not be submitted.
+	$effect(() => {
+		if (!canPromo && $appliedPromo) clearPromo();
+	});
 	let orderNotes = $state('');
 
 	let promoCodeInput = $state('');
@@ -170,10 +189,9 @@
 	async function initDeliveryOptions() {
 		pickupPointsLoading = true;
 		try {
-			const [points, cities] = await Promise.all([
-				loadPickupPoints(),
-				loadDeliveryCities()
-			]);
+			// Only ask for what the plan includes — the endpoints are gated too.
+			const points = canPickup ? await loadPickupPoints().catch(() => []) : [];
+			const cities = canCourier ? await loadDeliveryCities().catch(() => []) : [];
 			pickupPointsList = points;
 			deliveryCitiesList = cities;
 
@@ -492,6 +510,7 @@
 						<div class="delivery-method-tabs mb-4">
 							<h3 class="h4 fw-bold mb-3">{$translate('Delivery Method')}</h3>
 							<div class="method-options-grid">
+								{#if canCourier}
 								<button
 									type="button"
 									class="method-card"
@@ -511,8 +530,9 @@
 										<i class="fa-solid fa-circle-check"></i>
 									</div>
 								</button>
+								{/if}
 
-								{#if true}
+								{#if canPickup}
 								<button
 									type="button"
 									class="method-card"
@@ -581,7 +601,7 @@
 									</div>
 								</button>
 
-								{#if true}
+								{#if canFastDelivery}
 								<button
 									type="button"
 									class="speed-card"
@@ -953,6 +973,7 @@
 						</div>
 
 						<!-- Promo Code Box -->
+						{#if canPromo}
 						<div class="promo-box mb-4">
 							{#if $appliedPromo}
 								<div class="alert alert-success d-flex justify-content-between align-items-center py-2 px-3 mb-0">
@@ -992,6 +1013,7 @@
 								{/if}
 							{/if}
 						</div>
+						{/if}
 
 						<!-- Calculation Breakdown -->
 						<div class="price-breakdown border-top pt-3 mb-4">
