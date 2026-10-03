@@ -9,5 +9,5 @@ Route::prefix('review')->middleware(['auth:sanctum', 'feature:reviews'])->contro
     Route::delete('/{id}', 'delete')->name('review.delete');
     Route::delete('/admin/{id}', 'deleteByAdmin')->name('review.deleteByAdmin');
 });
-Route::get('review/featured', [ReviewController::class, 'featured'])->name('review.featured');
+Route::get('review/featured', [ReviewController::class, 'featured'])->middleware('feature:reviews')->name('review.featured');
 Route::get('review/{product_id}', [ReviewController::class, 'list'])->middleware('feature:reviews')->name('review.list');

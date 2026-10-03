@@ -31,6 +31,6 @@ Route::prefix('order')->middleware('feature:orders')->controller(OrderController
         Route::delete('/{id}', 'delete')->name('order.delete');
         Route::get('/receipt/{order_id}', 'getReceipt')->middleware('feature:order_receipt')->name('order.getReceipt');
         Route::get('/download-receipt/{order_id}', 'downloadReceipt')->middleware('feature:order_receipt')->name('order.downloadReceipt');
-        Route::get('/calculate-delivery-price', 'calculateDeliveryPrice')->name('order.calculateDeliveryPrice');
+        Route::get('/calculate-delivery-price', 'calculateDeliveryPrice')->middleware('feature:delivery_prices')->name('order.calculateDeliveryPrice');
     });
 });

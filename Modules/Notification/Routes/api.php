@@ -1,6 +1,7 @@
 <?php
 
-use Illuminate\Http\Request;
+use Modules\Notification\Http\Controllers\NotificationController;
+use Modules\Notification\Http\Controllers\NotificationTokenController;
 use Modules\Notification\Http\Controllers\SendNotificationController;
 
 /*
@@ -14,8 +15,6 @@ use Modules\Notification\Http\Controllers\SendNotificationController;
 |
 */
 
-
-
 Route::controller(SendNotificationController::class)->middleware(['auth:sanctum', 'feature:push_notifications'])->prefix('notification')->group(function () {
     Route::post('/', 'sendNotification')->name('notification.send');
 });
@@ -24,10 +23,10 @@ Route::controller(SendNotificationController::class)->middleware(['auth:sanctum'
  * istifadəçiyə də çatsın deyə. İstifadəçi daxil olanda eyni sətir onun
  * hesabına bağlanır.
  */
-Route::controller(\Modules\Notification\Http\Controllers\NotificationTokenController::class)->prefix('notification')->group(function () {
+Route::controller(NotificationTokenController::class)->middleware(['auth:sanctum', 'feature:push_notifications'])->prefix('notification')->group(function () {
     Route::post('/save-token', 'saveToken')->name('notification.save-token');
 });
-Route::controller(\Modules\Notification\Http\Controllers\NotificationController::class)->middleware(['auth:sanctum', 'feature:push_notifications'])->prefix('notification')->group(function () {
+Route::controller(NotificationController::class)->middleware(['auth:sanctum', 'feature:push_notifications'])->prefix('notification')->group(function () {
     Route::get('/', 'getAll')->name('notification.list');
     Route::get('/admin', 'getAllAdmin')->name('notification.listAdmin');
     Route::delete('/{id}', 'delete')->name('notification.delete');

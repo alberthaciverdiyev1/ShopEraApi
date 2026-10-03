@@ -1,17 +1,15 @@
 <?php
 
-use Illuminate\Http\Request;
-
 use Illuminate\Support\Facades\Route;
-use Modules\RoleAndPermissions\Http\Controllers\RoleController;
 use Modules\RoleAndPermissions\Http\Controllers\PermissionController;
+use Modules\RoleAndPermissions\Http\Controllers\RoleController;
 
 /*
 |--------------------------------------------------------------------------
 | Role Routes
 |--------------------------------------------------------------------------
 */
-Route::prefix('role')->middleware('auth:sanctum')->group(function () {
+Route::prefix('role')->middleware(['auth:sanctum', 'feature:roles_permissions'])->group(function () {
     Route::get('/', [RoleController::class, 'getAll']);
     Route::post('/', [RoleController::class, 'add']);
     Route::get('/{id}', [RoleController::class, 'details']);
@@ -30,12 +28,10 @@ Route::prefix('role')->middleware('auth:sanctum')->group(function () {
 | Permission Routes
 |--------------------------------------------------------------------------
 */
-Route::prefix('permission')->middleware('auth:sanctum')->group(function () {
+Route::prefix('permission')->middleware(['auth:sanctum', 'feature:roles_permissions'])->group(function () {
     Route::get('/', [PermissionController::class, 'getAll']);
     Route::post('/', [PermissionController::class, 'store']);
     Route::get('/{id}', [PermissionController::class, 'show']);
     Route::put('/{permission}', [PermissionController::class, 'update']);
     Route::delete('/{permission}', [PermissionController::class, 'delete']);
 });
-
-

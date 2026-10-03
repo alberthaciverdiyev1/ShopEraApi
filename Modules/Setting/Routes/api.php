@@ -20,7 +20,7 @@ Route::prefix('setting')->controller(SettingController::class)->group(function (
     Route::get('/', 'list')->name('setting.list');
     Route::put('/', 'update')->name('setting.update')->middleware(['auth:sanctum', 'feature:settings']);
 });
-Route::post('/change-locale', [SettingController::class, 'changeLocale'])->name('change-locale')->middleware(SetLocaleFromHeader::class);
+Route::post('/change-locale', [SettingController::class, 'changeLocale'])->name('change-locale')->middleware([SetLocaleFromHeader::class, 'feature:multi_language']);
 Route::get('/global-statistics', [StatisticController::class, 'statistics'])->middleware('feature:statistics')->name('global-statistics');
 
 /*

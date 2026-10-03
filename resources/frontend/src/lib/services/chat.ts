@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
 import { apiGet, apiPost, apiDelete, apiPostForm } from '$lib/utils/api';
+import { featureEnabled } from '$lib/services/features';
 
 export interface ApiChatAttachment {
 	id: number;
@@ -24,6 +25,11 @@ export const chatError = writable<string | null>(null);
 
 /** `GET /chat` — the current user's conversation with support. */
 export async function loadChatMessages(): Promise<ApiChatMessage[]> {
+	if (!featureEnabled('chat')) {
+		chatMessages.set([]);
+		return [];
+	}
+
 	chatLoading.set(true);
 	chatError.set(null);
 	try {
@@ -43,6 +49,8 @@ export async function loadChatMessages(): Promise<ApiChatMessage[]> {
 
 /** `POST /chat/send` — text and/or an optional image attachment. */
 export async function sendChatMessage(message: string, image?: File | null): Promise<void> {
+	if (!featureEnabled('chat')) return;
+
 	chatSending.set(true);
 	chatError.set(null);
 	try {
@@ -64,6 +72,8 @@ export async function sendChatMessage(message: string, image?: File | null): Pro
 
 /** `POST /chat/conversation/read/{id}` — marks the other side's messages as read. */
 export async function markChatRead(conversationId: number): Promise<void> {
+	if (!featureEnabled('chat')) return;
+
 	try {
 		await apiPost(`/chat/conversation/read/${conversationId}`);
 	} catch {
@@ -73,6 +83,8 @@ export async function markChatRead(conversationId: number): Promise<void> {
 
 /** `DELETE /chat/message/{id}` */
 export async function deleteChatMessage(messageId: number): Promise<void> {
+	if (!featureEnabled('chat')) return;
+
 	await apiDelete(`/chat/message/${messageId}`);
 	chatMessages.update((list) => list.filter((message) => message.id !== messageId));
 }

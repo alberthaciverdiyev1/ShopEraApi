@@ -2,6 +2,7 @@ import { derived, get, writable } from 'svelte/store';
 import { apiGet } from '$lib/utils/api';
 import { isLoggedIn } from '$lib/services/auth';
 import { basketTotal } from '$lib/services/basket';
+import { featureEnabled } from '$lib/services/features';
 
 export interface PromoResult {
 	id: number;
@@ -24,6 +25,10 @@ export const finalTotal = derived([basketTotal, promoDiscount], ([$total, $disco
 
 /** Validates a code against the user's basket. */
 export async function applyPromoCode(code: string): Promise<PromoResult> {
+	if (!featureEnabled('promo_codes')) {
+		throw new Error('Promo codes are not available.');
+	}
+
 	if (!get(isLoggedIn)) {
 		throw new Error('Please sign in to use a promo code.');
 	}

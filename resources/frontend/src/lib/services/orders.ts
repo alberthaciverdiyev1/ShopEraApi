@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
 import { apiGet, apiPost } from '$lib/utils/api';
+import { featureEnabled } from '$lib/services/features';
 import type { ApiProduct } from '$lib/services/products';
 
 export interface ApiOrderItem {
@@ -37,6 +38,11 @@ export const ordersLoading = writable(false);
 export const selectedOrder = writable<ApiOrder | null>(null);
 
 export async function loadOrders(): Promise<void> {
+	if (!featureEnabled('orders')) {
+		orders.set([]);
+		return;
+	}
+
 	ordersLoading.set(true);
 	try {
 		const list = await apiGet<ApiOrder[]>('/order');
@@ -50,6 +56,8 @@ export async function loadOrders(): Promise<void> {
 
 /** `GET /order/{id}` also accepts the order's transaction id. */
 export async function loadOrder(idOrTransaction: string | number): Promise<ApiOrder | null> {
+	if (!featureEnabled('orders')) return null;
+
 	try {
 		const order = await apiGet<ApiOrder>(`/order/${idOrTransaction}`);
 		selectedOrder.set(order);
@@ -61,6 +69,8 @@ export async function loadOrder(idOrTransaction: string | number): Promise<ApiOr
 
 /** The receipt endpoint is authenticated, so it is fetched and opened as a blob. */
 export async function openReceipt(orderId: number): Promise<void> {
+	if (!featureEnabled('order_receipt')) return;
+
 	const { API_BASE, TOKEN_KEY } = await import('$lib/utils/api');
 	const token = localStorage.getItem(TOKEN_KEY);
 
@@ -135,6 +145,8 @@ export async function fetchOrderPreview(
 	paramsOrAddressId?: number | string | null | OrderPreviewParams,
 	maybePromoCode?: string
 ): Promise<OrderPreview> {
+	if (!featureEnabled('orders')) return {} as OrderPreview;
+
 	const query: Record<string, string | number> = {};
 
 	if (paramsOrAddressId && typeof paramsOrAddressId === 'object') {
@@ -154,6 +166,8 @@ export async function fetchOrderPreview(
 export async function createOrderFromBasket(
 	payload: CreateOrderPayload
 ): Promise<{ payment_url?: string; transaction_id?: string }> {
+	if (!featureEnabled('orders')) throw new Error('Orders are not available.');
+
 	const result = await apiPost<{ payment_url?: string; transaction_id?: string }>('/order', payload);
 	return result ?? {};
 }
