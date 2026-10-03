@@ -25,10 +25,6 @@
                     <td class="px-4 py-3"><span class="rounded bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-600">{{ $owner->status->label() }}</span></td>
                     <td class="px-4 py-3">
                         <div class="flex justify-end gap-1">
-                            <form method="POST" action="{{ route('manager.owners.push', $owner) }}" class="inline">
-                                @csrf
-                                <button type="submit" title="Plan/feature dəyərlərini bazaya yaz" class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-emerald-600">⟳</button>
-                            </form>
                             <a href="{{ route('manager.owners.edit', $owner) }}" class="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-brand-600">✎</a>
                             <form method="POST" action="{{ route('manager.owners.destroy', $owner) }}">
                                 @csrf @method('DELETE')

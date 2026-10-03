@@ -2,15 +2,7 @@
 
 namespace Modules\Manager\Http\Controllers;
 
-use Modules\Manager\Entities\Domain;
-use Modules\Manager\Entities\Feature;
-use Modules\Manager\Entities\OwnerFeature;
-use Modules\Manager\Entities\Plan;
-use Modules\Manager\Entities\SiteOwner;
-use Modules\Manager\Entities\Subscription;
-use Modules\Manager\Entities\Theme;
-use Modules\Manager\Services\FeatureService;
-use Modules\Manager\Services\EntitlementWriter;
+use App\Support\TenantDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Arr;
@@ -20,6 +12,16 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Modules\Manager\Entities\Domain;
+use Modules\Manager\Entities\Feature;
+use Modules\Manager\Entities\OwnerFeature;
+use Modules\Manager\Entities\Plan;
+use Modules\Manager\Entities\SiteOwner;
+use Modules\Manager\Entities\Subscription;
+use Modules\Manager\Entities\Theme;
+use Modules\Manager\Services\EntitlementWriter;
+use Modules\Manager\Services\FeatureService;
+use Modules\User\Entities\User;
 
 class OwnerController extends Controller
 {
@@ -119,8 +121,6 @@ class OwnerController extends Controller
         return back()->with('status', __('Feature-lar yeniləndi.'));
     }
 
-
-
     public function destroy(SiteOwner $owner)
     {
         // Free the domains too, otherwise their hosts stay bound to a
@@ -193,13 +193,33 @@ class OwnerController extends Controller
         return back()->with('status', __('Məlumatlar bazaya yazıldı: :hosts', ['hosts' => implode(', ', $hosts)]));
     }
 
+    /**
+     * One-button full sync: push every owner's effective entitlements/theme/
+     * promo blocks into their tenant database(s).
+     */
+    public function pushAll()
+    {
+        $owners = SiteOwner::query()->with(['domains', 'currentSubscription.plan.features', 'ownerFeatures.feature', 'theme'])->get();
+
+        $hosts = 0;
+        foreach ($owners as $owner) {
+            $hosts += count($this->writer->push($owner));
+        }
+
+        if ($hosts === 0) {
+            return back()->with('status', __('Sinkronlaşdırılacaq tenant bazası tapılmadı.'));
+        }
+
+        return back()->with('status', __(':count host bazaya sinxronlaşdırıldı.', ['count' => $hosts]));
+    }
+
     public function updatePassword(Request $request, SiteOwner $owner)
     {
         $data = $request->validate(['password' => ['required', 'string', 'min:6']]);
 
         $database = $owner->db_name ?: $owner->suggestedDbName();
 
-        if (! \App\Support\TenantDatabase::exists($database)) {
+        if (! TenantDatabase::exists($database)) {
             return back()->withErrors(['password' => 'Tenant bazası tapılmadı.']);
         }
 
@@ -210,7 +230,7 @@ class OwnerController extends Controller
             DB::purge('tenant');
             DB::setDefaultConnection('tenant');
 
-            $user = \Modules\User\Entities\User::query()->where('email', $owner->email)->first();
+            $user = User::query()->where('email', $owner->email)->first();
 
             if (! $user) {
                 return back()->withErrors(['password' => 'Bu sahibin admin hesabı tapılmadı ('.$owner->email.').']);
@@ -353,7 +373,6 @@ class OwnerController extends Controller
             );
         }
     }
-
 
     private function uniqueGeneratedHost(SiteOwner $owner): string
     {

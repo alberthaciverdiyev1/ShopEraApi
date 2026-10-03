@@ -1,5 +1,19 @@
 @extends('manager::layouts.app')
 @section('content')
+    <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h1 class="text-lg font-semibold text-gray-800">İcmal</h1>
+            <p class="text-sm text-gray-400">Feature, tema və promo məlumatlarını tenant bazalarına yaz.</p>
+        </div>
+        <form method="POST" action="{{ route('manager.owners.pushAll') }}">
+            @csrf
+            <button type="submit" class="rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
+                    onclick="return confirm('Bütün sahiblərin feature/tema/məlumatları tenant bazalarına sinxronlaşdırılsın?')">
+                ⟳ DB sync
+            </button>
+        </form>
+    </div>
+
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         @foreach ($stats as $stat)
             <a href="{{ $stat['route'] }}" class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm hover:shadow-md">

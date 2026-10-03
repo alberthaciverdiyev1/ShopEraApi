@@ -8,6 +8,13 @@
                        hx-trigger="input changed delay:400ms, search"
                        class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm focus:border-brand-500 focus:ring-brand-500">
             </div>
+            <form method="POST" action="{{ route('manager.owners.pushAll') }}">
+                @csrf
+                <button type="submit" class="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700"
+                        onclick="return confirm('Bütün sahiblərin feature/tema/məlumatları tenant bazalarına sinxronlaşdırılsın?')">
+                    ⟳ DB sync
+                </button>
+            </form>
             <a href="{{ route('manager.owners.create') }}" class="rounded-lg bg-brand-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-700">Yeni sahib</a>
         </div>
         <div id="owner-table">@include('manager::owners._table')</div>
