@@ -52,10 +52,10 @@
 			if (res?.url) {
 				window.open(res.url, '_blank');
 			} else {
-				waError = 'WhatsApp nömrəsi təyin olunmayıb.';
+				waError = $translate('WhatsApp number is not set');
 			}
 		} catch (e) {
-			waError = (e as Error)?.message || 'Alınmadı.';
+			waError = (e as Error)?.message || $translate('Failed');
 		} finally {
 			waBusy = false;
 		}
@@ -365,11 +365,11 @@
 		promoLoading = true;
 		try {
 			const result = await applyPromoCode(code);
-			promoSuccess = `Promo code "${result.code}" applied!`;
+			promoSuccess = $translate('Promo code {code} applied ({percent}% off)', { code: result.code, percent: String(result.discount_percent) });
 			promoCodeInput = '';
 			await loadPreview(result.code);
 		} catch (err) {
-			promoError = err instanceof Error ? err.message : 'Invalid promo code.';
+			promoError = err instanceof Error ? err.message : $translate('Invalid promo code');
 		} finally {
 			promoLoading = false;
 		}
@@ -487,11 +487,11 @@
 						</div>
 						<h3 class="fw-bold mb-2">{$translate('Order Confirmed!')}</h3>
 						<p class="text-muted mb-3">
-							Thank you for your purchase. Your order has been placed successfully.
+							{$translate('Thank you for your purchase. Your order has been placed successfully.')}
 						</p>
 						{#if placedTransactionId}
 							<div class="badge bg-light text-dark p-2 fs-6 mb-4 border">
-								Transaction ID: <strong>{placedTransactionId}</strong>
+								{$translate('Transaction ID:')} <strong>{placedTransactionId}</strong>
 							</div>
 						{/if}
 						<div class="d-flex justify-content-center gap-3">
@@ -523,7 +523,7 @@
 									<div class="method-text">
 										<span class="method-title">{$translate('Courier Delivery')}</span>
 										<span class="method-desc">
-											{cityRates?.delivery_time || '1-2 iş günü'}
+											{cityRates?.delivery_time || $translate('1-2 business days')}
 										</span>
 									</div>
 									<div class="method-check">
@@ -545,7 +545,7 @@
 									<div class="method-text">
 										<span class="method-title">{$translate('Pickup Points')}</span>
 										<span class="method-desc">
-											{pickupPointsList.length > 0 ? `${pickupPointsList.length} filial` : 'Gəl-Al'}
+											{pickupPointsList.length > 0 ? $translate('{count} branches', { count: String(pickupPointsList.length) }) : $translate('Pickup')}
 										</span>
 									</div>
 									<div class="method-check">
@@ -588,7 +588,7 @@
 										<div>
 											<strong class="speed-title">{$translate('Standard Delivery')}</strong>
 											<span class="d-block small text-muted">
-												{cityRates?.delivery_time || '1-2 iş günü'}
+												{cityRates?.delivery_time || $translate('1-2 business days')}
 											</span>
 										</div>
 										<div class="text-end">
@@ -614,7 +614,7 @@
 												<i class="fa-solid fa-bolt text-warning"></i> {$translate('Fast Delivery')}
 											</strong>
 											<span class="d-block small text-muted">
-												{cityRates?.fast_delivery_time || '2-4 saat'}
+												{cityRates?.fast_delivery_time || $translate('2-4 hours')}
 											</span>
 										</div>
 										<div class="text-end">
@@ -635,7 +635,7 @@
 											class="btn btn-sm btn-outline-danger"
 											onclick={startNewAddress}
 										>
-											<i class="fa-solid fa-plus me-1"></i> Add New Address
+											<i class="fa-solid fa-plus me-1"></i> {$translate('Add New Address')}
 										</button>
 									{:else}
 										<button
@@ -646,7 +646,7 @@
 												if (def) selectAddress(def);
 											}}
 										>
-											<i class="fa-solid fa-arrow-left me-1"></i> Use Saved Address
+											<i class="fa-solid fa-arrow-left me-1"></i> {$translate('Use Saved Address')}
 										</button>
 									{/if}
 								{/if}
@@ -711,7 +711,7 @@
 												<input
 													type="text"
 													class="form-control"
-													placeholder="Recipient full name"
+													placeholder={$translate('Recipient full name')}
 													bind:value={activeAddressForm.full_name}
 													required
 												/>
@@ -722,7 +722,7 @@
 												<input
 													type="tel"
 													class="form-control"
-													placeholder="e.g. 0501234567"
+													placeholder={$translate('e.g. 0501234567')}
 													bind:value={activeAddressForm.contact_number}
 													required
 												/>
@@ -747,7 +747,7 @@
 												<input
 													type="text"
 													class="form-control"
-													placeholder="e.g. Yasamal, Nasimi"
+													placeholder={$translate('e.g. Yasamal, Nasimi')}
 													bind:value={activeAddressForm.town_village_district}
 													required
 												/>
@@ -758,7 +758,7 @@
 												<input
 													type="text"
 													class="form-control"
-													placeholder="e.g. Nizami str. 42"
+													placeholder={$translate('e.g. Nizami str. 42')}
 													bind:value={activeAddressForm.street_building_number}
 													required
 												/>
@@ -769,7 +769,7 @@
 												<input
 													type="text"
 													class="form-control"
-													placeholder="Apt 12, Floor 4"
+													placeholder={$translate('Apt 12, Floor 4')}
 													bind:value={activeAddressForm.unit_floor_apartment}
 												/>
 											</div>
@@ -779,7 +779,7 @@
 												<input
 													type="text"
 													class="form-control"
-													placeholder="e.g. Home, Office"
+													placeholder={$translate('e.g. Home, Office')}
 													bind:value={activeAddressForm.location_label}
 												/>
 											</div>
@@ -793,7 +793,7 @@
 														bind:checked={activeAddressForm.is_default}
 													/>
 													<label class="form-check-label small" for="is_default_checkout">
-														Save and set as my default delivery address
+														{$translate('Save and set as my default delivery address')}
 													</label>
 												</div>
 											</div>
@@ -815,7 +815,7 @@
 															if (def) selectAddress(def);
 														}}
 													>
-														Cancel
+														{$translate('Cancel')}
 													</button>
 												{/if}
 											</div>
@@ -915,7 +915,7 @@
 								id="order_notes"
 								rows="3"
 								class="form-control"
-								placeholder="Special instructions for delivery (e.g. building gate code, drop-off note)..."
+								placeholder={$translate('Special instructions for delivery (e.g. building gate code, drop-off note)...')}
 								bind:value={orderNotes}
 							></textarea>
 						</div>
@@ -979,14 +979,14 @@
 								<div class="alert alert-success d-flex justify-content-between align-items-center py-2 px-3 mb-0">
 									<div class="small">
 										<i class="fa-solid fa-tag me-1"></i>
-										Promo code <strong>{$appliedPromo.code}</strong> applied ({$appliedPromo.discount_percent}% off)
+										{$translate('Promo code {code} applied ({percent}% off)', { code: $appliedPromo.code, percent: String($appliedPromo.discount_percent) })}
 									</div>
 									<button
 										type="button"
 										class="btn btn-sm btn-link text-danger p-0 ms-2"
 										onclick={handleRemovePromo}
 									>
-										<i class="fa-solid fa-xmark"></i> Remove
+										<i class="fa-solid fa-xmark"></i> {$translate('Remove')}
 									</button>
 								</div>
 							{:else}
@@ -994,7 +994,7 @@
 									<input
 										type="text"
 										class="form-control form-control-sm"
-										placeholder="Have a promo code?"
+										placeholder={$translate('Have a promo code?')}
 										bind:value={promoCodeInput}
 										disabled={promoLoading}
 									/>
@@ -1003,7 +1003,7 @@
 										class="btn btn-dark btn-sm text-nowrap px-3"
 										disabled={promoLoading || !promoCodeInput.trim()}
 									>
-										{promoLoading ? 'Checking...' : 'Apply'}
+										{promoLoading ? $translate('Checking...') : $translate('Apply')}
 									</button>
 								</form>
 								{#if promoError}
@@ -1098,8 +1098,8 @@
 											class="form-check-input mt-0"
 										/>
 										<div>
-											<span class="fw-semibold d-block">Online Card Payment</span>
-											<span class="small text-muted">Visa, Mastercard, EPoint</span>
+											<span class="fw-semibold d-block">{$translate('Online Card Payment')}</span>
+											<span class="small text-muted">{$translate('Visa, Mastercard')}</span>
 										</div>
 									</div>
 									<div class="d-flex gap-1 text-muted fs-5">
@@ -1125,8 +1125,8 @@
 											class="form-check-input mt-0"
 										/>
 										<div>
-											<span class="fw-semibold d-block">Cash on Delivery</span>
-											<span class="small text-muted">Pay at doorstep upon receiving</span>
+											<span class="fw-semibold d-block">{$translate('Cash on Delivery')}</span>
+											<span class="small text-muted">{$translate('Pay at doorstep upon receiving')}</span>
 										</div>
 									</div>
 									<div class="text-muted fs-5">
@@ -1194,7 +1194,7 @@
 
 						<div class="text-center mt-3">
 							<span class="small text-muted">
-								<i class="fa-light fa-shield-check me-1 text-success"></i> Safe and secure checkout
+								<i class="fa-light fa-shield-check me-1 text-success"></i> {$translate('Safe and secure checkout')}
 							</span>
 						</div>
 					</div>
