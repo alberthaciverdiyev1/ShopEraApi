@@ -14,10 +14,11 @@ use Illuminate\Routing\Controller;
 class FeaturesController extends Controller
 {
     private const DEFAULTS = [
-        'buy_with_card' => true,
-        'buy_with_cash' => true,
-        'buy_with_whatsapp' => true,
+        'online_payment' => true,
+        'cash_on_delivery' => true,
+        'whatsapp_orders' => true,
         'phone_orders' => false,
+        'instagram_orders' => false,
     ];
 
     public function index(Request $request)

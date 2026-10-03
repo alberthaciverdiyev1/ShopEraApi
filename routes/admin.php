@@ -62,7 +62,7 @@ Route::middleware(['admin.auth', 'subscribed', 'admin.menu'])->group(function ()
         Route::post('product-prices', [Admin\ProductController::class, 'applyPrices'])->name('products.prices.apply');
     });
 
-    Route::get('categories/children', [Admin\CategoryController::class, 'children'])->name('categories.children');
+    Route::get('categories/children', [Admin\CategoryController::class, 'children'])->middleware('feature:categories')->name('categories.children');
     $resource('categories', Admin\CategoryController::class, 'categories');
     $resource('brands', Admin\BrandController::class, 'brands');
     $resource('colors', Admin\ColorController::class, 'colors');
@@ -103,7 +103,7 @@ Route::middleware(['admin.auth', 'subscribed', 'admin.menu'])->group(function ()
     $resource('popups', Admin\PopupController::class, 'popups');
     $resource('faqs', Admin\FaqController::class, 'faq');
     $resource('promocodes', Admin\PromoCodeController::class, 'promo_codes');
-    $resource('contact-messages', Admin\ContactMessageController::class);
+    $resource('contact-messages', Admin\ContactMessageController::class, 'contact_page');
 
     Route::middleware('feature:legal_terms')->group(function () {
         Route::get('legal-terms', [Admin\LegalTermController::class, 'index'])->name('legal-terms.index');

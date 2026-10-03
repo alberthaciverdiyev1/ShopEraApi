@@ -30,7 +30,7 @@
 {#await data.features}
     {@render loader('60vh')}
 {:then features}
-    {#if (features.story_images || features.story_videos) || false}
+    {#if features.stories ?? false}
         <StoryReel/>
     {/if}
 
@@ -42,7 +42,7 @@
         {/if}
     {/await}
 
-    {#if features.show_ads ?? false}
+    {#if features.promo_blocks ?? false}
         {#await data.promoBlocks then blocks}
             <MarqueeSection blocks={blocks}/>
         {/await}
@@ -70,20 +70,20 @@
         {/if}
     {/await}
 
-    {#if true}
+    {#if features.reviews ?? false}
         {#await data.featuredReviews}
             {@render loader('30vh')}
         {:then featuredReviews}
             <TestimonialSection featured={featuredReviews}/>
         {/await}
     {/if}
-    {#if features.show_ads ?? false}
+    {#if features.promo_blocks ?? false}
 
         {#await data.promoBlocks then blocks}
             <PromoBlocksSection blocks={blocks}/>
         {/await}
     {/if}
-    {#if true}
+    {#if features.blog ?? false}
         {#await data.recentBlogs then blogs}
             {#if (blogs?.length ?? 0) > 0}
                 <BlogSection blogs={blogs}/>
@@ -96,7 +96,7 @@
     {/if}
 {/await}
 
-{#if $features.popup ?? false}
+{#if $features.popups ?? false}
     <PopupModal/>
 {/if}
 <style>

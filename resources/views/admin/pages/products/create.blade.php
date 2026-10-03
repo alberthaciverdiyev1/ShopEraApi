@@ -37,22 +37,28 @@
                     </div>
                 </div>
 
-                <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-                    <p class="mb-4 font-semibold text-gray-700">Şəkillər</p>
-                    @include('admin.partials.media-upload', ['name' => 'new_images[]', 'multiple' => true, 'accept' => 'image/*', 'label' => 'Şəkil seçin', 'hint' => 'JPG, PNG, WebP · bir neçə fayl seçə bilərsiniz'])
-                </div>
+                @if (feature('product_images'))
+                    <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+                        <p class="mb-4 font-semibold text-gray-700">Şəkillər</p>
+                        @include('admin.partials.media-upload', ['name' => 'new_images[]', 'multiple' => true, 'accept' => 'image/*', 'label' => 'Şəkil seçin', 'hint' => 'JPG, PNG, WebP · bir neçə fayl seçə bilərsiniz'])
+                    </div>
+                @endif
 
-                <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
-                    <p class="mb-4 font-semibold text-gray-700">Videolar</p>
-                    @include('admin.partials.media-upload', ['name' => 'videos[]', 'multiple' => true, 'accept' => 'video/*', 'label' => 'Video seçin', 'hint' => 'MP4 / WebM · bir neçə fayl'])
-                </div>
+                @feature('product_videos')
+                    <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+                        <p class="mb-4 font-semibold text-gray-700">Videolar</p>
+                        @include('admin.partials.media-upload', ['name' => 'videos[]', 'multiple' => true, 'accept' => 'video/*', 'label' => 'Video seçin', 'hint' => 'MP4 / WebM · bir neçə fayl'])
+                    </div>
+                @endif
 
+                @if (feature('product_filters'))
                 <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
                     <p class="mb-4 font-semibold text-gray-700">Filtrlər</p>
                     <div id="product-filters">
                         @include('admin.pages.products._filters', ['filters' => $filters, 'productFilters' => $productFilters ?? []])
                     </div>
                 </div>
+                @endif
 
 
                 <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">

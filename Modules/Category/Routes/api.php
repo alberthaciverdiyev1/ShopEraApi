@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Http\Request;
+use Modules\Category\Http\Controllers\CategoryController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,8 +13,7 @@ use Illuminate\Http\Request;
 |
 */
 
-
-Route::prefix('category')->controller(\Modules\Category\Http\Controllers\CategoryController::class)->group(function () {
+Route::prefix('category')->middleware('feature:categories')->controller(CategoryController::class)->group(function () {
 
     Route::get('/with-products', 'listWithProducts')->name('category.listWithProducts');
     Route::get('/admin', 'listAdmin')->name('category.listAdmin');
@@ -27,4 +26,3 @@ Route::prefix('category')->controller(\Modules\Category\Http\Controllers\Categor
         Route::delete('/{id}', 'delete')->name('category.delete');
     });
 });
-

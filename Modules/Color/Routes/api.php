@@ -13,7 +13,7 @@ use Modules\Color\Http\Controllers\ColorController;
 |
 */
 
-Route::prefix('color')->controller(ColorController::class)->group(function () {
+Route::prefix('color')->middleware('feature:colors')->controller(ColorController::class)->group(function () {
 
     // Public: the storefront builds its filters from these lists.
     Route::get('/', 'list')->name('color.list');

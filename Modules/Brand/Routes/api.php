@@ -1,6 +1,6 @@
 <?php
 
-use Illuminate\Http\Request;
+use Modules\Brand\Http\Controllers\BrandController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,8 +13,7 @@ use Illuminate\Http\Request;
 |
 */
 
-
-Route::prefix('brand')->controller(\Modules\Brand\Http\Controllers\BrandController::class)->group(function () {
+Route::prefix('brand')->middleware('feature:brands')->controller(BrandController::class)->group(function () {
 
     Route::get('/', 'list')->name('brand.list');
     Route::get('/{id}', 'details')->name('brand.details');

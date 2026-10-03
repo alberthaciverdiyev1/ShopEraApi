@@ -21,16 +21,10 @@ class PlanSeeder extends Seeder
         $plans = [
             'free' => [
                 'name' => 'Free', 'price' => 0, 'sort_order' => 0,
-                'on' => ['products', 'categories', 'subdomain', 'theme_selection', 'buy_with_whatsapp', 'contact_page'],
+                'on' => ['products', 'categories', 'whatsapp_orders', 'contact_page'],
                 'off' => [
-                    'site_orders', 'buy_with_card', 'custom_domain', 'dark_light_theme',
-                    'promo_codes', 'shipping_settings', 'google_analytics', 'custom_code',
-                    'multi_language', 'chat',
-                ],
-                'values' => [
-                    'branding' => '0', 'seo' => '1',
-                    'color_customization' => '0', 'font_customization' => '0', 'component_selection' => '0',
-                    'homepage_editing' => '0', 'sales_reports' => '0', 'support_level' => '0',
+                    'orders', 'online_payment', 'custom_domain', 'promo_codes',
+                    'delivery_prices', 'multi_language', 'chat',
                 ],
                 'limits' => ['max_products' => '25', 'max_staff' => '0'],
             ],
@@ -38,40 +32,29 @@ class PlanSeeder extends Seeder
             'premium' => [
                 'name' => 'Premium', 'price' => 29, 'sort_order' => 1,
                 'on' => [
-                    'products', 'categories', 'subdomain', 'theme_selection', 'dark_light_theme',
-                    'buy_with_card', 'custom_domain', 'promo_codes', 'shipping_settings',
-                    'google_analytics', 'site_orders', 'buy_with_whatsapp', 'multi_language', 'chat', 'contact_page',
+                    'products', 'categories', 'whatsapp_orders', 'contact_page',
+                    'online_payment', 'custom_domain', 'promo_codes', 'delivery_prices',
+                    'orders', 'multi_language', 'chat',
                 ],
-                'off' => ['custom_code'],
-                'values' => [
-                    'branding' => '1', 'seo' => '2',
-                    'color_customization' => '1', 'font_customization' => '1', 'component_selection' => '1',
-                    'homepage_editing' => '1', 'sales_reports' => '1', 'support_level' => '1',
-                ],
+                'off' => [],
                 'limits' => ['max_products' => '500', 'max_staff' => '2'],
             ],
 
             'business' => [
                 'name' => 'Business', 'price' => 99, 'sort_order' => 2,
                 'on' => [
-                    'products', 'categories', 'subdomain', 'theme_selection', 'dark_light_theme',
-                    'buy_with_card', 'custom_domain', 'promo_codes', 'shipping_settings',
-                    'google_analytics', 'site_orders', 'buy_with_whatsapp', 'multi_language',
-                    'custom_code', 'chat', 'contact_page',
+                    'products', 'categories', 'whatsapp_orders', 'contact_page',
+                    'online_payment', 'custom_domain', 'promo_codes', 'delivery_prices',
+                    'orders', 'multi_language', 'chat',
                 ],
                 'off' => [],
-                'values' => [
-                    'branding' => '2', 'seo' => '3',
-                    'color_customization' => '2', 'font_customization' => '2', 'component_selection' => '2',
-                    'homepage_editing' => '2', 'sales_reports' => '2', 'support_level' => '2',
-                ],
                 'limits' => ['max_products' => '-1', 'max_staff' => '-1'],
             ],
         ];
 
         // Every feature not covered by the matrix stays enabled on all plans.
         $managed = collect($plans)->flatMap(fn ($p) => array_merge(
-            $p['on'], $p['off'], array_keys($p['values']), array_keys($p['limits'])
+            $p['on'], $p['off'], array_keys($p['values'] ?? []), array_keys($p['limits'])
         ))->unique();
         $rest = $featureIds->keys()->reject(fn ($key) => $managed->contains($key));
 
@@ -101,7 +84,7 @@ class PlanSeeder extends Seeder
                     $sync[$featureIds[$key]] = ['value' => '0'];
                 }
             }
-            foreach ($data['values'] as $key => $value) {
+            foreach ($data['values'] ?? [] as $key => $value) {
                 if (isset($featureIds[$key])) {
                     $sync[$featureIds[$key]] = ['value' => (string) $value];
                 }

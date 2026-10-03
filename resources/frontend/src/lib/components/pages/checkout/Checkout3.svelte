@@ -32,9 +32,9 @@
 
 	// Payment methods are gated by the shared feature flags (loaded once in the
 	// layout) — no per-page /features request.
-	const canCard = $derived($features.buy_with_card !== false);
-	const canCash = $derived($features.buy_with_cash !== false);
-	const canWhatsapp = $derived($features.buy_with_whatsapp !== false);
+	const canCard = $derived($features.online_payment !== false);
+	const canCash = $derived($features.cash_on_delivery !== false);
+	const canWhatsapp = $derived($features.whatsapp_orders !== false);
 
 	let waBusy = $state(false);
 	let waError = $state('');

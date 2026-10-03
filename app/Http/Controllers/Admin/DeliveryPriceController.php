@@ -26,9 +26,9 @@ class DeliveryPriceController extends ResourceController
         ['name' => 'city_name', 'label' => 'Şəhər', 'type' => 'text', 'rules' => ['required', 'max:255'], 'col' => 6],
         ['name' => 'price', 'label' => 'Qiymət', 'type' => 'number', 'col' => 6],
         ['name' => 'free_from', 'label' => 'Bu məbləğdən pulsuz', 'type' => 'number', 'col' => 6],
-        ['name' => 'fast_price', 'label' => 'Tez çatdırılma qiyməti', 'type' => 'number', 'col' => 6],
+        ['name' => 'fast_price', 'label' => 'Tez çatdırılma qiyməti', 'type' => 'number', 'col' => 6, 'feature' => 'fast_delivery'],
         ['name' => 'delivery_time', 'label' => 'Çatdırılma vaxtı', 'type' => 'text', 'col' => 6],
-        ['name' => 'fast_delivery_time', 'label' => 'Tez çatdırılma vaxtı', 'type' => 'text', 'col' => 6],
+        ['name' => 'fast_delivery_time', 'label' => 'Tez çatdırılma vaxtı', 'type' => 'text', 'col' => 6, 'feature' => 'fast_delivery'],
         ['name' => 'is_active', 'label' => 'Aktivdir', 'type' => 'checkbox', 'col' => 6],
     ];
 }

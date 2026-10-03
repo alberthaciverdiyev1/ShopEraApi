@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Payment\Http\Controllers\PaymentController;
 
-Route::prefix('payment')->group(function () {
+Route::prefix('payment')->middleware('feature:online_payment')->group(function () {
     Route::get('start', [PaymentController::class, 'start'])->name('payment.start');
     Route::post('create', [PaymentController::class, 'createPayment'])->name('payment.create');
     Route::get('success', [PaymentController::class, 'success'])->name('payment.success');

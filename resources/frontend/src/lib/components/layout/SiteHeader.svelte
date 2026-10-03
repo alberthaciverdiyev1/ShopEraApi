@@ -38,6 +38,7 @@
                 <a href={phoneHref(headerPhone)}>{headerPhone}</a>
             </div>
             <div class="lang">
+                {#if $languageOptions.length > 1}
                     <div class="language">
                         <i class="icon-earth"></i>
 
@@ -56,6 +57,7 @@
                             </select>
                         </div>
                     </div>
+                {/if}
 
                 <div class="user">
                     {#if $isLoggedIn}

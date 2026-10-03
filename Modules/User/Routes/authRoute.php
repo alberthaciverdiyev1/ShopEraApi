@@ -5,8 +5,8 @@ use Modules\User\Http\Controllers\AuthController;
 Route::prefix('auth')->controller(AuthController::class)->group(function () {
     Route::post('register', 'register')->name('auth.register');
     Route::post('login', 'login')->name('auth.login');
-    Route::post('send-otp', 'sendOtp')->name('auth.sendOtp');
-    Route::post('check-otp', 'checkOtp')->name('auth.checkOtp');
+    Route::post('send-otp', 'sendOtp')->middleware('feature:sms')->name('auth.sendOtp');
+    Route::post('check-otp', 'checkOtp')->middleware('feature:sms')->name('auth.checkOtp');
     Route::post('reset-password', 'resetPassword')->name('auth.resetPassword');
     // E-poçt ilə bərpa: kod göndər, sonra kodla yeni şifrə.
     Route::post('password/email-code', 'sendPasswordResetEmail')->name('auth.password.email-code');

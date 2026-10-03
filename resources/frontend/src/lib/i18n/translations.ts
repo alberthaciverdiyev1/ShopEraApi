@@ -16,12 +16,21 @@ export const languages: { value: Locale; label: string }[] = [
 	{ value: 'tr', label: 'Türkçe' }
 ];
 
-export const languageOptions = derived(features, ($features) =>
-	languages.map((language) => ({
-		...language,
-		status: ($features as Record<string, unknown>)[`lang_${language.value}`] !== false
-	}))
-);
+/**
+ * Languages the storefront may switch between. Without the `multi_language`
+ * entitlement only the default locale is offered; individual locales can then
+ * be turned off with `lang_xx` flags.
+ */
+export const languageOptions = derived(features, ($features) => {
+	const flags = $features as Record<string, unknown>;
+	const multiLanguage = flags.multi_language !== false;
+
+	return languages
+		.filter((language) =>
+			multiLanguage ? flags[`lang_${language.value}`] !== false : language.value === defaultLocale
+		)
+		.map((language) => ({ ...language, status: true }));
+});
 
 export const messages: Record<Locale, Record<string, string>> = {
 	en,

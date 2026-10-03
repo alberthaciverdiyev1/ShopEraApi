@@ -23,6 +23,11 @@ abstract class AdminController extends Controller
     protected function enabledLocales(): array
     {
         if ($this->enabledLocales === null) {
+            // Without the multi_language feature the panel is az-only.
+            if (! feature('multi_language')) {
+                return $this->enabledLocales = ['az'];
+            }
+
             $this->enabledLocales = array_values(array_filter(
                 ['az', 'en', 'ru', 'tr'],
                 fn (string $locale): bool => feature("lang_{$locale}")

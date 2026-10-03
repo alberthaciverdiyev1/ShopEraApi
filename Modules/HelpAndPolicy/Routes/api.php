@@ -1,6 +1,7 @@
 <?php
 
-use Illuminate\Http\Request;
+use Modules\HelpAndPolicy\Http\Controllers\FaqController;
+use Modules\HelpAndPolicy\Http\Controllers\LegalTermController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,7 +14,7 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::prefix('faq')->controller(\Modules\HelpAndPolicy\Http\Controllers\FaqController::class)->group(function () {
+Route::prefix('faq')->middleware('feature:faq')->controller(FaqController::class)->group(function () {
     Route::get('/', 'getAll')->name('faq.list');
 
     Route::middleware('auth:sanctum')->group(function () {
@@ -25,8 +26,8 @@ Route::prefix('faq')->controller(\Modules\HelpAndPolicy\Http\Controllers\FaqCont
 
 });
 
-Route::prefix('legal-terms')->controller(\Modules\HelpAndPolicy\Http\Controllers\LegalTermController::class)->group(function () {
-        Route::get('/', 'getAll')->name('legal_terms.list');
+Route::prefix('legal-terms')->middleware('feature:legal_terms')->controller(LegalTermController::class)->group(function () {
+    Route::get('/', 'getAll')->name('legal_terms.list');
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin', 'getAllAdmin')->name('legal_terms.listAdmin');
@@ -34,6 +35,3 @@ Route::prefix('legal-terms')->controller(\Modules\HelpAndPolicy\Http\Controllers
     });
 
 });
-
-
-
