@@ -111,7 +111,6 @@
 						<h5 class="widget-title">{$translate('Customer Service')}</h5>
 						<ul class="widget-links">
 							<li><a href="/about"><i class="fa-solid fa-chevron-right link-arrow"></i> {$translate('About')}</a></li>
-							<li><a href="/order/tracking"><i class="fa-solid fa-chevron-right link-arrow"></i> {$translate('Track Order')}</a></li>
 							<li><a href="/order/history"><i class="fa-solid fa-chevron-right link-arrow"></i> {$translate('Order History')}</a></li>
 							{#if $features.favorites}<li><a href="/wishlist"><i class="fa-solid fa-chevron-right link-arrow"></i> {$translate('Wishlist')}</a></li>{/if}
 							{#if $features.faq}<li><a href="/faq"><i class="fa-solid fa-chevron-right link-arrow"></i> {$translate('FAQ')}</a></li>{/if}

@@ -23,8 +23,7 @@ const PUBLIC_PREFIXES = [
 	'/blog',
 	'/contact',
 	'/categories',
-	'/look-book',
-	'/order/tracking'
+	'/look-book'
 ];
 
 function isCacheable(pathname: string): boolean {
