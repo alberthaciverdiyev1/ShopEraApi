@@ -23,6 +23,9 @@ Route::middleware(['admin.auth', 'subscribed', 'admin.menu'])->group(function ()
 
     Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
 
+    // Upgrade page shown from locked (Premium) sidebar items.
+    Route::get('plan', [Admin\PlanController::class, 'index'])->name('plan.index');
+
     /*
      * Registers the index/create/store/edit/update/destroy set for a simple
      * resource controller. Keeps this file a table of contents rather than a

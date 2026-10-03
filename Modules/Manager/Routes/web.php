@@ -7,6 +7,7 @@ use Modules\Manager\Http\Controllers\FeatureController;
 use Modules\Manager\Http\Controllers\OwnerController;
 use Modules\Manager\Http\Controllers\PlanController;
 use Modules\Manager\Http\Controllers\PromoBlockController;
+use Modules\Manager\Http\Controllers\SettingController;
 use Modules\Manager\Http\Controllers\ThemeController;
 use Modules\Manager\Http\Middleware\EnsureOwner;
 
@@ -27,6 +28,10 @@ Route::middleware(['auth:owner', EnsureOwner::class])->group(function () {
     Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Global SaaS settings (support contacts used by tenant upgrade pages).
+    Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::put('settings', [SettingController::class, 'update'])->name('settings.update');
 
     // Site owners (customers) managed by domain
     Route::post('owners/push-all', [OwnerController::class, 'pushAll'])->name('owners.pushAll');

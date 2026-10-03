@@ -19,16 +19,17 @@
                         @php $locked = ! \App\Support\AdminMenu::unlocked($item); @endphp
                         <li>
                             @if ($locked)
-                                {{-- Abunəliyə daxil deyil: yalnız məlumat üçün, kliklənmir. --}}
-                                <div title="{{ $item['label'] }} — abunəliyinizə daxil deyil"
-                                     aria-disabled="true"
-                                     class="nav-link flex cursor-not-allowed select-none items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-gray-400 opacity-60 dark:text-gray-500">
+                                {{-- Abunəliyə daxil deyil: klikləyəndə planı yüksəlt səhifəsinə keçir. --}}
+                                <a href="{{ route('admin.plan.index', array_filter(['feature' => $item['feature'] ?? null])) }}"
+                                   title="{{ $item['label'] }} — abunəliyinizə daxil deyil"
+                                   data-locked-feature="{{ $item['feature'] ?? '' }}"
+                                   class="nav-link flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-gray-400 opacity-70 transition hover:bg-amber-50 hover:opacity-100 dark:text-gray-500 dark:hover:bg-amber-500/10">
                                     <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"/>
                                     </svg>
                                     <span class="nav-label truncate">{{ $item['label'] }}</span>
                                     <span class="ml-auto shrink-0 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">Premium</span>
-                                </div>
+                                </a>
                             @else
                                 <a href="{{ route($item['route']) }}" title="{{ $item['label'] }}"
                                    class="nav-link flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium transition {{ $isActive($item['match'])
