@@ -3,6 +3,7 @@
 namespace Modules\Product\Entities;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class ProductVideo extends Model
 {
@@ -30,8 +31,6 @@ class ProductVideo extends Model
             return $value;
         }
 
-        $baseUrl = config('app.url') ?? request()->getSchemeAndHttpHost();
-
-        return rtrim($baseUrl, '/').'/'.ltrim($value, '/');
+        return Storage::disk('public')->url($value);
     }
 }

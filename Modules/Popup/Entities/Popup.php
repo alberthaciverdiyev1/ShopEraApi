@@ -4,6 +4,7 @@ namespace Modules\Popup\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Popup extends Model
 {
@@ -47,9 +48,7 @@ class Popup extends Model
             return $value;
         }
 
-        $baseUrl = config('app.url') ?? request()->getSchemeAndHttpHost();
-
-        return rtrim($baseUrl, '/').'/'.ltrim($value, '/');
+        return Storage::disk('public')->url($value);
     }
 
     public function getVideoAttribute($value): ?string
@@ -62,8 +61,6 @@ class Popup extends Model
             return $value;
         }
 
-        $baseUrl = config('app.url') ?? request()->getSchemeAndHttpHost();
-
-        return rtrim($baseUrl, '/').'/'.ltrim($value, '/');
+        return Storage::disk('public')->url($value);
     }
 }

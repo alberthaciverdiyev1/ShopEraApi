@@ -4,6 +4,7 @@ namespace Modules\Product\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class ProductImage extends Model
 {
@@ -28,8 +29,6 @@ class ProductImage extends Model
             return $value;
         }
 
-        $baseUrl = config('app.url') ?? request()->getSchemeAndHttpHost();
-
-        return rtrim($baseUrl, '/').'/'.ltrim($value, '/');
+        return Storage::disk('public')->url($value);
     }
 }
