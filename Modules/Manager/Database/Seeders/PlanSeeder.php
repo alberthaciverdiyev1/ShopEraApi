@@ -21,7 +21,7 @@ class PlanSeeder extends Seeder
         $plans = [
             'free' => [
                 'name' => 'Free', 'price' => 0, 'sort_order' => 0,
-                'on' => ['products', 'categories', 'whatsapp_orders', 'contact_page'],
+                'on' => ['products', 'categories', 'whatsapp_orders', 'contact_page', 'show_ads'],
                 'off' => [
                     'orders', 'online_payment', 'custom_domain', 'promo_codes',
                     'delivery_prices', 'multi_language', 'chat',
@@ -36,7 +36,7 @@ class PlanSeeder extends Seeder
                     'online_payment', 'custom_domain', 'promo_codes', 'delivery_prices',
                     'orders', 'multi_language', 'chat',
                 ],
-                'off' => [],
+                'off' => ['show_ads'],
                 'limits' => ['max_products' => '500', 'max_staff' => '2'],
             ],
 
@@ -47,7 +47,7 @@ class PlanSeeder extends Seeder
                     'online_payment', 'custom_domain', 'promo_codes', 'delivery_prices',
                     'orders', 'multi_language', 'chat',
                 ],
-                'off' => [],
+                'off' => ['show_ads'],
                 'limits' => ['max_products' => '-1', 'max_staff' => '-1'],
             ],
         ];

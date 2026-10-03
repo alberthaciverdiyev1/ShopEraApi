@@ -2,6 +2,7 @@
 
 namespace Modules\Manager\Services;
 
+use App\Http\Controllers\Admin\ThemeController;
 use App\Support\EntitlementStore;
 use App\Support\TenantDatabase;
 use Illuminate\Support\Facades\DB;
@@ -53,7 +54,7 @@ class EntitlementWriter
 
                 // Mirror the resolved palette into this tenant's ThemeColor rows
                 // so the storefront's own /api/theme keeps working.
-                app(\App\Http\Controllers\Admin\ThemeController::class)->storePalette($payload['theme'] ?? []);
+                app(ThemeController::class)->storePalette($payload['theme'] ?? []);
 
                 $pushed[] = $h;
 
@@ -101,7 +102,9 @@ class EntitlementWriter
     private function promoBlocks(SiteOwner $owner): array
     {
         $features = $this->features->resolve($owner);
-        $enabled = in_array(strtolower((string) ($features['promo_blocks']['value'] ?? '')), ['1', 'true', 'yes', 'on'], true);
+        // `show_ads` is the entitlement that injects promo/ad blocks. Free plans
+        // enable it; paid plans switch it off.
+        $enabled = in_array(strtolower((string) ($features['show_ads']['value'] ?? '')), ['1', 'true', 'yes', 'on'], true);
 
         if (! $enabled) {
             return [];

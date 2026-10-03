@@ -63,7 +63,7 @@ class FeatureSeeder extends Seeder
             ['reviews', 'Şərhlər & reytinq', 'bool', '1', 'Marketinq & Əlaqə'],
             ['chat', 'Canlı dəstək (chat)', 'bool', '0', 'Marketinq & Əlaqə'],
             ['auto_reply', 'Avtomatik cavablar', 'bool', '0', 'Marketinq & Əlaqə'],
-            ['promo_blocks', 'Promo bloklar (offer/reklam)', 'bool', '0', 'Marketinq & Əlaqə'],
+            ['show_ads', 'Reklamları göstər (offer/reklam blokları)', 'bool', '1', 'Marketinq & Əlaqə'],
             ['push_notifications', 'Push bildiriş (FCM)', 'bool', '0', 'Marketinq & Əlaqə'],
             ['sms', 'SMS (OTP)', 'bool', '1', 'Marketinq & Əlaqə'],
 

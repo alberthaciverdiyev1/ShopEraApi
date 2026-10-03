@@ -40,7 +40,7 @@
         <HeroSection banners={heroBanners}/>
     {/await}
 
-    {#if features.promo_blocks ?? false}
+    {#if features.show_ads ?? false}
         {#await data.promoBlocks then blocks}
             <MarqueeSection blocks={blocks}/>
         {/await}
@@ -75,7 +75,7 @@
             <TestimonialSection featured={featuredReviews}/>
         {/await}
     {/if}
-    {#if features.promo_blocks ?? false}
+    {#if features.show_ads ?? false}
 
         {#await data.promoBlocks then blocks}
             <PromoBlocksSection blocks={blocks}/>
