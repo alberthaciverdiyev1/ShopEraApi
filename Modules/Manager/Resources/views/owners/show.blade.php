@@ -7,7 +7,7 @@
             ['Sifariş', $owner->usage_orders ?? 0],
             ['Müştəri', $owner->usage_customers ?? 0],
             ['İşçi', $owner->usage_staff ?? 0],
-            ['Yaddaş', number_format((float) ($owner->usage_storage_gb ?? 0), 2).' GB'],
+            ['Yaddaş', number_format((float) ($owner->usage_storage_mb ?? 0), 2).' MB'],
             ['Baza', number_format((float) ($owner->usage_db_mb ?? 0), 2).' MB'],
         ];
         $fmt = fn ($d) => $d ? $d->format('d.m.Y H:i') : '—';

@@ -96,6 +96,7 @@ class ManagerReportUsage extends Command
             'usage_orders' => Order::query()->count(),
             'usage_customers' => User::query()->whereHas('roles', fn ($q) => $q->where('name', 'user'))->count(),
             'usage_storage_gb' => round($storageBytes / 1073741824, 2),
+            'usage_storage_mb' => round($storageBytes / 1048576, 2),
             'usage_db_mb' => round($dbBytes / 1048576, 2),
             'usage_reported_at' => now(),
         ];
