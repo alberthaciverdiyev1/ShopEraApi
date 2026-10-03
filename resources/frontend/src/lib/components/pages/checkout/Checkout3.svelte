@@ -990,7 +990,6 @@
 									</button>
 								</div>
 							{:else}
-								{#if true}
 								<form onsubmit={handleApplyPromo} class="d-flex gap-2">
 									<input
 										type="text"
@@ -1007,7 +1006,6 @@
 										{promoLoading ? 'Checking...' : 'Apply'}
 									</button>
 								</form>
-								{/if}
 								{#if promoError}
 									<div class="small text-danger mt-1">{promoError}</div>
 								{/if}

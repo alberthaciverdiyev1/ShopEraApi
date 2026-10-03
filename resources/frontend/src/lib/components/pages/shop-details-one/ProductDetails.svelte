@@ -689,7 +689,7 @@
 						>
 							{$translate('All specifications')}
 						</button>
-						{#if true}
+						{#if $features.reviews}
 							<button
 							type="button"
 							class="tab-btn"

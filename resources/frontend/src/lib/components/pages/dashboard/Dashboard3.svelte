@@ -11,7 +11,7 @@
 	import AddressSection from '$lib/components/pages/dashboard/AddressSection.svelte';
 	import Chat from '$lib/components/pages/dashboard/Chat.svelte';
 	import PlanLimits from '$lib/components/pages/dashboard/PlanLimits.svelte';
-	import { fetchFeatures, type ApiFeatures } from '$lib/services/features';
+	import { fetchFeatures, features as featureFlags, type ApiFeatures } from '$lib/services/features';
 
 	let features = $state<ApiFeatures | null>(null);
 	onMount(async () => {
@@ -99,7 +99,7 @@
                     aria-selected={tab === 'order-details'} onclick={() => (tab = 'order-details')}><i
                         class="fa-solid fa-list"></i>{$translate('Order Details')}</button>
 
-                {#if true}
+                {#if $featureFlags.chat}
                     <button class="nav-link" class:active={tab === 'messages'}
                         id="v-pills-messages-tab" type="button" role="tab" aria-controls="v-pills-messages"
                         aria-selected={tab === 'messages'} onclick={() => (tab = 'messages')}><i
@@ -267,10 +267,12 @@
             aria-labelledby="v-pills-order-details-tab" tabindex="0">
                 <OrderDetail order={$selectedOrder} onBack={() => (tab = 'order-history')} />
             </div>
+        {#if $featureFlags.chat}
         <div class="tab-pane fade" class:show={tab === 'messages'} class:active={tab === 'messages'} id="v-pills-messages" role="tabpanel"
             aria-labelledby="v-pills-messages-tab" tabindex="0">
                 <Chat />
             </div>
+        {/if}
         <div class="tab-pane fade" class:show={tab === 'wishlist'} class:active={tab === 'wishlist'} id="v-pills-wishlist" role="tabpanel"
             aria-labelledby="v-pills-wishlist-tab" tabindex="0">
 <!-- Wishlist Section Start -->

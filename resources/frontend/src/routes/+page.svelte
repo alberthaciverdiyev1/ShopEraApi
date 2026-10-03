@@ -35,11 +35,9 @@
     {/if}
 
     {#await data.heroBanners}
-        {#if true}{@render loader('55vh')}{/if}
+        {@render loader('55vh')}
     {:then heroBanners}
-        {#if true}
-            <HeroSection banners={heroBanners}/>
-        {/if}
+        <HeroSection banners={heroBanners}/>
     {/await}
 
     {#if features.promo_blocks ?? false}
@@ -56,7 +54,7 @@
             latest={latest}
             popular={popular}
             onSale={sale}
-            middleBanners={true ? middle : []}
+            middleBanners={middle}
         />
     {/await}
 
@@ -65,7 +63,7 @@
     {/await}
 
     {#await data.promoBanners then promo}
-        {#if true}
+        {#if features.banners ?? false}
             <PromoSection banners={promo}/>
         {/if}
     {/await}
