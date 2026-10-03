@@ -158,6 +158,19 @@ if [ ! -L public/storage ]; then
     "$PHP_BIN" artisan storage:link || warn "storage:link basarisiz"
 fi
 
+# 5b) Multi-tenant: session cookie must stay host-only. A parent-domain
+# SESSION_DOMAIN (e.g. ".snaker.store") makes every subdomain share one
+# session, so logging into one tenant logs the others out.
+if [ -f .env ] && grep -qE '^SESSION_DOMAIN=' .env; then
+    session_domain="$(grep -E '^SESSION_DOMAIN=' .env | head -1 | cut -d= -f2- | tr -d '[:space:]')"
+    if [ -n "$session_domain" ]; then
+        warn "SESSION_DOMAIN='$session_domain' subdomain-ler arasi ortaq sessiya yaradir; host-only ucun silinir"
+        cp .env ".env.bak.sessiondomain.$(date +%s)" 2>/dev/null || true
+        sed -i "/^SESSION_DOMAIN=/d" .env
+        ok "SESSION_DOMAIN silindi (host-only cookie)"
+    fi
+fi
+
 # 6) Cache
 # NOT: `optimize:clear` içindeki `cache:clear` tenant host->db haritasını
 # (file cache: tenant_map) siler; bu yüzden hedefli temizlik yapıyoruz.
