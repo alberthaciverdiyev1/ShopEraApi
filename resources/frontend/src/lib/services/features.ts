@@ -1,4 +1,4 @@
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 import { apiGet } from '$lib/utils/api';
 
 type Fetcher = typeof fetch;
@@ -27,4 +27,12 @@ export async function loadFeatures(fetcher?: Fetcher): Promise<ApiFeatures> {
 /** Backwards-compatible one-shot fetch. */
 export async function fetchFeatures(fetcher?: Fetcher): Promise<ApiFeatures> {
 	return loadFeatures(fetcher);
+}
+
+/**
+ * Is a feature on? Mirrors the backend's fail-open rule: an unknown key is
+ * treated as enabled, an explicit `false` disables it.
+ */
+export function featureEnabled(key: string): boolean {
+	return get(features)[key] !== false;
 }

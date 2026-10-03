@@ -1,5 +1,6 @@
 import { writable } from 'svelte/store';
 import { apiGet } from '$lib/utils/api';
+import { featureEnabled } from '$lib/services/features';
 
 export interface ApiPickupPoint {
 	id: number;
@@ -43,6 +44,11 @@ export const deliveryCitiesLoading = writable(false);
 
 /** Fetch active pickup points (stores/branches) */
 export async function loadPickupPoints(): Promise<ApiPickupPoint[]> {
+	if (!featureEnabled('pickup_points')) {
+		pickupPoints.set([]);
+		return [];
+	}
+
 	pickupPointsLoading.set(true);
 	try {
 		const list = await apiGet<ApiPickupPoint[]>('/pickup-point');
@@ -59,6 +65,11 @@ export async function loadPickupPoints(): Promise<ApiPickupPoint[]> {
 
 /** Fetch active cities for delivery */
 export async function loadDeliveryCities(): Promise<ApiDeliveryCity[]> {
+	if (!featureEnabled('delivery_cities')) {
+		deliveryCities.set([]);
+		return [];
+	}
+
 	deliveryCitiesLoading.set(true);
 	try {
 		const list = await apiGet<ApiDeliveryCity[]>('/city');
@@ -75,6 +86,8 @@ export async function loadDeliveryCities(): Promise<ApiDeliveryCity[]> {
 
 /** Fetch delivery rates for a specific city */
 export async function loadCityDeliveryDetails(cityName: string): Promise<ApiDeliveryDetail | null> {
+	if (!featureEnabled('delivery_prices')) return null;
+
 	try {
 		return await apiGet<ApiDeliveryDetail>('/delivery/details', { name: cityName });
 	} catch {

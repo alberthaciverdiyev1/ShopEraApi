@@ -1,6 +1,7 @@
 import { derived, get, writable } from 'svelte/store';
 import { apiDelete, apiGet, apiPost, apiPut } from '$lib/utils/api';
 import { isLoggedIn } from '$lib/services/auth';
+import { featureEnabled } from '$lib/services/features';
 import type { ApiProduct } from '$lib/services/products';
 
 export interface BasketItem {
@@ -35,7 +36,7 @@ export const basketTotal = derived(basketItems, (items) =>
 
 /** Loads the signed-in user's basket; clears it when signed out. */
 export async function loadBasket(): Promise<void> {
-	if (!get(isLoggedIn)) {
+	if (!featureEnabled('basket') || !get(isLoggedIn)) {
 		basketItems.set([]);
 		return;
 	}

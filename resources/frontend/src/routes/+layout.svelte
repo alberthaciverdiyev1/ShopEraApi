@@ -25,7 +25,12 @@
 	let { children } = $props();
 
 	onMount(() => {
-		loadFeatures();
+		// Feature flags decide which stores may hit the API — resolve them first
+		// so disabled features never fire a request (no needless DB queries).
+		loadFeatures().then(() => {
+			loadBasket();
+			loadFavorites();
+		});
 		// Apply the admin-managed favicon, falling back to the static one.
 		loadSettings().then((s) => {
 			if (!s.favicon_url) return;
@@ -51,8 +56,6 @@
 		startVersionWatch();
 		initAuth();
 		initLocale();
-		loadBasket();
-		loadFavorites();
 		applyThemeColors();
 		applyBackgrounds();
 		initPageBehaviors();
