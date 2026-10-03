@@ -172,3 +172,91 @@ document.addEventListener('change', (event) => {
         panel.classList.toggle('hidden', el.value !== panel.getAttribute('data-show-value'));
     });
 });
+
+/* ---------- Loading indicators (buttons + global spinner) ---------- */
+
+let activeRequests = 0;
+
+function globalSpinner(): HTMLElement | null {
+    return document.getElementById('global-spinner');
+}
+
+function updateGlobalSpinner(): void {
+    globalSpinner()?.classList.toggle('is-active', activeRequests > 0);
+}
+
+/** Resolve the element that should carry the spinner (button, or a form's submit button). */
+function spinnerTarget(el: EventTarget | null): HTMLElement | null {
+    if (!(el instanceof HTMLElement)) return null;
+
+    if (el instanceof HTMLFormElement) {
+        return el.querySelector<HTMLElement>('button[type="submit"], button:not([type])') ?? el;
+    }
+
+    return el;
+}
+
+function startLoading(el: EventTarget | null): void {
+    const target = spinnerTarget(el);
+    if (!target) return;
+
+    activeRequests++;
+    updateGlobalSpinner();
+
+    const isButton =
+        target instanceof HTMLButtonElement ||
+        (target instanceof HTMLInputElement && target.type === 'submit') ||
+        target.tagName === 'BUTTON';
+
+    if (!isButton || target.dataset.loading === '1') return;
+
+    target.dataset.loading = '1';
+    target.dataset.originalHtml = target.innerHTML;
+    target.classList.add('is-loading');
+    if (target instanceof HTMLButtonElement || target instanceof HTMLInputElement) {
+        target.disabled = true;
+    }
+    target.innerHTML = '<span class="btn-spinner" aria-hidden="true"></span>' + (target.dataset.originalHtml ?? '');
+}
+
+function stopLoading(el: EventTarget | null): void {
+    if (activeRequests > 0) activeRequests--;
+    updateGlobalSpinner();
+
+    const target = spinnerTarget(el);
+    if (!target || target.dataset.loading !== '1') return;
+
+    target.dataset.loading = '0';
+    target.classList.remove('is-loading');
+    if (target instanceof HTMLButtonElement || target instanceof HTMLInputElement) {
+        target.disabled = false;
+    }
+    if (target.dataset.originalHtml !== undefined) {
+        target.innerHTML = target.dataset.originalHtml;
+        delete target.dataset.originalHtml;
+    }
+}
+
+document.body.addEventListener('htmx:beforeRequest', (event: Event) => {
+    startLoading((event as CustomEvent).detail?.elt ?? null);
+});
+document.body.addEventListener('htmx:afterRequest', (event: Event) => {
+    stopLoading((event as CustomEvent).detail?.elt ?? null);
+});
+document.body.addEventListener('htmx:responseError', (event: Event) => {
+    stopLoading((event as CustomEvent).detail?.elt ?? null);
+});
+document.body.addEventListener('htmx:sendError', (event: Event) => {
+    stopLoading((event as CustomEvent).detail?.elt ?? null);
+});
+
+/* Plain (non-htmx) form submissions: show spinner until the page navigates. */
+document.addEventListener('submit', (event) => {
+    const form = event.target as HTMLFormElement | null;
+    if (!form || form.hasAttribute('hx-post') || form.hasAttribute('hx-put') || form.hasAttribute('hx-delete') || form.hasAttribute('hx-get')) {
+        return;
+    }
+
+    const button = form.querySelector<HTMLButtonElement>('button[type="submit"], button:not([type])');
+    startLoading(button ?? form);
+});

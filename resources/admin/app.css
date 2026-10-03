@@ -70,3 +70,26 @@
     /* Content column fills the viewport (sidebar is out of flow) */
     #admin-shell > .flex { width: 100%; }
 }
+
+/* Button + global loading indicators */
+@keyframes app-spin { to { transform: rotate(360deg); } }
+
+.btn-spinner {
+    display: inline-block;
+    width: .9em;
+    height: .9em;
+    margin-right: .5em;
+    vertical-align: -2px;
+    border-radius: 9999px;
+    border: 2px solid currentColor;
+    border-top-color: transparent;
+    animation: app-spin .7s linear infinite;
+}
+
+/* Buttons/links that kicked off a request get dimmed + non-interactive */
+.is-loading {
+    pointer-events: none;
+    opacity: .7;
+}
+
+#global-spinner.is-active { opacity: 1 !important; }
