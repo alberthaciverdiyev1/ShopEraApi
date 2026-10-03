@@ -376,6 +376,14 @@ const tr = {
 	'Creating account…': 'Hesap oluşturuluyor…',
 	'Have an account?': 'Hesabınız var mı?',
 	'Registration failed': 'Kayıt başarısız',
+	'Page not found': 'Sayfa bulunamadı',
+	'Access denied': 'Erişim reddedildi',
+	'Something went wrong': 'Bir şeyler ters gitti',
+	'The page you are looking for does not exist or has moved.': 'Aradığınız sayfa mevcut değil veya taşınmış.',
+	'You do not have permission to view this page.': 'Bu sayfayı görüntüleme izniniz yok.',
+	'An unexpected error occurred. Please try again in a moment.': 'Beklenmeyen bir hata oluştu. Lütfen birazdan tekrar deneyin.',
+	'Back to home': 'Ana sayfaya',
+	'Go back': 'Geri dön',
 } satisfies Record<string, string>;
 
 export default tr;

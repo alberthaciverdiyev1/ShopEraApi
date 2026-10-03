@@ -376,6 +376,14 @@ const az = {
 	'Creating account…': 'Hesab yaradılır…',
 	'Have an account?': 'Hesabınız var?',
 	'Registration failed': 'Qeydiyyat alınmadı',
+	'Page not found': 'Səhifə tapılmadı',
+	'Access denied': 'İcazə yoxdur',
+	'Something went wrong': 'Nəsə səhv getdi',
+	'The page you are looking for does not exist or has moved.': 'Axtardığınız səhifə mövcud deyil və ya köçürülüb.',
+	'You do not have permission to view this page.': 'Bu səhifəyə baxmaq icazəniz yoxdur.',
+	'An unexpected error occurred. Please try again in a moment.': 'Gözlənilməz xəta baş verdi. Bir az sonra yenidən cəhd edin.',
+	'Back to home': 'Ana səhifəyə',
+	'Go back': 'Geri qayıt',
 } satisfies Record<string, string>;
 
 export default az;

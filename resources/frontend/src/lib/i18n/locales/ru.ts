@@ -376,6 +376,14 @@ const ru = {
 	'Creating account…': 'Создание аккаунта…',
 	'Have an account?': 'Есть аккаунт?',
 	'Registration failed': 'Не удалось зарегистрироваться',
+	'Page not found': 'Страница не найдена',
+	'Access denied': 'Доступ запрещён',
+	'Something went wrong': 'Что-то пошло не так',
+	'The page you are looking for does not exist or has moved.': 'Запрашиваемая страница не существует или была перемещена.',
+	'You do not have permission to view this page.': 'У вас нет прав для просмотра этой страницы.',
+	'An unexpected error occurred. Please try again in a moment.': 'Произошла непредвиденная ошибка. Попробуйте ещё раз через мгновение.',
+	'Back to home': 'На главную',
+	'Go back': 'Назад',
 } satisfies Record<string, string>;
 
 export default ru;

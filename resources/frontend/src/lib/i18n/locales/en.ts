@@ -370,6 +370,14 @@ const en = {
 	'Creating account…': 'Creating account…',
 	'Have an account?': 'Have an account?',
 	'Registration failed': 'Registration failed',
+	'Page not found': 'Page not found',
+	'Access denied': 'Access denied',
+	'Something went wrong': 'Something went wrong',
+	'The page you are looking for does not exist or has moved.': 'The page you are looking for does not exist or has moved.',
+	'You do not have permission to view this page.': 'You do not have permission to view this page.',
+	'An unexpected error occurred. Please try again in a moment.': 'An unexpected error occurred. Please try again in a moment.',
+	'Back to home': 'Back to home',
+	'Go back': 'Go back',
 } satisfies Record<string, string>;
 
 export default en;
