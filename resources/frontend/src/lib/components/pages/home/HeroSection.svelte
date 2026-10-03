@@ -12,9 +12,12 @@
     const slides = $derived(banners.filter((banner) => banner.image || banner.product));
     const activeBanner = $derived(slides[activeIndex] ?? slides[0]);
     const activeProduct = $derived(activeBanner?.product ?? null);
-    const activeTitle = $derived(activeProduct ? productTitle(activeProduct) : $translate('Selected offer'));
+    const activeTitle = $derived(
+        activeProduct ? productTitle(activeProduct) : (activeBanner?.title || $translate('Selected offer'))
+    );
     const activeDescription = $derived(
-        activeProduct?.description || $translate('Selected quality products, fair prices, and easy shopping in one place.')
+        activeProduct?.description || activeBanner?.subtitle
+        || $translate('Selected quality products, fair prices, and easy shopping in one place.')
     );
     const activeImage = $derived(activeBanner ? activeBanner.image || (activeProduct ? productImage(activeProduct) : '') : '');
 

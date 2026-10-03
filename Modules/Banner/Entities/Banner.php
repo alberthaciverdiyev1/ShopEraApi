@@ -9,12 +9,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Storage;
 use Modules\Banner\Database\Factories\BannerFactory;
 use Modules\Product\Entities\Product;
+use Spatie\Translatable\HasTranslations;
 
 class Banner extends Model
 {
-    use HasFactory,ImagePath;
+    use HasFactory,HasTranslations,ImagePath;
 
     protected $table = 'banners';
+
+    /** @var array<int,string> */
+    public array $translatable = ['title', 'subtitle'];
 
     protected $fillable = [
         'image',
@@ -23,6 +27,8 @@ class Banner extends Model
         'is_active',
         'url',
         'product_id',
+        'title',
+        'subtitle',
     ];
 
     protected static function newFactory(): BannerFactory

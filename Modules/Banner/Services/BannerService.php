@@ -80,6 +80,8 @@ class BannerService
                 'type' => $request->input('type'),
                 'url' => $request->input('url'),
                 'product_id' => $request->input('product_id'),
+                'title' => $request->input('title'),
+                'subtitle' => $request->input('subtitle'),
                 'is_active' => $request->boolean('is_active', true),
             ]);
 
@@ -107,7 +109,7 @@ class BannerService
     {
         $options = ['' => '— Məhsul seçilməyib —'];
 
-        foreach (\Modules\Product\Entities\Product::query()->orderByDesc('id')->limit(500)->get() as $product) {
+        foreach (Product::query()->orderByDesc('id')->limit(500)->get() as $product) {
             $options[$product->id] = admin_label($product, 'title', '#'.$product->id);
         }
 

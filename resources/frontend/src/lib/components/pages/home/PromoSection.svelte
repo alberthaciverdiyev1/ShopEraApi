@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { fetchBanners, bannerHref, type ApiBanner } from '$lib/services/banners';
 	import { productImage } from '$lib/services/products';
+	import { translate } from '$lib/i18n';
 
 	let { banners: serverBanners = [] }: { banners?: ApiBanner[] } = $props();
 	let clientBanners = $state<ApiBanner[] | null>(null);
@@ -28,9 +29,9 @@
 							alt={banner.product?.title || 'Promo'}
 							loading="lazy"
 						/>
-						<span class="eyebrow">Limited offer</span>
-						<strong>{banner.product?.title || 'Selected offer'}</strong>
-						<small>Shop now</small>
+						<span class="eyebrow">{$translate('Limited offer')}</span>
+						<strong>{banner.product?.title || banner.title || $translate('Selected offer')}</strong>
+						<small>{banner.subtitle || $translate('Shop now')}</small>
 					</a>
 				{/each}
 			</div>

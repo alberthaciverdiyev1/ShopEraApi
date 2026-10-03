@@ -11,6 +11,8 @@ export interface ApiBanner {
 	second_image?: string | null;
 	type: BannerType | string;
 	url?: string | null;
+	title?: string | null;
+	subtitle?: string | null;
 	product_id?: number | null;
 	is_active?: boolean;
 	product?: ApiProduct | null;

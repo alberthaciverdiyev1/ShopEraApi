@@ -16,6 +16,8 @@ class BannerResource extends JsonResource
             'second_image' => $this->second_image,
             'type' => $this->type,
             'url' => $this->url,
+            'title' => $this->title,
+            'subtitle' => $this->subtitle,
             'product_id' => $this->product_id,
             'is_active' => (bool) $this->is_active,
             'product' => new ProductResource($this->whenLoaded('product')),
