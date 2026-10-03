@@ -93,3 +93,10 @@
 }
 
 #global-spinner.is-active { opacity: 1 !important; }
+
+/* Read-only "Premium required" sections: grey out and freeze the content */
+.plan-locked {
+    filter: grayscale(1);
+    opacity: .55;
+    user-select: none;
+}

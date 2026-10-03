@@ -6,18 +6,23 @@ use App\Support\AdminMenu;
 use App\Support\Features;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\View;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Blocks direct URL access to menu pages the owner is not entitled to.
- * Mirrors the sidebar filter (feature + plan) so hiding a menu item is not the
- * only protection — the route itself is refused too.
+ * Applies the sidebar's feature/plan rules to the routes behind it.
+ *
+ * A locked section stays reachable but read-only: GET requests render the page
+ * with a "Premium required" overlay (menuLocked), while any write (POST/PUT/
+ * PATCH/DELETE) is refused with 403 so a free plan cannot change anything.
  */
 class EnforceAdminMenuAccess
 {
     public function handle(Request $request, Closure $next): Response
     {
         $route = $request->route()?->getName();
+        $locked = false;
+        $label = null;
 
         if ($route !== null) {
             foreach (AdminMenu::groups() as $items) {
@@ -26,15 +31,27 @@ class EnforceAdminMenuAccess
                         continue;
                     }
 
-                    if (isset($item['feature']) && ! Features::enabled($item['feature'])) {
-                        abort(403, __('Bu bölmə abunəliyinizə daxil deyil.'));
-                    }
+                    $missing = (isset($item['feature']) && ! Features::enabled($item['feature']))
+                        || (isset($item['plan']) && ! plan($item['plan']));
 
-                    if (isset($item['plan']) && ! plan($item['plan'])) {
-                        abort(403, __('Bu bölmə planınıza daxil deyil.'));
+                    if ($missing) {
+                        $locked = true;
+                        $label = $item['label'];
                     }
                 }
             }
+        }
+
+        if ($locked) {
+            if (! in_array($request->method(), ['GET', 'HEAD', 'OPTIONS'], true)) {
+                abort(403, __('Bu bölmə Premium plandadır. Dəyişiklik etmək üçün planı yüksəldin.'));
+            }
+
+            View::share('menuLocked', true);
+            View::share('menuLockedLabel', $label);
+        } else {
+            View::share('menuLocked', false);
+            View::share('menuLockedLabel', null);
         }
 
         return $next($request);

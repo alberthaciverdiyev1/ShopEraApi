@@ -20,8 +20,8 @@
                         <li>
                             @if ($locked)
                                 {{-- Abunəliyə daxil deyil: klikləyəndə planı yüksəlt səhifəsinə keçir. --}}
-                                <a href="{{ route('admin.plan.index', array_filter(['feature' => $item['feature'] ?? null])) }}"
-                                   title="{{ $item['label'] }} — abunəliyinizə daxil deyil"
+                                <a href="{{ route($item['route']) }}"
+                                   title="{{ $item['label'] }} — Premium plan lazımdır (yalnız baxış)"
                                    data-locked-feature="{{ $item['feature'] ?? '' }}"
                                    class="nav-link flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-gray-400 opacity-70 transition hover:bg-amber-50 hover:opacity-100 dark:text-gray-500 dark:hover:bg-amber-500/10">
                                     <svg class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.6" stroke="currentColor">

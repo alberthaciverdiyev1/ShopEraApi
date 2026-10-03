@@ -73,7 +73,19 @@
                 </div>
             @endif
 
-            @yield('content')
+            @if (! empty($menuLocked))
+                <div class="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-700 dark:bg-gray-800 dark:text-amber-300" role="alert">
+                    <span class="rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide">Premium</span>
+                    <strong>Premium plan lazımdır.</strong>
+                    <span>“{{ $menuLockedLabel }}” bölməsi yalnız baxış rejimindədir — dəyişiklik etmək üçün planı yüksəldin.</span>
+                    <a href="{{ route('admin.plan.index', array_filter(['feature' => request()->route()?->getName()])) }}"
+                       class="ml-auto rounded-lg bg-amber-600 px-4 py-2 text-xs font-semibold text-white hover:bg-amber-700">Planı yüksəlt</a>
+                </div>
+            @endif
+
+            <div @if (! empty($menuLocked)) inert class="plan-locked" @endif>
+                @yield('content')
+            </div>
         </main>
     </div>
 </div>
