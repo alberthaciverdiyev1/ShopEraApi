@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Modules\Category\Entities\Category;
 use Modules\Manager\Entities\SiteOwner;
+use Modules\Order\Entities\Order;
 use Modules\Product\Entities\Product;
 use Modules\User\Entities\User;
 
@@ -80,11 +81,22 @@ class ManagerReportUsage extends Command
             // ignore
         }
 
+        $dbBytes = 0;
+        try {
+            $dbBytes = (int) (DB::connection(TenantDatabase::centralConnection())
+                ->selectOne('select pg_database_size(?) as size', [$database])->size ?? 0);
+        } catch (\Throwable) {
+            // ignore
+        }
+
         $usage = [
             'usage_products' => Product::query()->count(),
             'usage_categories' => Category::query()->count(),
             'usage_staff' => User::query()->whereHas('roles', fn ($q) => $q->where('name', '!=', 'user'))->count(),
+            'usage_orders' => Order::query()->count(),
+            'usage_customers' => User::query()->whereHas('roles', fn ($q) => $q->where('name', 'user'))->count(),
             'usage_storage_gb' => round($storageBytes / 1073741824, 2),
+            'usage_db_mb' => round($dbBytes / 1048576, 2),
             'usage_reported_at' => now(),
         ];
 

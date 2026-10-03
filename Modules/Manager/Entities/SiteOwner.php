@@ -2,12 +2,13 @@
 
 namespace Modules\Manager\Entities;
 
-use Modules\Manager\Enums\OwnerStatus;
+use App\Support\TenantContext;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Manager\Enums\OwnerStatus;
 
 class SiteOwner extends ControlModel
 {
@@ -17,11 +18,54 @@ class SiteOwner extends ControlModel
 
     protected $casts = [
         'status' => OwnerStatus::class,
+        'last_login_at' => 'datetime',
+        'last_logout_at' => 'datetime',
+        'last_seen_at' => 'datetime',
+        'usage_reported_at' => 'datetime',
     ];
 
     public function domains(): HasMany
     {
         return $this->hasMany(Domain::class);
+    }
+
+    public function activities(): HasMany
+    {
+        return $this->hasMany(OwnerActivity::class)->latest('created_at');
+    }
+
+    /**
+     * The owner that backs the tenant of the current request (resolved by the
+     * active tenant database, then by host). Null on non-tenant requests.
+     */
+    public static function findForCurrentTenant(): ?self
+    {
+        $database = TenantContext::database();
+        if (is_string($database) && $database !== '') {
+            $owner = static::query()->where('db_name', $database)->first();
+            if ($owner) {
+                return $owner;
+            }
+        }
+
+        $host = request()?->getHost();
+        if (is_string($host) && $host !== '') {
+            return static::query()->byHost($host)->first();
+        }
+
+        return null;
+    }
+
+    /** Touches last_seen (+ action) and writes an activity row. */
+    public function touchActivity(string $action, ?string $description = null, ?string $ip = null): void
+    {
+        try {
+            $this->forceFill(['last_seen_at' => now(), 'last_action' => $action])->save();
+        } catch (\Throwable) {
+            // ignore
+        }
+
+        OwnerActivity::record($this, $action, $description, $ip);
     }
 
     public function subscriptions(): HasMany
@@ -39,7 +83,7 @@ class SiteOwner extends ControlModel
         return $this->hasMany(OwnerFeature::class);
     }
 
-    public function theme(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function theme(): BelongsTo
     {
         return $this->belongsTo(Theme::class);
     }

@@ -35,7 +35,7 @@ Route::middleware(['auth:owner', EnsureOwner::class])->group(function () {
 
     // Site owners (customers) managed by domain
     Route::post('owners/push-all', [OwnerController::class, 'pushAll'])->name('owners.pushAll');
-    Route::resource('owners', OwnerController::class)->except(['show']);
+    Route::resource('owners', OwnerController::class);
     Route::put('owners/{owner}/features', [OwnerController::class, 'updateFeatures'])->name('owners.features');
     Route::post('owners/{owner}/password', [OwnerController::class, 'updatePassword'])->name('owners.password');
     Route::post('owners/{owner}/push', [OwnerController::class, 'push'])->name('owners.push');

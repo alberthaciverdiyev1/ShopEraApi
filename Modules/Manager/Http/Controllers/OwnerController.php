@@ -51,6 +51,22 @@ class OwnerController extends Controller
         return view('manager::owners.form', $this->formData(null));
     }
 
+    /** Monitoring dashboard: usage, last login/logout and the activity log. */
+    public function show(SiteOwner $owner)
+    {
+        $owner->load([
+            'domains',
+            'currentSubscription.plan',
+            'theme',
+            'activities' => fn ($q) => $q->limit(100),
+        ]);
+
+        return view('manager::owners.show', [
+            'title' => 'Sahib: '.$owner->name,
+            'owner' => $owner,
+        ]);
+    }
+
     public function store(Request $request)
     {
         $started = microtime(true);

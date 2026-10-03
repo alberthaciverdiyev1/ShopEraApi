@@ -189,6 +189,10 @@ if [ "$SKIP_MANAGER" != "1" ]; then
     info "manager:push (control entitlements -> tenants)"
     "$PHP_BIN" artisan manager:push || warn "manager:push basarisiz (atlandi)"
     ok "entitlements pushed"
+
+    info "manager:report-usage (tenant usage counters)"
+    "$PHP_BIN" artisan manager:report-usage || warn "manager:report-usage basarisiz (atlandi)"
+    ok "usage reported"
 fi
 
 # 8) Izinler (yalnizca root iken)
