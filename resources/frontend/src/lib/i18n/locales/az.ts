@@ -313,7 +313,6 @@ const az = {
 	'Navigation': 'Naviqasiya',
 	'Messages': 'Mesajlar',
 	'Addresses': 'Ünvanlar',
-	'Plan & Limits': 'Plan və limitlər',
 	'Log Out': 'Çıxış',
 	'Loading plan…': 'Plan yüklənir…',
 	'Plan information is not available yet.': 'Plan məlumatı hələ mövcud deyil.',

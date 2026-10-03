@@ -10,10 +10,9 @@
 	import { selectedOrder } from '$lib/services/orders';
 	import AddressSection from '$lib/components/pages/dashboard/AddressSection.svelte';
 	import Chat from '$lib/components/pages/dashboard/Chat.svelte';
-	import PlanLimits from '$lib/components/pages/dashboard/PlanLimits.svelte';
 	import { features as featureFlags } from '$lib/services/features';
 
-	type TabKey = 'dashboard' | 'order-history' | 'order-details' | 'messages' | 'wishlist' | 'addresses' | 'plan' | 'settings' | 'logout';
+	type TabKey = 'dashboard' | 'order-history' | 'order-details' | 'messages' | 'wishlist' | 'addresses' | 'settings' | 'logout';
 	let tab = $state<TabKey>('dashboard');
 
 	let defaultAddress = $state<ApiAddress | null>(null);
@@ -110,11 +109,6 @@
                     id="v-pills-addresses-tab" type="button" role="tab" aria-controls="v-pills-addresses"
                     aria-selected={tab === 'addresses'} onclick={() => (tab = 'addresses')}><i
                         class="fa-solid fa-location-dot"></i>{$translate('Addresses')}</button>
-
-                <button class="nav-link" class:active={tab === 'plan'}
-                    id="v-pills-plan-tab" type="button" role="tab" aria-controls="v-pills-plan"
-                    aria-selected={tab === 'plan'} onclick={() => (tab = 'plan')}><i
-                        class="fa-solid fa-gauge-high"></i>{$translate('Plan & Limits')}</button>
 
                 <button class="nav-link" class:active={tab === 'settings'}
                     id="v-pills-settings-tab" type="button" role="tab" aria-controls="v-pills-settings"
@@ -366,11 +360,6 @@
         <div class="tab-pane fade" class:show={tab === 'addresses'} class:active={tab === 'addresses'} id="v-pills-addresses" role="tabpanel"
             aria-labelledby="v-pills-addresses-tab" tabindex="0">
             <AddressSection onchange={loadDefaultAddress} />
-        </div>
-
-        <div class="tab-pane fade" class:show={tab === 'plan'} class:active={tab === 'plan'} id="v-pills-plan" role="tabpanel"
-            aria-labelledby="v-pills-plan-tab" tabindex="0">
-            <PlanLimits />
         </div>
 
         <div class="tab-pane fade" class:show={tab === 'settings'} class:active={tab === 'settings'} id="v-pills-settings"

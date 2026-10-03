@@ -313,7 +313,6 @@ const ru = {
 	'Navigation': 'Навигация',
 	'Messages': 'Сообщения',
 	'Addresses': 'Адреса',
-	'Plan & Limits': 'План и лимиты',
 	'Log Out': 'Выйти',
 	'Loading plan…': 'Загрузка плана…',
 	'Plan information is not available yet.': 'Информация о плане пока недоступна.',

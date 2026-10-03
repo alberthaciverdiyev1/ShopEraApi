@@ -313,7 +313,6 @@ const tr = {
 	'Navigation': 'Navigasyon',
 	'Messages': 'Mesajlar',
 	'Addresses': 'Adresler',
-	'Plan & Limits': 'Plan ve limitler',
 	'Log Out': 'Çıkış',
 	'Loading plan…': 'Plan yükleniyor…',
 	'Plan information is not available yet.': 'Plan bilgisi henüz mevcut değil.',

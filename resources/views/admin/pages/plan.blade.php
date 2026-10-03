@@ -9,6 +9,38 @@
 
 @section('content')
     <div class="mx-auto max-w-5xl space-y-6">
+        {{-- Current plan + limits/usage (moved here from the storefront) --}}
+        <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                    <p class="text-xs uppercase tracking-wide text-gray-400">Cari plan</p>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ $currentPlan ?: 'Free' }}</h2>
+                </div>
+                <span class="rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-600 dark:bg-brand-500/15">{{ $currentPlan ?: 'Free' }}</span>
+            </div>
+
+            <div class="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                @foreach ($limits as $row)
+                    @php
+                        $limit = $row['limit'];
+                        $used = $row['used'];
+                        $pct = ($limit !== null && $limit > 0) ? min(100, (int) round($used / $limit * 100)) : null;
+                    @endphp
+                    <div class="rounded-xl border border-gray-100 p-4 dark:border-gray-700">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="font-medium text-gray-700 dark:text-gray-200">{{ $row['label'] }}</span>
+                            <span class="text-gray-500">{{ $used }} / {{ $limit === null ? '∞' : $limit }}</span>
+                        </div>
+                        @if ($pct !== null)
+                            <div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-gray-100 dark:bg-gray-700">
+                                <div class="h-full rounded-full {{ $pct >= 90 ? 'bg-rose-500' : 'bg-brand-600' }}" style="width: {{ $pct }}%"></div>
+                            </div>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
         <div class="rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50 to-white p-6 dark:border-amber-800 dark:from-gray-800 dark:to-gray-800">
             <span class="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-amber-700 dark:bg-amber-500/15 dark:text-amber-400">
                 Premium

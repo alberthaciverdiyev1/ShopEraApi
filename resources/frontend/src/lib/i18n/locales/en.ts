@@ -307,7 +307,6 @@ const en = {
 	'Navigation': 'Navigation',
 	'Messages': 'Messages',
 	'Addresses': 'Addresses',
-	'Plan & Limits': 'Plan & Limits',
 	'Log Out': 'Log Out',
 	'Loading plan…': 'Loading plan…',
 	'Plan information is not available yet.': 'Plan information is not available yet.',
