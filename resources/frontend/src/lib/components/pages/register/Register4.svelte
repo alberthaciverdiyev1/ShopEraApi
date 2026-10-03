@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { register } from '$lib/services/auth';
+	import { translate } from '$lib/i18n';
 
 	let name = $state('');
 	let phone = $state('');
@@ -23,7 +24,7 @@
 			});
 			await goto('/');
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Registration failed';
+			error = e instanceof Error ? e.message : $translate('Registration failed');
 		} finally {
 			loading = false;
 		}
@@ -39,34 +40,34 @@
     <div class="col-xl-6 offset-xl-0 col-md-8 offset-md-2">
         <div class="contact-info-area">
             <div class="contact-content">
-                <h2 class="contact-content__title">Get Started Now</h2>
-                <p class="contact-content__subtitle">Enter your Credentials to access your account</p>
+                <h2 class="contact-content__title">{$translate('Get Started Now')}</h2>
+                <p class="contact-content__subtitle">{$translate('Enter your Credentials to access your account')}</p>
                 <form onsubmit={onSubmit} class="contact-form-items">
                     <div class="row g-4">
                         <div class="col-lg-12 fadeInUp">
                             <div class="form-clt">
-                                <span>Your name*</span>
-                                <input type="text" name="name" placeholder="Enter your name"
+                                <span>{$translate('Your name*')}</span>
+                                <input type="text" name="name" placeholder={$translate('Enter your name')}
                                        bind:value={name} required>
                             </div>
                         </div>
                         <div class="col-lg-12 fadeInUp">
                             <div class="form-clt">
-                                <span>Phone number*</span>
-                                <input type="text" name="phone" placeholder="Enter your phone number"
+                                <span>{$translate('Phone number*')}</span>
+                                <input type="text" name="phone" placeholder={$translate('Enter your phone number')}
                                        bind:value={phone} required>
                             </div>
                         </div>
                         <div class="col-lg-12 fadeInUp">
                             <div class="form-clt">
-                                <span>Email address</span>
-                                <input type="email" name="email" placeholder="Enter your email (optional)"
+                                <span>{$translate('Email address')}</span>
+                                <input type="email" name="email" placeholder={$translate('Enter your email (optional)')}
                                        bind:value={email}>
                             </div>
                         </div>
                         <div class="col-lg-12 fadeInUp">
                             <div class="form-clt">
-                                <span>Password*</span>
+                                <span>{$translate('Password*')}</span>
                                 <input type="password" name="password" placeholder="********"
                                        bind:value={password} required minlength="6">
                             </div>
@@ -78,12 +79,12 @@
                         {/if}
                         <div class="col-lg-12 fadeInUp">
                             <button type="submit" class="theme-btn style6" disabled={loading}>
-                                {loading ? 'Creating account…' : 'Sign Up'}
+                                {loading ? $translate('Creating account…') : $translate('Sign Up')}
                             </button>
                         </div>
                     </div>
                 </form>
-                <h5 class="contact-content__logtitle center">Have an account? <a href="/login">Sign In</a></h5>
+                <h5 class="contact-content__logtitle center">{$translate('Have an account?')} <a href="/login">{$translate('Sign In')}</a></h5>
              </div>
        </div>
     </div>

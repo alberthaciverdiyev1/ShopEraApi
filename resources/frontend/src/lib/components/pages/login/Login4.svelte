@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { login } from '$lib/services/auth';
+	import { translate } from '$lib/i18n';
 
 	let identifier = $state('');
 	let password = $state('');
@@ -16,7 +17,7 @@
 			await login(identifier, password);
 			await goto('/');
 		} catch (e) {
-			error = e instanceof Error ? e.message : 'Login failed';
+			error = e instanceof Error ? e.message : $translate('Login failed');
 		} finally {
 			loading = false;
 		}
@@ -32,20 +33,20 @@
     <div class="col-xl-6 offset-xl-0 col-md-8 offset-md-2">
         <div class="contact-info-area">
             <div class="contact-content">
-                <h2 class="contact-content__title">Get Started Now</h2>
-                <p class="contact-content__subtitle">Enter your Credentials to access your account</p>
+                <h2 class="contact-content__title">{$translate('Get Started Now')}</h2>
+                <p class="contact-content__subtitle">{$translate('Enter your Credentials to access your account')}</p>
                 <form onsubmit={onSubmit} class="contact-form-items">
                     <div class="row g-4">
                         <div class="col-lg-12 fadeInUp">
                             <div class="form-clt">
-                                <span>Phone or email*</span>
-                                <input type="text" name="identifier" placeholder="Phone number or email"
+                                <span>{$translate('Phone or email*')}</span>
+                                <input type="text" name="identifier" placeholder={$translate('Phone number or email')}
                                        bind:value={identifier} required>
                             </div>
                         </div>
                         <div class="col-lg-12 fadeInUp">
                             <div class="form-clt">
-                                <span>Password*</span>
+                                <span>{$translate('Password*')}</span>
                                 <input type="password" name="password" placeholder="********"
                                        bind:value={password} required>
                             </div>
@@ -57,12 +58,12 @@
                         {/if}
                         <div class="col-lg-12 fadeInUp">
                             <button type="submit" class="theme-btn style6" disabled={loading}>
-                                {loading ? 'Signing in…' : 'Sign In'}
+                                {loading ? $translate('Signing in…') : $translate('Sign In')}
                             </button>
                         </div>
                     </div>
                 </form>
-                <h5 class="contact-content__logtitle center">Don't Have an account? <a href="/register">Sign Up</a></h5>
+                <h5 class="contact-content__logtitle center">{$translate("Don't Have an account?")} <a href="/register">{$translate('Sign Up')}</a></h5>
              </div>
        </div>
     </div>
