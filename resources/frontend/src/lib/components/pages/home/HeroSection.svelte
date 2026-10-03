@@ -408,35 +408,37 @@
 
         .hero-meta {
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 18px;
+            gap: 8px;
+            max-width: 260px;
+            margin-top: 14px;
             margin-left: 0;
             margin-right: 0;
         }
 
         .meta-item {
-            min-height: 72px;
-            padding: 12px;
-            border-radius: 16px;
+            min-height: 56px;
+            padding: 9px 10px;
+            border-radius: 12px;
+            box-shadow: 0 10px 24px rgba(10, 17, 30, 0.06);
         }
 
         .meta-item span {
-            margin-bottom: 6px;
-            font-size: 12px;
+            margin-bottom: 5px;
+            font-size: 11px;
         }
 
         .meta-item strong {
-            font-size: 16px;
+            font-size: 14px;
         }
 
         .color-plate {
-            gap: 6px;
-            min-height: 16px;
+            gap: 5px;
+            min-height: 14px;
         }
 
         .color-dot {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
         }
 
         .hero-actions {
@@ -511,7 +513,8 @@
         }
 
         .hero-meta {
-            grid-template-columns: 1fr;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            max-width: 220px;
         }
 
         .hero-media-wrap {
