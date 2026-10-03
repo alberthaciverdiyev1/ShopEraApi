@@ -17,8 +17,6 @@ class FeaturesController extends Controller
         'online_payment' => true,
         'cash_on_delivery' => true,
         'whatsapp_orders' => true,
-        'phone_orders' => false,
-        'instagram_orders' => false,
     ];
 
     public function index(Request $request)

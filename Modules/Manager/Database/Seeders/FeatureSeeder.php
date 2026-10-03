@@ -39,7 +39,6 @@ class FeatureSeeder extends Seeder
             ['faq', 'FAQ', 'bool', '1', 'Kontent'],
             ['legal_terms', 'Hüquqi şərtlər', 'bool', '1', 'Kontent'],
             ['contact_page', 'Əlaqə səhifəsi', 'bool', '1', 'Kontent'],
-            ['sitemap_seo', 'Sitemap & SEO', 'bool', '1', 'Kontent'],
             ['theme_colors', 'Tema rəngləri', 'bool', '0', 'Kontent'],
             ['custom_theme', 'Öz custom teması', 'bool', '0', 'Kontent'],
 
@@ -49,11 +48,7 @@ class FeatureSeeder extends Seeder
             ['online_payment', 'Onlayn ödəniş (Epoint)', 'bool', '1', 'Sifariş & Ödəniş'],
             ['cash_on_delivery', 'Qapıda nağd ödəniş', 'bool', '1', 'Sifariş & Ödəniş'],
             ['whatsapp_orders', 'WhatsApp ilə sifariş', 'bool', '1', 'Sifariş & Ödəniş'],
-            ['phone_orders', 'Telefon ilə sifariş', 'bool', '0', 'Sifariş & Ödəniş'],
-            ['instagram_orders', 'Instagram / DM ilə sifariş', 'bool', '0', 'Sifariş & Ödəniş'],
-            ['saved_cards', 'Yadda saxlanan kartlar', 'bool', '0', 'Sifariş & Ödəniş'],
             ['balance_wallet', 'Balans / cüzdan', 'bool', '1', 'Sifariş & Ödəniş'],
-            ['refunds', 'Geri qaytarma (balansa)', 'bool', '0', 'Sifariş & Ödəniş'],
 
             // Çatdırılma
             ['delivery_prices', 'Çatdırılma qiymətləri', 'bool', '1', 'Çatdırılma'],
@@ -72,11 +67,6 @@ class FeatureSeeder extends Seeder
             ['push_notifications', 'Push bildiriş (FCM)', 'bool', '0', 'Marketinq & Əlaqə'],
             ['sms', 'SMS (OTP)', 'bool', '1', 'Marketinq & Əlaqə'],
 
-            // Marketplace
-            ['marketplace', 'Marketplace (çox satıcı)', 'bool', '0', 'Marketplace'],
-            ['store_commission', 'Komissiya idarəsi', 'bool', '0', 'Marketplace'],
-            ['store_settings', 'Mağaza parametrləri', 'bool', '0', 'Marketplace'],
-
             // İstifadəçi
             ['users', 'İstifadəçilər', 'bool', '1', 'İstifadəçi'],
             ['roles_permissions', 'Rol & icazə idarəsi', 'bool', '1', 'İstifadəçi'],
@@ -88,7 +78,6 @@ class FeatureSeeder extends Seeder
             ['multi_language', 'Çoxdillilik (az/en/ru/tr)', 'bool', '1', 'Sistem'],
             ['statistics', 'Statistika & hesabat', 'bool', '0', 'Sistem'],
             ['settings', 'Parametrlər', 'bool', '1', 'Sistem'],
-            ['custom_domain', 'Öz domeni', 'bool', '0', 'Sistem'],
 
             // Limitlər
             ['max_products', 'Maks. məhsul', 'limit', '100', 'Limitlər'],
