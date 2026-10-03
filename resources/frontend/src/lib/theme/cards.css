@@ -217,3 +217,11 @@
 		font-size: 12.5px !important;
 	}
 }
+
+/* Active/hover state: the icon inside the filled circle must be white too. */
+.fav-btn.active i,
+.fav-btn:hover i,
+.add-to-cart-btn.active i,
+.add-to-cart-btn:hover i {
+	color: #fff !important;
+}
