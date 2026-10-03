@@ -44,7 +44,7 @@
                     </div>
                 @endif
 
-                @feature('product_videos')
+                @if (feature('product_videos'))
                     <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
                         <p class="mb-4 font-semibold text-gray-700">Videolar</p>
                         @include('admin.partials.media-upload', ['name' => 'videos[]', 'multiple' => true, 'accept' => 'video/*', 'label' => 'Video seçin', 'hint' => 'MP4 / WebM · bir neçə fayl'])
