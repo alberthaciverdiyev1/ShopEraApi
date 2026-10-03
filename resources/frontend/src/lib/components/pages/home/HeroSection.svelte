@@ -416,24 +416,24 @@
         }
 
         .meta-item {
-            min-height: 56px;
-            padding: 9px 10px;
+            min-height: 44px;
+            padding: 7px 9px;
             border-radius: 12px;
             box-shadow: 0 10px 24px rgba(10, 17, 30, 0.06);
         }
 
         .meta-item span {
-            margin-bottom: 5px;
-            font-size: 11px;
+            margin-bottom: 3px;
+            font-size: 10px;
         }
 
         .meta-item strong {
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .color-plate {
             gap: 5px;
-            min-height: 14px;
+            min-height: 12px;
         }
 
         .color-dot {
@@ -491,7 +491,7 @@
         .hero-picks {
             position: absolute;
             right: 10px;
-            bottom: 10px;
+            bottom: -6px;
             justify-content: center;
             width: max-content;
             max-width: 100%;
@@ -519,6 +519,7 @@
 
         .hero-media-wrap {
             width: 100%;
+            margin-bottom: 14px;
         }
     }
 </style>
