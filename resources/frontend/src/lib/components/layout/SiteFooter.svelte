@@ -1,6 +1,8 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { features } from '$lib/services/features';
-	import { translate } from '$lib/i18n';
+	import { translate, locale } from '$lib/i18n';
+	import { categories, categoryName, loadCategories } from '$lib/services/categories';
 	import {
 		mailHref,
 		phoneHref,
@@ -32,6 +34,15 @@
 	}
 
 	const currentYear = new Date().getFullYear();
+
+	onMount(() => loadCategories());
+
+	/** Top-level categories with the most products (max 6) for the footer. */
+	const footerCategories = $derived(
+		[...$categories]
+			.sort((a, b) => (b.products_count ?? 0) - (a.products_count ?? 0))
+			.slice(0, 6)
+	);
 </script>
 
 <footer class="snaker-footer">
@@ -81,11 +92,14 @@
 					<div class="footer-widget">
 						<h5 class="widget-title">{$translate('Categories')}</h5>
 						<ul class="widget-links">
-							<li><a href="/shop?category=1"><i class="fa-solid fa-chevron-right link-arrow"></i> {$translate('Electronics')}</a></li>
-							<li><a href="/shop?category=2"><i class="fa-solid fa-chevron-right link-arrow"></i> {$translate('Fashion')}</a></li>
-							<li><a href="/shop?category=3"><i class="fa-solid fa-chevron-right link-arrow"></i> {$translate('Home & Living')}</a></li>
-							<li><a href="/shop?category=4"><i class="fa-solid fa-chevron-right link-arrow"></i> {$translate('Beauty')}</a></li>
-							<li><a href="/shop?category=5"><i class="fa-solid fa-chevron-right link-arrow"></i> {$translate('Sports')}</a></li>
+							{#each footerCategories as category (category.id)}
+								<li>
+									<a href={`/shop?category=${category.id}`}>
+										<i class="fa-solid fa-chevron-right link-arrow"></i>
+										{categoryName(category, $locale)}
+									</a>
+								</li>
+							{/each}
 							<li><a href="/shop"><i class="fa-solid fa-chevron-right link-arrow"></i> {$translate('All products')}</a></li>
 						</ul>
 					</div>
