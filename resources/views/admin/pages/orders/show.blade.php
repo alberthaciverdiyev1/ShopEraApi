@@ -17,7 +17,8 @@
         <div class="space-y-5 lg:col-span-2">
             <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
                 <div class="border-b border-gray-100 px-5 py-3 font-semibold text-gray-700">Məhsullar</div>
-                <table class="w-full text-sm">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
                     <thead>
                         <tr class="border-b border-gray-100 text-left text-xs uppercase text-gray-400">
                             <th class="px-5 py-2 font-semibold">Məhsul</th>
@@ -59,6 +60,8 @@
                         </tr>
                     </tfoot>
                 </table>
+                </div>
+
             </div>
 
             <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">

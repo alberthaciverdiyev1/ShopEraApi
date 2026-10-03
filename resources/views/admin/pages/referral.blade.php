@@ -19,7 +19,8 @@
 
         <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm lg:col-span-2">
             <div class="border-b border-gray-100 px-5 py-3 font-semibold text-gray-700">Referal kodlar</div>
-            <table class="w-full text-sm">
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-gray-100 text-left text-xs uppercase text-gray-400">
                         <th class="px-5 py-2 font-semibold">İstifadəçi</th>
@@ -39,6 +40,8 @@
                     @endforelse
                 </tbody>
             </table>
+            </div>
+
         </div>
     </div>
 @endsection

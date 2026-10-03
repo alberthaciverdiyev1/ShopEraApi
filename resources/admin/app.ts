@@ -63,19 +63,34 @@ document.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') closeModal();
 });
 
-/** Sidebar collapse state, remembered across page loads. */
+/** Sidebar: off-canvas drawer on mobile, collapsible rail on desktop. */
 document.addEventListener('DOMContentLoaded', () => {
     const shell = document.getElementById('admin-shell');
     const toggle = document.getElementById('sidebar-toggle');
-    const collapsed = localStorage.getItem('admin:sidebar') === 'collapsed';
+    if (!shell || !toggle) return;
 
-    if (shell && collapsed) shell.classList.add('sidebar-collapsed');
+    const isMobile = () => window.matchMedia('(max-width: 1023.98px)').matches;
+    const closeDrawer = () => shell.classList.remove('sidebar-open');
 
-    toggle?.addEventListener('click', () => {
-        if (!shell) return;
+    // Desktop collapse state, remembered across page loads.
+    if (!isMobile() && localStorage.getItem('admin:sidebar') === 'collapsed') {
+        shell.classList.add('sidebar-collapsed');
+    }
+
+    toggle.addEventListener('click', () => {
+        if (isMobile()) {
+            shell.classList.toggle('sidebar-open');
+            return;
+        }
         shell.classList.toggle('sidebar-collapsed');
         localStorage.setItem('admin:sidebar', shell.classList.contains('sidebar-collapsed') ? 'collapsed' : 'open');
     });
+
+    // Close the mobile drawer on backdrop click, Escape, or a nav item tap.
+    document.querySelectorAll('[data-drawer-close]').forEach((el) => el.addEventListener('click', closeDrawer));
+    document.querySelectorAll('aside.sidebar a').forEach((a) => a.addEventListener('click', () => { if (isMobile()) closeDrawer(); }));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+    window.addEventListener('resize', () => { if (!isMobile()) closeDrawer(); });
 });
 
 /** Category tree: toggling a row shows/hides every descendant row. */

@@ -13,6 +13,9 @@
 
     @include('admin.partials.sidebar')
 
+    {{-- Mobile drawer backdrop --}}
+    <div class="sidebar-backdrop" data-drawer-close></div>
+
     <div class="flex min-w-0 flex-1 flex-col">
         <header class="sticky top-0 z-30 flex items-center gap-3 border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-800">
             <button id="sidebar-toggle" type="button" data-drawer-toggle

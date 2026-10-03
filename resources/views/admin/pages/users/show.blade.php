@@ -65,7 +65,8 @@
 
             <div class="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
                 <div class="border-b border-gray-100 px-5 py-3 font-semibold text-gray-700">Son sifarişlər</div>
-                <table class="w-full text-sm">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
                     <tbody class="divide-y divide-gray-50">
                         @forelse ($recentOrders as $order)
                             <tr>
@@ -78,6 +79,8 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
+
             </div>
         </div>
     </div>

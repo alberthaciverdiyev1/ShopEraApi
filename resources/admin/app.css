@@ -31,3 +31,42 @@
 #admin-shell.sidebar-collapsed .sidebar .nav-group-title,
 #admin-shell.sidebar-collapsed .sidebar .brand-text { display: none; }
 #admin-shell.sidebar-collapsed .sidebar .nav-link { justify-content: center; }
+
+/* Mobile: sidebar becomes an off-canvas drawer with a backdrop */
+.sidebar-backdrop { display: none; }
+
+@media (max-width: 1023.98px) {
+    .sidebar {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 60;
+        width: 16rem !important;
+        max-width: 85vw;
+        transform: translateX(-100%);
+        transition: transform .25s ease;
+        box-shadow: 0 12px 40px rgba(15, 23, 42, .28);
+    }
+
+    #admin-shell.sidebar-open .sidebar { transform: translateX(0); }
+
+    #admin-shell.sidebar-open .sidebar-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 55;
+        background: rgba(15, 23, 42, .5);
+        backdrop-filter: blur(2px);
+    }
+
+    /* Desktop collapse rules must not shrink the mobile drawer */
+    #admin-shell.sidebar-collapsed .sidebar { width: 16rem !important; }
+    #admin-shell.sidebar-collapsed .sidebar .nav-label,
+    #admin-shell.sidebar-collapsed .sidebar .nav-group-title,
+    #admin-shell.sidebar-collapsed .sidebar .brand-text { display: revert; }
+    #admin-shell.sidebar-collapsed .sidebar .nav-link { justify-content: flex-start; }
+
+    /* Content column fills the viewport (sidebar is out of flow) */
+    #admin-shell > .flex { width: 100%; }
+}

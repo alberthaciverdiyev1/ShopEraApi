@@ -6,7 +6,8 @@
             <p class="font-semibold text-gray-700">Rollar</p>
             <a href="{{ route('admin.roles.create') }}" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700">Yeni rol</a>
         </div>
-        <table class="w-full text-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
             <thead>
                 <tr class="border-b border-gray-100 text-left text-xs uppercase text-gray-400">
                     <th class="px-4 py-3 font-semibold">Ad</th>
@@ -36,5 +37,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
+
     </div>
 @endsection
