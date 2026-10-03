@@ -11,12 +11,7 @@
 	import AddressSection from '$lib/components/pages/dashboard/AddressSection.svelte';
 	import Chat from '$lib/components/pages/dashboard/Chat.svelte';
 	import PlanLimits from '$lib/components/pages/dashboard/PlanLimits.svelte';
-	import { fetchFeatures, features as featureFlags, type ApiFeatures } from '$lib/services/features';
-
-	let features = $state<ApiFeatures | null>(null);
-	onMount(async () => {
-		features = await fetchFeatures();
-	});
+	import { features as featureFlags } from '$lib/services/features';
 
 	type TabKey = 'dashboard' | 'order-history' | 'order-details' | 'messages' | 'wishlist' | 'addresses' | 'plan' | 'settings' | 'logout';
 	let tab = $state<TabKey>('dashboard');

@@ -1,12 +1,11 @@
 <script lang="ts">
 	import { translate } from '$lib/i18n';
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { fetchFeatures } from '$lib/services/features';
+	import { features } from '$lib/services/features';
 
-	onMount(async () => {
-		const f = await fetchFeatures();
-		if (f.blog === false) goto('/');
+	// The layout loads /features once — react to the store instead of re-fetching.
+	$effect(() => {
+		if ($features.blog === false) goto('/');
 	});
 	import Breadcrumb from '$lib/components/layout/Breadcrumb.svelte';
 	import Blog3 from '$lib/components/pages/blog/Blog3.svelte';
