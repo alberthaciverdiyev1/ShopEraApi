@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 	import ShopProductCard from '$lib/components/cards/ShopProductCard.svelte';
 	import DynamicFilter from '$lib/components/shop/DynamicFilter.svelte';
 	import { fetchCategoryFilters, filterChoices, filterTitle, type FilterDefinition } from '$lib/services/filters';
@@ -753,6 +754,7 @@
 			{/if}
 		</div>
 
+		{#if browser}
 		<!-- Desktop Sort & Counter Bar (Full width above sidebar and products, so sidebar & products start aligned) -->
 		<div class="desktop-shop-toolbar mb-4 d-none d-lg-flex justify-content-between align-items-center">
 			<div class="desktop-shop-toolbar__count">
@@ -768,6 +770,8 @@
 			</div>
 		</div>
 
+		{/if}
+
 		<div class="row gx-30">
 			<!-- Desktop Sidebar (Hidden on tablet/mobile < 992px) -->
 			<div class="col-lg-3 d-none d-lg-block">
@@ -776,6 +780,7 @@
 
 			<!-- Products Grid Container -->
 			<div class="col-lg-9">
+			{#if browser}
 
 				{#if error}
 					<p class="text-center py-5">{error}</p>
@@ -822,6 +827,7 @@
 						{/if}
 					</div>
 				{/if}
+			{/if}
 			</div>
 		</div>
 	</div>
