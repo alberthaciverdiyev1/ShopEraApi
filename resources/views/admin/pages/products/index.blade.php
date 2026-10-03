@@ -24,6 +24,14 @@
                 <option value="1" @selected(($filters['is_active'] ?? '') === '1')>Aktiv</option>
                 <option value="0" @selected(($filters['is_active'] ?? '') === '0')>Deaktiv</option>
             </select>
+            <button type="button"
+                    hx-delete="{{ route('admin.products.bulkDestroy') }}"
+                    hx-include=".row-check"
+                    hx-target="#resource-table" hx-swap="innerHTML"
+                    hx-confirm="Seçilmiş məhsullar silinsin?"
+                    class="rounded-lg border border-rose-200 px-3 py-2 text-sm font-medium text-rose-600 hover:bg-rose-50">
+                Seçilmişləri sil
+            </button>
             <a href="{{ route('admin.products.prices') }}" class="rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50">Toplu qiymət</a>
             <a href="{{ route('admin.products.create') }}" class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700">Yeni məhsul</a>
         </div>

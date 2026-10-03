@@ -294,6 +294,44 @@ class ProductController extends AdminController
         return redirect()->route('admin.products.index')->with('status', __('Məhsul silindi.'));
     }
 
+    /** Deletes every selected product (checkbox column on the list). */
+    public function bulkDestroy(Request $request)
+    {
+        $this->requirePermission('delete product');
+
+        $ids = collect((array) $request->input('ids', []))
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values();
+
+        $deleted = 0;
+        foreach ($ids as $id) {
+            try {
+                $this->service()->adminDelete($id);
+                $deleted++;
+            } catch (\Throwable) {
+                // Skip a product that vanished or could not be removed.
+            }
+        }
+
+        $message = $deleted > 0
+            ? __(':count məhsul silindi.', ['count' => $deleted])
+            : __('Heç bir məhsul seçilmədi.');
+
+        if ($this->isHtmx($request)) {
+            $rows = $this->service()->adminQuery($request)->paginate(20)->withQueryString();
+
+            return response()
+                ->view('admin.pages.products._table', ['rows' => $rows])
+                ->header('HX-Trigger', $this->htmxTriggers([
+                    'toast' => ['type' => $deleted > 0 ? 'success' : 'error', 'message' => $message],
+                ]));
+        }
+
+        return redirect()->route('admin.products.index')->with('status', $message);
+    }
+
     public function destroyImage(int $imageId)
     {
         $this->requirePermission('update product');

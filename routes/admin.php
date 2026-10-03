@@ -52,6 +52,8 @@ Route::middleware(['admin.auth', 'subscribed', 'admin.menu'])->group(function ()
         Route::post('products', [Admin\ProductController::class, 'store'])->name('products.store');
         Route::get('products/{id}/edit', [Admin\ProductController::class, 'edit'])->name('products.edit');
         Route::put('products/{id}', [Admin\ProductController::class, 'update'])->name('products.update');
+        // Registered before products/{id} so "bulk" is not read as an id.
+        Route::delete('products/bulk', [Admin\ProductController::class, 'bulkDestroy'])->name('products.bulkDestroy');
         Route::delete('products/{id}', [Admin\ProductController::class, 'destroy'])->name('products.destroy');
         Route::get('products/{id}', [Admin\ProductController::class, 'show'])->name('products.show');
         Route::delete('products/images/{imageId}', [Admin\ProductController::class, 'destroyImage'])->name('products.images.destroy');

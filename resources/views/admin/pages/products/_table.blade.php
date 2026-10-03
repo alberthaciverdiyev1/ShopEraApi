@@ -5,6 +5,11 @@
     <table class="w-full text-sm">
         <thead>
             <tr class="border-b border-gray-100 text-left text-xs uppercase tracking-wide text-gray-400">
+                <th class="px-4 py-3 font-semibold">
+                    <input type="checkbox" title="Hamısını seç"
+                           class="h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                           onclick="document.querySelectorAll('.row-check').forEach((c) => (c.checked = this.checked))">
+                </th>
                 <th class="px-4 py-3 font-semibold">Məhsul</th>
                 <th class="px-4 py-3 font-semibold">Kateqoriya</th>
                 <th class="px-4 py-3 font-semibold">Qiymət</th>
@@ -16,6 +21,9 @@
         <tbody class="divide-y divide-gray-50">
             @forelse ($rows as $product)
                 <tr class="hover:bg-gray-50/60">
+                    <td class="px-4 py-3">
+                        <input type="checkbox" name="ids[]" class="row-check h-4 w-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500" value="{{ $product->id }}">
+                    </td>
                     <td class="px-4 py-3">
                         <div class="flex items-center gap-3">
                             @if ($product->images->first())
@@ -56,7 +64,7 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="6" class="px-4 py-12 text-center text-gray-400">Məhsul yoxdur</td></tr>
+                <tr><td colspan="7" class="px-4 py-12 text-center text-gray-400">Məhsul yoxdur</td></tr>
             @endforelse
         </tbody>
     </table>
