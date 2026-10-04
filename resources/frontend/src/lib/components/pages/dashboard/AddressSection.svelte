@@ -28,8 +28,11 @@
 
 	let addresses = $state<ApiAddress[]>([]);
 	let deliveryCities = $state<ApiDeliveryCity[]>([]);
-	// Cities come from the API (/city); no hardcoded fallback list.
-	const availableCities = $derived<string[]>(deliveryCities.map((c) => c.name || c.key));
+	// Cities come from the API (/city); de-duplicated because the API can
+	// return the same name twice (which broke keyed {#each} blocks).
+	const availableCities = $derived<string[]>([
+		...new Set(deliveryCities.map((c) => c.name || c.key).filter(Boolean))
+	]);
 
 	let loading = $state(true);
 	let form = $state<AddressPayload>({ ...emptyAddress });

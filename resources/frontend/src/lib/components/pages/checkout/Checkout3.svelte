@@ -150,8 +150,11 @@
 			: selectedAddressId
 	);
 
-	// Cities come from the API (/city); no hardcoded fallback list.
-	const availableCityNames = $derived<string[]>(deliveryCitiesList.map((c) => c.name || c.key));
+	// Cities come from the API (/city); de-duplicated (the API may return
+	// the same name twice, which breaks keyed {#each} blocks).
+	const availableCityNames = $derived<string[]>([
+		...new Set(deliveryCitiesList.map((c) => c.name || c.key).filter(Boolean))
+	]);
 
 	const activePickupPoint = $derived<ApiPickupPoint | null>(
 		pickupPointsList.find((p) => p.id === selectedPickupPointId) ?? null
