@@ -14,17 +14,26 @@ use Modules\User\Entities\User;
  */
 class PlanUsage
 {
+    public const KEYS = ['max_products', 'max_categories', 'max_staff', 'max_orders', 'storage_gb'];
+
     /** @return array<string,int|float> */
     public static function all(): array
     {
-        return [
+        return array_combine(self::KEYS, array_map(fn ($k) => self::value($k), self::KEYS));
+    }
+
+    /** Usage for a single limit key (avoids scanning storage for count checks). */
+    public static function value(string $key): int|float
+    {
+        return match ($key) {
             'max_products' => Product::query()->count(),
             'max_categories' => Category::query()->count(),
             'max_staff' => self::staffCount(),
             // max_orders is a monthly cap, so usage counts the current month.
             'max_orders' => Order::query()->where('created_at', '>=', now()->startOfMonth())->count(),
             'storage_gb' => self::storageGb(),
-        ];
+            default => 0,
+        };
     }
 
     /** Anyone holding a non-customer role counts against max_staff. */
@@ -35,7 +44,8 @@ class PlanUsage
             ->count();
     }
 
-    private static function storageGb(): float
+    /** Precise storage usage in bytes (used for limit checks). */
+    public static function storageBytes(): int
     {
         $bytes = 0;
 
@@ -49,6 +59,11 @@ class PlanUsage
             // Storage not configured / unreadable — report 0 rather than fail.
         }
 
-        return round($bytes / 1073741824, 2);
+        return $bytes;
+    }
+
+    private static function storageGb(): float
+    {
+        return round(self::storageBytes() / 1073741824, 2);
     }
 }

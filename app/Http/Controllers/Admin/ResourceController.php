@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Support\PlanLimits;
 use App\Support\TenantContext;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -9,7 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
+use Illuminate\Support\ViewErrorBag;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -188,12 +191,14 @@ abstract class ResourceController extends AdminController
                     $this->pendingSync[$field['sync']] = array_map('intval', (array) ($data[$name] ?? []));
                     unset($data[$name]);
                 }
+
                 continue;
             }
 
             if ($type === 'lines') {
                 $lines = array_values(array_filter(array_map('trim', explode("\n", (string) ($data[$name] ?? ''))), fn ($v) => $v !== ''));
                 $data[$name] = $lines;
+
                 continue;
             }
 
@@ -204,6 +209,7 @@ abstract class ResourceController extends AdminController
                     $base = array_values(array_filter($base, fn ($rule) => ! str_starts_with($rule, 'required')));
                 }
                 $rules[$name] = array_merge(['nullable'], $base);
+
                 continue;
             }
 
@@ -214,22 +220,26 @@ abstract class ResourceController extends AdminController
                         : array_values(array_diff($base, ['required']));
                     $rules["{$name}.{$locale}"] = $localeRules ?: ['nullable'];
                 }
+
                 continue;
             }
 
             if ($type === 'checkbox') {
                 $rules[$name] = ['nullable'];
+
                 continue;
             }
 
             if ($type === 'multiselect') {
                 $rules[$name] = array_merge(['nullable', 'array'], $base);
                 $rules["{$name}.*"] = ['exists:'.$this->relationTable($field), 'id'];
+
                 continue;
             }
 
             if ($type === 'lines') {
                 $rules[$name] = ['nullable', 'string'];
+
                 continue;
             }
 
@@ -247,6 +257,7 @@ abstract class ResourceController extends AdminController
 
             if ($type === 'checkbox') {
                 $data[$name] = $request->boolean($name);
+
                 continue;
             }
 
@@ -256,12 +267,14 @@ abstract class ResourceController extends AdminController
                 } else {
                     unset($data[$name]);
                 }
+
                 continue;
             }
 
             if (str_starts_with($type, 'translatable_')) {
                 $values = $this->fillLocales((array) ($data[$name] ?? []));
                 $data[$name] = $values;
+
                 continue;
             }
 
@@ -270,12 +283,14 @@ abstract class ResourceController extends AdminController
                     $this->pendingSync[$field['sync']] = array_map('intval', (array) ($data[$name] ?? []));
                     unset($data[$name]);
                 }
+
                 continue;
             }
 
             if ($type === 'lines') {
                 $lines = array_values(array_filter(array_map('trim', explode("\n", (string) ($data[$name] ?? ''))), fn ($v) => $v !== ''));
                 $data[$name] = $lines;
+
                 continue;
             }
 
@@ -283,6 +298,12 @@ abstract class ResourceController extends AdminController
                 unset($data[$name]);
 
                 if ($request->hasFile($name)) {
+                    if (PlanLimits::storageFull((int) $request->file($name)->getSize())) {
+                        throw ValidationException::withMessages([
+                            $name => __('Yaddaş limitinə çatdınız. Fayl yükləmək üçün planı yüksəldin.'),
+                        ]);
+                    }
+
                     $data[$name] = $request->file($name)->store(
                         TenantContext::storagePath($field['path'] ?? $this->defaultStoragePath()),
                         'public'
@@ -351,9 +372,9 @@ abstract class ResourceController extends AdminController
                 'title' => $this->title,
                 'locales' => $this->locales(),
                 'options' => $this->optionsMap(),
-                'errors' => (new \Illuminate\Support\ViewErrorBag)->put(
+                'errors' => (new ViewErrorBag)->put(
                     'default',
-                    new \Illuminate\Support\MessageBag($errors)
+                    new MessageBag($errors)
                 ),
             ], 200)
             ->header('HX-Retarget', '#modal-root');
@@ -379,7 +400,6 @@ abstract class ResourceController extends AdminController
     {
         return 'admin.resources._form';
     }
-
 
     /**
      * Fields the controller decides to show: a field is hidden when its

@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\Gender;
 use App\Support\Features;
+use App\Support\PlanLimits;
 use App\Support\TenantContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Modules\Banner\Entities\Banner;
 use Modules\Brand\Entities\Brand;
 use Modules\Category\Entities\Category;
@@ -123,10 +125,13 @@ class ProductController extends AdminController
     {
         $this->requirePermission('add product');
 
-        $limit = Features::limit('max_products');
-        if ($limit !== null && $limit >= 0 && Product::query()->count() >= $limit) {
+        if (PlanLimits::reached('max_products', 1)) {
+            $limit = Features::limit('max_products');
+
             return back()->withInput()->withErrors(['limit' => "Məhsul limitinə çatdınız ($limit). Planı yüksəldin."]);
         }
+
+        $this->guardStorage($request);
 
         $data = $request->validate([
             'title.az' => ['required', 'string', 'max:255'],
@@ -201,6 +206,8 @@ class ProductController extends AdminController
     public function update(Request $request, int $id)
     {
         $this->requirePermission('update product');
+
+        $this->guardStorage($request);
 
         $product = Product::query()->with('sizes')->findOrFail($id);
 
@@ -409,6 +416,24 @@ class ProductController extends AdminController
         $video->delete();
 
         return back()->with('status', __('Video silindi.'));
+    }
+
+    /** Reject the upload when it would push the tenant over its storage limit. */
+    private function guardStorage(Request $request): void
+    {
+        $bytes = 0;
+
+        foreach (['new_images', 'videos'] as $field) {
+            foreach ((array) $request->file($field, []) as $file) {
+                $bytes += (int) $file->getSize();
+            }
+        }
+
+        if ($bytes > 0 && PlanLimits::storageFull($bytes)) {
+            throw ValidationException::withMessages([
+                'new_images' => __('Yaddaş limitinə çatdınız. Fayl yükləmək üçün planı yüksəldin.'),
+            ]);
+        }
     }
 
     private function syncVideos(Product $product, Request $request): void
