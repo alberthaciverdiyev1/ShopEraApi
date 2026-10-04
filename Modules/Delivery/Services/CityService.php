@@ -31,7 +31,11 @@ class CityService implements ICrudInterface
     {
         $nameAz = $request->input('name');
         $key = $this->generateKey($nameAz);
-        $city = City::withTrashed()->where('key', $key)->first();
+
+        // Match by key OR (case-insensitively) by name — different spellings
+        // would otherwise create two rows with the same name.
+        $city = City::withTrashed()->where('key', $key)->first()
+            ?? City::withTrashed()->whereRaw('lower(name) = ?', [mb_strtolower(trim($nameAz))])->first();
 
         if ($city && ! $city->trashed() && $city->is_active) {
             return responseHelper(__('City already exists.'), 400);

@@ -16,7 +16,7 @@ class DeliveryDatabaseSeeder extends Seeder
     public function run(): void
     {
         // Zone 1 — Baku and its closest suburbs.
-        $zone1 = ['Baku', 'BakiXetaiRayonu', 'BakiSabayilRayon', 'BakiXezerRayonu', 'BakiNesimiRayon', 'BakiQaradagRayon', 'BakiNizamiRayonu', 'BakiBineqediRayon', 'PirallahiRayonu', 'BakiYasamalRayonu', 'BakiSabuncuRayonu', 'BakiNerimanovRayonu', 'BakiSuraxaniRayon', 'Xirdalan', 'Xirdalan', 'Khirdalan', 'Masazir', 'Mehdiabad'];
+        $zone1 = ['Baku', 'BakiXetaiRayonu', 'BakiSabayilRayon', 'BakiXezerRayonu', 'BakiNesimiRayon', 'BakiQaradagRayon', 'BakiNizamiRayonu', 'BakiBineqediRayon', 'PirallahiRayonu', 'BakiYasamalRayonu', 'BakiSabuncuRayonu', 'BakiNerimanovRayonu', 'BakiSuraxaniRayon', 'Xirdalan', 'Khirdalan', 'Masazir', 'Mehdiabad'];
         // Zone 2 — Sumqayit, Absheron and nearby towns.
         $zone2 = ['Sumgayit', 'Sumqayit', 'Sumqayit_AZ', 'Abseron', 'SarayQesebe', 'Qobustan', 'Xizi', 'Shamakhi'];
         // Zone 3 — large regional cities.
