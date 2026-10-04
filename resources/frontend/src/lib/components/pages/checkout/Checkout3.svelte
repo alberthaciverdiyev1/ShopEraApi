@@ -5,7 +5,6 @@
 	import { appliedPromo, applyPromoCode, clearPromo } from '$lib/services/promo';
 
 	import {
-		CITIES,
 		fetchAddresses,
 		createAddress,
 		type ApiAddress,
@@ -84,7 +83,7 @@
 	let activeAddressForm = $state<AddressPayload>({
 		full_name: '',
 		contact_number: '',
-		city: CITIES[0],
+		city: '',
 		town_village_district: '',
 		street_building_number: '',
 		unit_floor_apartment: '',
@@ -151,11 +150,8 @@
 			: selectedAddressId
 	);
 
-	const availableCityNames = $derived<string[]>(
-		deliveryCitiesList.length > 0
-			? deliveryCitiesList.map((c) => c.name || c.key)
-			: CITIES
-	);
+	// Cities come from the API (/city); no hardcoded fallback list.
+	const availableCityNames = $derived<string[]>(deliveryCitiesList.map((c) => c.name || c.key));
 
 	const activePickupPoint = $derived<ApiPickupPoint | null>(
 		pickupPointsList.find((p) => p.id === selectedPickupPointId) ?? null
@@ -198,6 +194,12 @@
 			if (points.length > 0 && !selectedPickupPointId) {
 				selectedPickupPointId = points[0].id;
 			}
+
+			// Default the address form to the first API city once cities load.
+			if (! activeAddressForm.city && cities.length > 0) {
+				activeAddressForm = { ...activeAddressForm, city: cities[0].name || cities[0].key };
+				updateCityRates(activeAddressForm.city ?? '');
+			}
 		} finally {
 			pickupPointsLoading = false;
 		}
@@ -228,14 +230,14 @@
 				activeAddressForm = {
 					full_name: '',
 					contact_number: profilePhone(),
-					city: availableCityNames[0] || CITIES[0],
+					city: availableCityNames[0] ?? '',
 					town_village_district: '',
 					street_building_number: '',
 					unit_floor_apartment: '',
 					location_label: '',
 					is_default: true
 				};
-				updateCityRates(activeAddressForm.city || 'Baku');
+				if (activeAddressForm.city) updateCityRates(activeAddressForm.city);
 			}
 		} catch {
 			savedAddresses = [];
@@ -249,7 +251,7 @@
 		activeAddressForm = {
 			full_name: addr.full_name ?? '',
 			contact_number: addr.contact_number ? String(addr.contact_number) : '',
-			city: addr.city ?? availableCityNames[0] ?? CITIES[0],
+			city: addr.city ?? availableCityNames[0] ?? '',
 			town_village_district: addr.town_village_district ?? '',
 			street_building_number: addr.street_building_number ?? '',
 			unit_floor_apartment: addr.unit_floor_apartment ?? '',
@@ -283,14 +285,14 @@
 		activeAddressForm = {
 			full_name: '',
 			contact_number: profilePhone(),
-			city: availableCityNames[0] || CITIES[0],
+			city: availableCityNames[0] ?? '',
 			town_village_district: '',
 			street_building_number: '',
 			unit_floor_apartment: '',
 			location_label: '',
 			is_default: savedAddresses.length === 0
 		};
-		updateCityRates(activeAddressForm.city || 'Baku');
+		if (activeAddressForm.city) updateCityRates(activeAddressForm.city);
 		preview = null;
 		previewError = null;
 	}

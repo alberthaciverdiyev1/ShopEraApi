@@ -2,15 +2,6 @@ import { get } from 'svelte/store';
 import { apiDelete, apiGet, apiGetRaw, apiPost, apiPostForm, apiPut } from '$lib/utils/api';
 import { isLoggedIn, setUser, user, type AuthUser } from '$lib/services/auth';
 
-/** The storefront states of Azerbaijan, as the API expects them. */
-export const CITIES = [
-	'Baku', 'Ganja', 'Sumgayit', 'Mingachevir', 'Lankaran', 'Shaki', 'Shirvan', 'Naftalan',
-	'Yevlakh', 'Khankendi', 'Nakhchivan', 'Khirdalan', 'Agdam', 'Agdash', 'Agjabadi', 'Agsu',
-	'Astara', 'Babek', 'Balakan', 'Beylagan', 'Bilasuvar', 'Dashkasan', 'Fuzuli', 'Gadabay',
-	'Goychay', 'Goygol', 'Hajigabul', 'Imishli', 'Ismayilli', 'Jalilabad', 'Kalbajar',
-	'Kurdamir', 'Lachin', 'Lerik', 'Masalli', 'Neftchala', 'Oguz', 'Qabala', 'Qakh', 'Gazakh'
-];
-
 export interface ApiAddress {
 	id: number;
 	city?: string | null;

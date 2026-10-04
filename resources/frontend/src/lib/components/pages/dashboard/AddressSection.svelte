@@ -4,7 +4,6 @@
 	import { isLoggedIn } from '$lib/services/auth';
 	import Button from '$lib/components/ui/Button.svelte';
 	import {
-		CITIES,
 		createAddress,
 		deleteAddress,
 		fetchAddresses,
@@ -20,7 +19,7 @@
 	const emptyAddress: AddressPayload = {
 		full_name: '',
 		contact_number: '',
-		city: CITIES[0],
+		city: '',
 		town_village_district: '',
 		street_building_number: '',
 		unit_floor_apartment: '',
@@ -29,9 +28,8 @@
 
 	let addresses = $state<ApiAddress[]>([]);
 	let deliveryCities = $state<ApiDeliveryCity[]>([]);
-	const availableCities = $derived<string[]>(
-		deliveryCities.length > 0 ? deliveryCities.map((c) => c.name || c.key) : CITIES
-	);
+	// Cities come from the API (/city); no hardcoded fallback list.
+	const availableCities = $derived<string[]>(deliveryCities.map((c) => c.name || c.key));
 
 	let loading = $state(true);
 	let form = $state<AddressPayload>({ ...emptyAddress });
@@ -69,6 +67,7 @@
 		editingId = null;
 		form = {
 			...emptyAddress,
+			city: availableCities[0] ?? '',
 			is_default: addresses.length === 0
 		};
 		showForm = true;
@@ -81,7 +80,7 @@
 		form = {
 			full_name: address.full_name ?? '',
 			contact_number: String(address.contact_number ?? ''),
-			city: address.city ?? CITIES[0],
+			city: address.city ?? availableCities[0] ?? '',
 			town_village_district: address.town_village_district ?? '',
 			street_building_number: address.street_building_number ?? '',
 			unit_floor_apartment: address.unit_floor_apartment ?? '',
