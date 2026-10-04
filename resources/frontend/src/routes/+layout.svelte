@@ -32,15 +32,23 @@
 			loadFavorites();
 		});
 		// Apply the admin-managed favicon, falling back to the static one.
+		// Update both rel="icon" and rel="shortcut icon" (browsers may prefer
+		// either) and bust the browser's favicon cache with a version query.
 		loadSettings().then((s) => {
 			if (!s.favicon_url) return;
-			let link = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
-			if (!link) {
-				link = document.createElement('link');
+
+			const href = `${s.favicon_url}${s.favicon_url.includes('?') ? '&' : '?'}v=${Date.now()}`;
+			const links = document.querySelectorAll<HTMLLinkElement>('link[rel="icon"], link[rel="shortcut icon"]');
+
+			if (links.length === 0) {
+				const link = document.createElement('link');
 				link.rel = 'icon';
 				document.head.appendChild(link);
 			}
-			link.href = s.favicon_url;
+
+			document.querySelectorAll<HTMLLinkElement>('link[rel="icon"], link[rel="shortcut icon"]').forEach((link) => {
+				link.href = href;
+			});
 		});
 		let dispose: (() => void) | undefined;
 

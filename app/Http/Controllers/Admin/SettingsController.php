@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Http\Request;
 use App\Support\TenantContext;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Modules\Setting\Services\SettingService;
 
@@ -90,7 +90,7 @@ class SettingsController extends AdminController
 
                 if ($type === 'image') {
                     if ($request->hasFile($name)) {
-                        $data[$name] = $request->file($name)->store('branding', 'public');
+                        $data[$name] = $request->file($name)->store(TenantContext::storagePath('branding'), 'public');
                     } elseif ($request->boolean('remove_'.$name)) {
                         $data[$name] = null;
                     }

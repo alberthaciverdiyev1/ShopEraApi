@@ -13,7 +13,7 @@ Route::prefix('filters')->middleware('feature:product_filters')->controller(Filt
     Route::get('/', 'list')->name('filter.list');
 });
 
-Route::prefix('category-filters')->middleware('feature:product_filters')->controller(FilterController::class)->group(function () {
+Route::prefix('category-filters')->middleware(['feature:product_filters', 'feature:category_filters'])->controller(FilterController::class)->group(function () {
     Route::get('/', 'categoryFilters')->name('filter.category');
 });
 

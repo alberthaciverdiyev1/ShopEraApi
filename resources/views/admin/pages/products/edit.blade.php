@@ -79,7 +79,7 @@
                 </div>
                 @endif
 
-                @if (feature('product_filters'))
+                @if (feature('category_filters'))
                 <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
                     <p class="mb-4 font-semibold text-gray-700">Filtrlər</p>
                     <div id="product-filters">

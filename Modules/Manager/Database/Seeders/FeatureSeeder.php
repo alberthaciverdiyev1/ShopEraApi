@@ -24,6 +24,7 @@ class FeatureSeeder extends Seeder
             ['colors', 'Rənglər', 'bool', '1', 'Kataloq'],
             ['sizes', 'Ölçülər', 'bool', '1', 'Kataloq'],
             ['product_filters', 'Məhsul filtrləri', 'bool', '1', 'Kataloq'],
+            ['category_filters', 'Kateqoriya filtrləri', 'bool', '0', 'Kataloq'],
             ['product_images', 'Məhsul şəkilləri', 'bool', '1', 'Kataloq'],
             ['product_videos', 'Məhsul videoları', 'bool', '1', 'Kataloq'],
             ['product_story_videos', 'Story videoları', 'bool', '0', 'Kataloq'],

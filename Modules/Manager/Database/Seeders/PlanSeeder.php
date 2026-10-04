@@ -24,7 +24,7 @@ class PlanSeeder extends Seeder
                 'on' => ['products', 'categories', 'whatsapp_orders', 'contact_page', 'show_ads'],
                 'off' => [
                     'orders', 'online_payment', 'custom_domain', 'promo_codes',
-                    'delivery_prices', 'multi_language', 'chat',
+                    'delivery_prices', 'multi_language', 'chat', 'category_filters',
                 ],
                 'limits' => ['max_products' => '25', 'storage_mb' => '100'],
             ],
@@ -34,7 +34,7 @@ class PlanSeeder extends Seeder
                 'on' => [
                     'products', 'categories', 'whatsapp_orders', 'contact_page',
                     'online_payment', 'custom_domain', 'promo_codes', 'delivery_prices',
-                    'orders', 'multi_language', 'chat',
+                    'orders', 'multi_language', 'chat', 'category_filters',
                 ],
                 'off' => ['show_ads'],
                 'limits' => ['max_products' => '500', 'storage_mb' => '5000'],
@@ -45,7 +45,7 @@ class PlanSeeder extends Seeder
                 'on' => [
                     'products', 'categories', 'whatsapp_orders', 'contact_page',
                     'online_payment', 'custom_domain', 'promo_codes', 'delivery_prices',
-                    'orders', 'multi_language', 'chat',
+                    'orders', 'multi_language', 'chat', 'category_filters',
                 ],
                 'off' => ['show_ads'],
                 'limits' => ['max_products' => '-1', 'storage_mb' => '-1'],
