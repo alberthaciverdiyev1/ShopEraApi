@@ -31,6 +31,10 @@ Route::middleware(['admin.auth', 'subscribed', 'admin.menu', LogOwnerActivity::c
     // Upgrade page linked from the read-only "Premium" notice.
     Route::get('plan', [Admin\PlanController::class, 'index'])->name('plan.index');
 
+    // The signed-in admin's own password.
+    Route::get('profile/password', [Admin\ProfileController::class, 'edit'])->name('profile.password');
+    Route::put('profile/password', [Admin\ProfileController::class, 'update'])->name('profile.password.update');
+
     /*
      * Registers the index/create/store/edit/update/destroy set for a simple
      * resource controller. Keeps this file a table of contents rather than a
