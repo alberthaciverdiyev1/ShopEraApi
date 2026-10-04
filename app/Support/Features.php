@@ -15,10 +15,7 @@ class Features
     /** Numeric limits defined in Manager.Snaker's feature catalogue. */
     public const LIMIT_KEYS = [
         'max_products',
-        'max_categories',
-        'max_staff',
-        'max_orders',
-        'storage_gb',
+        'storage_mb',
     ];
 
     private static bool $warned = false;

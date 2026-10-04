@@ -81,10 +81,7 @@ class FeatureSeeder extends Seeder
 
             // Limitlər
             ['max_products', 'Maks. məhsul', 'limit', '100', 'Limitlər'],
-            ['max_categories', 'Maks. kateqoriya', 'limit', '20', 'Limitlər'],
-            ['max_staff', 'Maks. işçi', 'limit', '2', 'Limitlər'],
-            ['max_orders', 'Aylıq maks. sifariş', 'limit', '500', 'Limitlər'],
-            ['storage_gb', 'Yaddaş (GB)', 'limit', '5', 'Limitlər'],
+            ['storage_mb', 'Yaddaş (MB)', 'limit', '100', 'Limitlər'],
         ];
 
         foreach ($features as $i => [$key, $name, $type, $default, $group]) {

@@ -3,10 +3,7 @@
 namespace App\Support;
 
 use Illuminate\Support\Facades\Storage;
-use Modules\Category\Entities\Category;
-use Modules\Order\Entities\Order;
 use Modules\Product\Entities\Product;
-use Modules\User\Entities\User;
 
 /**
  * Current consumption for the plan limits mirrored from Manager.Snaker.
@@ -14,7 +11,7 @@ use Modules\User\Entities\User;
  */
 class PlanUsage
 {
-    public const KEYS = ['max_products', 'max_categories', 'max_staff', 'max_orders', 'storage_gb'];
+    public const KEYS = ['max_products', 'storage_mb'];
 
     /** @return array<string,int|float> */
     public static function all(): array
@@ -27,21 +24,9 @@ class PlanUsage
     {
         return match ($key) {
             'max_products' => Product::query()->count(),
-            'max_categories' => Category::query()->count(),
-            'max_staff' => self::staffCount(),
-            // max_orders is a monthly cap, so usage counts the current month.
-            'max_orders' => Order::query()->where('created_at', '>=', now()->startOfMonth())->count(),
-            'storage_gb' => self::storageGb(),
+            'storage_mb' => round(self::storageBytes() / 1048576, 2),
             default => 0,
         };
-    }
-
-    /** Anyone holding a non-customer role counts against max_staff. */
-    private static function staffCount(): int
-    {
-        return User::query()
-            ->whereHas('roles', fn ($query) => $query->where('name', '!=', 'user'))
-            ->count();
     }
 
     /** Precise storage usage in bytes (used for limit checks). */
@@ -60,10 +45,5 @@ class PlanUsage
         }
 
         return $bytes;
-    }
-
-    private static function storageGb(): float
-    {
-        return round(self::storageBytes() / 1073741824, 2);
     }
 }

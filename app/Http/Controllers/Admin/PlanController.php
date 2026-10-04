@@ -3,20 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Support\Features;
+use App\Support\PlanUsage;
 use App\Support\Subscription;
-use App\Support\TenantContext;
-use Illuminate\Support\Facades\Storage;
-use Modules\Category\Entities\Category;
 use Modules\Manager\Entities\Plan;
 use Modules\Manager\Entities\Setting;
-use Modules\Order\Entities\Order;
-use Modules\Product\Entities\Product;
 use Modules\Setting\Entities\Setting as TenantSetting;
-use Modules\User\Entities\User;
 
 /**
- * Plan page: the current plan with its limits/usage, the available plans and
- * a WhatsApp CTA. Shown both from the sidebar and from locked (Premium) items.
+ * Plan page: the current plan with its limits/usage (products, storage),
+ * the available plans and a WhatsApp CTA. Shown from the sidebar and from
+ * locked (Premium) items.
  */
 class PlanController extends AdminController
 {
@@ -59,55 +55,20 @@ class PlanController extends AdminController
     {
         $limits = Features::limits();
 
-        $usage = [
-            'max_products' => $this->safe(fn () => Product::query()->count()),
-            'max_categories' => $this->safe(fn () => Category::query()->count()),
-            'max_staff' => $this->safe(fn () => User::query()->whereHas('roles', fn ($q) => $q->where('name', '!=', 'user'))->count()),
-            'max_orders' => $this->safe(fn () => Order::query()->count()),
-            'storage_gb' => $this->storageGb(),
-        ];
-
         $labels = [
             'max_products' => 'Məhsullar',
-            'max_categories' => 'Kateqoriyalar',
-            'max_staff' => 'İşçilər',
-            'max_orders' => 'Sifarişlər',
-            'storage_gb' => 'Yaddaş (GB)',
+            'storage_mb' => 'Yaddaş (MB)',
         ];
 
         $rows = [];
         foreach ($labels as $key => $label) {
             $rows[] = [
                 'label' => $label,
-                'used' => $usage[$key] ?? 0,
+                'used' => PlanUsage::value($key),
                 'limit' => $limits[$key] ?? null,
             ];
         }
 
         return $rows;
-    }
-
-    private function storageGb(): float
-    {
-        try {
-            $prefix = TenantContext::storagePath('');
-            $bytes = 0;
-            foreach (Storage::disk('public')->allFiles($prefix) as $file) {
-                $bytes += (int) Storage::disk('public')->size($file);
-            }
-
-            return round($bytes / 1073741824, 2);
-        } catch (\Throwable) {
-            return 0;
-        }
-    }
-
-    private function safe(callable $fn): int
-    {
-        try {
-            return (int) $fn();
-        } catch (\Throwable) {
-            return 0;
-        }
     }
 }

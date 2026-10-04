@@ -25,13 +25,13 @@ class PlanLimits
     /** Would $incomingBytes more data exceed the storage limit? */
     public static function storageFull(int $incomingBytes): bool
     {
-        $limitGb = Features::limit('storage_gb');
+        $limitMb = Features::limit('storage_mb');
 
-        if ($limitGb === null || $limitGb < 0) {
+        if ($limitMb === null || $limitMb < 0) {
             return false;
         }
 
-        $limitBytes = (int) round($limitGb * 1073741824);
+        $limitBytes = (int) round($limitMb * 1048576);
 
         return (PlanUsage::storageBytes() + $incomingBytes) > $limitBytes;
     }
