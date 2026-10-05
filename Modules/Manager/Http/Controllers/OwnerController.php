@@ -246,13 +246,30 @@ class OwnerController extends Controller
             DB::purge('tenant');
             DB::setDefaultConnection('tenant');
 
-            $user = User::query()->where('email', $owner->email)->first();
+            $user = User::query()->whereRaw('lower(email) = ?', [mb_strtolower((string) $owner->email)])->first();
+
+            if (! $user) {
+                // The owner's e-mail may have changed since provisioning, so
+                // fall back to the tenant's admin (non-customer) account.
+                $user = User::query()->role('admin')->orderBy('id')->first()
+                    ?? User::query()->whereHas('roles', fn ($q) => $q->where('name', '!=', 'user'))->orderBy('id')->first();
+            }
 
             if (! $user) {
                 return back()->withErrors(['password' => 'Bu sahibin admin hesabı tapılmadı ('.$owner->email.').']);
             }
 
             $user->update(['password' => Hash::make($data['password'])]);
+
+            // Keep the admin login in sync with the owner e-mail so the next
+            // lookup (and the owner) use the same address.
+            try {
+                if (strcasecmp((string) $user->email, (string) $owner->email) !== 0) {
+                    $user->update(['email' => mb_strtolower((string) $owner->email)]);
+                }
+            } catch (\Throwable) {
+                // e-mail already taken by another tenant user — leave as is.
+            }
         } catch (\Throwable $e) {
             return back()->withErrors(['password' => 'Şifrə yenilənə bilmədi: '.$e->getMessage()]);
         } finally {
