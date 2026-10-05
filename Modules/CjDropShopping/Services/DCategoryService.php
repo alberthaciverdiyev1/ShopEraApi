@@ -177,23 +177,39 @@ class DCategoryService extends DBaseService
                 continue;
             }
 
-            $id = (string) ($item['categoryId'] ?? $item['id'] ?? '');
+            // CJ returns three differently-keyed nesting levels:
+            // categoryFirstId/List -> categorySecondId/List -> categoryId.
+            $id = (string) ($item['categoryId']
+                ?? $item['categoryFirstId']
+                ?? $item['categorySecondId']
+                ?? $item['id']
+                ?? '');
 
             if ($id === '') {
                 continue;
             }
 
+            $name = (string) ($item['categoryName']
+                ?? $item['categoryFirstName']
+                ?? $item['categorySecondName']
+                ?? $item['name']
+                ?? '');
+
             $parent = (string) ($item['categoryParentId'] ?? $item['parentId'] ?? $parentId ?? '');
 
             $flat[] = [
                 'id' => $id,
-                'name' => (string) ($item['categoryName'] ?? $item['name'] ?? ''),
+                'name' => $name,
                 'parent_id' => $parent !== '' ? $parent : null,
                 'image' => $item['categoryImage'] ?? $item['image'] ?? null,
                 'sort_order' => (int) ($item['sortOrder'] ?? $item['sort_order'] ?? $index),
             ];
 
-            $children = $item['children'] ?? $item['childList'] ?? null;
+            $children = $item['categoryFirstList']
+                ?? $item['categorySecondList']
+                ?? $item['children']
+                ?? $item['childList']
+                ?? null;
 
             if (is_array($children) && $children !== []) {
                 $flat = array_merge($flat, $this->flatten($children, $id));

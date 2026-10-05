@@ -22,9 +22,13 @@ class DCategorySyncTest extends TestCase
         $this->assertNotEmpty(config('cjdropshopping.base_url'));
     }
 
-    public function test_it_imports_cj_categories_with_their_hierarchy(): void
+    public function test_it_imports_a_flat_cj_category_list(): void
     {
-        $this->fakeCj();
+        $this->fakeCj([
+            ['categoryId' => '100', 'categoryName' => 'Electronics', 'categoryParentId' => '0'],
+            ['categoryId' => '101', 'categoryName' => 'Phones', 'categoryParentId' => '100'],
+            ['categoryId' => '102', 'categoryName' => 'Accessories', 'categoryParentId' => '100'],
+        ]);
 
         $summary = app(DCategoryService::class)->sync(false);
 
@@ -39,9 +43,46 @@ class DCategorySyncTest extends TestCase
         $this->assertSame('Electronics', $root->getTranslations('name')['en']);
     }
 
+    public function test_it_imports_the_real_nested_cj_shape(): void
+    {
+        // CJ nests three differently-keyed levels.
+        $this->fakeCj([
+            [
+                'categoryFirstId' => 'F1',
+                'categoryFirstName' => 'Women',
+                'categoryFirstList' => [
+                    [
+                        'categorySecondId' => 'S1',
+                        'categorySecondName' => 'Tops',
+                        'categorySecondList' => [
+                            ['categoryId' => 'C1', 'categoryName' => 'Blouses'],
+                            ['categoryId' => 'C2', 'categoryName' => 'Shirts'],
+                        ],
+                    ],
+                ],
+            ],
+        ]);
+
+        $summary = app(DCategoryService::class)->sync(false);
+
+        $this->assertSame(4, $summary['fetched']);
+
+        $first = Category::where('cj_category_id', 'F1')->firstOrFail();
+        $second = Category::where('cj_category_id', 'S1')->firstOrFail();
+        $third = Category::where('cj_category_id', 'C1')->firstOrFail();
+
+        $this->assertNull($first->parent_id);
+        $this->assertSame($first->id, $second->parent_id);
+        $this->assertSame($second->id, $third->parent_id);
+    }
+
     public function test_sync_is_idempotent(): void
     {
-        $this->fakeCj();
+        $this->fakeCj([
+            ['categoryId' => '100', 'categoryName' => 'Electronics', 'categoryParentId' => '0'],
+            ['categoryId' => '101', 'categoryName' => 'Phones', 'categoryParentId' => '100'],
+            ['categoryId' => '102', 'categoryName' => 'Accessories', 'categoryParentId' => '100'],
+        ]);
 
         app(DCategoryService::class)->sync(false);
         $summary = app(DCategoryService::class)->sync(false);
@@ -51,7 +92,7 @@ class DCategorySyncTest extends TestCase
         $this->assertSame(3, Category::query()->count());
     }
 
-    private function fakeCj(): void
+    private function fakeCj(array $categories): void
     {
         Http::fake([
             '*/authentication/getAccessToken' => Http::response([
@@ -63,11 +104,7 @@ class DCategorySyncTest extends TestCase
             ]),
             '*/product/getCategory' => Http::response([
                 'code' => 200,
-                'data' => [
-                    ['categoryId' => '100', 'categoryName' => 'Electronics', 'categoryParentId' => '0', 'categoryLevel' => 1],
-                    ['categoryId' => '101', 'categoryName' => 'Phones', 'categoryParentId' => '100', 'categoryLevel' => 2],
-                    ['categoryId' => '102', 'categoryName' => 'Accessories', 'categoryParentId' => '100', 'categoryLevel' => 2],
-                ],
+                'data' => $categories,
             ]),
         ]);
     }

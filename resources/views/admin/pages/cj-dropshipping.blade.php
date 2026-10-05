@@ -53,8 +53,8 @@
                             @csrf
                             <label class="flex items-center gap-1.5 text-xs text-gray-500">
                                 <input type="hidden" name="translate" value="0">
-                                <input type="checkbox" name="translate" value="1" checked class="rounded border-gray-300">
-                                Tərcümə et
+                                <input type="checkbox" name="translate" value="1" class="rounded border-gray-300">
+                                Tərcümə et (yavaş)
                             </label>
                             <button class="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-700">
                                 Sinxronla
@@ -76,8 +76,8 @@
                     @csrf
                     <label class="flex items-center gap-1.5 text-xs text-gray-500">
                         <input type="hidden" name="translate" value="0">
-                        <input type="checkbox" name="translate" value="1" checked class="rounded border-gray-300">
-                        Tərcümə et
+                        <input type="checkbox" name="translate" value="1" class="rounded border-gray-300">
+                        Tərcümə et (yavaş)
                     </label>
                     <button class="rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-800">
                         Hamısını sinxronla
