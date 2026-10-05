@@ -78,8 +78,7 @@ class SettingsController extends AdminController
             $groups['CJ Dropshipping'] = [
                 'icon' => 'M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m12.75 0V6.75m0 2.599l-1.6-.64a9.06 9.06 0 00-6.55 0l-1.6.64m11.75 0a9.07 9.07 0 01-3.25 1.71M3.75 9.35a9.06 9.06 0 003.25 1.71m6 0a9.06 9.06 0 01-6 0',
                 'fields' => [
-                    ['cj_dropshipping_email', 'CJ e-poçt', 'text', 6],
-                    ['cj_dropshipping_api_key', 'CJ API key', 'password', 6],
+                    ['cj_dropshipping_api_key', 'CJ API key', 'password', 12],
                 ],
             ];
         }

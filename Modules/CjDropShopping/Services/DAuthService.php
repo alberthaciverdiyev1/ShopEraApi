@@ -15,31 +15,28 @@ use RuntimeException;
 /**
  * CJ Dropshipping authentication.
  *
- * Owns the credentials and the short-lived access token only. The e-mail + API
- * key are read from the tenant's `settings` row (editable in the admin panel
- * when the `cj_dropshipping` feature is enabled), falling back to module
- * config/env. The token is cached per tenant and per credential pair, and is
- * consumed by the other D* services through {@see DBaseService}.
+ * Owns the API key and the short-lived access token only. The API key is read
+ * from the tenant's `settings` row (editable in the admin panel when the
+ * `cj_dropshipping` feature is enabled), falling back to module config/env.
+ * The token is cached per tenant/per key, and is consumed by the other D*
+ * services through {@see DBaseService}.
  *
  * @see https://developers.cjdropshipping.com
  */
 class DAuthService
 {
-    /** @var array<string,?string> per-request memo of the settings row values */
+    /** @var array<string,?string> per-request memo of the settings row value */
     private array $storedMemo = [];
 
     public function __construct(private readonly ?array $config = null) {}
 
     public function isConfigured(): bool
     {
-        return $this->credential('email') !== null
-            && $this->credential('email') !== ''
-            && $this->credential('api_key') !== null
-            && $this->credential('api_key') !== '';
+        return $this->apiKey() !== null;
     }
 
     /**
-     * Verify the credentials and return connection metadata (never the secrets).
+     * Verify the API key and return connection metadata (never the secret).
      */
     public function connection(): array
     {
@@ -50,7 +47,6 @@ class DAuthService
 
         return [
             'connected' => true,
-            'email' => $this->maskEmail((string) $this->credential('email')),
             'base_url' => $this->setting('base_url'),
             'token_expires_at' => $expiresAt ? Carbon::createFromTimestamp($expiresAt)->toIso8601String() : null,
         ];
@@ -61,7 +57,7 @@ class DAuthService
      *
      * Reuses the cached token while it is still fresh, tries a token refresh
      * when only the refresh token is still valid, and falls back to a full
-     * login (e-mail + API key) otherwise.
+     * login (API key) otherwise.
      */
     public function token(): string
     {
@@ -133,18 +129,17 @@ class DAuthService
         }
     }
 
-    /** Drop the cached token (e.g. after a rejected request or a credential change). */
+    /** Drop the cached token (e.g. after a rejected request or an API key change). */
     public function forgetToken(): void
     {
         Cache::forget($this->tokenCacheKey());
     }
 
-    /** Full login with the account e-mail + API key. @return array<string,mixed> */
+    /** Full login with the API key. @return array<string,mixed> */
     protected function authenticate(): array
     {
         $response = $this->http()->post($this->url('authentication/getAccessToken'), [
-            'email' => $this->credential('email'),
-            'password' => $this->credential('api_key'),
+            'apiKey' => $this->apiKey(),
         ]);
 
         return $this->unwrap($response);
@@ -214,7 +209,7 @@ class DAuthService
     /** @param array<string,mixed> $body */
     protected function fail(Response $response, array $body): never
     {
-        // Never log credentials or full payloads; only the status and CJ code.
+        // Never log the API key or full payloads; only the status and CJ code.
         Log::warning('CJ Dropshipping authentication failed', [
             'status' => $response->status(),
             'code' => $body['code'] ?? null,
@@ -242,65 +237,57 @@ class DAuthService
     protected function ensureConfigured(): void
     {
         if (! $this->isConfigured()) {
-            throw new RuntimeException(__('CJ Dropshipping is not configured. Set CJ_DROPSHIPPING_EMAIL and CJ_DROPSHIPPING_API_KEY.'));
+            throw new RuntimeException(__('CJ Dropshipping is not configured. Set CJ_DROPSHIPPING_API_KEY or the admin settings field.'));
         }
     }
 
     protected function tokenCacheKey(): string
     {
-        $fingerprint = sha1(($this->credential('email') ?? '').'|'.($this->credential('api_key') ?? ''));
+        $fingerprint = sha1((string) $this->apiKey());
 
         return TenantContext::cacheKey('cjdropshipping:access_token:'.$fingerprint);
     }
 
     /**
-     * Resolve a credential: explicit constructor config (tests/manual wiring)
+     * Resolve the API key: explicit constructor config (tests/manual wiring)
      * wins, then the tenant's settings row, then module config/env.
      */
-    protected function credential(string $key): ?string
+    protected function apiKey(): ?string
     {
         if ($this->config !== null) {
-            return $this->config[$key] ?? null;
+            $key = $this->config['api_key'] ?? null;
+
+            return is_string($key) && $key !== '' ? $key : null;
         }
 
-        $stored = $this->storedCredential($key);
+        $stored = $this->storedApiKey();
 
-        if (is_string($stored) && $stored !== '') {
+        if ($stored !== null) {
             return $stored;
         }
 
-        $fallback = config('cjdropshipping.'.$key);
+        $fallback = config('cjdropshipping.api_key');
 
         return is_string($fallback) && $fallback !== '' ? $fallback : null;
     }
 
     /**
-     * Read the credential from the tenant's single settings row. Fails soft so
-     * an unmigrated/absent table never breaks the integration.
+     * Read the API key from the tenant's single settings row. Fails soft so an
+     * unmigrated/absent table never breaks the integration.
      */
-    protected function storedCredential(string $key): ?string
+    protected function storedApiKey(): ?string
     {
-        $column = match ($key) {
-            'email' => 'cj_dropshipping_email',
-            'api_key' => 'cj_dropshipping_api_key',
-            default => null,
-        };
-
-        if ($column === null) {
-            return null;
-        }
-
-        if (array_key_exists($key, $this->storedMemo)) {
-            return $this->storedMemo[$key];
+        if (array_key_exists('api_key', $this->storedMemo)) {
+            return $this->storedMemo['api_key'];
         }
 
         try {
-            $value = Setting::query()->first()?->{$column};
+            $value = Setting::query()->first()?->cj_dropshipping_api_key;
         } catch (\Throwable) {
             $value = null;
         }
 
-        return $this->storedMemo[$key] = (is_string($value) && $value !== '' ? $value : null);
+        return $this->storedMemo['api_key'] = (is_string($value) && $value !== '' ? $value : null);
     }
 
     /**
@@ -312,16 +299,5 @@ class DAuthService
         $config = array_replace(config('cjdropshipping', []), $this->config ?? []);
 
         return $config[$key] ?? $default;
-    }
-
-    protected function maskEmail(string $email): string
-    {
-        $at = strpos($email, '@');
-
-        if ($at === false || $at < 2) {
-            return $email === '' ? '' : str_repeat('*', strlen($email));
-        }
-
-        return substr($email, 0, 2).str_repeat('*', max(1, $at - 2)).substr($email, $at);
     }
 }

@@ -9,13 +9,12 @@ return [
     | CJ Dropshipping Open API
     |--------------------------------------------------------------------------
     |
-    | Credentials are issued from the CJ Dropshipping dashboard
-    | (https://developers.cjdropshipping.com). Authentication expects the
-    | account e-mail plus the generated API key used as the password.
+    | The API key is issued from the CJ Dropshipping dashboard
+    | (https://developers.cjdropshipping.com). Authentication posts only this
+    | key to `authentication/getAccessToken`; no account e-mail is required.
     |
     */
     'base_url' => env('CJ_DROPSHIPPING_BASE_URL', 'https://developers.cjdropshipping.com/api2.0/v1'),
-    'email' => env('CJ_DROPSHIPPING_EMAIL'),
     'api_key' => env('CJ_DROPSHIPPING_API_KEY'),
     'timeout' => (int) env('CJ_DROPSHIPPING_TIMEOUT', 20),
 

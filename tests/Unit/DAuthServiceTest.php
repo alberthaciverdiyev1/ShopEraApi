@@ -10,33 +10,30 @@ use Tests\TestCase;
 
 class DAuthServiceTest extends TestCase
 {
-    public function test_it_is_not_configured_without_credentials(): void
+    public function test_it_is_not_configured_without_an_api_key(): void
     {
-        $service = new DAuthService(['email' => '', 'api_key' => null]);
+        $service = new DAuthService(['api_key' => '']);
 
         $this->assertFalse($service->isConfigured());
     }
 
-    public function test_it_is_configured_when_email_and_api_key_are_present(): void
+    public function test_it_is_configured_when_an_api_key_is_present(): void
     {
-        $service = new DAuthService([
-            'email' => 'owner@example.com',
-            'api_key' => 'secret-key',
-        ]);
+        $service = new DAuthService(['api_key' => 'secret-key']);
 
         $this->assertTrue($service->isConfigured());
     }
 
     public function test_connection_fails_when_not_configured(): void
     {
-        $service = new DAuthService(['email' => null, 'api_key' => null]);
+        $service = new DAuthService(['api_key' => null]);
 
         $this->expectException(RuntimeException::class);
 
         $service->connection();
     }
 
-    public function test_it_authenticates_and_reuses_the_cached_token(): void
+    public function test_it_authenticates_with_the_api_key_and_reuses_the_cached_token(): void
     {
         Http::fake([
             '*/authentication/getAccessToken' => Http::response($this->payload('AT')),
@@ -49,8 +46,8 @@ class DAuthServiceTest extends TestCase
 
         Http::assertSentCount(1);
         Http::assertSent(fn ($request) => str_contains($request->url(), 'authentication/getAccessToken')
-            && $request['email'] === 'owner@example.com'
-            && $request['password'] === 'secret-key');
+            && $request['apiKey'] === 'secret-key'
+            && ! array_key_exists('email', $request->data()));
     }
 
     public function test_it_refreshes_the_token_when_the_access_token_expired(): void
@@ -92,7 +89,6 @@ class DAuthServiceTest extends TestCase
     private function service(): DAuthService
     {
         return new DAuthService([
-            'email' => 'owner@example.com',
             'api_key' => 'secret-key',
             'base_url' => 'https://developers.cjdropshipping.com/api2.0/v1',
         ]);
