@@ -229,11 +229,23 @@ class CategoryService
         unset($validated['name']);
 
         return handleTransaction(function () use ($validated, $name) {
-            $category = $this->model->create($validated);
+            $category = $this->createFromData($validated);
             $category->update(['name' => $name]);
 
             return $category->refresh();
         }, 'Category added successfully.', CategoryResource::class);
+    }
+
+    /**
+     * Create a category from a plain attribute array (no HTTP request needed),
+     * so programmatic imports (e.g. the CJ Dropshipping sync) go through the
+     * same path as the API.
+     *
+     * @param  array<string,mixed>  $attributes
+     */
+    public function createFromData(array $attributes): Category
+    {
+        return $this->model->create($attributes);
     }
 
     //    public function update($request, int $id): JsonResponse
