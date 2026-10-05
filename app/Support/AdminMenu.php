@@ -211,6 +211,15 @@ class AdminMenu
                     'match' => 'admin.delivery-infos.*',
                     'icon' => 'M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z'],
             ],
+            'Dropshipping' => [
+                [
+                    'label' => 'CJ Dropshipping',
+                    'route' => 'admin.cj-dropshipping.index',
+                    'feature' => 'cj_dropshipping',
+                    'match' => 'admin.cj-dropshipping.*',
+                    'icon' => 'M4.755 10.059a7.5 7.5 0 0112.548-3.364l1.903 1.903m0 0V4.5m0 4.098h-4.098M19.245 13.941a7.5 7.5 0 01-12.548 3.364l-1.903-1.903m0 0V19.5m0-4.098h4.098',
+                ],
+            ],
             'Sistem' => [
                 [
                     'label' => 'Rollar və icazələr',

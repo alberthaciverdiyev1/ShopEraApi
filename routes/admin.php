@@ -134,6 +134,11 @@ Route::middleware(['admin.auth', 'subscribed', 'admin.menu', LogOwnerActivity::c
     // Roles & permissions
     $resource('roles', Admin\RoleController::class);
 
+    // CJ Dropshipping (feature: cj_dropshipping)
+    Route::get('cj-dropshipping', [Admin\CjDropshippingController::class, 'index'])->name('cj-dropshipping.index');
+    Route::post('cj-dropshipping/sync-categories', [Admin\CjDropshippingController::class, 'syncCategories'])->name('cj-dropshipping.sync-categories');
+    Route::post('cj-dropshipping/sync-all', [Admin\CjDropshippingController::class, 'syncAll'])->name('cj-dropshipping.sync-all');
+
     // System
     Route::get('theme', [Admin\ThemeController::class, 'index'])->name('theme.index');
     Route::put('theme', [Admin\ThemeController::class, 'update'])->name('theme.update');
