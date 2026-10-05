@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/cjdropshopping",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\CjDropShopping\\": "app/",
+            "Modules\\CjDropShopping\\Database\\Factories\\": "database/factories/",
+            "Modules\\CjDropShopping\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\CjDropShopping\\Tests\\": "tests/"
+        }
+    }
+}

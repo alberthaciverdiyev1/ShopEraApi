@@ -1,0 +1,11 @@
+{
+    "name": "CjDropShopping",
+    "alias": "cjdropshopping",
+    "description": "CJ Dropshipping API integration: authentication, product search/details, categories and freight calculation.",
+    "keywords": ["dropshipping", "cj", "integration"],
+    "priority": 0,
+    "providers": [
+        "Modules\\CjDropShopping\\Providers\\CjDropShoppingServiceProvider"
+    ],
+    "files": []
+}
