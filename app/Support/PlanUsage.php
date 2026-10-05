@@ -11,7 +11,7 @@ use Modules\Product\Entities\Product;
  */
 class PlanUsage
 {
-    public const KEYS = ['max_products', 'storage_mb'];
+    public const array KEYS = ['max_products', 'storage_mb'];
 
     /** @return array<string,int|float> */
     public static function all(): array

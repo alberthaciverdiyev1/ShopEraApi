@@ -100,10 +100,6 @@
                             class="fa-solid fa-comments"></i>{$translate('Messages')}</button>
                 {/if}
 
-                <button class="nav-link" class:active={tab === 'wishlist'}
-                    id="v-pills-wishlist-tab" type="button" role="tab" aria-controls="v-pills-wishlist"
-                    aria-selected={tab === 'wishlist'} onclick={() => (tab = 'wishlist')}><i
-                        class="fa-light fa-heart"></i>{$translate('Wishlist')}</button>
 
                 <button class="nav-link" class:active={tab === 'addresses'}
                     id="v-pills-addresses-tab" type="button" role="tab" aria-controls="v-pills-addresses"
@@ -262,101 +258,6 @@
                 <Chat />
             </div>
         {/if}
-        <div class="tab-pane fade" class:show={tab === 'wishlist'} class:active={tab === 'wishlist'} id="v-pills-wishlist" role="tabpanel"
-            aria-labelledby="v-pills-wishlist-tab" tabindex="0">
-<!-- Wishlist Section Start -->
-            <!-- Wishlist Section Start -->
-            <div class="wishlist-wrapper fix bg-white">
-                <div class="container">
-                    <form action="#" class="woocommerce-cart-form">
-                        <table class="wishlist_table">
-                            <thead>
-                                <tr>
-                                    <th class="cart-col-image">{$translate('Product')}</th>
-                                    <th class="cart-col-price">{$translate('Price')}</th>
-                                    <th class="cart-col-total">Sub total</th>
-                                    <th class="cart-col-stock">Stock</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="cart_item">
-                                    <td class="product" data-title="Product">
-                                        <button><i class="fa-solid fa-xmark"></i></button>
-                                        <a class="cartimage" href="#"><img width="91"
-                                                height="91" src="/assets/images/cart/cart-thumb1_1.jpg"
-                                                alt="Image"></a>
-                                        shorter dress above
-                                    </td>
-                                    <td data-title="Price">
-                                        <span class="amount"><bdi><span>$</span>30.00</bdi></span>
-                                    </td>
-                                    <td data-title="Total">
-                                        <span class="amount"><bdi><span>$</span>20.00</bdi></span>
-                                    </td>
-                                    <td data-title="stock">
-                                        <a href="#" class="stock">In stock</a>
-                                    </td>
-                                </tr>
-                                <tr class="cart_item">
-                                    <td class="product" data-title="Product">
-                                        <button><i class="fa-solid fa-xmark"></i></button>
-                                        <a class="cartimage" href="#"><img width="91"
-                                                height="91" src="/assets/images/cart/cart-thumb1_2.jpg"
-                                                alt="Image"></a>
-                                        close-fitting dress
-                                    </td>
-                                    <td data-title="Price">
-                                        <span class="amount"><bdi><span>$</span>50.00</bdi></span>
-                                    </td>
-                                    <td data-title="Total">
-                                        <span class="amount"><bdi><span>$</span>60.00</bdi></span>
-                                    </td>
-                                    <td data-title="stock">
-                                        <a href="#" class="stock_out">out of stock</a>
-                                    </td>
-                                </tr>
-                                <tr class="cart_item">
-                                    <td class="product" data-title="Product">
-                                        <button><i class="fa-solid fa-xmark"></i></button>
-                                        <a class="cartimage" href="#"><img width="91"
-                                                height="91" src="/assets/images/cart/cart-thumb1_3.jpg"
-                                                alt="Image"></a>
-                                        flowy dress that often
-                                    </td>
-                                    <td data-title="Price">
-                                        <span class="amount"><bdi><span>$</span>70.00</bdi></span>
-                                    </td>
-                                    <td data-title="Total">
-                                        <span class="amount"><bdi><span>$</span>30.00</bdi></span>
-                                    </td>
-                                    <td data-title="stock">
-                                        <a href="#" class="stock">In stock</a>
-                                    </td>
-                                </tr>
-                                <tr class="cart_item">
-                                    <td class="product" data-title="Product">
-                                        <button><i class="fa-solid fa-xmark"></i></button>
-                                        <a class="cartimage" href="#"><img width="91"
-                                                height="91" src="/assets/images/cart/cart-thumb1_4.jpg"
-                                                alt="Image"></a>
-                                        Tight and form
-                                    </td>
-                                    <td data-title="Price">
-                                        <span class="amount"><bdi><span>$</span>10.00</bdi></span>
-                                    </td>
-                                    <td data-title="Total">
-                                        <span class="amount"><bdi><span>$</span>80.00</bdi></span>
-                                    </td>
-                                    <td data-title="stock">
-                                        <a href="#" class="stock_out">out of stock</a>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </form>
-                </div>
-            </div>
-        </div>
         <div class="tab-pane fade" class:show={tab === 'addresses'} class:active={tab === 'addresses'} id="v-pills-addresses" role="tabpanel"
             aria-labelledby="v-pills-addresses-tab" tabindex="0">
             <AddressSection onchange={loadDefaultAddress} />
@@ -385,7 +286,7 @@
                 </div>
             </div>
         </div>
-    </div>  
+    </div>
 </div>
 </div>
 </div>

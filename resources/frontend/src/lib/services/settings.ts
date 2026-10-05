@@ -22,12 +22,7 @@ export interface ApiStoreSettings {
 	linkedin_url?: string | null;
 }
 
-type SettingsPayload =
-	| ApiStoreSettings
-	| ApiStoreSettings[]
-	| { data?: ApiStoreSettings | ApiStoreSettings[] }
-	| null
-	| undefined;
+type SettingsPayload =	| ApiStoreSettings	| ApiStoreSettings[]	| { data?: ApiStoreSettings | ApiStoreSettings[] }	| null	| undefined;
 
 export const fallbackSettings: ApiStoreSettings = {
 	email: 'support@snaker.store',
