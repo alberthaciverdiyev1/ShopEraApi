@@ -137,6 +137,7 @@ Route::middleware(['admin.auth', 'subscribed', 'admin.menu', LogOwnerActivity::c
     // CJ Dropshipping (feature: cj_dropshipping)
     Route::get('cj-dropshipping', [Admin\CjDropshippingController::class, 'index'])->name('cj-dropshipping.index');
     Route::post('cj-dropshipping/sync-categories', [Admin\CjDropshippingController::class, 'syncCategories'])->name('cj-dropshipping.sync-categories');
+    Route::post('cj-dropshipping/sync-products', [Admin\CjDropshippingController::class, 'syncProducts'])->name('cj-dropshipping.sync-products');
     Route::post('cj-dropshipping/sync-all', [Admin\CjDropshippingController::class, 'syncAll'])->name('cj-dropshipping.sync-all');
 
     // System

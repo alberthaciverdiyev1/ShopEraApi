@@ -599,6 +599,18 @@ class ProductService
     //        return $product;
     //    }
 
+    /**
+     * Create a product from a plain attribute array (no HTTP request needed),
+     * so programmatic imports (e.g. the CJ Dropshipping sync) go through the
+     * same model path as the API.
+     *
+     * @param  array<string,mixed>  $attributes
+     */
+    public function createFromData(array $attributes): Product
+    {
+        return $this->model->create($attributes);
+    }
+
     public function add($request, array $overrides = []): JsonResponse
     {
         if (PlanLimits::reached('max_products', 1)) {

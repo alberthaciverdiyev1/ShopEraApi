@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Modules\CjDropShopping\Services\DAuthService;
 use Modules\CjDropShopping\Services\DCategoryService;
+use Modules\CjDropShopping\Services\DProductService;
 use RuntimeException;
 use Throwable;
 
@@ -32,6 +33,11 @@ class CjDropshippingController extends AdminController
             'description' => 'CJ kategoriya ağacını çəkib lokal kateqoriyalara yazır.',
             'route' => 'admin.cj-dropshipping.sync-categories',
         ],
+        'products' => [
+            'label' => 'Məhsullar (CJ panelindən)',
+            'description' => 'CJ paneldə əlavə etdiyin məhsulları lokal kataloqa çəkir.',
+            'route' => 'admin.cj-dropshipping.sync-products',
+        ],
     ];
 
     public function index()
@@ -47,6 +53,11 @@ class CjDropshippingController extends AdminController
     public function syncCategories(Request $request): RedirectResponse
     {
         return $this->run(fn () => $this->handler('categories', $this->translate($request)));
+    }
+
+    public function syncProducts(Request $request): RedirectResponse
+    {
+        return $this->run(fn () => $this->handler('products', $this->translate($request)));
     }
 
     public function syncAll(Request $request): RedirectResponse
@@ -68,6 +79,7 @@ class CjDropshippingController extends AdminController
     {
         return match ($key) {
             'categories' => app(DCategoryService::class)->sync($translate),
+            'products' => app(DProductService::class)->sync($translate),
             default => [],
         };
     }
