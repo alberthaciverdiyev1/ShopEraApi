@@ -18,7 +18,7 @@ use RuntimeException;
 abstract class DBaseService
 {
     /** CJ error codes that mean "the access token is invalid/expired". */
-    private const TOKEN_ERROR_CODES = [1600200, 1600300];
+    private const array TOKEN_ERROR_CODES = [1600200, 1600300];
 
     public function __construct(protected readonly DAuthService $auth) {}
 
