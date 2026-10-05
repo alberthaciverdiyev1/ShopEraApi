@@ -7,7 +7,13 @@ use Modules\CjDropShopping\Services\DAuthService;
 use Modules\CjDropShopping\Services\DBrandService;
 use Modules\CjDropShopping\Services\DCategoryService;
 use Modules\CjDropShopping\Services\DFreightService;
+use Modules\CjDropShopping\Services\DOrderService;
+use Modules\CjDropShopping\Services\DPaymentService;
 use Modules\CjDropShopping\Services\DProductService;
+use Modules\CjDropShopping\Services\DShopService;
+use Modules\CjDropShopping\Services\DTrackingService;
+use Modules\CjDropShopping\Services\DUserService;
+use Modules\CjDropShopping\Services\DWarehouseService;
 use Nwidart\Modules\Traits\PathNamespace;
 
 class CjDropShoppingServiceProvider extends ServiceProvider
@@ -33,6 +39,12 @@ class CjDropShoppingServiceProvider extends ServiceProvider
         $this->app->singleton(DCategoryService::class);
         $this->app->singleton(DBrandService::class);
         $this->app->singleton(DFreightService::class);
+        $this->app->singleton(DTrackingService::class);
+        $this->app->singleton(DOrderService::class);
+        $this->app->singleton(DPaymentService::class);
+        $this->app->singleton(DUserService::class);
+        $this->app->singleton(DShopService::class);
+        $this->app->singleton(DWarehouseService::class);
     }
 
     /**
