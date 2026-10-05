@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { apiGet } from '$lib/utils/api';
+	import { sanitizeHtml } from '$lib/utils/sanitizeHtml';
 	import { hasDiscount, fetchProducts, productImage, productTitle, type ApiProduct, type ApiProductFilter } from '$lib/services/products';
 	import Rating from '$lib/components/ui/Rating.svelte';
 	import ShopProductCard from '$lib/components/cards/ShopProductCard.svelte';
@@ -704,7 +705,11 @@
 					<div class="tab-content-panel">
 						{#if activeTab === 'description'}
 							<div class="description-body">
-								<p>{product.description || $translate('No additional description is available for this product.')}</p>
+								{#if product.description}
+									{@html sanitizeHtml(product.description)}
+								{:else}
+									<p>{$translate('No additional description is available for this product.')}</p>
+								{/if}
 							</div>
 						{:else if activeTab === 'specs'}
 							<div class="specs-table-body">

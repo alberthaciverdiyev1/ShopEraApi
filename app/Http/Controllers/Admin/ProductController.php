@@ -13,6 +13,7 @@ use Illuminate\Validation\ValidationException;
 use Modules\Banner\Entities\Banner;
 use Modules\Brand\Entities\Brand;
 use Modules\Category\Entities\Category;
+use Modules\CjDropShopping\Entities\DropshippingProductDetail;
 use Modules\Color\Entities\Color;
 use Modules\Filter\Entities\ProductFilter;
 use Modules\Filter\Services\FilterService;
@@ -60,6 +61,7 @@ class ProductController extends AdminController
         return view('admin.pages.products.show', [
             'title' => admin_label($product, 'title', '#'.$product->id),
             'product' => $product,
+            'dropshipping' => DropshippingProductDetail::query()->where('product_id', $product->id)->first(),
         ]);
     }
 

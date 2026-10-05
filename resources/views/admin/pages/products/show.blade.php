@@ -48,9 +48,23 @@
                 </div>
             </div>
 
+            @php
+                // CJ descriptions are HTML. Allow only formatting tags and strip
+                // every attribute so no scripts / event handlers can run.
+                $rawDescription = (string) ($product->description ?? '');
+                $safeDescription = trim((string) preg_replace(
+                    '/<(\w+)[^>]*>/',
+                    '<$1>',
+                    strip_tags($rawDescription, '<p><br><strong><em><b><i><u><ul><ol><li><h2><h3><h4><blockquote>'),
+                ));
+            @endphp
             <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
                 <p class="mb-3 font-semibold text-gray-700">Təsvir</p>
-                <p class="whitespace-pre-line text-sm text-gray-600">{{ $product->description ?: '—' }}</p>
+                @if ($safeDescription !== '')
+                    <div class="text-sm leading-relaxed text-gray-600 [&_blockquote]:border-l-2 [&_blockquote]:border-gray-200 [&_blockquote]:pl-3 [&_li]:ml-4 [&_ol]:list-decimal [&_p]:mb-2 [&_ul]:list-disc">{!! $safeDescription !!}</div>
+                @else
+                    <p class="text-sm text-gray-400">—</p>
+                @endif
             </div>
 
             <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
@@ -81,6 +95,38 @@
                     <div class="flex justify-between"><dt class="text-gray-500">Cins</dt><dd class="text-gray-700">{{ $product->gender ?? '—' }}</dd></div>
                 </dl>
             </div>
+
+            @if ($dropshipping)
+                <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+                    <div class="mb-3 flex items-center justify-between">
+                        <p class="font-semibold text-gray-700">CJ Dropshipping</p>
+                        @if ($dropshipping->product_type)
+                            <span class="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-medium text-brand-600">{{ $dropshipping->product_type }}</span>
+                        @endif
+                    </div>
+                    <dl class="space-y-2 text-sm">
+                        <div class="flex justify-between gap-3"><dt class="shrink-0 text-gray-500">CJ pid</dt><dd class="truncate font-mono text-xs text-gray-700" title="{{ $dropshipping->cj_product_id }}">{{ $dropshipping->cj_product_id }}</dd></div>
+                        <div class="flex justify-between"><dt class="text-gray-500">CJ SKU</dt><dd class="text-gray-700">{{ $dropshipping->cj_sku ?? '—' }}</dd></div>
+                        <div class="flex justify-between"><dt class="text-gray-500">Təchizatçı</dt><dd class="text-gray-700">{{ $dropshipping->supplier_name ?? $dropshipping->supplier_id ?? '—' }}</dd></div>
+                        <div class="flex justify-between"><dt class="text-gray-500">Kateqoriya (CJ)</dt><dd class="truncate text-gray-700" title="{{ $dropshipping->cj_category_name }}">{{ $dropshipping->cj_category_name ?? '—' }}</dd></div>
+                        <div class="flex justify-between"><dt class="text-gray-500">Anbar</dt><dd class="text-gray-700">{{ $dropshipping->warehouse ?? '—' }}{{ $dropshipping->area_country_code ? ' ('.$dropshipping->area_country_code.')' : '' }}</dd></div>
+                        <div class="flex justify-between"><dt class="text-gray-500">Göndərmə</dt><dd class="text-gray-700">{{ $dropshipping->shop_method ?? '—' }}</dd></div>
+                        <div class="flex justify-between"><dt class="text-gray-500">CJ qiymət</dt><dd class="text-gray-700">{{ $dropshipping->cj_price ?? '—' }}</dd></div>
+                        @if ($dropshipping->cj_discount_price)
+                            <div class="flex justify-between"><dt class="text-gray-500">CJ endirim</dt><dd class="text-gray-700">{{ number_format((float) $dropshipping->cj_discount_price, 2) }}</dd></div>
+                        @endif
+                        <div class="flex justify-between"><dt class="text-gray-500">Çəki (q)</dt><dd class="text-gray-700">{{ $dropshipping->weight_grams ?? '—' }}</dd></div>
+                        <div class="flex justify-between"><dt class="text-gray-500">Paket çəkisi (q)</dt><dd class="text-gray-700">{{ $dropshipping->pack_weight_grams ?? '—' }}</dd></div>
+                        <div class="flex justify-between"><dt class="text-gray-500">Variant sayı</dt><dd class="text-gray-700">{{ is_array($dropshipping->variants) ? count($dropshipping->variants) : 0 }}</dd></div>
+                        <div class="flex justify-between"><dt class="text-gray-500">Listed</dt><dd class="text-gray-700">{{ $dropshipping->listed_num }}</dd></div>
+                        <div class="flex justify-between"><dt class="text-gray-500">Satış statusu</dt><dd class="text-gray-700">{{ $dropshipping->sale_status ?? '—' }}</dd></div>
+                        <div class="flex justify-between"><dt class="text-gray-500">Pulsuz göndərmə</dt><dd class="text-gray-700">{{ $dropshipping->is_free_shipping ? 'Bəli' : 'Xeyr' }}</dd></div>
+                        @if (! empty($dropshipping->shipping_country_codes))
+                            <div class="flex justify-between gap-3"><dt class="shrink-0 text-gray-500">Ölkələr</dt><dd class="truncate text-right text-gray-700" title="{{ implode(', ', (array) $dropshipping->shipping_country_codes) }}">{{ implode(', ', (array) $dropshipping->shipping_country_codes) }}</dd></div>
+                        @endif
+                    </dl>
+                </div>
+            @endif
 
             <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
                 <p class="mb-3 font-semibold text-gray-700">Rənglər</p>
