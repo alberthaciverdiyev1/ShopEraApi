@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Modules\Category\Entities\Category;
 use Modules\Category\Services\CategoryService;
 
@@ -37,6 +38,9 @@ class CategoryController extends ResourceController
     /** Categories are shown as a tree, so paginate generously. */
     protected int $perPage = 200;
 
+    /** Top-level categories per page when browsing the tree. */
+    private const ROOT_PER_PAGE = 50;
+
     private function service(): CategoryService
     {
         return app(CategoryService::class);
@@ -44,17 +48,83 @@ class CategoryController extends ResourceController
 
     public function index(Request $request)
     {
-        $rows = $this->listingQuery($request)->paginate($this->perPage)->withQueryString();
+        $nodes = $this->treeNodesFor($request);
 
         if ($this->isHtmx($request)) {
-            return view($this->tableView(), $this->tableData($rows));
+            return view($this->tableView(), ['nodes' => $nodes, 'route' => $this->route]);
         }
 
-        return view('admin.pages.categories.index', array_merge($this->tableData($rows), [
+        return view('admin.pages.categories.index', [
             'title' => $this->title,
             'searchable' => true,
             'filters' => $request->only(['q']),
-        ]));
+            'nodes' => $nodes,
+            'route' => $this->route,
+        ]);
+    }
+
+    /**
+     * Tree nodes for the listing. A search term is shown as a flat, paginated
+     * list of matches; browsing paginates top-level categories but always pulls
+     * in their full subtree, so pagination can never split a parent from its
+     * children.
+     *
+     * @return array<int,array{category:Category,depth:int,chain:string,hasChildren:bool}>
+     */
+    private function treeNodesFor(Request $request): array
+    {
+        $term = trim((string) $request->query('q', ''));
+
+        if ($term !== '') {
+            $rows = $this->listingQuery($request)->paginate($this->perPage)->withQueryString();
+
+            return $this->service()->treeNodes($rows);
+        }
+
+        $roots = Category::query()
+            ->whereNull('parent_id')
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->paginate(self::ROOT_PER_PAGE)
+            ->withQueryString();
+
+        $items = collect($roots->items());
+
+        if ($items->isNotEmpty()) {
+            $items = $items->merge($this->descendantsOf($items->pluck('id')->all()));
+        }
+
+        return $this->service()->treeNodes($items);
+    }
+
+    /**
+     * All descendants of the given category ids, breadth-first so parents are
+     * always collected before their children.
+     *
+     * @param  array<int,int>  $parentIds
+     * @return Collection<int,Category>
+     */
+    private function descendantsOf(array $parentIds): Collection
+    {
+        $all = collect();
+        $ids = $parentIds;
+
+        while ($ids !== []) {
+            $children = Category::query()
+                ->whereIn('parent_id', $ids)
+                ->orderBy('sort_order')
+                ->orderBy('id')
+                ->get();
+
+            if ($children->isEmpty()) {
+                break;
+            }
+
+            $all = $all->merge($children);
+            $ids = $children->pluck('id')->all();
+        }
+
+        return $all;
     }
 
     /** Grouped ordering so children immediately follow their parent. */
