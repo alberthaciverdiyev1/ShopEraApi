@@ -15,10 +15,11 @@ class DCategorySyncTest extends TestCase
 
         $this->artisan('module:migrate', ['module' => 'Category']);
 
-        config([
-            'cjdropshipping.api_key' => 'test-key',
-            'cjdropshipping.base_url' => 'https://developers.cjdropshipping.com/api2.0/v1',
-        ]);
+        // Only the key is overridden; base_url must resolve from the module
+        // config (regression guard for the wrong config key).
+        config(['cjdropshopping.api_key' => 'test-key']);
+
+        $this->assertNotEmpty(config('cjdropshopping.base_url'));
     }
 
     public function test_it_imports_cj_categories_with_their_hierarchy(): void

@@ -103,11 +103,11 @@ abstract class DBaseService
 
     protected function http(): PendingRequest
     {
-        return Http::timeout((int) config('cjdropshipping.timeout', 20))->acceptJson();
+        return Http::timeout((int) config('cjdropshopping.timeout', 20))->acceptJson();
     }
 
     protected function url(string $path): string
     {
-        return rtrim((string) config('cjdropshipping.base_url'), '/').'/'.ltrim($path, '/');
+        return rtrim((string) config('cjdropshopping.base_url'), '/').'/'.ltrim($path, '/');
     }
 }

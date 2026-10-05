@@ -245,7 +245,7 @@ class DAuthService
     {
         $fingerprint = sha1((string) $this->apiKey());
 
-        return TenantContext::cacheKey('cjdropshipping:access_token:'.$fingerprint);
+        return TenantContext::cacheKey('cjdropshopping:access_token:'.$fingerprint);
     }
 
     /**
@@ -266,7 +266,7 @@ class DAuthService
             return $stored;
         }
 
-        $fallback = config('cjdropshipping.api_key');
+        $fallback = config('cjdropshopping.api_key');
 
         return is_string($fallback) && $fallback !== '' ? $fallback : null;
     }
@@ -296,7 +296,7 @@ class DAuthService
      */
     protected function setting(string $key, mixed $default = null): mixed
     {
-        $config = array_replace(config('cjdropshipping', []), $this->config ?? []);
+        $config = array_replace(config('cjdropshopping', []), $this->config ?? []);
 
         return $config[$key] ?? $default;
     }

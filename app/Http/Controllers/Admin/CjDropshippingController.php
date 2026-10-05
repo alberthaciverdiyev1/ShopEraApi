@@ -80,9 +80,14 @@ class CjDropshippingController extends AdminController
     private function run(callable $callback): RedirectResponse
     {
         try {
+            // Resolve the result first: back()->with() flashes immediately, so
+            // building the success redirect before the work would flash a false
+            // "completed" message even when the sync throws.
+            $result = $callback();
+
             return back()
                 ->with('status', __('CJ sinxronizasiyası tamamlandı.'))
-                ->with('cj_result', $callback());
+                ->with('cj_result', $result);
         } catch (RuntimeException $e) {
             return back()->withErrors(['cj' => $e->getMessage()]);
         } catch (Throwable $e) {
