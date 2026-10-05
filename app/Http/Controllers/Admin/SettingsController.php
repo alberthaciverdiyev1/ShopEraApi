@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Support\Features;
 use App\Support\TenantContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -13,9 +14,10 @@ class SettingsController extends AdminController
 
     /**
      * Grouped edit schema. Each entry: [field, label, type, column-width(12)].
-     * "translatable_textarea" stores a per-locale map.
+     * "translatable_textarea" stores a per-locale map, "password" is write-only
+     * (blank keeps the stored value).
      */
-    private const GROUPS = [
+    private const BASE_GROUPS = [
         'Brendinq' => [
             'icon' => 'M3.75 6A2.25 2.25 0 016 3.75h12A2.25 2.25 0 0120.25 6v12A2.25 2.25 0 0118 20.25H6A2.25 2.25 0 013.75 18V6z',
             'fields' => [
@@ -59,6 +61,32 @@ class SettingsController extends AdminController
         ],
     ];
 
+    /**
+     * Full schema for the current tenant. The CJ Dropshipping group only exists
+     * when the owner's `cj_dropshipping` entitlement is active, so the API key
+     * field is neither shown nor persisted otherwise.
+     *
+     * @return array<string,array{icon:string,fields:array<int,array{0:string,1:string,2:string,3:int}>}>
+     */
+    private function groups(): array
+    {
+        $groups = self::BASE_GROUPS;
+
+        // Strict default: the field appears only when the entitlement was
+        // explicitly enabled for this owner (not on an unsynced instance).
+        if (Features::enabled('cj_dropshipping', false)) {
+            $groups['CJ Dropshipping'] = [
+                'icon' => 'M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m12.75 0V6.75m0 2.599l-1.6-.64a9.06 9.06 0 00-6.55 0l-1.6.64m11.75 0a9.07 9.07 0 01-3.25 1.71M3.75 9.35a9.06 9.06 0 003.25 1.71m6 0a9.06 9.06 0 01-6 0',
+                'fields' => [
+                    ['cj_dropshipping_email', 'CJ e-poçt', 'text', 6],
+                    ['cj_dropshipping_api_key', 'CJ API key', 'password', 6],
+                ],
+            ];
+        }
+
+        return $groups;
+    }
+
     public function index()
     {
         $setting = app(SettingService::class)->current();
@@ -66,7 +94,7 @@ class SettingsController extends AdminController
         return view('admin.pages.settings', [
             'title' => $this->title,
             'setting' => $setting,
-            'groups' => self::GROUPS,
+            'groups' => $this->groups(),
             'locales' => $this->enabledLocales(),
         ]);
     }
@@ -78,7 +106,7 @@ class SettingsController extends AdminController
         $setting = app(SettingService::class)->currentOrFail();
         $data = [];
 
-        foreach (self::GROUPS as $group) {
+        foreach ($this->groups() as $group) {
             foreach ($group['fields'] as [$name, , $type]) {
                 if ($type === 'translatable_textarea') {
                     $value = $request->input($name);
@@ -93,6 +121,18 @@ class SettingsController extends AdminController
                         $data[$name] = $request->file($name)->store(TenantContext::storagePath('branding'), 'public');
                     } elseif ($request->boolean('remove_'.$name)) {
                         $data[$name] = null;
+                    }
+
+                    continue;
+                }
+
+                // Write-only secret: a blank field keeps the stored value and
+                // the current value is never rendered back into the HTML.
+                if ($type === 'password') {
+                    $value = $request->input($name);
+
+                    if (is_string($value) && $value !== '') {
+                        $data[$name] = $value;
                     }
 
                     continue;

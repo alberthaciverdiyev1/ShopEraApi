@@ -48,6 +48,10 @@
                                             </div>
                                         @endforeach
                                     </div>
+                                @elseif ($type === 'password')
+                                    <input type="password" name="{{ $name }}" value="" autocomplete="new-password"
+                                           placeholder="{{ $value ? '•••••••• (dəyişmək üçün yazın)' : '' }}"
+                                           class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-brand-500">
                                 @else
                                     <input type="{{ $type === 'number' ? 'number' : 'text' }}" step="any" name="{{ $name }}" value="{{ $value }}"
                                            class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-brand-500">

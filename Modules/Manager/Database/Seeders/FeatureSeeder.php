@@ -30,6 +30,7 @@ class FeatureSeeder extends Seeder
             ['product_story_videos', 'Story videoları', 'bool', '0', 'Kataloq'],
             ['bulk_price_update', 'Toplu qiymət dəyişikliyi', 'bool', '0', 'Kataloq'],
             ['ai_description', 'AI təsvir generasiyası', 'bool', '0', 'Kataloq'],
+            ['cj_dropshipping', 'CJ Dropshipping inteqrasiyası', 'bool', '0', 'Kataloq'],
             ['stock_subscriptions', 'Stok bildiriş abunəliyi', 'bool', '1', 'Kataloq'],
 
             // Kontent
