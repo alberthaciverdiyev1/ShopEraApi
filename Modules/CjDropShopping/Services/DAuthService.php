@@ -57,37 +57,80 @@ class DAuthService
     }
 
     /**
-     * Return a valid access token, authenticating (and caching) it when needed.
+     * Return a valid access token.
+     *
+     * Reuses the cached token while it is still fresh, tries a token refresh
+     * when only the refresh token is still valid, and falls back to a full
+     * login (e-mail + API key) otherwise.
      */
     public function token(): string
     {
         $this->ensureConfigured();
 
-        $cached = Cache::get($this->tokenCacheKey());
+        $cached = Cache::get($this->tokenCacheKey(), []);
+        $buffer = (int) $this->setting('token_cache_buffer', 300);
 
         if (is_array($cached)
             && ! empty($cached['access_token'])
-            && ($cached['expires_at'] ?? 0) > now()->addSeconds((int) $this->setting('token_cache_buffer', 300))->getTimestamp()) {
+            && ($cached['expires_at'] ?? 0) > now()->addSeconds($buffer)->getTimestamp()) {
             return (string) $cached['access_token'];
         }
 
-        $data = $this->authenticate();
-
-        if (empty($data['accessToken'])) {
-            throw new RuntimeException(__('CJ Dropshipping did not return an access token.'));
+        if (is_array($cached)
+            && ! empty($cached['refresh_token'])
+            && ($cached['refresh_expires_at'] ?? 0) > now()->addSeconds($buffer)->getTimestamp()) {
+            try {
+                return $this->refresh((string) $cached['refresh_token']);
+            } catch (RuntimeException) {
+                // Refresh token rejected — fall through to a full login.
+            }
         }
 
-        $expiresAt = ! empty($data['accessTokenExpiryDate'])
-            ? Carbon::parse($data['accessTokenExpiryDate'])->getTimestamp()
-            : now()->addHours(12)->getTimestamp();
+        return $this->store($this->authenticate());
+    }
 
-        Cache::put($this->tokenCacheKey(), [
-            'access_token' => $data['accessToken'],
-            'refresh_token' => $data['refreshToken'] ?? null,
-            'expires_at' => $expiresAt,
-        ], max(60, $expiresAt - now()->getTimestamp()));
+    /**
+     * Exchange a refresh token for a new access token.
+     *
+     * @param  string|null  $refreshToken  Defaults to the cached refresh token.
+     */
+    public function refresh(?string $refreshToken = null): string
+    {
+        $this->ensureConfigured();
 
-        return (string) $data['accessToken'];
+        $refreshToken ??= $this->cached('refresh_token');
+
+        if ($refreshToken === null || $refreshToken === '') {
+            throw new RuntimeException(__('CJ Dropshipping has no refresh token to use.'));
+        }
+
+        $response = $this->http()->post($this->url('authentication/refreshAccessToken'), [
+            'refreshToken' => $refreshToken,
+        ]);
+
+        return $this->store($this->unwrap($response));
+    }
+
+    /**
+     * Invalidate the session server-side and drop the cached tokens. Never
+     * throws — logout is best-effort.
+     */
+    public function logout(): void
+    {
+        try {
+            $token = $this->cached('access_token');
+
+            if ($token !== null) {
+                $this->http()
+                    ->withHeaders(['CJ-Access-Token' => $token])
+                    ->post($this->url('authentication/logout'));
+            }
+        } catch (\Throwable $e) {
+            // Never log secrets; the local token is cleared regardless.
+            Log::warning('CJ Dropshipping logout failed', ['message' => $e->getMessage()]);
+        } finally {
+            $this->forgetToken();
+        }
     }
 
     /** Drop the cached token (e.g. after a rejected request or a credential change). */
@@ -96,7 +139,7 @@ class DAuthService
         Cache::forget($this->tokenCacheKey());
     }
 
-    /** @return array<string,mixed> */
+    /** Full login with the account e-mail + API key. @return array<string,mixed> */
     protected function authenticate(): array
     {
         $response = $this->http()->post($this->url('authentication/getAccessToken'), [
@@ -105,6 +148,46 @@ class DAuthService
         ]);
 
         return $this->unwrap($response);
+    }
+
+    /**
+     * Persist a token payload and return its access token.
+     *
+     * @param  array<string,mixed>  $data
+     */
+    protected function store(array $data): string
+    {
+        if (empty($data['accessToken'])) {
+            throw new RuntimeException(__('CJ Dropshipping did not return an access token.'));
+        }
+
+        $expiresAt = ! empty($data['accessTokenExpiryDate'])
+            ? Carbon::parse($data['accessTokenExpiryDate'])->getTimestamp()
+            : now()->addHours(12)->getTimestamp();
+
+        $refreshExpiresAt = ! empty($data['refreshTokenExpiryDate'])
+            ? Carbon::parse($data['refreshTokenExpiryDate'])->getTimestamp()
+            : null;
+
+        // Keep the entry for as long as either token can still be useful, so a
+        // live refresh token is not evicted the moment the access token expires.
+        $ttl = max(60, max($expiresAt, $refreshExpiresAt ?? 0) - now()->getTimestamp());
+
+        Cache::put($this->tokenCacheKey(), [
+            'access_token' => (string) $data['accessToken'],
+            'refresh_token' => $data['refreshToken'] ?? null,
+            'expires_at' => $expiresAt,
+            'refresh_expires_at' => $refreshExpiresAt,
+        ], $ttl);
+
+        return (string) $data['accessToken'];
+    }
+
+    protected function cached(string $key): ?string
+    {
+        $value = Cache::get($this->tokenCacheKey(), [])[$key] ?? null;
+
+        return is_string($value) && $value !== '' ? $value : null;
     }
 
     /** @return array<string,mixed> */
@@ -220,10 +303,15 @@ class DAuthService
         return $this->storedMemo[$key] = (is_string($value) && $value !== '' ? $value : null);
     }
 
-    /** Non-secret config value (base_url, timeout, token buffer, ...). */
+    /**
+     * Non-secret config value (base_url, timeout, token buffer, ...). A partial
+     * constructor config overrides the module config rather than replacing it.
+     */
     protected function setting(string $key, mixed $default = null): mixed
     {
-        return ($this->config ?? config('cjdropshipping', []))[$key] ?? $default;
+        $config = array_replace(config('cjdropshipping', []), $this->config ?? []);
+
+        return $config[$key] ?? $default;
     }
 
     protected function maskEmail(string $email): string
