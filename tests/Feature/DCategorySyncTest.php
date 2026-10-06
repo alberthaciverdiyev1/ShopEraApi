@@ -17,7 +17,10 @@ class DCategorySyncTest extends TestCase
 
         // Only the key is overridden; base_url must resolve from the module
         // config (regression guard for the wrong config key).
-        config(['cjdropshopping.api_key' => 'test-key']);
+        config([
+            'cjdropshopping.api_key' => 'test-key',
+            'cjdropshopping.request_interval_ms' => 0,
+        ]);
 
         $this->assertNotEmpty(config('cjdropshopping.base_url'));
     }

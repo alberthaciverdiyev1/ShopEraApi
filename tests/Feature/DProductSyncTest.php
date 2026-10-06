@@ -22,7 +22,10 @@ class DProductSyncTest extends TestCase
             $this->artisan('module:migrate', ['module' => $module]);
         }
 
-        config(['cjdropshopping.api_key' => 'test-key']);
+        config([
+            'cjdropshopping.api_key' => 'test-key',
+            'cjdropshopping.request_interval_ms' => 0,
+        ]);
         Storage::fake('public');
 
         User::query()->create([

@@ -18,6 +18,10 @@ return [
     'api_key' => env('CJ_DROPSHIPPING_API_KEY'),
     'timeout' => (int) env('CJ_DROPSHIPPING_TIMEOUT', 20),
 
+    // CJ's QPS limit is 1 request/second; space authenticated calls out by this
+    // many milliseconds. Set 0 to disable (e.g. in tests).
+    'request_interval_ms' => (int) env('CJ_DROPSHIPPING_REQUEST_INTERVAL', 1100),
+
     /*
     | Imported product prices = the cheapest CJ variant price + this markup
     | percentage. 0 keeps CJ's USD price as-is.
@@ -39,6 +43,21 @@ return [
     | adapt without editing anything here.
     |
     */
+    /*
+    |--------------------------------------------------------------------------
+    | Re-sync behaviour
+    |--------------------------------------------------------------------------
+    |
+    | On re-import these `products` columns are never overwritten, so local
+    | edits survive a sync (price is the usual one). Add more columns if you
+    | also edit them locally, e.g. title, description, category_id, brand_id,
+    | sku, weight, discount. Stock is always refreshed.
+    |
+    */
+    'import' => [
+        'protected_fields' => ['price', 'discount', 'is_active', 'approval_status'],
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Specification filters
@@ -81,6 +100,7 @@ return [
             'indigo', 'teal', 'olive', 'lime', 'coral', 'ivory', 'cream', 'khaki', 'burgundy',
             'turquoise', 'lavender', 'peach', 'mint', 'rose', 'charcoal', 'bronze', 'copper',
             'multicolor', 'multi', 'transparent', 'clear', 'nude', 'apricot', 'wine',
+            'coffee', 'sunflower', 'champagne', 'rainbow', 'jet black', 'natural black',
         ],
 
         // Colour name => hex, used when creating a Color row. Extend as needed;

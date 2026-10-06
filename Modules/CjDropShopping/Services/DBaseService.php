@@ -20,6 +20,9 @@ abstract class DBaseService
     /** CJ error codes that mean "the access token is invalid/expired". */
     private const array TOKEN_ERROR_CODES = [1600200, 1600300];
 
+    /** Unix time of the last CJ call, so we respect the 1 request/second QPS limit. */
+    private static float $lastRequestAt = 0.0;
+
     public function __construct(protected readonly DAuthService $auth) {}
 
     /**
@@ -50,6 +53,8 @@ abstract class DBaseService
      */
     protected function send(string $method, string $path, array $payload = [], bool $retry = true): array
     {
+        $this->throttle();
+
         $client = $this->http()->withHeaders(['CJ-Access-Token' => $this->auth->token()]);
         $url = $this->url($path);
 
@@ -99,6 +104,27 @@ abstract class DBaseService
                 ? $message
                 : __('CJ Dropshipping API request failed.')
         );
+    }
+
+    /**
+     * CJ enforces a 1 request/second QPS limit, so space the calls out. Seconds
+     * are shared across all D* services via the static timestamp.
+     */
+    protected function throttle(): void
+    {
+        $interval = (int) config('cjdropshopping.request_interval_ms', 1100);
+
+        if ($interval <= 0) {
+            return;
+        }
+
+        $wait = (self::$lastRequestAt + $interval / 1000) - microtime(true);
+
+        if ($wait > 0) {
+            usleep((int) round($wait * 1_000_000));
+        }
+
+        self::$lastRequestAt = microtime(true);
     }
 
     protected function http(): PendingRequest

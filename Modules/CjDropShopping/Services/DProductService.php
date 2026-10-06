@@ -134,7 +134,7 @@ class DProductService extends DBaseService
             $attributes = $this->productAttributes($detail, $item, $translate);
 
             if ($product) {
-                $product->update($attributes);
+                $product->update($this->updatableAttributes($attributes));
                 $updated++;
             } else {
                 if (PlanLimits::reached('max_products', 1)) {
@@ -241,6 +241,20 @@ class DProductService extends DBaseService
             'is_active' => true,
             'approval_status' => 'approved',
         ], fn ($value) => $value !== null);
+    }
+
+    /**
+     * Fields actually written on re-sync. Anything in the protected list is
+     * left untouched so locally edited values (price, discount, ...) survive.
+     *
+     * @param  array<string,mixed>  $attributes
+     * @return array<string,mixed>
+     */
+    private function updatableAttributes(array $attributes): array
+    {
+        $protected = (array) config('cjdropshopping.import.protected_fields', []);
+
+        return array_diff_key($attributes, array_flip($protected));
     }
 
     /**
@@ -410,13 +424,10 @@ class DProductService extends DBaseService
             }
         }
 
-        if ($colors !== []) {
-            $product->colors()->sync(array_keys($colors));
-        }
-
-        if ($sizes !== []) {
-            $product->sizes()->sync($sizes);
-        }
+        // Replace (even with an empty set) so stale/wrong options imported by an
+        // earlier run are removed when the provider no longer reports them.
+        $product->colors()->sync(array_keys($colors));
+        $product->sizes()->sync($sizes);
 
         return ['colors' => count($colors), 'sizes' => count($sizes)];
     }
@@ -513,7 +524,7 @@ class DProductService extends DBaseService
         }
 
         $sizeTokens = array_map('strtoupper', (array) config('cjdropshopping.variant.size_tokens', []));
-        $tokens = preg_split('/[\s\-,]+/', $text) ?: [];
+        $tokens = array_values(array_filter(preg_split('/[\s\-,]+/', $text) ?: [], fn ($token) => $token !== ''));
         $last = (string) end($tokens);
         $upper = strtoupper($last);
 
@@ -521,8 +532,15 @@ class DProductService extends DBaseService
             return $last;
         }
 
-        if ($last !== '' && preg_match('/^(US|EU|UK)?\s?\d{1,3}(\.\d)?$/i', $last)) {
-            return $last;
+        // A trailing number is only a size when it stands alone ("38") or is
+        // marked as one ("US 8"). "Blue 2" / "Style 1" are pack/style labels,
+        // not sizes.
+        if ($last !== '' && preg_match('/^\d{1,3}(\.\d)?$/', $last)) {
+            $previous = count($tokens) >= 2 ? strtolower($tokens[count($tokens) - 2]) : null;
+
+            if (count($tokens) === 1 || in_array($previous, ['us', 'eu', 'uk', 'size'], true)) {
+                return $last;
+            }
         }
 
         return null;
@@ -564,15 +582,8 @@ class DProductService extends DBaseService
             return Str::title(implode(' ', $phrase));
         }
 
-        // No known colour token: only trust a lone word (e.g. "Sunflower").
-        if (count($tokens) === 1) {
-            $token = $tokens[0];
-
-            if (preg_match('/^[A-Za-z][A-Za-z\'&]{2,}$/', $token) && ! in_array(strtolower($token), $stopwords, true)) {
-                return Str::title($token);
-            }
-        }
-
+        // No recognised colour word: leave it out rather than inventing a colour
+        // from an arbitrary token (e.g. "Greena", "Style").
         return null;
     }
 
