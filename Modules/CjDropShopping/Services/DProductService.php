@@ -403,11 +403,11 @@ class DProductService extends DBaseService
         }
 
         if ($colors !== []) {
-            $product->colors()->syncWithoutDetaching(array_keys($colors));
+            $product->colors()->sync(array_keys($colors));
         }
 
         if ($sizes !== []) {
-            $product->sizes()->syncWithoutDetaching($sizes);
+            $product->sizes()->sync($sizes);
         }
 
         return ['colors' => count($colors), 'sizes' => count($sizes)];
@@ -527,25 +527,45 @@ class DProductService extends DBaseService
 
         $tokens = array_values(array_filter(
             preg_split('/[\s\-,]+/', $text) ?: [],
-            fn ($token) => $token !== '',
+            fn ($token) => $token !== '' && ! preg_match('/\d/', $token),
         ));
 
         if ($tokens === []) {
             return null;
         }
 
-        $last = (string) end($tokens);
+        $allowlist = array_map('strtolower', (array) config('cjdropshopping.variant.color_allowlist', []));
+        $qualifiers = ['light', 'dark', 'deep', 'pale', 'bright', 'neon', 'hot', 'baby', 'sky', 'royal'];
 
-        // Skip codes / quantities (contain digits) and non-words.
-        if (preg_match('/\d/', $last) || ! preg_match('/^[A-Za-z][A-Za-z\'& ]{2,}$/', $last)) {
-            return null;
+        // Prefer a recognised colour word (with a leading qualifier), scanning
+        // from the end so the most specific colour wins and stray trailing
+        // words like "Luokou" are not mistaken for a colour.
+        for ($i = count($tokens) - 1; $i >= 0; $i--) {
+            if (! in_array(strtolower($tokens[$i]), $allowlist, true)) {
+                continue;
+            }
+
+            $phrase = [];
+
+            if ($i > 0 && in_array(strtolower($tokens[$i - 1]), $qualifiers, true)) {
+                $phrase[] = $tokens[$i - 1];
+            }
+
+            $phrase[] = $tokens[$i];
+
+            return Str::title(implode(' ', $phrase));
         }
 
-        if (in_array(strtolower($last), $stopwords, true)) {
-            return null;
+        // No known colour token: only trust a lone word (e.g. "Sunflower").
+        if (count($tokens) === 1) {
+            $token = $tokens[0];
+
+            if (preg_match('/^[A-Za-z][A-Za-z\'&]{2,}$/', $token) && ! in_array(strtolower($token), $stopwords, true)) {
+                return Str::title($token);
+            }
         }
 
-        return Str::title($last);
+        return null;
     }
 
     private function colorId(string $name): ?int
