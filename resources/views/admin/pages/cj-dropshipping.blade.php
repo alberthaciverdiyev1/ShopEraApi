@@ -24,7 +24,9 @@
             <div class="p-5">
                 <p class="text-sm text-gray-500">
                     Provider məlumatlarını əl ilə sinxronlaşdırın. Hər resurs üçün ayrı-ayrı və ya
-                    hamısını birlikdə işə salın. Heç bir avtomatik scheduler yoxdur — yalnız buradan tetiklenir.
+                    hamısını birlikdə işə salın. Sinxronizasiya <b>arxa planda (queue)</b> işləyir,
+                    ona görə ekran donmur; nəticə bir neçə dəqiqə sonra səhifəni yeniləyəndə görünür.
+                    (Worker işləməlidir: <code>php artisan queue:work</code>.)
                 </p>
 
                 @if (! $configured)

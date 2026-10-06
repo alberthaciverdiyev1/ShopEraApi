@@ -36,17 +36,6 @@ class DProductService extends DBaseService
 
     private const MAX_IMAGES = 20;
 
-    /** Tokens CJ uses for apparel sizes. */
-    private const SIZE_TOKENS = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '2XL', '3XL', '4XL', '5XL', 'FREE SIZE', 'ONE SIZE', 'FREESIZE'];
-
-    /** Words that look like a colour but are actually the garment/part name. */
-    private const COLOR_STOPWORDS = [
-        'hoodie', 'sweatshirt', 'shirt', 'shirts', 'jacket', 'coat', 'pants', 'dress', 'set', 'sets',
-        'weft', 'bundle', 'bundles', 'wig', 'wigs', 'straight', 'curly', 'wave', 'wavy', 'socks', 'lamp',
-        'tool', 'tools', 'cap', 'hat', 'bag', 'shoes', 'sneakers', 'size', 'color', 'colour', 'piece',
-        'pieces', 'pc', 'pcs', 'style', 'model', 'type',
-    ];
-
     /** @var array<string,string> per-run translation memo, keyed by "lang|text" */
     private array $translations = [];
 
@@ -374,6 +363,14 @@ class DProductService extends DBaseService
      */
     private function syncVariants(Product $product, array $detail): array
     {
+        $autoColors = (bool) config('cjdropshopping.variant.auto_colors', true);
+        $autoSizes = (bool) config('cjdropshopping.variant.auto_sizes', true);
+
+        if (! $autoColors && ! $autoSizes) {
+            return ['colors' => 0, 'sizes' => 0];
+        }
+
+        $stopwords = $this->colorStopwords($product, $detail);
         $colors = [];
         $sizes = [];
 
@@ -382,9 +379,9 @@ class DProductService extends DBaseService
                 continue;
             }
 
-            $parsed = $this->parseVariant($variant);
+            $parsed = $this->parseVariant($variant, $stopwords);
 
-            if ($parsed['color'] !== null) {
+            if ($autoColors && $parsed['color'] !== null) {
                 $colorId = $this->colorId($parsed['color']);
 
                 if ($colorId) {
@@ -392,7 +389,7 @@ class DProductService extends DBaseService
                 }
             }
 
-            if ($parsed['size'] !== null) {
+            if ($autoSizes && $parsed['size'] !== null) {
                 $sizeId = $this->sizeId($parsed['size']);
 
                 if ($sizeId) {
@@ -417,13 +414,42 @@ class DProductService extends DBaseService
     }
 
     /**
+     * Colour stopwords for one product: the shared config list plus every word
+     * taken from the product's own title and category, so a new catalogue's own
+     * vocabulary never turns into a bogus colour.
+     *
+     * @return array<int,string>
+     */
+    private function colorStopwords(Product $product, array $detail): array
+    {
+        $static = (array) config('cjdropshopping.variant.color_stopwords', []);
+
+        $text = implode(' ', array_filter([
+            implode(' ', array_map('strval', (array) $product->getTranslations('title'))),
+            $detail['productNameEn'] ?? null,
+            $detail['categoryName'] ?? null,
+            $detail['twoCategoryName'] ?? null,
+            $detail['oneCategoryName'] ?? null,
+        ]));
+
+        $allowlist = array_map('strtolower', (array) config('cjdropshopping.variant.color_allowlist', []));
+
+        $dynamic = array_filter(
+            preg_split('/[^a-z0-9]+/i', Str::lower($text)) ?: [],
+            fn ($token) => strlen($token) >= 3 && ! in_array($token, $allowlist, true),
+        );
+
+        return array_values(array_unique(array_map('strtolower', array_merge($static, $dynamic))));
+    }
+
+    /**
      * Best-effort extraction of colour/size from a CJ variant. CJ has no
      * dedicated colour/size fields — only a free-text variantKey like
      * "Washed Hoodie Black-S", "SB102063-M" or "Black".
      *
      * @return array{color:?string,size:?string}
      */
-    private function parseVariant(array $variant): array
+    private function parseVariant(array $variant, array $stopwords): array
     {
         $key = trim((string) ($variant['variantKey'] ?? ''));
         $size = null;
@@ -451,7 +477,7 @@ class DProductService extends DBaseService
         }
 
         if ($color === null) {
-            $color = $this->extractColor($key);
+            $color = $this->extractColor($key, $stopwords);
         }
 
         return ['color' => $color, 'size' => $size];
@@ -463,20 +489,27 @@ class DProductService extends DBaseService
             return null;
         }
 
-        // Length / range sizes: "8inch", "10cm", "S to M", "36 to 38".
-        if (preg_match('/\b(\d+(?:\.\d+)?\s*(?:inch|cm|"))/i', $text, $match)) {
+        // Letter ranges: "S to M", "XL-XXL".
+        if (preg_match('/\b(XS|S|M|L|XL|XXL|XXXL|2XL|3XL|4XL)\s*(?:-|to|–)\s*(XS|S|M|L|XL|XXL|XXXL|2XL|3XL|4XL)\b/i', $text, $match)) {
+            return trim($match[1]).' - '.trim($match[2]);
+        }
+
+        // Length / capacity sizes: "8inch", "10cm", "128GB", "1TB".
+        if (preg_match('/\b(\d+(?:\.\d+)?\s*(?:inch|cm|"|gb|tb))\b/i', $text, $match)) {
             return trim($match[1]);
         }
 
-        if (preg_match('/\b([0-9]{1,3}\s*to\s*[0-9]{1,3})\b/i', $text, $match)) {
+        // Numeric ranges: "36 to 38", "36-38".
+        if (preg_match('/\b([0-9]{1,3}\s*(?:to|-)\s*[0-9]{1,3})\b/i', $text, $match)) {
             return trim($match[1]);
         }
 
+        $sizeTokens = array_map('strtoupper', (array) config('cjdropshopping.variant.size_tokens', []));
         $tokens = preg_split('/[\s\-,]+/', $text) ?: [];
         $last = (string) end($tokens);
         $upper = strtoupper($last);
 
-        if (in_array($upper, self::SIZE_TOKENS, true)) {
+        if ($upper !== '' && in_array($upper, $sizeTokens, true)) {
             return $last;
         }
 
@@ -487,7 +520,7 @@ class DProductService extends DBaseService
         return null;
     }
 
-    private function extractColor(string $text): ?string
+    private function extractColor(string $text, array $stopwords): ?string
     {
         // Drop model codes like "SB102063" / "CJJF3221399".
         $text = (string) preg_replace('/\b[A-Z]{1,5}\d{3,}[A-Z0-9-]*\b/i', ' ', $text);
@@ -508,7 +541,7 @@ class DProductService extends DBaseService
             return null;
         }
 
-        if (in_array(strtolower($last), self::COLOR_STOPWORDS, true)) {
+        if (in_array(strtolower($last), $stopwords, true)) {
             return null;
         }
 

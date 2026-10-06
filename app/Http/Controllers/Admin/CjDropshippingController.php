@@ -4,17 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
+use Modules\CjDropShopping\Jobs\RunCjSync;
 use Modules\CjDropShopping\Services\DAuthService;
-use Modules\CjDropShopping\Services\DCategoryService;
-use Modules\CjDropShopping\Services\DProductService;
-use RuntimeException;
-use Throwable;
 
 /**
- * Admin page for the CJ Dropshipping integration. Every provider sync is
- * triggered manually here, one button per resource, plus a "sync everything"
- * button. The page is gated by the `cj_dropshipping` feature via the
+ * Admin page for the CJ Dropshipping integration. Syncing runs on the queue so
+ * a slow provider call never blocks the request; the page shows the cached
+ * result of the last run. Gated by the `cj_dropshipping` feature via the
  * AdminMenu + EnforceAdminMenuAccess middleware.
  */
 class CjDropshippingController extends AdminController
@@ -22,7 +19,7 @@ class CjDropshippingController extends AdminController
     protected string $title = 'CJ Dropshipping';
 
     /**
-     * Individually triggerable syncs. Add a resource here (and to handler())
+     * Individually triggerable syncs. Add a resource here (and a route/action)
      * to expose a new button; "sync all" picks them up automatically.
      *
      * @var array<string,array{label:string,description:string,route:string}>
@@ -46,66 +43,29 @@ class CjDropshippingController extends AdminController
             'title' => $this->title,
             'actions' => self::ACTIONS,
             'configured' => app(DAuthService::class)->isConfigured(),
-            'lastResult' => session('cj_result'),
+            'lastResult' => Cache::get(RunCjSync::resultKey()),
         ]);
     }
 
     public function syncCategories(Request $request): RedirectResponse
     {
-        return $this->run(fn () => $this->handler('categories', $this->translate($request)));
+        return $this->dispatch('categories', $request);
     }
 
     public function syncProducts(Request $request): RedirectResponse
     {
-        return $this->run(fn () => $this->handler('products', $this->translate($request)));
+        return $this->dispatch('products', $request);
     }
 
     public function syncAll(Request $request): RedirectResponse
     {
-        return $this->run(function () use ($request) {
-            $translate = $this->translate($request);
-            $results = [];
-
-            foreach (array_keys(self::ACTIONS) as $key) {
-                $results[$key] = $this->handler($key, $translate);
-            }
-
-            return $results;
-        });
+        return $this->dispatch('all', $request);
     }
 
-    /** @return array<string,mixed> */
-    private function handler(string $key, bool $translate): array
+    private function dispatch(string $resource, Request $request): RedirectResponse
     {
-        return match ($key) {
-            'categories' => app(DCategoryService::class)->sync($translate),
-            'products' => app(DProductService::class)->sync($translate),
-            default => [],
-        };
-    }
+        RunCjSync::dispatch($resource, $request->boolean('translate'));
 
-    private function translate(Request $request): bool
-    {
-        return $request->boolean('translate');
-    }
-
-    private function run(callable $callback): RedirectResponse
-    {
-        try {
-            // Resolve the result first: back()->with() flashes immediately, so
-            // building the success redirect before the work would flash a false
-            // "completed" message even when the sync throws.
-            $result = $callback();
-
-            return back()
-                ->with('status', __('CJ sinxronizasiyası tamamlandı.'))
-                ->with('cj_result', $result);
-        } catch (RuntimeException $e) {
-            return back()->withErrors(['cj' => $e->getMessage()]);
-        } catch (Throwable $e) {
-            Log::error('CJ Dropshipping admin sync failed', ['message' => $e->getMessage()]);
-
-            return back()->withErrors(['cj' => __('CJ sinxronizasiyası alınmadı.')]);
-        }
+        return back()->with('status', __('CJ sinxronizasiyası arxa planda başladı. Nəticə bir neçə dəqiqə ərzində görünəcək.'));
     }
 }
