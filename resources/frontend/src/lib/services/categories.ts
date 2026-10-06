@@ -61,7 +61,13 @@ export async function loadCategories(force = false): Promise<void> {
 	try {
 		// `all=1` returns every category flat (parents aren't returned with children loaded).
 		const flat = await cachedGet<ApiCategory[]>('/category', { all: 1 });
-		categories.set(buildTree(flat));
+
+		// Hide categories without visible products. `products_count` already
+		// includes descendant products (a parent with only stocked children is
+		// kept), so a zero count means the whole subtree is empty.
+		const visible = flat.filter((item) => item.products_count === undefined || item.products_count > 0);
+
+		categories.set(buildTree(visible));
 	} catch (error) {
 		categoriesError.set(error instanceof Error ? error.message : 'Failed to load categories');
 	} finally {
