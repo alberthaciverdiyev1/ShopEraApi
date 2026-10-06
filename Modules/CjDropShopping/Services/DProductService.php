@@ -10,10 +10,13 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Modules\Brand\Entities\Brand;
 use Modules\Category\Entities\Category;
 use Modules\CjDropShopping\Entities\DropshippingProductDetail;
+use Modules\Color\Entities\Color;
 use Modules\Product\Entities\Product;
 use Modules\Product\Services\ProductService;
+use Modules\Size\Entities\Size;
 use Modules\User\Entities\User;
 use RuntimeException;
 use Throwable;
@@ -33,8 +36,24 @@ class DProductService extends DBaseService
 
     private const MAX_IMAGES = 20;
 
+    /** Tokens CJ uses for apparel sizes. */
+    private const SIZE_TOKENS = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '2XL', '3XL', '4XL', '5XL', 'FREE SIZE', 'ONE SIZE', 'FREESIZE'];
+
+    /** Words that look like a colour but are actually the garment/part name. */
+    private const COLOR_STOPWORDS = [
+        'hoodie', 'sweatshirt', 'shirt', 'shirts', 'jacket', 'coat', 'pants', 'dress', 'set', 'sets',
+        'weft', 'bundle', 'bundles', 'wig', 'wigs', 'straight', 'curly', 'wave', 'wavy', 'socks', 'lamp',
+        'tool', 'tools', 'cap', 'hat', 'bag', 'shoes', 'sneakers', 'size', 'color', 'colour', 'piece',
+        'pieces', 'pc', 'pcs', 'style', 'model', 'type',
+    ];
+
     /** @var array<string,string> per-run translation memo, keyed by "lang|text" */
     private array $translations = [];
+
+    /** @var array<string,int>|null lazily loaded lowercased name => id maps */
+    private ?array $colorMap = null;
+
+    private ?array $sizeMap = null;
 
     public function __construct(
         DAuthService $auth,
@@ -89,7 +108,7 @@ class DProductService extends DBaseService
         $userId = $this->adminUserId();
         $items = $this->allMyProducts();
 
-        $created = $updated = $skipped = $images = 0;
+        $created = $updated = $skipped = $images = $colors = $sizes = 0;
         $map = [];
 
         foreach ($items as $item) {
@@ -138,6 +157,16 @@ class DProductService extends DBaseService
                 $images += $this->importImages($product, $detail, $item);
             }
 
+            $variantSummary = $this->syncVariants($product, $detail);
+            $colors += $variantSummary['colors'];
+            $sizes += $variantSummary['sizes'];
+
+            $stock = $this->importStock($detail);
+
+            if ($stock !== null) {
+                $product->update(['stock_count' => $stock]);
+            }
+
             DropshippingProductDetail::query()->updateOrCreate(
                 ['cj_product_id' => $pid],
                 $this->detailAttributes($product, $pid, $item, $detail),
@@ -152,6 +181,8 @@ class DProductService extends DBaseService
             'updated' => $updated,
             'skipped' => $skipped,
             'images' => $images,
+            'colors' => $colors,
+            'sizes' => $sizes,
             'map' => $map,
         ];
     }
@@ -209,6 +240,7 @@ class DProductService extends DBaseService
             'weight' => $weight ?: null,
             'sku' => $detail['productSku'] ?? $item['sku'] ?? null,
             'category_id' => $this->categoryId($detail),
+            'brand_id' => $this->brandId($detail['supplierName'] ?? null),
             'is_active' => true,
             'approval_status' => 'approved',
         ], fn ($value) => $value !== null);
@@ -332,6 +364,274 @@ class DProductService extends DBaseService
     {
         return (int) collect($detail['variants'] ?? [])
             ->sum(fn ($variant) => (int) ($variant['inventoryNum'] ?? 0));
+    }
+
+    /**
+     * Parse CJ variants into colour / size options and attach them to the
+     * product (creating Colour/Size rows on demand).
+     *
+     * @return array{colors:int,sizes:int}
+     */
+    private function syncVariants(Product $product, array $detail): array
+    {
+        $colors = [];
+        $sizes = [];
+
+        foreach (($detail['variants'] ?? []) as $variant) {
+            if (! is_array($variant)) {
+                continue;
+            }
+
+            $parsed = $this->parseVariant($variant);
+
+            if ($parsed['color'] !== null) {
+                $colorId = $this->colorId($parsed['color']);
+
+                if ($colorId) {
+                    $colors[$colorId] = true;
+                }
+            }
+
+            if ($parsed['size'] !== null) {
+                $sizeId = $this->sizeId($parsed['size']);
+
+                if ($sizeId) {
+                    $sizes[$sizeId] = [
+                        'price' => is_numeric($variant['variantSellPrice'] ?? null) ? (float) $variant['variantSellPrice'] : null,
+                        'wholesale_price' => null,
+                        'discount' => null,
+                    ];
+                }
+            }
+        }
+
+        if ($colors !== []) {
+            $product->colors()->syncWithoutDetaching(array_keys($colors));
+        }
+
+        if ($sizes !== []) {
+            $product->sizes()->syncWithoutDetaching($sizes);
+        }
+
+        return ['colors' => count($colors), 'sizes' => count($sizes)];
+    }
+
+    /**
+     * Best-effort extraction of colour/size from a CJ variant. CJ has no
+     * dedicated colour/size fields — only a free-text variantKey like
+     * "Washed Hoodie Black-S", "SB102063-M" or "Black".
+     *
+     * @return array{color:?string,size:?string}
+     */
+    private function parseVariant(array $variant): array
+    {
+        $key = trim((string) ($variant['variantKey'] ?? ''));
+        $size = null;
+        $color = null;
+
+        // Some products carry structured options like "Color:Black;Size:M".
+        $property = $variant['variantProperty'] ?? null;
+
+        if (is_string($property) && $property !== '' && $property !== '[]') {
+            if (preg_match('/colou?r\s*[:=]\s*([^;,]+)/i', $property, $match)) {
+                $color = trim($match[1]);
+            }
+
+            if (preg_match('/size\s*[:=]\s*([^;,]+)/i', $property, $match)) {
+                $size = trim($match[1]);
+            }
+        }
+
+        if ($size === null) {
+            $size = $this->extractSize($key);
+
+            if ($size !== null) {
+                $key = trim((string) preg_replace('/'.preg_quote($size, '/').'$/i', '', $key), ' -,');
+            }
+        }
+
+        if ($color === null) {
+            $color = $this->extractColor($key);
+        }
+
+        return ['color' => $color, 'size' => $size];
+    }
+
+    private function extractSize(string $text): ?string
+    {
+        if ($text === '') {
+            return null;
+        }
+
+        // Length / range sizes: "8inch", "10cm", "S to M", "36 to 38".
+        if (preg_match('/\b(\d+(?:\.\d+)?\s*(?:inch|cm|"))/i', $text, $match)) {
+            return trim($match[1]);
+        }
+
+        if (preg_match('/\b([0-9]{1,3}\s*to\s*[0-9]{1,3})\b/i', $text, $match)) {
+            return trim($match[1]);
+        }
+
+        $tokens = preg_split('/[\s\-,]+/', $text) ?: [];
+        $last = (string) end($tokens);
+        $upper = strtoupper($last);
+
+        if (in_array($upper, self::SIZE_TOKENS, true)) {
+            return $last;
+        }
+
+        if ($last !== '' && preg_match('/^(US|EU|UK)?\s?\d{1,3}(\.\d)?$/i', $last)) {
+            return $last;
+        }
+
+        return null;
+    }
+
+    private function extractColor(string $text): ?string
+    {
+        // Drop model codes like "SB102063" / "CJJF3221399".
+        $text = (string) preg_replace('/\b[A-Z]{1,5}\d{3,}[A-Z0-9-]*\b/i', ' ', $text);
+
+        $tokens = array_values(array_filter(
+            preg_split('/[\s\-,]+/', $text) ?: [],
+            fn ($token) => $token !== '',
+        ));
+
+        if ($tokens === []) {
+            return null;
+        }
+
+        $last = (string) end($tokens);
+
+        // Skip codes / quantities (contain digits) and non-words.
+        if (preg_match('/\d/', $last) || ! preg_match('/^[A-Za-z][A-Za-z\'& ]{2,}$/', $last)) {
+            return null;
+        }
+
+        if (in_array(strtolower($last), self::COLOR_STOPWORDS, true)) {
+            return null;
+        }
+
+        return Str::title($last);
+    }
+
+    private function colorId(string $name): ?int
+    {
+        $needle = $this->normalizeName($name);
+
+        if ($needle === null) {
+            return null;
+        }
+
+        $this->colorMap ??= $this->loadTranslatableMap(Color::class);
+
+        if (isset($this->colorMap[$needle])) {
+            return $this->colorMap[$needle];
+        }
+
+        $color = Color::query()->create(['name' => $this->localized($name, false), 'is_active' => true]);
+
+        return $this->colorMap[$needle] = (int) $color->id;
+    }
+
+    private function sizeId(string $name): ?int
+    {
+        $needle = $this->normalizeName($name);
+
+        if ($needle === null) {
+            return null;
+        }
+
+        $this->sizeMap ??= $this->loadTranslatableMap(Size::class);
+
+        if (isset($this->sizeMap[$needle])) {
+            return $this->sizeMap[$needle];
+        }
+
+        $size = Size::query()->create(['name' => $this->localized($name, false), 'is_active' => true]);
+
+        return $this->sizeMap[$needle] = (int) $size->id;
+    }
+
+    private function normalizeName(string $name): ?string
+    {
+        $name = Str::lower(trim($name));
+
+        return $name === '' ? null : $name;
+    }
+
+    /** @return array<string,int> lowercased translated name => id */
+    private function loadTranslatableMap(string $model): array
+    {
+        $map = [];
+
+        foreach ($model::query()->get() as $row) {
+            foreach ((array) $row->getTranslations('name') as $value) {
+                $key = Str::lower(trim((string) $value));
+
+                if ($key !== '' && ! isset($map[$key])) {
+                    $map[$key] = (int) $row->id;
+                }
+            }
+        }
+
+        return $map;
+    }
+
+    private function brandId(?string $name): ?int
+    {
+        $name = trim((string) $name);
+
+        if ($name === '') {
+            return null;
+        }
+
+        return (int) Brand::query()->firstOrCreate(['name' => $name], ['is_active' => true])->id;
+    }
+
+    /**
+     * Sum the live inventory across a product's variants via the dedicated
+     * stock endpoint. Returns null when no variant could be resolved, so an
+     * outage never zeroes an existing stock count.
+     */
+    private function importStock(array $detail): ?int
+    {
+        $variants = $detail['variants'] ?? [];
+
+        if (! is_array($variants) || $variants === []) {
+            return null;
+        }
+
+        $total = 0;
+        $resolved = false;
+
+        foreach ($variants as $variant) {
+            $vid = $variant['vid'] ?? null;
+
+            if (! $vid) {
+                continue;
+            }
+
+            try {
+                $rows = $this->get('product/stock/queryByVid', ['vid' => (string) $vid]);
+            } catch (Throwable $e) {
+                continue;
+            }
+
+            if (! is_array($rows) || $rows === []) {
+                continue;
+            }
+
+            $resolved = true;
+
+            foreach ($rows as $row) {
+                if (is_array($row)) {
+                    $total += (int) ($row['totalInventoryNum'] ?? $row['storageNum'] ?? 0);
+                }
+            }
+        }
+
+        return $resolved ? $total : null;
     }
 
     private function categoryId(array $detail): ?int
