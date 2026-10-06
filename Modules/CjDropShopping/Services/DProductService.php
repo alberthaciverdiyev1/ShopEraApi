@@ -14,6 +14,9 @@ use Modules\Brand\Entities\Brand;
 use Modules\Category\Entities\Category;
 use Modules\CjDropShopping\Entities\DropshippingProductDetail;
 use Modules\Color\Entities\Color;
+use Modules\Filter\Entities\CategoryFilter;
+use Modules\Filter\Entities\Filter;
+use Modules\Filter\Entities\ProductFilter;
 use Modules\Product\Entities\Product;
 use Modules\Product\Services\ProductService;
 use Modules\Size\Entities\Size;
@@ -43,6 +46,8 @@ class DProductService extends DBaseService
     private ?array $colorMap = null;
 
     private ?array $sizeMap = null;
+
+    private ?array $filterMap = null;
 
     public function __construct(
         DAuthService $auth,
@@ -97,7 +102,7 @@ class DProductService extends DBaseService
         $userId = $this->adminUserId();
         $items = $this->allMyProducts();
 
-        $created = $updated = $skipped = $images = $colors = $sizes = 0;
+        $created = $updated = $skipped = $images = $colors = $sizes = $specs = 0;
         $map = [];
 
         foreach ($items as $item) {
@@ -156,6 +161,8 @@ class DProductService extends DBaseService
                 $product->update(['stock_count' => $stock]);
             }
 
+            $specs += $this->syncSpecifications($product, $detail, $translate);
+
             DropshippingProductDetail::query()->updateOrCreate(
                 ['cj_product_id' => $pid],
                 $this->detailAttributes($product, $pid, $item, $detail),
@@ -172,6 +179,7 @@ class DProductService extends DBaseService
             'images' => $images,
             'colors' => $colors,
             'sizes' => $sizes,
+            'specs' => $specs,
             'map' => $map,
         ];
     }
@@ -655,12 +663,12 @@ class DProductService extends DBaseService
     }
 
     /** @return array<string,int> lowercased translated name => id */
-    private function loadTranslatableMap(string $model): array
+    private function loadTranslatableMap(string $model, string $attribute = 'name'): array
     {
         $map = [];
 
         foreach ($model::query()->get() as $row) {
-            foreach ((array) $row->getTranslations('name') as $value) {
+            foreach ((array) $row->getTranslations($attribute) as $value) {
                 $key = Str::lower(trim((string) $value));
 
                 if ($key !== '' && ! isset($map[$key])) {
@@ -670,6 +678,121 @@ class DProductService extends DBaseService
         }
 
         return $map;
+    }
+
+    /**
+     * Turn the "Key: Value" specification lines from the CJ description into
+     * dynamic Filters: a Filter per key (shared catalogue-wide), attached to
+     * the product's category, with the product's value on product_filters.
+     */
+    private function syncSpecifications(Product $product, array $detail, bool $translate): int
+    {
+        $specs = $this->parseSpecifications($detail);
+
+        if ($specs === []) {
+            return 0;
+        }
+
+        $count = 0;
+
+        foreach ($specs as $key => $value) {
+            $filterId = $this->filterId($key, $translate);
+
+            if ($filterId === null) {
+                continue;
+            }
+
+            if ($product->category_id) {
+                CategoryFilter::query()->firstOrCreate([
+                    'filter_id' => $filterId,
+                    'category_id' => $product->category_id,
+                ]);
+            }
+
+            ProductFilter::query()->updateOrCreate(
+                ['product_id' => $product->id, 'filter_id' => $filterId],
+                ['value' => mb_substr($value, 0, 255)],
+            );
+
+            $count++;
+        }
+
+        return $count;
+    }
+
+    /**
+     * Parse "Key: Value" lines out of the CJ description HTML.
+     *
+     * @return array<string,string>
+     */
+    private function parseSpecifications(array $detail): array
+    {
+        $html = (string) ($detail['description'] ?? '');
+
+        if (trim($html) === '') {
+            return [];
+        }
+
+        $text = html_entity_decode(
+            strip_tags((string) preg_replace('/<(br|\/p|\/div|\/li|\/tr|\/h[1-6])\b[^>]*>/i', "\n", $html)),
+            ENT_QUOTES | ENT_HTML5,
+        );
+
+        $skip = array_map('strtolower', (array) config('cjdropshopping.spec.skip_keys', []));
+        $max = (int) config('cjdropshopping.spec.max_keys', 20);
+        $specs = [];
+
+        foreach (preg_split('/\r?\n/', $text) ?: [] as $line) {
+            $line = trim($line);
+
+            if ($line === '' || count($specs) >= $max) {
+                continue;
+            }
+
+            if (! preg_match('/^([A-Za-z][A-Za-z0-9 \/°%().\'\-]{1,40}):\s*(\S.{0,200})$/u', $line, $match)) {
+                continue;
+            }
+
+            $key = trim($match[1]);
+            $value = trim($match[2]);
+
+            if (in_array(Str::lower($key), $skip, true)) {
+                continue;
+            }
+
+            // Reject feature headings / sentences masquerading as specs.
+            if (str_word_count($key) > 4 || mb_strlen($value) > 120 || preg_match('/\.\s+/', $value)) {
+                continue;
+            }
+
+            // First occurrence wins so a "Specification:" block is not
+            // overwritten by later, looser mentions.
+            $specs[$key] ??= $value;
+        }
+
+        return $specs;
+    }
+
+    private function filterId(string $title, bool $translate): ?int
+    {
+        $needle = Str::lower(trim($title));
+
+        if ($needle === '') {
+            return null;
+        }
+
+        $this->filterMap ??= $this->loadTranslatableMap(Filter::class, 'title');
+
+        if (isset($this->filterMap[$needle])) {
+            return $this->filterMap[$needle];
+        }
+
+        $filter = Filter::query()->create([
+            'title' => $this->localized($title, $translate),
+            'type' => 'select',
+        ]);
+
+        return $this->filterMap[$needle] = (int) $filter->id;
     }
 
     private function brandId(?string $name): ?int

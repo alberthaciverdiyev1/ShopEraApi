@@ -39,6 +39,24 @@ return [
     | adapt without editing anything here.
     |
     */
+    /*
+    |--------------------------------------------------------------------------
+    | Specification filters
+    |--------------------------------------------------------------------------
+    |
+    | CJ product specs live as "Key: Value" lines in the description. Every key
+    | (except these) becomes a dynamic Filter attached to the product and its
+    | category, so specs work catalogue-wide without code changes.
+    |
+    */
+    'spec' => [
+        'max_keys' => 20,
+        'skip_keys' => [
+            'product name', 'name', 'color', 'colour', 'size', 'image', 'images',
+            'sku', 'model', 'brand', 'product id', 'pid', 'weight',
+        ],
+    ],
+
     'variant' => [
         'auto_colors' => (bool) env('CJ_DROPSHIPPING_AUTO_COLORS', true),
         'auto_sizes' => (bool) env('CJ_DROPSHIPPING_AUTO_SIZES', true),
