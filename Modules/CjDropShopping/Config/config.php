@@ -64,6 +64,33 @@ return [
             'turquoise', 'lavender', 'peach', 'mint', 'rose', 'charcoal', 'bronze', 'copper',
             'multicolor', 'multi', 'transparent', 'clear', 'nude', 'apricot', 'wine',
         ],
+
+        // Colour name => hex, used when creating a Color row. Extend as needed;
+        // multi-word names (e.g. "light green") are resolved first, then the
+        // base colour word is used as a fallback.
+        'color_hex' => [
+            'black' => '#000000', 'white' => '#ffffff', 'red' => '#ff0000', 'blue' => '#0000ff',
+            'green' => '#008000', 'yellow' => '#ffff00', 'pink' => '#ffc0cb', 'purple' => '#800080',
+            'orange' => '#ffa500', 'brown' => '#a52a2a', 'grey' => '#808080', 'gray' => '#808080',
+            'silver' => '#c0c0c0', 'gold' => '#ffd700', 'beige' => '#f5f5dc', 'navy' => '#000080',
+            'maroon' => '#800000', 'cyan' => '#00ffff', 'magenta' => '#ff00ff', 'violet' => '#ee82ee',
+            'indigo' => '#4b0082', 'teal' => '#008080', 'olive' => '#808000', 'lime' => '#00ff00',
+            'coral' => '#ff7f50', 'ivory' => '#fffff0', 'cream' => '#fffdd0', 'khaki' => '#f0e68c',
+            'burgundy' => '#800020', 'turquoise' => '#40e0d0', 'lavender' => '#e6e6fa',
+            'peach' => '#ffe5b4', 'mint' => '#98ff98', 'rose' => '#ff007f', 'charcoal' => '#36454f',
+            'bronze' => '#cd7f32', 'copper' => '#b87333', 'nude' => '#e3bc9a', 'apricot' => '#fbceb1',
+            'wine' => '#722f37', 'multi' => '#cccccc', 'multicolor' => '#cccccc',
+            'coffee' => '#6f4e37', 'sunflower' => '#ffda03', 'champagne' => '#f7e7ce',
+            'army green' => '#4b5320', 'fluorescent green' => '#7fff00', 'dark brown' => '#654321',
+            // Common qualifier + base combinations.
+            'light green' => '#90ee90', 'dark green' => '#006400', 'light blue' => '#add8e6',
+            'dark blue' => '#00008b', 'light pink' => '#ffb6c1', 'light grey' => '#d3d3d3',
+            'dark grey' => '#a9a9a9', 'light gray' => '#d3d3d3', 'dark gray' => '#a9a9a9',
+            'light yellow' => '#ffffe0', 'dark red' => '#8b0000', 'light purple' => '#dda0dd',
+            'dark purple' => '#301934', 'sky blue' => '#87ceeb', 'royal blue' => '#4169e1',
+            'hot pink' => '#ff69b4', 'navy blue' => '#000080', 'baby blue' => '#89cff0',
+            'deep blue' => '#00008b',
+        ],
     ],
 
     /*

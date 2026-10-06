@@ -579,12 +579,53 @@ class DProductService extends DBaseService
         $this->colorMap ??= $this->loadTranslatableMap(Color::class);
 
         if (isset($this->colorMap[$needle])) {
+            $this->backfillColorHex($this->colorMap[$needle], $name);
+
             return $this->colorMap[$needle];
         }
 
-        $color = Color::query()->create(['name' => $this->localized($name, false), 'is_active' => true]);
+        $color = Color::query()->create([
+            'name' => $this->localized($name, false),
+            'hex' => $this->colorHex($name),
+            'is_active' => true,
+        ]);
 
         return $this->colorMap[$needle] = (int) $color->id;
+    }
+
+    /** Fill in a hex value on an existing colour that does not have one yet. */
+    private function backfillColorHex(int $id, string $name): void
+    {
+        $hex = $this->colorHex($name);
+
+        if ($hex === null) {
+            return;
+        }
+
+        $color = Color::query()->find($id);
+
+        if ($color && empty($color->hex)) {
+            $color->update(['hex' => $hex]);
+        }
+    }
+
+    /** Resolve a hex value for a colour name from config (exact, then base word). */
+    private function colorHex(string $name): ?string
+    {
+        $map = array_change_key_case((array) config('cjdropshopping.variant.color_hex', []), CASE_LOWER);
+        $needle = Str::lower(trim($name));
+
+        if (isset($map[$needle])) {
+            return $map[$needle];
+        }
+
+        foreach (preg_split('/[\s-]+/', $needle) ?: [] as $token) {
+            if (isset($map[$token])) {
+                return $map[$token];
+            }
+        }
+
+        return null;
     }
 
     private function sizeId(string $name): ?int
