@@ -11,7 +11,7 @@
 		type ApiListing
 	} from '$lib/services/listings';
 
-	const token = $derived(page.params.token ?? '');
+	const token = $derived((page.params as Record<string, string>).token ?? '');
 
 	let listing = $state<ApiListing | null>(null);
 	let loading = $state(true);
