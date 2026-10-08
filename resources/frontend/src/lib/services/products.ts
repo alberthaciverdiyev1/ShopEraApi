@@ -27,6 +27,10 @@ export interface ApiProduct {
 	images?: ApiProductImage[];
 	category?: { id: number; name: string } | null;
 	brand?: { id: number; name: string } | null;
+	city?: string | null;
+	condition?: 'new' | 'used' | string | null;
+	has_delivery?: boolean;
+	is_promoted?: boolean;
 	seller_type?: 'guest' | 'user' | 'vendor' | null;
 	contact_name?: string | null;
 	seller?: { id: number; name: string; slug: string } | null;

@@ -52,7 +52,7 @@ class ProductService
             ->count();
 
         $query = Product::query()
-            ->with(['colors', 'sizes', 'images', 'videos', 'category', 'brand'])
+            ->with(['colors', 'sizes', 'images', 'videos', 'category', 'brand', 'city'])
             ->withAvg('reviews', 'rate')
             ->withCount('reviews');
 
@@ -111,6 +111,21 @@ class ProductService
 
         if (! empty($params['brand_ids']) && is_array($params['brand_ids'])) {
             $query->whereIn('brand_id', $params['brand_ids']);
+        }
+
+        // Marketplace listing filters: location, condition, delivery.
+        if (! empty($params['city_ids']) && is_array($params['city_ids'])) {
+            $query->whereIn('city_id', $params['city_ids']);
+        } elseif (! empty($params['city_id'])) {
+            $query->where('city_id', $params['city_id']);
+        }
+
+        if (! empty($params['condition']) && in_array($params['condition'], ['new', 'used'], true)) {
+            $query->where('condition', $params['condition']);
+        }
+
+        if (! empty($params['has_delivery'])) {
+            $query->where('has_delivery', true);
         }
 
         if (! empty($params['color_ids']) && is_array($params['color_ids'])) {
@@ -186,7 +201,12 @@ class ProductService
         // it, which is the same rule the house catalogue follows above.
         $pinnedFirst = empty($params['order_by']);
 
-        if (! empty($params['is_admin'])) {
+        if (! empty($params['marketplace'])) {
+            // Marketplace feed: promoted listings always float to the top, then
+            // the shopper's sort (or newest).
+            $query->orderByDesc('is_promoted');
+            orderBy($query, $params);
+        } elseif (! empty($params['is_admin'])) {
             orderBy($query, $params);
         } elseif (! $isFiltered) {
             if ($pinnedFirst) {

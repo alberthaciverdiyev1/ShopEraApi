@@ -74,6 +74,10 @@ class ProductResource extends JsonResource
             // Marketplace seller info (contact details come from /listings/{id}/contact).
             'seller_type' => $this->seller_type,
             'contact_name' => $this->contact_name,
+            'condition' => $this->condition,
+            'has_delivery' => (bool) $this->has_delivery,
+            'is_promoted' => (bool) $this->is_promoted,
+            'city' => $this->whenLoaded('city', fn () => $this->city?->name),
             'seller' => $this->whenLoaded('vendor', fn () => $this->vendor ? [
                 'id' => $this->vendor->id,
                 'name' => $this->vendor->name,

@@ -25,6 +25,13 @@ export interface ShopFilters {
 	filters?: Record<string, string[]>;
 	/** Dependent filter tree values: `filter_value_ids[]=…`. */
 	filter_value_ids?: Array<string | number>;
+	/** Marketplace listing filters. */
+	city_ids?: Array<string | number>;
+	city_id?: string | number;
+	condition?: 'new' | 'used';
+	has_delivery?: boolean;
+	/** Marketplace feed ordering (promoted first). */
+	marketplace?: boolean;
 }
 
 export interface ShopResult {
