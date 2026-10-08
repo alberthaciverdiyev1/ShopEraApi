@@ -17,8 +17,24 @@ class CategoryDatabaseSeeder extends Seeder
                 'az' => 'Elektronika', 'en' => 'Electronics', 'ru' => 'Электроника', 'tr' => 'Elektronik',
                 'image' => 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=640&q=80',
                 'children' => [
-                    ['az' => 'Telefonlar', 'en' => 'Phones', 'ru' => 'Телефоны', 'tr' => 'Telefonlar', 'image' => 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=640&q=80'],
-                    ['az' => 'Noutbuklar', 'en' => 'Laptops', 'ru' => 'Ноутбуки', 'tr' => 'Dizüstü Bilgisayarlar', 'image' => 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=640&q=80'],
+                    [
+                        'az' => 'Telefonlar', 'en' => 'Phones', 'ru' => 'Телефоны', 'tr' => 'Telefonlar',
+                        'image' => 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=640&q=80',
+                        'children' => [
+                            ['az' => 'Smartfonlar', 'en' => 'Smartphones', 'ru' => 'Смартфоны', 'tr' => 'Akıllı Telefonlar', 'image' => 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=640&q=80'],
+                            ['az' => 'Telefon aksesuarları', 'en' => 'Phone Accessories', 'ru' => 'Аксессуары для телефонов', 'tr' => 'Telefon Aksesuarları', 'image' => 'https://images.unsplash.com/photo-1601972599720-36938d4ecd31?auto=format&fit=crop&w=640&q=80'],
+                            ['az' => 'Düyməli telefonlar', 'en' => 'Feature Phones', 'ru' => 'Кнопочные телефоны', 'tr' => 'Tuşlu Telefonlar', 'image' => 'https://images.unsplash.com/photo-1535303311164-664fc9ec6532?auto=format&fit=crop&w=640&q=80'],
+                        ],
+                    ],
+                    [
+                        'az' => 'Noutbuklar', 'en' => 'Laptops', 'ru' => 'Ноутбуки', 'tr' => 'Dizüstü Bilgisayarlar',
+                        'image' => 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=640&q=80',
+                        'children' => [
+                            ['az' => 'Gaming noutbuklar', 'en' => 'Gaming Laptops', 'ru' => 'Игровые ноутбуки', 'tr' => 'Oyuncu Laptopları', 'image' => 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&w=640&q=80'],
+                            ['az' => 'Ultrabuklar', 'en' => 'Ultrabooks', 'ru' => 'Ультрабуки', 'tr' => 'Ultrabooklar', 'image' => 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=640&q=80'],
+                            ['az' => 'Noutbuk aksesuarları', 'en' => 'Laptop Accessories', 'ru' => 'Аксессуары для ноутбуков', 'tr' => 'Laptop Aksesuarları', 'image' => 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=640&q=80'],
+                        ],
+                    ],
                     ['az' => 'Planşetlər', 'en' => 'Tablets', 'ru' => 'Планшеты', 'tr' => 'Tabletler', 'image' => 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=640&q=80'],
                     ['az' => 'Televizorlar', 'en' => 'TVs', 'ru' => 'Телевизоры', 'tr' => 'Televizyonlar', 'image' => 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?auto=format&fit=crop&w=640&q=80'],
                 ],
@@ -27,8 +43,24 @@ class CategoryDatabaseSeeder extends Seeder
                 'az' => 'Geyim', 'en' => 'Fashion', 'ru' => 'Одежда', 'tr' => 'Giyim',
                 'image' => 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=640&q=80',
                 'children' => [
-                    ['az' => 'Kişi geyimi', 'en' => 'Men', 'ru' => 'Мужское', 'tr' => 'Erkek', 'image' => 'https://images.unsplash.com/photo-1516826957135-700dedea698c?auto=format&fit=crop&w=640&q=80'],
-                    ['az' => 'Qadın geyimi', 'en' => 'Women', 'ru' => 'Женское', 'tr' => 'Kadın', 'image' => 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=640&q=80'],
+                    [
+                        'az' => 'Kişi geyimi', 'en' => 'Men', 'ru' => 'Мужское', 'tr' => 'Erkek',
+                        'image' => 'https://images.unsplash.com/photo-1516826957135-700dedea698c?auto=format&fit=crop&w=640&q=80',
+                        'children' => [
+                            ['az' => 'Köynəklər', 'en' => 'Shirts', 'ru' => 'Рубашки', 'tr' => 'Gömlekler', 'image' => 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=640&q=80'],
+                            ['az' => 'Şalvarlar', 'en' => 'Trousers', 'ru' => 'Брюки', 'tr' => 'Pantolonlar', 'image' => 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=640&q=80'],
+                            ['az' => 'Gödəkçələr', 'en' => 'Jackets', 'ru' => 'Куртки', 'tr' => 'Ceketler', 'image' => 'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=640&q=80'],
+                        ],
+                    ],
+                    [
+                        'az' => 'Qadın geyimi', 'en' => 'Women', 'ru' => 'Женское', 'tr' => 'Kadın',
+                        'image' => 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=640&q=80',
+                        'children' => [
+                            ['az' => 'Donlar', 'en' => 'Dresses', 'ru' => 'Платья', 'tr' => 'Elbiseler', 'image' => 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=640&q=80'],
+                            ['az' => 'Bluzlar', 'en' => 'Blouses', 'ru' => 'Блузки', 'tr' => 'Bluzlar', 'image' => 'https://images.unsplash.com/photo-1551489186-cf8726f514f8?auto=format&fit=crop&w=640&q=80'],
+                            ['az' => 'Ətəklər', 'en' => 'Skirts', 'ru' => 'Юбки', 'tr' => 'Etekler', 'image' => 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=640&q=80'],
+                        ],
+                    ],
                     ['az' => 'Uşaq geyimi', 'en' => 'Kids', 'ru' => 'Детское', 'tr' => 'Çocuk', 'image' => 'https://images.unsplash.com/photo-1503919005314-30d93d07d823?auto=format&fit=crop&w=640&q=80'],
                     ['az' => 'Ayaqqabı', 'en' => 'Shoes', 'ru' => 'Обувь', 'tr' => 'Ayakkabı', 'image' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=640&q=80'],
                 ],
@@ -37,8 +69,24 @@ class CategoryDatabaseSeeder extends Seeder
                 'az' => 'Ev və Yaşayış', 'en' => 'Home & Living', 'ru' => 'Дом и быт', 'tr' => 'Ev ve Yaşam',
                 'image' => 'https://images.unsplash.com/photo-1484101403633-562f891dc89a?auto=format&fit=crop&w=640&q=80',
                 'children' => [
-                    ['az' => 'Mebel', 'en' => 'Furniture', 'ru' => 'Мебель', 'tr' => 'Mobilya', 'image' => 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=640&q=80'],
-                    ['az' => 'Mətbəx', 'en' => 'Kitchen', 'ru' => 'Кухня', 'tr' => 'Mutfak', 'image' => 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=640&q=80'],
+                    [
+                        'az' => 'Mebel', 'en' => 'Furniture', 'ru' => 'Мебель', 'tr' => 'Mobilya',
+                        'image' => 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=640&q=80',
+                        'children' => [
+                            ['az' => 'Divanlar', 'en' => 'Sofas', 'ru' => 'Диваны', 'tr' => 'Kanepeler', 'image' => 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=640&q=80'],
+                            ['az' => 'Masalar', 'en' => 'Tables', 'ru' => 'Столы', 'tr' => 'Masalar', 'image' => 'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?auto=format&fit=crop&w=640&q=80'],
+                            ['az' => 'Şkaflar', 'en' => 'Wardrobes', 'ru' => 'Шкафы', 'tr' => 'Dolaplar', 'image' => 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=640&q=80'],
+                        ],
+                    ],
+                    [
+                        'az' => 'Mətbəx', 'en' => 'Kitchen', 'ru' => 'Кухня', 'tr' => 'Mutfak',
+                        'image' => 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=640&q=80',
+                        'children' => [
+                            ['az' => 'Qab-qacaq', 'en' => 'Tableware', 'ru' => 'Посуда', 'tr' => 'Sofra Takımı', 'image' => 'https://images.unsplash.com/photo-1603199506016-b9a594b593c0?auto=format&fit=crop&w=640&q=80'],
+                            ['az' => 'Mətbəx alətləri', 'en' => 'Kitchen Tools', 'ru' => 'Кухонные инструменты', 'tr' => 'Mutfak Gereçleri', 'image' => 'https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=640&q=80'],
+                            ['az' => 'Saxlama qabları', 'en' => 'Storage Containers', 'ru' => 'Контейнеры для хранения', 'tr' => 'Saklama Kapları', 'image' => 'https://images.unsplash.com/photo-1556911261-6bd341186b2f?auto=format&fit=crop&w=640&q=80'],
+                        ],
+                    ],
                     ['az' => 'Dekor', 'en' => 'Decor', 'ru' => 'Декор', 'tr' => 'Dekorasyon', 'image' => 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=640&q=80'],
                     ['az' => 'İşıqlandırma', 'en' => 'Lighting', 'ru' => 'Освещение', 'tr' => 'Aydınlatma', 'image' => 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=640&q=80'],
                 ],
@@ -108,19 +156,30 @@ class CategoryDatabaseSeeder extends Seeder
                 'sort_order' => $sort--,
             ]);
 
-            foreach ($parent['children'] as $child) {
-                Category::updateOrCreate([
-                    'name->en' => $child['en'],
-                    'parent_id' => $parentCategory->id,
-                ], [
-                    'name' => [
-                        'az' => $child['az'], 'en' => $child['en'],
-                        'ru' => $child['ru'], 'tr' => $child['tr'],
-                    ],
-                    'image' => $child['image'],
-                    'is_active' => true,
-                    'sort_order' => 0,
-                ]);
+            $this->syncChildren($parent['children'], $parentCategory->id);
+        }
+    }
+
+    private function syncChildren(array $children, int $parentId): void
+    {
+        $sort = count($children);
+
+        foreach ($children as $child) {
+            $category = Category::updateOrCreate([
+                'name->en' => $child['en'],
+                'parent_id' => $parentId,
+            ], [
+                'name' => [
+                    'az' => $child['az'], 'en' => $child['en'],
+                    'ru' => $child['ru'], 'tr' => $child['tr'],
+                ],
+                'image' => $child['image'],
+                'is_active' => true,
+                'sort_order' => $sort--,
+            ]);
+
+            if (! empty($child['children'])) {
+                $this->syncChildren($child['children'], $category->id);
             }
         }
     }
