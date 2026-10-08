@@ -3,6 +3,7 @@
 namespace Modules\Filter\Entities;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Category\Entities\Category;
@@ -23,6 +24,28 @@ class Filter extends Model
         'title' => 'array',
         'options' => 'array',
     ];
+
+    /** The subcategory this filter belongs to. */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
+
+    /** The filter whose selection drives this filter's options. */
+    public function dependsOn(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'depends_on_filter_id');
+    }
+
+    public function dependents(): HasMany
+    {
+        return $this->hasMany(self::class, 'depends_on_filter_id');
+    }
+
+    public function values(): HasMany
+    {
+        return $this->hasMany(FilterValue::class, 'filter_id')->orderBy('sort_order')->orderBy('id');
+    }
 
     public function categories(): BelongsToMany
     {

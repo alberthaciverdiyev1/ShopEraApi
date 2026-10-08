@@ -5,6 +5,7 @@ namespace Modules\Filter\Services;
 use Illuminate\Http\JsonResponse;
 use Modules\Filter\Entities\CategoryFilter;
 use Modules\Filter\Entities\Filter;
+use Modules\Filter\Entities\FilterValue;
 use Modules\Filter\Entities\ProductFilter;
 use Modules\Filter\Http\Resources\FilterResource;
 use Modules\Filter\Http\Resources\ProductFilterResource;
@@ -57,6 +58,37 @@ class FilterService
         });
 
         return responseHelper(__('Filters retrieved successfully.'), 200, FilterResource::collection($filters));
+    }
+
+    /**
+     * The dependent filter tree for a subcategory: each filter with all of its
+     * values (flat, each carrying parent_value_id). The client filters a
+     * child's options by the parent value it currently has selected.
+     */
+    public function tree(int $categoryId): JsonResponse
+    {
+        $filters = $this->model->query()
+            ->where('category_id', $categoryId)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->with(['values'])
+            ->get();
+
+        $data = $filters->map(fn (Filter $filter) => [
+            'id' => $filter->id,
+            'title' => $filter->title,
+            'type' => $filter->type,
+            'required' => (bool) $filter->required,
+            'sort_order' => $filter->sort_order,
+            'depends_on_filter_id' => $filter->depends_on_filter_id,
+            'values' => $filter->values->map(fn (FilterValue $value) => [
+                'id' => $value->id,
+                'title' => $value->title,
+                'parent_value_id' => $value->parent_value_id,
+            ])->all(),
+        ])->all();
+
+        return responseHelper(__('Filters retrieved successfully.'), 200, $data);
     }
 
     /**

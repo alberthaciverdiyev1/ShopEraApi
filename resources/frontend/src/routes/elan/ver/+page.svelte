@@ -6,6 +6,13 @@
 	import { loadCategories, categories, categoryName, type Category, type ApiCategory } from '$lib/services/categories';
 	import { loadDeliveryCities, deliveryCities } from '$lib/services/delivery';
 	import { loadBrands, type ApiBrand } from '$lib/services/brands';
+	import {
+		loadFilterTree,
+		filterTitle,
+		filterValueTitle,
+		type ApiFilterNode,
+		type FilterValueNode
+	} from '$lib/services/filters-tree';
 
 	type Picked = { id: number; name: string; needsBrand: boolean };
 
@@ -21,6 +28,10 @@
 	let brandId = $state('');
 	let model = $state('');
 	let brands = $state<ApiBrand[]>([]);
+
+	// Dependent filter tree for the chosen subcategory.
+	let filterTree = $state<ApiFilterNode[]>([]);
+	let filterSel = $state<Record<number, number>>({});
 	let contactName = $state('');
 	let contactPhone = $state('');
 	let contactEmail = $state('');
@@ -58,7 +69,39 @@
 			needsBrand: !!(category as ApiCategory).needs_brand
 		};
 		phase = 'form';
+		filterTree = [];
+		filterSel = {};
+		loadFilterTree(category.id).then((tree) => (filterTree = tree));
 		window.scrollTo({ top: 0, behavior: 'smooth' });
+	}
+
+	/** Options for a filter: root values, or children of the selected parent value. */
+	function filterOptions(filter: ApiFilterNode): FilterValueNode[] {
+		const dep = filter.depends_on_filter_id;
+		if (dep) {
+			const parent = filterSel[dep];
+			if (!parent) return [];
+			return filter.values.filter((v) => Number(v.parent_value_id) === Number(parent));
+		}
+		return filter.values.filter((v) => !v.parent_value_id);
+	}
+
+	function onFilterChange(filter: ApiFilterNode, raw: string) {
+		const next = { ...filterSel };
+		const value = raw ? Number(raw) : 0;
+		if (value) next[filter.id] = value;
+		else delete next[filter.id];
+
+		const resetDependents = (id: number) => {
+			for (const f of filterTree) {
+				if (f.depends_on_filter_id === id) {
+					delete next[f.id];
+					resetDependents(f.id);
+				}
+			}
+		};
+		resetDependents(filter.id);
+		filterSel = next;
 	}
 
 	function goToLevel(index: number) {
@@ -118,7 +161,16 @@
 			return;
 		}
 
-		const fields: Record<string, string | number> = {
+		const missingRequired = filterTree.find((f) => f.required && !filterSel[f.id]);
+		if (missingRequired) {
+			error = `“${filterTitle(missingRequired, $locale)}” seçilməlidir.`;
+			submitting = false;
+			return;
+		}
+
+		const filterValueIds = Object.values(filterSel).filter(Boolean);
+
+		const fields: Record<string, string | number | Array<string | number>> = {
 			title,
 			description,
 			category_id: picked.id,
@@ -126,6 +178,10 @@
 			condition,
 			price
 		};
+
+		if (filterValueIds.length) {
+			fields.filter_values = filterValueIds;
+		}
 
 		if (picked.needsBrand) {
 			fields.brand_id = brandId;
@@ -256,6 +312,31 @@
 			{#if error}<div class="alert alert-danger">{error}</div>{/if}
 
 			<form class="row g-4" onsubmit={onSubmit}>
+				{#if filterTree.length}
+					<div class="col-12 form-section">
+						<h6 class="section-title">Filtrlər</h6>
+						<div class="row g-3">
+							{#each filterTree as filter (filter.id)}
+								{@const opts = filterOptions(filter)}
+								{@const disabled = !!filter.depends_on_filter_id && !filterSel[filter.depends_on_filter_id]}
+								<div class="col-md-6">
+									<label class="form-label" for={`f-${filter.id}`}>
+										{filterTitle(filter, $locale)}{#if filter.required} *{/if}
+									</label>
+									<select id={`f-${filter.id}`} class="form-select" {disabled}
+									        value={filterSel[filter.id] ?? ''}
+									        onchange={(e) => onFilterChange(filter, e.currentTarget.value)}>
+										<option value="">Seçin…</option>
+										{#each opts as value (value.id)}
+											<option value={value.id}>{filterValueTitle(value, $locale)}</option>
+										{/each}
+									</select>
+								</div>
+							{/each}
+						</div>
+					</div>
+				{/if}
+
 				<div class="col-12 form-section">
 					<h6 class="section-title">Əsas məlumat</h6>
 					<div class="row g-3">

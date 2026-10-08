@@ -72,10 +72,17 @@ export async function deleteListing(id: string | number): Promise<void> {
 }
 
 /** Builds a FormData payload from a listing form + optional image files. */
-export function buildListingForm(fields: Record<string, string | number>, files: File[] = []): FormData {
+export function buildListingForm(
+	fields: Record<string, string | number | Array<string | number>>,
+	files: File[] = []
+): FormData {
 	const form = new FormData();
 	for (const [key, value] of Object.entries(fields)) {
-		if (value !== undefined && value !== null && `${value}` !== '') {
+		if (Array.isArray(value)) {
+			for (const item of value) {
+				if (item !== undefined && item !== null && `${item}` !== '') form.append(`${key}[]`, `${item}`);
+			}
+		} else if (value !== undefined && value !== null && `${value}` !== '') {
 			form.append(key, `${value}`);
 		}
 	}

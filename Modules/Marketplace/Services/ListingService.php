@@ -7,6 +7,9 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Modules\Category\Entities\Category;
 use Modules\Delivery\Entities\City;
+use Modules\Filter\Entities\Filter;
+use Modules\Filter\Entities\FilterValue;
+use Modules\Filter\Entities\ProductFilterValue;
 use Modules\Marketplace\Entities\Vendor;
 use Modules\Product\Entities\Product;
 use Modules\User\Entities\User;
@@ -63,6 +66,7 @@ class ListingService
         }
 
         $this->storeImages($listing, $request);
+        $this->syncFilterValues($listing, $data['filter_values'] ?? []);
 
         return ['listing' => $listing, 'manage_url' => $manageUrl, 'manage_token' => $plainToken];
     }
@@ -88,6 +92,10 @@ class ListingService
 
         $listing->save();
         $this->storeImages($listing, $request);
+
+        if (array_key_exists('filter_values', $data)) {
+            $this->syncFilterValues($listing, $data['filter_values'] ?? []);
+        }
 
         return $listing;
     }
@@ -117,6 +125,57 @@ class ListingService
     private function translations(string $value): array
     {
         return ['az' => $value, 'en' => $value, 'ru' => $value, 'tr' => $value];
+    }
+
+    /** Stores the chosen filter values, enforcing the dependency chain. */
+    private function syncFilterValues(Product $listing, array $valueIds): void
+    {
+        ProductFilterValue::query()->where('product_id', $listing->id)->delete();
+
+        $valueIds = array_values(array_filter(array_map('intval', $valueIds)));
+
+        if ($valueIds === []) {
+            return;
+        }
+
+        $values = FilterValue::query()->with('filter')->whereIn('id', $valueIds)->get();
+        $byFilter = $values->keyBy('filter_id');
+
+        foreach ($values as $value) {
+            $filter = $value->filter;
+
+            // A dependent value must hang off the value selected in its parent filter.
+            if ($filter && $filter->depends_on_filter_id && $value->parent_value_id) {
+                $parent = $byFilter->get($filter->depends_on_filter_id);
+
+                if (! $parent || (int) $parent->id !== (int) $value->parent_value_id) {
+                    throw ValidationException::withMessages([
+                        'filter_values' => 'Filtrlər arasındakı asılılıq düzgün deyil.',
+                    ]);
+                }
+            }
+        }
+
+        $required = Filter::query()
+            ->where('category_id', $listing->category_id)
+            ->where('required', true)
+            ->pluck('id');
+
+        foreach ($required as $filterId) {
+            if (! $byFilter->has($filterId)) {
+                throw ValidationException::withMessages([
+                    'filter_values' => 'Bütün məcburi filtrləri seçin.',
+                ]);
+            }
+        }
+
+        foreach ($values as $value) {
+            ProductFilterValue::query()->create([
+                'product_id' => $listing->id,
+                'filter_id' => $value->filter_id,
+                'filter_value_id' => $value->id,
+            ]);
+        }
     }
 
     /** The storefront sends a city key (the /city endpoint has no ids). */

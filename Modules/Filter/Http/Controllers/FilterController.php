@@ -16,7 +16,7 @@ class FilterController extends Controller
 
     public function __construct(FilterService $service)
     {
-        $this->middleware('auth:sanctum')->except(['list', 'categoryFilters', 'productValues']);
+        $this->middleware('auth:sanctum')->except(['list', 'categoryFilters', 'tree', 'productValues']);
         $this->middleware('permission:add filter')->only('add');
         $this->middleware('permission:update filter')->only(['update', 'setCategories']);
         $this->middleware('permission:delete filter')->only('delete');
@@ -45,6 +45,20 @@ class FilterController extends Controller
         }
 
         return $this->service->categoryFilters($categoryId);
+    }
+
+    /**
+     * Dependent filter tree for a subcategory (brand → model → storage …).
+     */
+    public function tree(Request $request)
+    {
+        $categoryId = (int) $request->query('category_id', 0);
+
+        if ($categoryId <= 0) {
+            return responseHelper(__('The category_id field is required.'), 422, []);
+        }
+
+        return $this->service->tree($categoryId);
     }
 
     /**

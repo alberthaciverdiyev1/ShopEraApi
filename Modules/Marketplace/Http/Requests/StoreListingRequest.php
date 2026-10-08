@@ -33,6 +33,9 @@ class StoreListingRequest extends FormRequest
             'contact_phone' => [Rule::requiredIf($guest), 'nullable', 'string', 'max:32'],
             'contact_email' => ['nullable', 'email', 'max:190'],
 
+            'filter_values' => ['nullable', 'array'],
+            'filter_values.*' => ['integer', Rule::exists('filter_values', 'id')],
+
             'images' => ['nullable', 'array', 'max:10'],
             'images.*' => ['file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
         ];

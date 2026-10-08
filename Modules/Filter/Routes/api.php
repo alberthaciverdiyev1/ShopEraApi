@@ -11,6 +11,7 @@ use Modules\Filter\Http\Controllers\FilterController;
 // Public reads.
 Route::prefix('filters')->controller(FilterController::class)->group(function () {
     Route::get('/', 'list')->name('filter.list');
+    Route::get('/tree', 'tree')->name('filter.tree');
 });
 
 Route::prefix('category-filters')->controller(FilterController::class)->group(function () {
