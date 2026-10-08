@@ -509,6 +509,11 @@ class UserService
     {
         $this->forbidSelf($id, 'Öz hesabınızı silə bilməzsiniz.');
 
-        $this->user->newQuery()->findOrFail($id)->delete();
+        $user = $this->user->newQuery()->findOrFail($id);
+
+        // Admin hesabları (özü də daxil) panelə girişi itirməsin deyə silinmir.
+        abort_if(admin_has_role($user), 403, 'Admin hesabları silinə bilməz.');
+
+        $user->delete();
     }
 }
