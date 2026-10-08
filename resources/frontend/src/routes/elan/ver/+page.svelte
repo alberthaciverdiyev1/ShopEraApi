@@ -231,7 +231,6 @@
 <section class="elan-page">
 	<div class="container" style="max-width: 940px;">
 		<header class="hero">
-			<span class="hero-badge"><i class="fa-solid fa-bullhorn"></i> Pulsuz elan</span>
 			<h1>Elan yerləşdir</h1>
 			<p>Bir neçə addımda elanınızı dərc edin — qeydiyyat tələb olunmur.</p>
 		</header>
@@ -547,26 +546,21 @@
 		resize: vertical;
 	}
 
-	.check-row { display: flex; flex-wrap: wrap; gap: 12px; }
+	.check-row { display: flex; flex-wrap: wrap; gap: 22px; }
 	.check-pill {
 		display: inline-flex;
 		align-items: center;
 		gap: 8px;
-		padding: 12px 18px;
-		border: 1.5px solid #e6e9f0;
-		border-radius: 12px;
-		background: #fff;
-		font-weight: 600;
+		font-weight: 500;
 		color: #1e293b;
 		cursor: pointer;
-		transition: border-color 0.12s ease, background 0.12s ease, color 0.12s ease;
 	}
-	.check-pill:hover { border-color: var(--theme); }
-	.check-pill input { width: 18px; height: 18px; accent-color: var(--theme); }
-	.check-pill:has(input:checked) {
-		border-color: var(--theme);
-		background: color-mix(in srgb, var(--theme) 8%, #fff);
-		color: var(--theme);
+	.check-pill input {
+		width: 18px;
+		height: 18px;
+		margin: 0;
+		accent-color: var(--theme);
+		cursor: pointer;
 	}
 
 	.dropzone { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 30px; border: 2px dashed #cbd5e1; border-radius: 14px; background: #f8fafc; text-align: center; cursor: pointer; transition: all .15s ease; }
