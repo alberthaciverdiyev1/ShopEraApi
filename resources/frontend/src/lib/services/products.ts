@@ -27,6 +27,9 @@ export interface ApiProduct {
 	images?: ApiProductImage[];
 	category?: { id: number; name: string } | null;
 	brand?: { id: number; name: string } | null;
+	seller_type?: 'guest' | 'user' | 'vendor' | null;
+	contact_name?: string | null;
+	seller?: { id: number; name: string; slug: string } | null;
 	/** Dependent filter values chosen when the listing was posted. */
 	filter_values?: Array<{
 		filter_id?: number;

@@ -105,6 +105,25 @@ class ListingService
         return $listing;
     }
 
+    /**
+     * Reveal the seller's contact details for a listing and count the reveal.
+     * Falls back to the seller account and, for a vendor, the store.
+     */
+    public function contact(Product $listing): array
+    {
+        $listing->increment('contact_reveals');
+
+        $user = $listing->user;
+        $vendor = $listing->vendor;
+
+        return [
+            'name' => $listing->contact_name
+                ?: ($vendor?->name ?: ($user ? trim($user->name.' '.$user->surname) : null)),
+            'phone' => $listing->contact_phone ?: $user?->phone ?: $vendor?->phone,
+            'email' => $listing->contact_email ?: $user?->email ?: $vendor?->email,
+        ];
+    }
+
     public function findByManageToken(string $token): ?Product
     {
         return Product::query()

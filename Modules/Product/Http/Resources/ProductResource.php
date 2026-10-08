@@ -71,6 +71,15 @@ class ProductResource extends JsonResource
             'description_admin' => $this->getTranslation('description', $locale, false) ?? $this->getTranslation('description', 'az'),
             'colors' => ColorResource::collection($this->whenLoaded('colors')),
 
+            // Marketplace seller info (contact details come from /listings/{id}/contact).
+            'seller_type' => $this->seller_type,
+            'contact_name' => $this->contact_name,
+            'seller' => $this->whenLoaded('vendor', fn () => $this->vendor ? [
+                'id' => $this->vendor->id,
+                'name' => $this->vendor->name,
+                'slug' => $this->vendor->slug,
+            ] : null),
+
             // Values chosen from the dependent filter tree (brand/model/storage/…).
             'filter_values' => $this->whenLoaded('filterValues', fn () => $this->filterValues->map(fn ($fv) => [
                 'filter_id' => $fv->filter_id,

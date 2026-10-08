@@ -23,6 +23,9 @@ Route::prefix('listings')->controller(ListingController::class)->group(function 
     Route::put('/manage/{token}', 'manageUpdate')->name('listing.manage.update');
     Route::delete('/manage/{token}', 'manageDestroy')->name('listing.manage.destroy');
 
+    // Public: reveal the seller's contact details.
+    Route::get('/{id}/contact', 'contact')->whereNumber('id')->name('listing.contact');
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', 'store')->name('listing.store');
         Route::get('/mine', 'myListings')->name('listing.mine');

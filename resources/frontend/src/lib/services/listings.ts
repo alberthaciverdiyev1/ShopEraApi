@@ -107,3 +107,14 @@ export async function loadListingFields(categoryId: number): Promise<ListingSche
 		return {};
 	}
 }
+
+export interface ListingContact {
+	name?: string | null;
+	phone?: string | null;
+	email?: string | null;
+}
+
+/** Reveal the seller's contact details for a listing. */
+export async function fetchListingContact(id: number): Promise<ListingContact> {
+	return apiGet<ListingContact>(`/listings/${id}/contact`);
+}

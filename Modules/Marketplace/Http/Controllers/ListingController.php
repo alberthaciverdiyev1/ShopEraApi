@@ -15,6 +15,14 @@ class ListingController extends Controller
 {
     public function __construct(private readonly ListingService $service) {}
 
+    /** Reveal the seller's contact details for a listing (public). */
+    public function contact(int $id)
+    {
+        $listing = Product::query()->with(['user', 'vendor'])->findOrFail($id);
+
+        return responseHelper('OK', 200, $this->service->contact($listing));
+    }
+
     /** The listing form schema (visible/required fields) for a category. */
     public function fields(Request $request)
     {

@@ -8,6 +8,7 @@
 	import { toggleFavoriteProduct } from '$lib/services/favorite-actions';
 	import { fetchRecommendedProducts, subscribeToStock, unsubscribeFromStock } from '$lib/services/products';
 	import { createReview, type ApiReview } from '$lib/services/reviews';
+	import { fetchListingContact, type ListingContact } from '$lib/services/listings';
 	import { features } from '$lib/services/features';
 	import { isLoggedIn, user } from '$lib/services/auth';
 	import { translate } from '$lib/i18n';
@@ -133,6 +134,21 @@
 	let activeTab = $state<'description' | 'specs' | 'reviews'>('description');
 	let isWishlisted = $state(Boolean(product.is_favorite));
 	let addedToCart = $state(false);
+
+	// Seller contact reveal (number hidden until requested).
+	let contact = $state<ListingContact | null>(null);
+	let revealing = $state(false);
+	async function revealContact() {
+		if (contact || revealing) return;
+		revealing = true;
+		try {
+			contact = await fetchListingContact(product.id);
+		} catch {
+			contact = {};
+		} finally {
+			revealing = false;
+		}
+	}
 
 	// Dynamic Filters (from product API or loaded via /product-filters)
 	let dynamicFilters = $state<ApiProductFilter[]>(product.filters ?? []);
@@ -668,6 +684,35 @@
 								>
 									<i class="fa-regular fa-bell"></i>
 									<span>{subscribed ? $translate('Stock alert is on') : $translate('Notify me when in stock')}</span>
+								</button>
+							{/if}
+						</div>
+
+						<div class="seller-contact">
+							<div class="seller-info">
+								<span class="seller-avatar"><i class="fa-solid fa-user"></i></span>
+								<span class="seller-name">
+									{product.seller?.name ?? product.contact_name ?? $translate('Seller')}
+								</span>
+								{#if product.seller}
+									<span class="seller-badge">{$translate('Store')}</span>
+								{:else if product.seller_type === 'guest'}
+									<span class="seller-badge">{$translate('Private')}</span>
+								{/if}
+							</div>
+
+							{#if contact}
+								{#if contact.phone}
+									<a class="contact-btn" href={`tel:${contact.phone}`}>
+										<i class="fa-solid fa-phone"></i> {contact.phone}
+									</a>
+								{:else}
+									<span class="contact-empty">{$translate('No phone number')}</span>
+								{/if}
+							{:else}
+								<button type="button" class="contact-btn" disabled={revealing} onclick={revealContact}>
+									<i class="fa-solid fa-phone"></i>
+									{revealing ? $translate('Loading...') : $translate('Show number')}
 								</button>
 							{/if}
 						</div>
@@ -2219,4 +2264,37 @@
 			font-size: 12.5px;
 		}
 	}
+
+	.seller-contact {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		flex-wrap: wrap;
+		margin-top: 16px;
+		padding: 14px 16px;
+		border: 1.5px solid #e6e9f0;
+		border-radius: 14px;
+		background: #f8fafc;
+	}
+	.seller-info { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
+	.seller-avatar {
+		display: inline-flex; align-items: center; justify-content: center;
+		width: 34px; height: 34px; border-radius: 50%;
+		background: color-mix(in srgb, var(--theme) 12%, #fff); color: var(--theme);
+	}
+	.seller-name { font-weight: 700; color: #0f172a; }
+	.seller-badge {
+		padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700;
+		background: color-mix(in srgb, var(--theme) 12%, #fff); color: var(--theme);
+	}
+	.contact-btn {
+		display: inline-flex; align-items: center; gap: 8px;
+		padding: 10px 18px; border: 0; border-radius: 12px;
+		background: var(--theme); color: #fff; font-weight: 700; text-decoration: none;
+		cursor: pointer;
+	}
+	.contact-btn:hover { color: #fff; filter: brightness(0.95); }
+	.contact-btn:disabled { opacity: 0.7; cursor: default; }
+	.contact-empty { color: #94a3b8; font-size: 14px; }
 </style>
