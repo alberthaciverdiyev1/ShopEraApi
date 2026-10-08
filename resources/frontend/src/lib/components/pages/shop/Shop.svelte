@@ -185,6 +185,7 @@
 		try {
 			const [order_by, order_type] = sort.split(':');
 			const result = await fetchShopProducts({
+				marketplace: true,
 				search: search.trim() || undefined,
 				category_ids: categoryId ? [categoryId] : undefined,
 				brand_ids: brandId ? [brandId] : undefined,
