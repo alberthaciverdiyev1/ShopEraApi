@@ -65,7 +65,7 @@
 <style>
     .best-seller-product-items-two__thumb {
         position: relative;
-        height: 260px;
+        height: 230px;
         overflow: hidden;
         border-radius: 12px 12px 0 0;
     }
