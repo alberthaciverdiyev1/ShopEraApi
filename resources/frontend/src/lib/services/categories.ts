@@ -1,4 +1,4 @@
-import { writable } from 'svelte/store';
+import { get, writable } from 'svelte/store';
 import { cachedGet } from '$lib/utils/api-cache';
 
 export interface ApiCategory {
@@ -53,7 +53,9 @@ let requested = false;
 
 /** Fetch all categories once and nest them by parent_id. */
 export async function loadCategories(force = false): Promise<void> {
-	if (requested && !force) return;
+	// Retry whenever we still have nothing to show: a single failed/empty load
+	// must never lock every page out of categories for the whole session.
+	if (requested && !force && get(categories).length) return;
 	requested = true;
 
 	categoriesLoading.set(true);
@@ -62,8 +64,14 @@ export async function loadCategories(force = false): Promise<void> {
 	try {
 		// `all=1` returns every category flat (parents aren't returned with children loaded).
 		const flat = await cachedGet<ApiCategory[]>('/category', { all: 1 });
-		categories.set(buildTree(flat));
+		const list = Array.isArray(flat) ? flat : [];
+		categories.set(buildTree(list));
+
+		if (list.length === 0) {
+			requested = false; // nothing cached that is worth keeping
+		}
 	} catch (error) {
+		requested = false; // allow the next caller to try again
 		categoriesError.set(error instanceof Error ? error.message : 'Failed to load categories');
 	} finally {
 		categoriesLoading.set(false);
