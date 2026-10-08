@@ -125,5 +125,5 @@
 <style>
 	.check-row { display: flex; flex-wrap: wrap; gap: 22px; }
 	.check-pill { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; color: #1e293b; cursor: pointer; }
-	.check-pill input { width: 18px; height: 18px; margin: 0; accent-color: var(--theme); cursor: pointer; }
+	.check-pill input { display: inline-block !important; visibility: visible !important; opacity: 1 !important; width: 18px !important; height: 18px !important; margin: 0; accent-color: var(--theme); cursor: pointer; }
 </style>

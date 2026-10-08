@@ -556,8 +556,13 @@
 		cursor: pointer;
 	}
 	.check-pill input {
-		width: 18px;
-		height: 18px;
+		/* The theme hides native checkboxes and draws one on a sibling label;
+		   force our real checkbox to be visible. */
+		display: inline-block !important;
+		visibility: visible !important;
+		opacity: 1 !important;
+		width: 18px !important;
+		height: 18px !important;
 		margin: 0;
 		accent-color: var(--theme);
 		cursor: pointer;
