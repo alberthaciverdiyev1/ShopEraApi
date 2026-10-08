@@ -4,6 +4,8 @@ Bu dosya, Claude Code'un bu depoda çalışırken uyması gereken kuralları ve 
 dair bağlamı tanımlar. Talimatlar Türkçe yazılmıştır; kod, değişken ve commit
 içerikleri mevcut projedeki İngilizce konvansiyonunu korur.
 
+ her degisikligi benim adimdan ingilizce commit at ve ssh ile push et
+
 ## Proje Özeti
 
 **Snaker.az** — Laravel 12 tabanlı, çok dilli (az/en/ru/tr) bir e-ticaret ve
