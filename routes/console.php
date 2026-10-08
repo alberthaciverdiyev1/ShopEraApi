@@ -21,3 +21,5 @@ Artisan::command('orders:expire-pending-payments {--hours=3} {--limit=200}', fun
 })->purpose('Expire old unpaid card orders and return reserved stock');
 
 Schedule::command('orders:expire-pending-payments --hours=3 --limit=200')->everyFifteenMinutes()->withoutOverlapping();
+
+Schedule::command('listings:expire-promotions')->hourly();

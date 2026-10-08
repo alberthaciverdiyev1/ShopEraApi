@@ -130,3 +130,32 @@ export interface ReportPayload {
 export async function reportListing(id: number, payload: ReportPayload): Promise<void> {
 	await apiPost(`/listings/${id}/report`, { reason: payload.reason, comment: payload.comment });
 }
+
+export interface PromotionPackage {
+	id: number;
+	name: Record<string, string> | string | null;
+	type: 'promoted' | 'premium' | string;
+	days: number;
+	price: string | number;
+}
+
+export function packageName(pkg: PromotionPackage, locale = 'az'): string {
+	if (!pkg.name) return '';
+	if (typeof pkg.name === 'string') return pkg.name;
+	return pkg.name[locale] ?? pkg.name.az ?? Object.values(pkg.name)[0] ?? '';
+}
+
+/** Active promotion packages. */
+export async function fetchPromotionPackages(): Promise<PromotionPackage[]> {
+	try {
+		const list = await apiGet<PromotionPackage[]>('/listings/promotion-packages');
+		return Array.isArray(list) ? list : [];
+	} catch {
+		return [];
+	}
+}
+
+/** Create a promotion order for a listing (activated after payment). */
+export async function promoteListing(id: number, packageId: number): Promise<void> {
+	await apiPost(`/listings/${id}/promote`, { package_id: packageId });
+}

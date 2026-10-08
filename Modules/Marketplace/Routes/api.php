@@ -14,6 +14,7 @@ use Modules\Marketplace\Http\Controllers\VendorController;
 */
 Route::prefix('listings')->controller(ListingController::class)->group(function () {
     Route::get('/fields', 'fields')->name('listing.fields');
+    Route::get('/promotion-packages', 'packages')->name('listing.packages');
     Route::post('/guest', 'storeGuest')->name('listing.guest');
 
     // Secret-link management for guest listings.
@@ -29,6 +30,7 @@ Route::prefix('listings')->controller(ListingController::class)->group(function 
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', 'store')->name('listing.store');
+        Route::post('/{id}/promote', 'promote')->whereNumber('id')->name('listing.promote');
         Route::get('/mine', 'myListings')->name('listing.mine');
         Route::put('/{id}', 'update')->whereNumber('id')->name('listing.update');
         Route::delete('/{id}', 'destroy')->whereNumber('id')->name('listing.destroy');

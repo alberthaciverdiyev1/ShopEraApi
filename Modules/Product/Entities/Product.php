@@ -42,6 +42,10 @@ class Product extends Model
         'stock_count' => 'integer',
         'weight' => 'float',
         'discount_expire_date' => 'datetime',
+        'promoted_until' => 'datetime',
+        'premium_until' => 'datetime',
+        'approved_at' => 'datetime',
+        'last_approved_at' => 'datetime',
     ];
 
     public function scopePubliclyAvailable($query)

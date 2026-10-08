@@ -8,13 +8,37 @@ use Illuminate\Validation\Rule;
 use Modules\Marketplace\Http\Requests\StoreListingRequest;
 use Modules\Marketplace\Http\Requests\UpdateListingRequest;
 use Modules\Marketplace\Http\Resources\ListingResource;
+use Modules\Marketplace\Entities\PromotionPackage;
 use Modules\Marketplace\Services\ListingService;
+use Modules\Marketplace\Services\PromotionService;
 use Modules\Marketplace\Support\ListingFields;
 use Modules\Product\Entities\Product;
 
 class ListingController extends Controller
 {
-    public function __construct(private readonly ListingService $service) {}
+    public function __construct(private readonly ListingService $service, private readonly PromotionService $promotions) {}
+
+    /** Active promotion packages (public). */
+    public function packages()
+    {
+        return responseHelper('OK', 200, $this->promotions->packages());
+    }
+
+    /** Create a promotion order for the signed-in owner's listing. */
+    public function promote(Request $request, int $id)
+    {
+        $data = $request->validate(['package_id' => ['required', 'exists:promotion_packages,id']]);
+        $listing = Product::query()->findOrFail($id);
+        $package = PromotionPackage::query()->findOrFail($data['package_id']);
+
+        $order = $this->promotions->createOrder($listing, $request->user('sanctum'), $package);
+
+        return responseHelper('Promosiya sifarişi yaradıldı.', 201, [
+            'id' => $order->id,
+            'status' => $order->status,
+            'price' => (float) $order->price,
+        ]);
+    }
 
     /** Report a listing (public, signed-in users are recorded). */
     public function report(Request $request, int $id)

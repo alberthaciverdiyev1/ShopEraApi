@@ -60,6 +60,14 @@ Route::middleware(['admin.auth'])->group(function () {
     Route::get('categories/children', [Admin\CategoryController::class, 'children'])->name('categories.children');
     $resource('categories', Admin\CategoryController::class);
 
+    // Promotions (paid placements).
+    Route::get('promotions', [Admin\PromotionController::class, 'index'])->name('promotions.index');
+    Route::post('promotions/package', [Admin\PromotionController::class, 'storePackage'])->name('promotions.storePackage');
+    Route::put('promotions/package/{id}', [Admin\PromotionController::class, 'updatePackage'])->name('promotions.updatePackage');
+    Route::delete('promotions/package/{id}', [Admin\PromotionController::class, 'destroyPackage'])->name('promotions.destroyPackage');
+    Route::put('promotions/order/{id}/activate', [Admin\PromotionController::class, 'activate'])->name('promotions.activate');
+    Route::put('promotions/order/{id}/cancel', [Admin\PromotionController::class, 'cancel'])->name('promotions.cancel');
+
     // Dependent filters (categories -> filters -> values).
     Route::get('listing-filters', [Admin\FilterAdminController::class, 'index'])->name('listing-filters.index');
     Route::post('listing-filters/filter', [Admin\FilterAdminController::class, 'storeFilter'])->name('listing-filters.storeFilter');
