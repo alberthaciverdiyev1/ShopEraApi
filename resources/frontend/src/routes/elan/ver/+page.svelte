@@ -487,7 +487,34 @@
 
 	.form-section { background: #fff; border: 1.5px solid #e6e9f0; border-radius: 16px; padding: 20px; }
 	.section-title { font-weight: 800; color: #0f172a; margin-bottom: 14px; }
-	.form-section .form-control, .form-section .form-select { border-radius: 12px; padding: 10px 14px; }
+	/* The global ui-consistency sheet forces a min-height on every control,
+	   which left the text sitting off-centre. Pin the height, padding and line
+	   box so inputs/selects line up, and give the textarea real room. */
+	.form-section .form-control,
+	.form-section .form-select {
+		height: 54px !important;
+		min-height: 54px !important;
+		border-radius: 12px;
+		font-size: 15px;
+	}
+
+	.form-section input.form-control {
+		padding: 0 14px !important;
+		line-height: 54px !important;
+	}
+
+	.form-section select.form-select {
+		padding: 0 36px 0 14px !important;
+		line-height: 52px !important;
+	}
+
+	.form-section textarea.form-control {
+		height: auto !important;
+		min-height: 160px !important;
+		padding: 12px 14px !important;
+		line-height: 1.55 !important;
+		resize: vertical;
+	}
 
 	.dropzone { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 30px; border: 2px dashed #cbd5e1; border-radius: 14px; background: #f8fafc; text-align: center; cursor: pointer; transition: all .15s ease; }
 	.dropzone:hover, .dropzone.is-drag { border-color: var(--theme); background: color-mix(in srgb, var(--theme) 6%, #fff); }
