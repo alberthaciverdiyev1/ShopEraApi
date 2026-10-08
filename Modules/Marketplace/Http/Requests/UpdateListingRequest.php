@@ -19,7 +19,7 @@ class UpdateListingRequest extends FormRequest
             'description' => ['sometimes', 'required', 'string', 'max:5000'],
             'category_id' => ['sometimes', 'required', 'exists:categories,id'],
             'price' => ['sometimes', 'required', 'numeric', 'min:0'],
-            'city_id' => ['sometimes', 'required', 'exists:cities,id'],
+            'city_key' => ['sometimes', 'required', 'string', Rule::exists('cities', 'key')],
             'condition' => ['sometimes', 'required', Rule::in(['new', 'used'])],
             'stock_count' => ['sometimes', 'integer', 'min:1'],
 

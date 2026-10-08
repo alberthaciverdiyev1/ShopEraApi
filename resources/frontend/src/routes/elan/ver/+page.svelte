@@ -14,7 +14,7 @@
 
 	let title = $state('');
 	let description = $state('');
-	let cityId = $state('');
+	let cityKey = $state('');
 	let condition = $state('used');
 	let price = $state('');
 	let contactName = $state('');
@@ -108,7 +108,7 @@
 			title,
 			description,
 			category_id: picked.id,
-			city_id: cityId,
+			city_key: cityKey,
 			condition,
 			price
 		};
@@ -251,10 +251,10 @@
 						</div>
 						<div class="col-md-6">
 							<label class="form-label" for="l-city">Şəhər *</label>
-							<select id="l-city" class="form-select" bind:value={cityId} required>
+							<select id="l-city" class="form-select" bind:value={cityKey} required>
 								<option value="">Seçin…</option>
-								{#each $deliveryCities as city (city.id)}
-									<option value={city.id}>{city.name}</option>
+								{#each $deliveryCities as city (city.key)}
+									<option value={city.key}>{city.name}</option>
 								{/each}
 							</select>
 						</div>

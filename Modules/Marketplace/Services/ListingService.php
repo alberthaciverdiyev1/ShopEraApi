@@ -4,6 +4,7 @@ namespace Modules\Marketplace\Services;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Modules\Delivery\Entities\City;
 use Modules\Marketplace\Entities\Vendor;
 use Modules\Product\Entities\Product;
 use Modules\User\Entities\User;
@@ -25,7 +26,7 @@ class ListingService
             'title' => $this->translations($data['title']),
             'description' => $this->translations($data['description']),
             'category_id' => $data['category_id'],
-            'city_id' => $data['city_id'],
+            'city_id' => $this->resolveCityId($data['city_key'] ?? null),
             'condition' => $data['condition'],
             'price' => $data['price'],
             'stock_count' => (int) ($data['stock_count'] ?? 1),
@@ -63,10 +64,14 @@ class ListingService
             $listing->description = $this->translations($data['description']);
         }
 
-        foreach (['category_id', 'city_id', 'condition', 'price', 'stock_count', 'contact_name', 'contact_phone', 'contact_email'] as $field) {
+        foreach (['category_id', 'condition', 'price', 'stock_count', 'contact_name', 'contact_phone', 'contact_email'] as $field) {
             if (array_key_exists($field, $data)) {
                 $listing->{$field} = $data[$field];
             }
+        }
+
+        if (array_key_exists('city_key', $data)) {
+            $listing->city_id = $this->resolveCityId($data['city_key']);
         }
 
         $listing->save();
@@ -100,5 +105,15 @@ class ListingService
     private function translations(string $value): array
     {
         return ['az' => $value, 'en' => $value, 'ru' => $value, 'tr' => $value];
+    }
+
+    /** The storefront sends a city key (the /city endpoint has no ids). */
+    private function resolveCityId(?string $key): ?int
+    {
+        if (! $key) {
+            return null;
+        }
+
+        return City::query()->where('key', $key)->value('id');
     }
 }
