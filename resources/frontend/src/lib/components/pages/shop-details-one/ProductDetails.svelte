@@ -242,6 +242,14 @@
 
 	// Top Parameter Box (Specifications) — purely dynamic from dynamic filters / specifications!
 	const specs = $derived.by(() => {
+		// Listing filters chosen when the product was posted (brand/model/storage…).
+		const listingFilters = (product.filter_values ?? [])
+			.filter((fv) => fv.filter && fv.value)
+			.map((fv) => ({ label: String(fv.filter), value: String(fv.value) }));
+		if (listingFilters.length) {
+			return listingFilters;
+		}
+
 		if (dynamicFilters.length) {
 			const paramFilters = dynamicFilters.filter(
 				(f) => !CORE_KEYS.includes((f.name || f.title || '').trim().toLowerCase())

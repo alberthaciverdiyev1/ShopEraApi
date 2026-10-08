@@ -27,6 +27,13 @@ export interface ApiProduct {
 	images?: ApiProductImage[];
 	category?: { id: number; name: string } | null;
 	brand?: { id: number; name: string } | null;
+	/** Dependent filter values chosen when the listing was posted. */
+	filter_values?: Array<{
+		filter_id?: number;
+		filter?: string | null;
+		filter_value_id?: number;
+		value?: string | null;
+	}>;
 	sales_count?: number;
 	views?: number;
 	stock_count?: number;

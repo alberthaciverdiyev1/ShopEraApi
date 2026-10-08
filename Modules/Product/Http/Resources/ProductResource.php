@@ -70,6 +70,14 @@ class ProductResource extends JsonResource
             'title_admin' => $this->getTranslation('title', $locale, false) ?? $this->getTranslation('title', 'az'),
             'description_admin' => $this->getTranslation('description', $locale, false) ?? $this->getTranslation('description', 'az'),
             'colors' => ColorResource::collection($this->whenLoaded('colors')),
+
+            // Values chosen from the dependent filter tree (brand/model/storage/…).
+            'filter_values' => $this->whenLoaded('filterValues', fn () => $this->filterValues->map(fn ($fv) => [
+                'filter_id' => $fv->filter_id,
+                'filter' => $fv->filter?->title,
+                'filter_value_id' => $fv->filter_value_id,
+                'value' => $fv->value?->title,
+            ])->values()),
             //            'sizes' => SizeResource::collection($this->whenLoaded('sizes')),
 
             'sizes' => $this->whenLoaded('sizes', function () {

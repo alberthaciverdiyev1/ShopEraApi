@@ -345,7 +345,8 @@ class ProductService
     {
         try {
             $product = $this->model->with([
-                'colors', 'sizes', 'images', 'videos', 'category', 'brand', 'reviews.user', 'productFilters.filter',
+                'colors', 'sizes', 'images', 'videos', 'category', 'brand', 'reviews.user',
+                'productFilters.filter', 'filterValues.filter', 'filterValues.value',
             ])->publiclyAvailable()->findOrFail($id);
 
             $product?->increment('views');
