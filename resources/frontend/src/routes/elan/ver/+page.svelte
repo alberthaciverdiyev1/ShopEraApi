@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { locale } from '$lib/i18n';
 	import { isLoggedIn, user } from '$lib/services/auth';
-	import { createGuestListing, createListing, buildListingForm, type ApiListing } from '$lib/services/listings';
+	import { createGuestListing, createListing, buildListingForm, loadListingFields, type ApiListing, type ListingSchema } from '$lib/services/listings';
 	import { loadCategories, categories, categoryName, type Category, type ApiCategory } from '$lib/services/categories';
 	import { loadDeliveryCities, deliveryCities } from '$lib/services/delivery';
 	import { loadBrands, type ApiBrand } from '$lib/services/brands';
@@ -33,6 +33,11 @@
 	// Dependent filter tree for the chosen subcategory.
 	let filterTree = $state<ApiFilterNode[]>([]);
 	let filterSel = $state<Record<number, number>>({});
+
+	// Per-category field schema (which fields show / are required).
+	let schema = $state<ListingSchema>({});
+	const visible = (field: string) => schema[field]?.visible ?? true;
+	const required = (field: string) => schema[field]?.required ?? false;
 	let contactName = $state('');
 	let contactPhone = $state('');
 	let contactEmail = $state('');
@@ -72,7 +77,9 @@
 		phase = 'form';
 		filterTree = [];
 		filterSel = {};
+		schema = {};
 		loadFilterTree(category.id).then((tree) => (filterTree = tree));
+		loadListingFields(category.id).then((s) => (schema = s));
 		window.scrollTo({ top: 0, behavior: 'smooth' });
 	}
 
@@ -343,41 +350,55 @@
 				<div class="col-12 form-section">
 					<h6 class="section-title">Əsas məlumat</h6>
 					<div class="row g-3">
-						<div class="col-12">
-							<label class="form-label" for="l-title">Başlıq *</label>
-							<input id="l-title" class="form-control" bind:value={title} required maxlength="255"
-							       placeholder="Məsələn: iPhone 15 Pro 256GB" />
-						</div>
-						<div class="col-12">
-							<label class="form-label" for="l-desc">Təsvir *</label>
-							<textarea id="l-desc" class="form-control" rows="5" bind:value={description} required
-							          placeholder="Vəziyyəti, xüsusiyyətləri və s. yazın…"></textarea>
-						</div>
-						<div class="col-md-6">
-							<label class="form-label" for="l-city">Şəhər *</label>
-							<select id="l-city" class="form-select" bind:value={cityKey} required>
-								<option value="">Seçin…</option>
-								{#each $deliveryCities as city (city.key)}
-									<option value={city.key}>{city.name}</option>
-								{/each}
-							</select>
-						</div>
-						<div class="col-md-6">
-							<label class="form-label" for="l-price">Qiymət (₼) *</label>
-							<input id="l-price" class="form-control" type="number" min="0" step="0.01" bind:value={price} required />
-						</div>
-						<div class="col-12">
-							<div class="check-row">
-								<label class="check-pill">
-									<input type="checkbox" bind:checked={isNew} />
-									<span>Yeni</span>
-								</label>
-								<label class="check-pill">
-									<input type="checkbox" bind:checked={delivery} />
-									<span>Çatdırılma var</span>
-								</label>
+						{#if visible('title')}
+							<div class="col-12">
+								<label class="form-label" for="l-title">Başlıq {required('title') ? '*' : ''}</label>
+								<input id="l-title" class="form-control" bind:value={title} required={required('title')} maxlength="255"
+								       placeholder="Məsələn: iPhone 15 Pro 256GB" />
 							</div>
-						</div>
+						{/if}
+						{#if visible('description')}
+							<div class="col-12">
+								<label class="form-label" for="l-desc">Təsvir {required('description') ? '*' : ''}</label>
+								<textarea id="l-desc" class="form-control" rows="5" bind:value={description} required={required('description')}
+								          placeholder="Vəziyyəti, xüsusiyyətləri və s. yazın…"></textarea>
+							</div>
+						{/if}
+						{#if visible('city')}
+							<div class="col-md-6">
+								<label class="form-label" for="l-city">Şəhər {required('city') ? '*' : ''}</label>
+								<select id="l-city" class="form-select" bind:value={cityKey} required={required('city')}>
+									<option value="">Seçin…</option>
+									{#each $deliveryCities as city (city.key)}
+										<option value={city.key}>{city.name}</option>
+									{/each}
+								</select>
+							</div>
+						{/if}
+						{#if visible('price')}
+							<div class="col-md-6">
+								<label class="form-label" for="l-price">Qiymət (₼) {required('price') ? '*' : ''}</label>
+								<input id="l-price" class="form-control" type="number" min="0" step="0.01" bind:value={price} required={required('price')} />
+							</div>
+						{/if}
+						{#if visible('condition') || visible('delivery')}
+							<div class="col-12">
+								<div class="check-row">
+									{#if visible('condition')}
+										<label class="check-pill">
+											<input type="checkbox" bind:checked={isNew} />
+											<span>Yeni</span>
+										</label>
+									{/if}
+									{#if visible('delivery')}
+										<label class="check-pill">
+											<input type="checkbox" bind:checked={delivery} />
+											<span>Çatdırılma var</span>
+										</label>
+									{/if}
+								</div>
+							</div>
+						{/if}
 						{#if picked?.needsBrand}
 							<div class="col-md-6">
 								<label class="form-label" for="l-brand">Marka *</label>
@@ -396,31 +417,33 @@
 					</div>
 				</div>
 
-				<div class="col-12 form-section">
-					<h6 class="section-title">Şəkillər <span class="muted">(maks. 10)</span></h6>
-					<label class="dropzone" class:is-drag={dragging}
-					       ondragover={(e) => { e.preventDefault(); dragging = true; }}
-					       ondragleave={() => (dragging = false)}
-					       ondrop={onDrop}>
-						<input type="file" accept="image/*" multiple hidden
-						       onchange={(e) => addFiles(e.currentTarget.files)} />
-						<div class="dz-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
-						<div><strong>Şəkilləri bura sürükləyin</strong> və ya <span class="link">fayl seçin</span></div>
-						<div class="muted small">JPG, PNG, WEBP — hər biri maks. 8 MB</div>
-					</label>
+				{#if visible('photos')}
+					<div class="col-12 form-section">
+						<h6 class="section-title">Şəkillər {required('photos') ? '*' : ''} <span class="muted">(maks. 10)</span></h6>
+						<label class="dropzone" class:is-drag={dragging}
+						       ondragover={(e) => { e.preventDefault(); dragging = true; }}
+						       ondragleave={() => (dragging = false)}
+						       ondrop={onDrop}>
+							<input type="file" accept="image/*" multiple hidden
+							       onchange={(e) => addFiles(e.currentTarget.files)} />
+							<div class="dz-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+							<div><strong>Şəkilləri bura sürükləyin</strong> və ya <span class="link">fayl seçin</span></div>
+							<div class="muted small">JPG, PNG, WEBP — hər biri maks. 8 MB</div>
+						</label>
 
-					{#if previews.length}
-						<div class="thumbs">
-							{#each previews as src, i (src)}
-								<div class="thumb">
-									{#if i === 0}<span class="cover-tag">Əsas</span>{/if}
-									<img {src} alt={`Şəkil ${i + 1}`} />
-									<button type="button" class="remove" onclick={() => removeImage(i)} aria-label="Sil">×</button>
-								</div>
-							{/each}
-						</div>
-					{/if}
-				</div>
+						{#if previews.length}
+							<div class="thumbs">
+								{#each previews as src, i (src)}
+									<div class="thumb">
+										{#if i === 0}<span class="cover-tag">Əsas</span>{/if}
+										<img {src} alt={`Şəkil ${i + 1}`} />
+										<button type="button" class="remove" onclick={() => removeImage(i)} aria-label="Sil">×</button>
+									</div>
+								{/each}
+							</div>
+						{/if}
+					</div>
+				{/if}
 
 				<div class="col-12 form-section">
 					<h6 class="section-title">Əlaqə</h6>

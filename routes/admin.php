@@ -59,6 +59,10 @@ Route::middleware(['admin.auth'])->group(function () {
 
     Route::get('categories/children', [Admin\CategoryController::class, 'children'])->name('categories.children');
     $resource('categories', Admin\CategoryController::class);
+
+    // Per-category listing form schema (which fields show / are required).
+    Route::get('category-fields', [Admin\CategoryFieldController::class, 'index'])->name('category-fields.index');
+    Route::put('category-fields', [Admin\CategoryFieldController::class, 'update'])->name('category-fields.update');
     $resource('brands', Admin\BrandController::class);
     $resource('colors', Admin\ColorController::class);
     $resource('sizes', Admin\SizeController::class);

@@ -15,6 +15,7 @@ use Modules\Marketplace\Http\Controllers\ListingController;
 | authenticated group.
 */
 Route::prefix('listings')->controller(ListingController::class)->group(function () {
+    Route::get('/fields', 'fields')->name('listing.fields');
     Route::post('/guest', 'storeGuest')->name('listing.guest');
 
     // Secret-link management for guest listings.

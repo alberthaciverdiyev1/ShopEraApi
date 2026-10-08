@@ -92,3 +92,18 @@ export function buildListingForm(
 	}
 	return form;
 }
+
+export interface FieldConfig {
+	visible: boolean;
+	required: boolean;
+}
+export type ListingSchema = Record<string, FieldConfig>;
+
+/** Per-category listing form schema (which fields show / are required). */
+export async function loadListingFields(categoryId: number): Promise<ListingSchema> {
+	try {
+		return await apiGet<ListingSchema>('/listings/fields', { category_id: categoryId });
+	} catch {
+		return {};
+	}
+}

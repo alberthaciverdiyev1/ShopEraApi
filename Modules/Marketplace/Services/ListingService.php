@@ -36,15 +36,15 @@ class ListingService
         }
 
         $listing = Product::create([
-            'title' => $this->translations($data['title']),
-            'description' => $this->translations($data['description']),
+            'title' => isset($data['title']) ? $this->translations($data['title']) : null,
+            'description' => isset($data['description']) ? $this->translations($data['description']) : null,
             'category_id' => $data['category_id'],
             'brand_id' => $data['brand_id'] ?? null,
             'model' => $data['model'] ?? null,
             'city_id' => $this->resolveCityId($data['city_key'] ?? null),
-            'condition' => $data['condition'],
+            'condition' => $data['condition'] ?? null,
             'has_delivery' => filter_var($data['has_delivery'] ?? false, FILTER_VALIDATE_BOOLEAN),
-            'price' => $data['price'],
+            'price' => $data['price'] ?? 0,
             'stock_count' => (int) ($data['stock_count'] ?? 1),
             'user_id' => $user?->id,
             'vendor_id' => $vendor?->id,

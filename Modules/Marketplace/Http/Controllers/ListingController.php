@@ -8,11 +8,20 @@ use Modules\Marketplace\Http\Requests\StoreListingRequest;
 use Modules\Marketplace\Http\Requests\UpdateListingRequest;
 use Modules\Marketplace\Http\Resources\ListingResource;
 use Modules\Marketplace\Services\ListingService;
+use Modules\Marketplace\Support\ListingFields;
 use Modules\Product\Entities\Product;
 
 class ListingController extends Controller
 {
     public function __construct(private readonly ListingService $service) {}
+
+    /** The listing form schema (visible/required fields) for a category. */
+    public function fields(Request $request)
+    {
+        $categoryId = (int) $request->query('category_id', 0);
+
+        return responseHelper('OK', 200, ListingFields::forCategory($categoryId ?: null));
+    }
 
     /** Guest listing — no account; returns the secret manage URL. */
     public function storeGuest(StoreListingRequest $request)
