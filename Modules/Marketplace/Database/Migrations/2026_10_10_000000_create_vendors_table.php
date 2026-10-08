@@ -10,7 +10,8 @@ return new class extends Migration
     {
         Schema::create('vendors', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            // A store always belongs to a registered account ("no user, no store").
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->json('name')->nullable();
             $table->string('slug')->unique();
             $table->string('logo')->nullable();
