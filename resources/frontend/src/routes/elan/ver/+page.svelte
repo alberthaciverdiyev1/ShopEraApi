@@ -8,9 +8,9 @@
 
 	type Picked = { id: number; name: string };
 
-	let step = $state<1 | 2>(1);
+	let phase = $state<'category' | 'form'>('category');
+	let path = $state<Category[]>([]); // chosen ancestors while drilling down
 	let picked = $state<Picked | null>(null);
-	let activeCategory = $state<Category | null>(null);
 
 	let title = $state('');
 	let description = $state('');
@@ -31,18 +31,37 @@
 	let manageUrl = $state<string | null>(null);
 	let copied = $state(false);
 
+	const currentList = $derived<Category[]>(path.length ? path[path.length - 1].children : $categories);
+	const currentNode = $derived<Category | null>(path.length ? path[path.length - 1] : null);
+
 	function initial(name: string): string {
 		return name?.trim()?.charAt(0)?.toUpperCase() ?? '?';
 	}
 
-	function pick(category: Category | ApiCategory) {
+	function choose(category: Category) {
+		if (category.children?.length) {
+			path = [...path, category];
+		} else {
+			select(category);
+		}
+	}
+
+	function select(category: Category | ApiCategory) {
 		picked = { id: category.id, name: categoryName(category, $locale) };
-		step = 2;
+		phase = 'form';
 		window.scrollTo({ top: 0, behavior: 'smooth' });
 	}
 
-	function backToCategory() {
-		step = 1;
+	function goToLevel(index: number) {
+		path = index < 0 ? [] : path.slice(0, index + 1);
+	}
+
+	function back() {
+		if (path.length) {
+			path = path.slice(0, -1);
+		} else {
+			phase = 'category';
+		}
 	}
 
 	function addFiles(list: FileList | null) {
@@ -131,14 +150,12 @@
 		</header>
 
 		<div class="steps">
-			<div class="step" class:active={step === 1} class:done={step === 2}>
-				<span class="dot">{step === 2 ? '✓' : '1'}</span>
-				<span>Kateqoriya</span>
+			<div class="step" class:active={phase === 'category'} class:done={phase === 'form'}>
+				<span class="dot">{phase === 'form' ? '✓' : '1'}</span><span>Kateqoriya</span>
 			</div>
-			<div class="bar" class:filled={step === 2}></div>
-			<div class="step" class:active={step === 2}>
-				<span class="dot">2</span>
-				<span>Elan məlumatları</span>
+			<div class="bar" class:filled={phase === 'form'}></div>
+			<div class="step" class:active={phase === 'form'}>
+				<span class="dot">2</span><span>Elan məlumatları</span>
 			</div>
 		</div>
 
@@ -160,18 +177,27 @@
 					<a href="/elanlarim" class="theme-btn">Elanlarıma keç</a>
 				{/if}
 			</div>
-		{:else if step === 1}
+		{:else if phase === 'category'}
 			{#if $categories.length === 0}
 				<p class="text-muted">Kateqoriyalar yüklənir…</p>
 			{:else}
-				<p class="section-hint">Elanınızın uyğun olduğu kateqoriyanı seçin</p>
+				<nav class="crumbs" aria-label="Kateqoriya yolu">
+					<button type="button" class="crumb" class:current={path.length === 0}
+					        onclick={() => goToLevel(-1)}>Bütün kateqoriyalar</button>
+					{#each path as crumb, i (crumb.id)}
+						<span class="sep">/</span>
+						<button type="button" class="crumb" class:current={i === path.length - 1}
+						        onclick={() => goToLevel(i)}>{categoryName(crumb, $locale)}</button>
+					{/each}
+				</nav>
+
+				<p class="section-hint">
+					{#if path.length === 0}Bir kateqoriya seçin{:else}Alt kateqoriya seçin{/if}
+				</p>
 
 				<div class="cat-grid">
-					{#each $categories as category (category.id)}
-						<button type="button" class="cat-card" class:active={activeCategory?.id === category.id}
-						        onmouseenter={() => (activeCategory = category)}
-						        onfocus={() => (activeCategory = category)}
-						        onclick={() => (category.children.length ? (activeCategory = category) : pick(category))}>
+					{#each currentList as category (category.id)}
+						<button type="button" class="cat-card" onclick={() => choose(category)}>
 							{#if category.image}
 								<span class="cat-thumb" style={`background-image:url('${category.image}')`}></span>
 							{:else}
@@ -179,42 +205,23 @@
 							{/if}
 							<span class="cat-name">{categoryName(category, $locale)}</span>
 							{#if category.children.length}
-								<span class="cat-count">{category.children.length} alt kateqoriya</span>
+								<span class="cat-count">{category.children.length} alt kateqoriya <i class="fas fa-chevron-right"></i></span>
+							{:else}
+								<span class="cat-count">seç <i class="fas fa-check"></i></span>
 							{/if}
 						</button>
 					{/each}
 				</div>
 
-				{#if activeCategory}
-					<div class="subpanel">
-						<div class="subpanel-head">
-							<span class="dot-sm"></span>
-							<strong>{categoryName(activeCategory, $locale)}</strong>
-							{#if activeCategory.children.length}
-								<button type="button" class="select-parent" onclick={() => pick(activeCategory as Category)}>
-									bu kateqoriyanı seç
-								</button>
-							{/if}
-						</div>
-
-						{#if activeCategory.children.length}
-							<div class="sub-grid">
-								{#each activeCategory.children as child (child.id)}
-									<button type="button" class="sub-card"
-									        onclick={() => (child.children.length ? (activeCategory = child) : pick(child))}>
-										<span>{categoryName(child, $locale)}</span>
-										{#if child.children.length}<i class="fas fa-chevron-right"></i>{/if}
-									</button>
-								{/each}
-							</div>
-						{:else}
-							<button type="button" class="theme-btn" onclick={() => pick(activeCategory as Category)}>
-								Bu kateqoriyanı seç
-							</button>
-						{/if}
+				{#if currentNode}
+					<div class="extra">
+						<button type="button" class="btn btn-outline-secondary" onclick={back}>
+							<i class="fas fa-arrow-left"></i> Geri
+						</button>
+						<button type="button" class="select-current" onclick={() => select(currentNode)}>
+							“{categoryName(currentNode, $locale)}” kateqoriyasını seç
+						</button>
 					</div>
-				{:else}
-					<p class="section-hint mt-3 mb-0">Kateqoriyanın üzərinə gəlin — alt kateqoriyalar burada açılacaq.</p>
 				{/if}
 			{/if}
 		{:else}
@@ -223,7 +230,9 @@
 					<span class="muted">Kateqoriya</span>
 					<strong>{picked?.name}</strong>
 				</div>
-				<button type="button" class="btn btn-sm btn-outline-secondary" onclick={backToCategory}>Dəyiş</button>
+				<button type="button" class="btn btn-sm btn-outline-secondary" onclick={() => { phase = 'category'; path = []; }}>
+					Dəyiş
+				</button>
 			</div>
 
 			{#if error}<div class="alert alert-danger">{error}</div>{/if}
@@ -317,7 +326,7 @@
 					<button class="theme-btn" type="submit" disabled={submitting}>
 						{submitting ? 'Yerləşdirilir…' : 'Elanı yerləşdir'}
 					</button>
-					<button class="btn btn-outline-secondary" type="button" onclick={backToCategory}>Geri</button>
+					<button class="btn btn-outline-secondary" type="button" onclick={() => { phase = 'category'; path = []; }}>Geri</button>
 				</div>
 			</form>
 		{/if}
@@ -341,25 +350,23 @@
 	.steps .bar { flex: 1; height: 2px; background: #e2e8f0; border-radius: 2px; transition: background .2s; }
 	.steps .bar.filled { background: #16a34a; }
 
+	.crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 8px; }
+	.crumbs .crumb { border: 0; background: none; padding: 2px 4px; color: var(--theme); font-weight: 700; font-size: 14px; cursor: pointer; }
+	.crumbs .crumb.current { color: #0f172a; cursor: default; }
+	.crumbs .sep { color: #cbd5e1; }
+
 	.section-hint { color: #64748b; font-size: 14px; margin-bottom: 14px; }
 
 	.cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 14px; }
 	.cat-card { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 12px; border: 1.5px solid #e6e9f0; border-radius: 16px; background: #fff; cursor: pointer; text-align: left; transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease; }
-	.cat-card:hover, .cat-card.active { transform: translateY(-3px); border-color: var(--theme); box-shadow: 0 14px 30px rgba(15,23,42,.10); }
+	.cat-card:hover { transform: translateY(-3px); border-color: var(--theme); box-shadow: 0 14px 30px rgba(15,23,42,.10); }
 	.cat-thumb { width: 100%; height: 84px; border-radius: 12px; background-size: cover; background-position: center; background-color: #eef1f6; }
 	.cat-thumb.placeholder { display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 800; color: var(--theme); background: color-mix(in srgb, var(--theme) 10%, #fff); }
 	.cat-name { font-weight: 700; color: #0f172a; font-size: 15px; line-height: 1.25; }
 	.cat-count { font-size: 12px; color: #94a3b8; }
 
-	.subpanel { margin-top: 20px; padding: 18px; border: 1.5px solid color-mix(in srgb, var(--theme) 30%, #fff); border-radius: 16px; background: #fff; box-shadow: 0 14px 34px rgba(15,23,42,.07); animation: fade .18s ease; }
-	@keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-	.subpanel-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-	.subpanel-head .dot-sm { width: 10px; height: 10px; border-radius: 50%; background: var(--theme); }
-	.subpanel-head strong { font-size: 16px; color: #0f172a; }
-	.select-parent { margin-left: auto; border: 0; background: none; color: var(--theme); font-weight: 700; font-size: 13px; cursor: pointer; text-decoration: underline; }
-	.sub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
-	.sub-card { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 12px 14px; border: 1px solid #e6e9f0; border-radius: 12px; background: #fff; font-weight: 600; color: #1e293b; cursor: pointer; transition: all .12s ease; }
-	.sub-card:hover { border-color: var(--theme); color: var(--theme); background: color-mix(in srgb, var(--theme) 6%, #fff); }
+	.extra { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 20px; }
+	.select-current { border: 0; background: none; color: var(--theme); font-weight: 700; text-decoration: underline; cursor: pointer; }
 
 	.picked-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; margin-bottom: 20px; border-radius: 14px; background: #fff; border: 1.5px solid #e6e9f0; }
 	.picked-bar .muted { display: block; font-size: 12px; color: #94a3b8; }
