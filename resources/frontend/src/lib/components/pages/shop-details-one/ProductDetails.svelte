@@ -9,6 +9,7 @@
 	import { fetchRecommendedProducts, subscribeToStock, unsubscribeFromStock } from '$lib/services/products';
 	import { createReview, type ApiReview } from '$lib/services/reviews';
 	import { fetchListingContact, type ListingContact } from '$lib/services/listings';
+	import ChatModal from '$lib/components/chat/ChatModal.svelte';
 	import { features } from '$lib/services/features';
 	import { isLoggedIn, user } from '$lib/services/auth';
 	import { translate } from '$lib/i18n';
@@ -138,6 +139,8 @@
 	// Seller contact reveal (number hidden until requested).
 	let contact = $state<ListingContact | null>(null);
 	let revealing = $state(false);
+	let chatOpen = $state(false);
+	let chatProductId = $state<number | null>(null);
 	async function revealContact() {
 		if (contact || revealing) return;
 		revealing = true;
@@ -701,20 +704,29 @@
 								{/if}
 							</div>
 
-							{#if contact}
-								{#if contact.phone}
-									<a class="contact-btn" href={`tel:${contact.phone}`}>
-										<i class="fa-solid fa-phone"></i> {contact.phone}
-									</a>
+							<div class="seller-actions">
+								{#if contact}
+									{#if contact.phone}
+										<a class="contact-btn" href={`tel:${contact.phone}`}>
+											<i class="fa-solid fa-phone"></i> {contact.phone}
+										</a>
+									{:else}
+										<span class="contact-empty">{$translate('No phone number')}</span>
+									{/if}
 								{:else}
-									<span class="contact-empty">{$translate('No phone number')}</span>
+									<button type="button" class="contact-btn" disabled={revealing} onclick={revealContact}>
+										<i class="fa-solid fa-phone"></i>
+										{revealing ? $translate('Loading...') : $translate('Show number')}
+									</button>
 								{/if}
-							{:else}
-								<button type="button" class="contact-btn" disabled={revealing} onclick={revealContact}>
-									<i class="fa-solid fa-phone"></i>
-									{revealing ? $translate('Loading...') : $translate('Show number')}
-								</button>
-							{/if}
+
+								{#if product.seller_type && product.seller_type !== 'guest'}
+									<button type="button" class="contact-btn chat-btn"
+									        onclick={() => { chatProductId = product.id; chatOpen = true; }}>
+										<i class="fa-solid fa-comment-dots"></i> {$translate('Message seller')}
+									</button>
+								{/if}
+							</div>
 						</div>
 					</div>
 				</div>
@@ -887,6 +899,8 @@
 		{/if}
 	</div>
 </div>
+
+<ChatModal bind:open={chatOpen} productId={chatProductId} />
 
 <style>
 	.product-details-container {
@@ -2297,4 +2311,7 @@
 	.contact-btn:hover { color: #fff; filter: brightness(0.95); }
 	.contact-btn:disabled { opacity: 0.7; cursor: default; }
 	.contact-empty { color: #94a3b8; font-size: 14px; }
+
+	.seller-actions { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+	.contact-btn.chat-btn { background: #128c7e; }
 </style>

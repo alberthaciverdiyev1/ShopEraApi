@@ -10,6 +10,8 @@
     import {productImage, productTitle, productUrl} from '$lib/services/products';
     import {languageOptions, locale, setLocale, translate, type Locale} from '$lib/i18n';
     import {features} from '$lib/services/features';
+    import {chatUnread, refreshChatUnread} from '$lib/services/listing-chat';
+    import ChatModal from '$lib/components/chat/ChatModal.svelte';
     import {phoneHref, primaryPhone, settings} from '$lib/services/settings';
 
     const headerPhone = $derived(primaryPhone($settings));
@@ -17,6 +19,15 @@
     // The catalog mega-menu opens on hover (CSS) and toggles on click/tap.
     let catalogOpen = $state(false);
     let catalogItem = $state<HTMLDivElement | null>(null);
+    let chatOpen = $state(false);
+
+    onMount(() => {
+        if ($isLoggedIn) refreshChatUnread();
+        const timer = setInterval(() => {
+            if ($isLoggedIn) refreshChatUnread();
+        }, 30000);
+        return () => clearInterval(timer);
+    });
 
     // Close it when navigating away or clicking outside.
     afterNavigate(() => {
@@ -131,6 +142,13 @@
                             </div>
                         </div>
                         <NavbarSearch/>
+                        {#if $isLoggedIn}
+                            <button type="button" class="header-chat-icon" aria-label={$translate('Messages')}
+                                    onclick={() => (chatOpen = true)}>
+                                <i class="fa-regular fa-comment-dots"></i>
+                                {#if $chatUnread > 0}<span class="cart-count">{$chatUnread}</span>{/if}
+                            </button>
+                        {/if}
                         <div class="menu-cart">
                             <div class="cart-box">
                                 {#if $basketItems.length}
@@ -254,6 +272,7 @@
             </div>
         </div>
     </div>
+    <ChatModal bind:open={chatOpen} />
 </header>
 
 <style>
@@ -875,4 +894,15 @@
         width: auto;
         display: block;
     }
+
+    .header-chat-icon {
+        position: relative;
+        border: 0;
+        background: none;
+        color: inherit;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 6px 8px;
+    }
+    .header-chat-icon:hover { color: var(--theme); }
 </style>
