@@ -9,6 +9,7 @@ export interface ApiListing {
 	price: string | number | null;
 	seller_type: SellerType;
 	condition: string | null;
+	has_delivery?: boolean;
 	category_id: number | null;
 	brand_id?: number | null;
 	brand?: string | null;

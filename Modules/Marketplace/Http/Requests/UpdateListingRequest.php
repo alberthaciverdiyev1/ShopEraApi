@@ -23,6 +23,7 @@ class UpdateListingRequest extends FormRequest
             'price' => ['sometimes', 'required', 'numeric', 'min:0'],
             'city_key' => ['sometimes', 'required', 'string', Rule::exists('cities', 'key')],
             'condition' => ['sometimes', 'required', Rule::in(['new', 'used'])],
+            'has_delivery' => ['nullable', 'boolean'],
             'stock_count' => ['sometimes', 'integer', 'min:1'],
 
             'contact_name' => ['nullable', 'string', 'max:255'],

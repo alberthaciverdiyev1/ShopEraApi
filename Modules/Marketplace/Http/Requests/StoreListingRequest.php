@@ -27,6 +27,7 @@ class StoreListingRequest extends FormRequest
             'price' => ['required', 'numeric', 'min:0'],
             'city_key' => ['required', 'string', Rule::exists('cities', 'key')],
             'condition' => ['required', Rule::in(['new', 'used'])],
+            'has_delivery' => ['nullable', 'boolean'],
             'stock_count' => ['nullable', 'integer', 'min:1'],
 
             'contact_name' => [Rule::requiredIf($guest), 'nullable', 'string', 'max:255'],

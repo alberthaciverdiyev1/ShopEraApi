@@ -43,6 +43,7 @@ class ListingService
             'model' => $data['model'] ?? null,
             'city_id' => $this->resolveCityId($data['city_key'] ?? null),
             'condition' => $data['condition'],
+            'has_delivery' => filter_var($data['has_delivery'] ?? false, FILTER_VALIDATE_BOOLEAN),
             'price' => $data['price'],
             'stock_count' => (int) ($data['stock_count'] ?? 1),
             'user_id' => $user?->id,
@@ -84,6 +85,10 @@ class ListingService
             if (array_key_exists($field, $data)) {
                 $listing->{$field} = $data[$field];
             }
+        }
+
+        if (array_key_exists('has_delivery', $data)) {
+            $listing->has_delivery = filter_var($data['has_delivery'], FILTER_VALIDATE_BOOLEAN);
         }
 
         if (array_key_exists('city_key', $data)) {

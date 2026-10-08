@@ -23,7 +23,8 @@
 	let title = $state('');
 	let description = $state('');
 	let cityKey = $state('');
-	let condition = $state('used');
+	let isNew = $state(false);
+	let delivery = $state(false);
 	let price = $state('');
 	let brandId = $state('');
 	let model = $state('');
@@ -175,9 +176,11 @@
 			description,
 			category_id: picked.id,
 			city_key: cityKey,
-			condition,
+			condition: isNew ? 'new' : 'used',
 			price
 		};
+
+		fields.has_delivery = delivery ? 1 : 0;
 
 		if (filterValueIds.length) {
 			fields.filter_values = filterValueIds;
@@ -359,16 +362,21 @@
 								{/each}
 							</select>
 						</div>
-						<div class="col-md-3">
-							<label class="form-label" for="l-cond">Vəziyyət *</label>
-							<select id="l-cond" class="form-select" bind:value={condition}>
-								<option value="new">Yeni</option>
-								<option value="used">İşlənmiş</option>
-							</select>
-						</div>
-						<div class="col-md-3">
+						<div class="col-md-6">
 							<label class="form-label" for="l-price">Qiymət (₼) *</label>
 							<input id="l-price" class="form-control" type="number" min="0" step="0.01" bind:value={price} required />
+						</div>
+						<div class="col-12">
+							<div class="check-row">
+								<label class="check-pill">
+									<input type="checkbox" bind:checked={isNew} />
+									<span>Yeni</span>
+								</label>
+								<label class="check-pill">
+									<input type="checkbox" bind:checked={delivery} />
+									<span>Çatdırılma var</span>
+								</label>
+							</div>
 						</div>
 						{#if picked?.needsBrand}
 							<div class="col-md-6">
@@ -514,6 +522,28 @@
 		padding: 12px 14px !important;
 		line-height: 1.55 !important;
 		resize: vertical;
+	}
+
+	.check-row { display: flex; flex-wrap: wrap; gap: 12px; }
+	.check-pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		padding: 12px 18px;
+		border: 1.5px solid #e6e9f0;
+		border-radius: 12px;
+		background: #fff;
+		font-weight: 600;
+		color: #1e293b;
+		cursor: pointer;
+		transition: border-color 0.12s ease, background 0.12s ease, color 0.12s ease;
+	}
+	.check-pill:hover { border-color: var(--theme); }
+	.check-pill input { width: 18px; height: 18px; accent-color: var(--theme); }
+	.check-pill:has(input:checked) {
+		border-color: var(--theme);
+		background: color-mix(in srgb, var(--theme) 8%, #fff);
+		color: var(--theme);
 	}
 
 	.dropzone { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 30px; border: 2px dashed #cbd5e1; border-radius: 14px; background: #f8fafc; text-align: center; cursor: pointer; transition: all .15s ease; }

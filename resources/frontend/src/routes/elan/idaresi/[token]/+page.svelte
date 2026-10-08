@@ -22,14 +22,16 @@
 	let title = $state('');
 	let description = $state('');
 	let price = $state('');
-	let condition = $state('used');
+	let isNew = $state(false);
+	let delivery = $state(false);
 	let files = $state<File[]>([]);
 
 	function fill(l: ApiListing) {
 		title = listingTitle(l);
 		description = (l.description?.az ?? l.description?.en ?? '') as string;
 		price = String(l.price ?? '');
-		condition = l.condition ?? 'used';
+		isNew = (l.condition ?? 'used') === 'new';
+		delivery = !!l.has_delivery;
 	}
 
 	async function save(event: SubmitEvent) {
@@ -37,7 +39,10 @@
 		error = null;
 		saving = true;
 		try {
-			const form = buildListingForm({ title, description, price, condition }, files);
+			const form = buildListingForm(
+				{ title, description, price, condition: isNew ? 'new' : 'used', has_delivery: delivery ? 1 : 0 },
+				files
+			);
 			await updateManagedListing(token, form);
 			listing = await fetchManagedListing(token);
 			fill(listing);
@@ -94,12 +99,12 @@
 					<label class="form-label">Qiymət (₼)</label>
 					<input class="form-control" type="number" min="0" step="0.01" bind:value={price} required />
 				</div>
-				<div class="col-md-6">
-					<label class="form-label">Vəziyyət</label>
-					<select class="form-select" bind:value={condition}>
-						<option value="new">Yeni</option>
-						<option value="used">İşlənmiş</option>
-					</select>
+				<div class="col-12">
+					<label class="form-label d-block">Vəziyyət / çatdırılma</label>
+					<div class="check-row">
+						<label class="check-pill"><input type="checkbox" bind:checked={isNew} /> <span>Yeni</span></label>
+						<label class="check-pill"><input type="checkbox" bind:checked={delivery} /> <span>Çatdırılma var</span></label>
+					</div>
 				</div>
 				<div class="col-12">
 					<label class="form-label">Yeni şəkillər</label>
@@ -116,3 +121,11 @@
 		{/if}
 	</div>
 </section>
+
+<style>
+	.check-row { display: flex; flex-wrap: wrap; gap: 12px; }
+	.check-pill { display: inline-flex; align-items: center; gap: 8px; padding: 12px 18px; border: 1.5px solid #e6e9f0; border-radius: 12px; background: #fff; font-weight: 600; color: #1e293b; cursor: pointer; }
+	.check-pill:hover { border-color: var(--theme); }
+	.check-pill input { width: 18px; height: 18px; accent-color: var(--theme); }
+	.check-pill:has(input:checked) { border-color: var(--theme); background: color-mix(in srgb, var(--theme) 8%, #fff); color: var(--theme); }
+</style>
