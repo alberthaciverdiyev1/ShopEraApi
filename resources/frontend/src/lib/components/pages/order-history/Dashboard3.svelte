@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { translate } from '$lib/i18n';
+	import PasswordInput from '$lib/components/ui/PasswordInput.svelte';
 </script>
 
 <!-- Dashboard Section Start -->
@@ -574,18 +575,15 @@
                         <form class="row g-3">
                             <div class="col-md-4">
                                 <label for="currentPassword" class="form-label">Current Password</label>
-                                <input type="password" class="form-control" id="currentPassword"
-                                    placeholder="Password">
+                                <PasswordInput id="currentPassword" placeholder="Password" />
                             </div>
                             <div class="col-md-4">
                                 <label for="newPassword" class="form-label">New Password</label>
-                                <input type="password" class="form-control" id="newPassword"
-                                    placeholder="Password">
+                                <PasswordInput id="newPassword" placeholder="Password" />
                             </div>
                             <div class="col-md-4">
                                 <label for="confirmPassword" class="form-label">Confirm Password</label>
-                                <input type="password" class="form-control" id="confirmPassword"
-                                    placeholder="Password">
+                                <PasswordInput id="confirmPassword" placeholder="Password" />
                             </div>
                             <div class="col-12">
                                 <button type="submit" class="theme-btn mt-3">Change Password</button>
