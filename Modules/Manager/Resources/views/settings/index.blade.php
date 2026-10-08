@@ -26,6 +26,16 @@
             @error('support_email')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
         </div>
 
+        <div class="border-t border-gray-200 pt-5">
+            <label class="{{ $label }}">{{ $keys['admin_disclaimer'] }}</label>
+            <p class="mb-2 text-sm text-gray-500">
+                Bu mətn hər mağazanın admin panelində sidebar-ın ən aşağısında kiçik qeyd kimi göstərilir.
+            </p>
+            <textarea name="admin_disclaimer" rows="4" placeholder="Məsələn: Bu panel yalnız nümayiş məqsədi daşıyır."
+                      class="{{ $input }}">{{ old('admin_disclaimer', $values['admin_disclaimer'] ?? '') }}</textarea>
+            @error('admin_disclaimer')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
+        </div>
+
         <div class="flex justify-end border-t border-gray-200 pt-4">
             <button class="rounded-lg bg-brand-600 px-6 py-2 text-sm font-semibold text-white hover:bg-brand-700">Yadda saxla</button>
         </div>

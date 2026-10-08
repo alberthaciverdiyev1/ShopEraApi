@@ -2,6 +2,14 @@
     $groups = \App\Support\AdminMenu::groups();
 
     $isActive = fn (string $match) => request()->routeIs($match);
+
+    // Global disclaimer pushed from the Manager panel (control DB). Optional.
+    $disclaimer = null;
+    try {
+        $disclaimer = trim((string) \Modules\Manager\Entities\Setting::query()->where('key', 'admin_disclaimer')->value('value'));
+    } catch (\Throwable) {
+        // Control DB unreachable — the sidebar still renders without it.
+    }
 @endphp
 
 <aside class="sidebar sticky top-0 h-screen w-64 shrink-0 overflow-y-auto border-r border-gray-200 bg-white transition-all duration-200 dark:border-gray-700 dark:bg-gray-800">
@@ -55,4 +63,10 @@
             <span class="nav-label truncate">Vitrin</span>
         </a>
     </div>
+
+    @if (! empty($disclaimer))
+        <div class="disclaimer block border-t border-gray-200 px-4 py-3 dark:border-gray-700">
+            <p class="text-[11px] leading-relaxed text-gray-400 dark:text-gray-500">{{ $disclaimer }}</p>
+        </div>
+    @endif
 </aside>

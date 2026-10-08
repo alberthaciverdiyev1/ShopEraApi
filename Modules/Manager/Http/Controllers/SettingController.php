@@ -15,6 +15,7 @@ class SettingController extends Controller
     private const KEYS = [
         'support_whatsapp' => 'Dəstək WhatsApp nömrəsi',
         'support_email' => 'Dəstək e-poçtu',
+        'admin_disclaimer' => 'Admin panel disclaimer',
     ];
 
     public function index()
@@ -36,12 +37,13 @@ class SettingController extends Controller
         $data = $request->validate([
             'support_whatsapp' => ['nullable', 'string', 'max:32'],
             'support_email' => ['nullable', 'email', 'max:190'],
+            'admin_disclaimer' => ['nullable', 'string', 'max:1000'],
         ]);
 
         foreach (self::KEYS as $key => $label) {
             Setting::query()->updateOrCreate(
                 ['key' => $key],
-                ['value' => $data[$key] ?? null, 'label' => $label, 'group' => 'support']
+                ['value' => $data[$key] ?? null, 'label' => $label, 'group' => $key === 'admin_disclaimer' ? 'admin' : 'support']
             );
         }
 

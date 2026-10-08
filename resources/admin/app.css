@@ -29,6 +29,7 @@
 #admin-shell.sidebar-collapsed .sidebar { width: 4.5rem; }
 #admin-shell.sidebar-collapsed .sidebar .nav-label,
 #admin-shell.sidebar-collapsed .sidebar .nav-group-title,
+#admin-shell.sidebar-collapsed .sidebar .disclaimer,
 #admin-shell.sidebar-collapsed .sidebar .brand-text { display: none; }
 #admin-shell.sidebar-collapsed .sidebar .nav-link { justify-content: center; }
 
@@ -64,6 +65,7 @@
     #admin-shell.sidebar-collapsed .sidebar { width: 16rem !important; }
     #admin-shell.sidebar-collapsed .sidebar .nav-label,
     #admin-shell.sidebar-collapsed .sidebar .nav-group-title,
+    #admin-shell.sidebar-collapsed .sidebar .disclaimer,
     #admin-shell.sidebar-collapsed .sidebar .brand-text { display: revert; }
     #admin-shell.sidebar-collapsed .sidebar .nav-link { justify-content: flex-start; }
 
