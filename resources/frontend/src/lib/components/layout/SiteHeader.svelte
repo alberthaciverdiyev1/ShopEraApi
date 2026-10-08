@@ -3,7 +3,7 @@
     import NavMenu from '$lib/components/layout/NavMenu.svelte';
     import CategoryMenu from '$lib/components/layout/CategoryMenu.svelte';
     import NavbarSearch from '$lib/components/layout/NavbarSearch.svelte';
-    import {goto} from '$app/navigation';
+    import {goto, afterNavigate} from '$app/navigation';
     import {isLoggedIn, logout, user} from '$lib/services/auth';
     import {basketCount, basketItems, basketTotal, removeBasketItem} from '$lib/services/basket';
     import {favoriteProducts, favoritesCount, removeFavorite} from '$lib/services/favorites';
@@ -13,6 +13,23 @@
     import {phoneHref, primaryPhone, settings} from '$lib/services/settings';
 
     const headerPhone = $derived(primaryPhone($settings));
+
+    // The catalog mega-menu opens on hover (CSS) and toggles on click/tap.
+    let catalogOpen = $state(false);
+    let catalogItem = $state<HTMLDivElement | null>(null);
+
+    // Close it when navigating away or clicking outside.
+    afterNavigate(() => {
+        catalogOpen = false;
+    });
+    $effect(() => {
+        if (!catalogOpen) return;
+        const onDocClick = (event: MouseEvent) => {
+            if (catalogItem && !catalogItem.contains(event.target as Node)) catalogOpen = false;
+        };
+        document.addEventListener('click', onDocClick);
+        return () => document.removeEventListener('click', onDocClick);
+    });
 
     onMount(() => {
         const header = document.getElementById('header-sticky');
@@ -91,10 +108,11 @@
                                      alt="logo-img" class="header-logo-img">
                             </a>
                         </div>
-                        <div class="header-cataegory-item">
+                        <div class="header-cataegory-item" class:catalog-open={catalogOpen} bind:this={catalogItem}>
                             <ul class="header-cataegory">
                                 <li>
-                                    <a href="#">
+                                    <a href="/shop" aria-expanded={catalogOpen}
+                                       onclick={(event) => { event.preventDefault(); catalogOpen = !catalogOpen; }}>
                                         <span class="left-icon"><i class="icon-app"></i></span>
                                         {$translate('All Categories')}
                                         <span class="right-icon"><i class="fa-regular fa-chevron-down"></i></span>
@@ -458,23 +476,31 @@
         font-size: 13px !important;
     }
 
-    :global(.header-1 .header-cataegory-item > .sub-cataegory) {
+    :global(.header-1 .header-cataegory-item > .catalog-mega-panel) {
         top: calc(100% + 10px) !important;
-        min-width: 250px !important;
-        padding: 8px !important;
+        left: 0 !important;
+        display: grid !important;
+        grid-template-columns: 312px 312px 320px;
+        width: min(944px, calc(100vw - 32px)) !important;
+        min-width: 0 !important;
+        min-height: 560px;
+        max-height: min(70vh, 640px);
+        overflow: hidden;
+        padding: 0 !important;
         border: 1px solid rgba(15, 23, 42, 0.1) !important;
-        border-radius: 12px !important;
+        border-radius: 14px !important;
         background: #ffffff !important;
-        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12) !important;
+        box-shadow: 0 22px 52px rgba(15, 23, 42, 0.16) !important;
     }
 
-    :global(.header-1 .header-cataegory-item:hover > .sub-cataegory) {
+    :global(.header-1 .header-cataegory-item:hover > .catalog-mega-panel),
+    :global(.header-1 .header-cataegory-item.catalog-open > .catalog-mega-panel) {
         visibility: visible !important;
         opacity: 1 !important;
         transform: translateY(0) !important;
     }
 
-    :global(.header-1 .header-cataegory-item > .sub-cataegory::before) {
+    :global(.header-1 .header-cataegory-item > .catalog-mega-panel::before) {
         content: '';
         position: absolute;
         right: 0;
@@ -483,55 +509,97 @@
         height: 12px;
     }
 
-    :global(.header-1 .header-cataegory-item .sub-cataegory li) {
-        position: relative;
+    :global(.header-1 .catalog-mega-panel .catalog-column) {
+        min-width: 0;
+        max-height: min(70vh, 640px);
+        overflow-y: auto;
+        padding: 10px;
+        border-right: 1px solid rgba(15, 23, 42, 0.09);
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 transparent;
     }
 
-    :global(.header-1 .header-cataegory-item .sub-cataegory li a) {
+    :global(.header-1 .catalog-mega-panel .catalog-column:last-child) {
+        border-right: 0;
+    }
+
+    :global(.header-1 .catalog-mega-panel .catalog-row) {
         display: flex !important;
         align-items: center !important;
-        justify-content: space-between !important;
-        min-height: 40px;
-        padding: 0 12px !important;
+        gap: 12px;
+        min-height: 50px;
+        padding: 7px 12px !important;
         border: 0 !important;
         border-radius: 8px;
-        color: #334155 !important;
-        font-size: 14px !important;
+        color: #1f2937 !important;
+        font-size: 14.5px !important;
         font-weight: 600 !important;
         line-height: 1.25;
+        text-decoration: none !important;
+        white-space: normal;
     }
 
-    :global(.header-1 .header-cataegory-item .sub-cataegory li:hover > a) {
-        background: rgba(var(--theme-rgb), 0.08) !important;
+    :global(.header-1 .catalog-mega-panel .catalog-row:hover),
+    :global(.header-1 .catalog-mega-panel .catalog-row.active) {
+        background: #f5f6fa !important;
         color: var(--theme) !important;
     }
 
-    :global(.header-1 .header-cataegory-item .sub-cataegory li .sub-cataegory) {
-        inset-inline-start: calc(100% - 1px) !important;
-        top: 0 !important;
-        min-width: 230px !important;
-        padding: 8px !important;
-        border: 1px solid rgba(15, 23, 42, 0.1) !important;
-        border-radius: 12px !important;
-        background: #ffffff !important;
-        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12) !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-        transform: translateY(0) !important;
+    :global(.header-1 .catalog-mega-panel .catalog-thumb) {
+        display: inline-flex;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        overflow: hidden;
+        border-radius: 8px;
+        background: #f1f5f9;
+        color: #94a3b8;
     }
 
-    :global(.header-1 .header-cataegory-item .sub-cataegory li:hover > .sub-cataegory) {
-        visibility: visible !important;
-        opacity: 1 !important;
-    }
-
-    :global(.header-1 .header-cataegory-item .sub-cataegory li .sub-cataegory::before) {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 100%;
-        width: 12px;
+    :global(.header-1 .catalog-mega-panel .catalog-thumb img) {
+        width: 100%;
         height: 100%;
+        object-fit: cover;
+    }
+
+    :global(.header-1 .catalog-mega-panel .catalog-row span:nth-child(2)),
+    :global(.header-1 .catalog-mega-panel .catalog-row-text span) {
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    :global(.header-1 .catalog-mega-panel .catalog-chevron) {
+        flex: 0 0 auto;
+        margin-left: auto;
+        color: #94a3b8;
+        font-size: 12px;
+    }
+
+    :global(.header-1 .catalog-mega-panel .catalog-leaf-link) {
+        display: block;
+        padding: 11px 10px;
+        border-radius: 8px;
+        color: #1f2937 !important;
+        font-size: 14.5px;
+        font-weight: 600;
+        line-height: 1.3;
+        text-decoration: none !important;
+    }
+
+    :global(.header-1 .catalog-mega-panel .catalog-leaf-link:hover),
+    :global(.header-1 .catalog-mega-panel .catalog-leaf-link-featured) {
+        background: #f5f6fa;
+        color: var(--theme) !important;
+    }
+
+    :global(.header-1 .catalog-mega-panel .catalog-menu-message) {
+        grid-column: 1 / -1;
+        padding: 18px;
+        color: #64748b;
+        font-size: 14px;
+        font-weight: 600;
     }
 
     :global(.header-1 .header-main) {
