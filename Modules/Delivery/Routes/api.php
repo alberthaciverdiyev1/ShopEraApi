@@ -16,7 +16,7 @@ use Modules\Delivery\Http\Controllers\PickupPointController;
 |
 */
 
-Route::prefix('delivery')->controller(DeliveryController::class)->middleware(['auth:sanctum', 'feature:delivery_prices'])->group(function () {
+Route::prefix('delivery')->controller(DeliveryController::class)->middleware(['auth:sanctum'])->group(function () {
     Route::get('/', 'list')->name('delivery.list');
     Route::post('/', 'add')->name('delivery.add');
     Route::get('/details', 'details')->name('delivery.details');
@@ -24,9 +24,9 @@ Route::prefix('delivery')->controller(DeliveryController::class)->middleware(['a
     Route::put('/{id}', 'update')->name('delivery.update');
     Route::delete('/{id}', 'delete')->name('delivery.delete');
 });
-Route::get('city', [DeliveryController::class, 'cities'])->middleware('feature:delivery_cities')->name('city.list');
+Route::get('city', [DeliveryController::class, 'cities'])->name('city.list');
 
-Route::prefix('pickup-point')->controller(PickupPointController::class)->middleware(['auth:sanctum', 'feature:pickup_points'])->group(function () {
+Route::prefix('pickup-point')->controller(PickupPointController::class)->middleware(['auth:sanctum'])->group(function () {
     Route::get('/', 'getAll')->name('pickup-point.list')->withoutMiddleware('auth:sanctum');
     Route::post('/', 'add')->name('pickup-point.add');
     Route::get('/details', 'details')->name('pickup-point.details');
@@ -36,7 +36,7 @@ Route::prefix('pickup-point')->controller(PickupPointController::class)->middlew
     Route::delete('/{id}', 'delete')->name('pickup-point.delete');
 });
 
-Route::prefix('delivery-city')->controller(CityController::class)->middleware(['auth:sanctum', 'feature:delivery_cities'])->group(function () {
+Route::prefix('delivery-city')->controller(CityController::class)->middleware(['auth:sanctum'])->group(function () {
     Route::get('/', 'getAll')->name('delivery-city.list')->withoutMiddleware('auth:sanctum');
     Route::post('/', 'add')->name('delivery-city.add');
     Route::get('/details/{id}', 'details')->name('delivery-city.details');
@@ -46,7 +46,7 @@ Route::prefix('delivery-city')->controller(CityController::class)->middleware(['
 
 Route::prefix('delivery-info')
     ->controller(DeliveryInfoController::class)
-    ->middleware(['auth:sanctum', 'feature:delivery_info'])
+    ->middleware(['auth:sanctum'])
     ->group(function () {
         Route::get('/', 'getAll')->name('delivery-info.list')->withoutMiddleware('auth:sanctum');
         Route::put('/{id}', 'update')->name('delivery-info.update');

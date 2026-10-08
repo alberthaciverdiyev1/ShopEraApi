@@ -1,27 +1,24 @@
-import { get, writable } from 'svelte/store';
-import { apiGet } from '$lib/utils/api';
+import { writable } from 'svelte/store';
 
 type Fetcher = typeof fetch;
 
-/**
- * Feature flags as delivered by the API (`GET /features`). Keys are dynamic:
- * whatever the Manager catalogue exposes, no hardcoded list here.
- */
+/** Feature flags. There is no gating any more, so every key reads as enabled. */
 export type ApiFeatures = Record<string, boolean | undefined>;
 
-/** Shared store; loaded once in +layout.svelte and read reactively everywhere. */
-export const features = writable<ApiFeatures>({});
+/**
+ * Any key access resolves to `true`, so both `$features.someFlag` and
+ * `featureEnabled('some_flag')` behave as "always on".
+ */
+const ALWAYS_ON = new Proxy({} as ApiFeatures, {
+	get: () => true
+});
+
+/** Shared store; kept for components that read `$features` reactively. */
+export const features = writable<ApiFeatures>(ALWAYS_ON);
 
 export async function loadFeatures(fetcher?: Fetcher): Promise<ApiFeatures> {
-	try {
-		const flags = await apiGet<ApiFeatures>('/features', {}, fetcher);
-		const value = flags && typeof flags === 'object' ? flags : {};
-		features.set(value);
-		return value;
-	} catch {
-		features.set({});
-		return {};
-	}
+	features.set(ALWAYS_ON);
+	return ALWAYS_ON;
 }
 
 /** Backwards-compatible one-shot fetch. */
@@ -29,10 +26,7 @@ export async function fetchFeatures(fetcher?: Fetcher): Promise<ApiFeatures> {
 	return loadFeatures(fetcher);
 }
 
-/**
- * Is a feature on? Mirrors the backend's fail-open rule: an unknown key is
- * treated as enabled, an explicit `false` disables it.
- */
-export function featureEnabled(key: string): boolean {
-	return get(features)[key] !== false;
+/** Every feature is on. */
+export function featureEnabled(_key: string): boolean {
+	return true;
 }

@@ -14,7 +14,6 @@
 	import BackToTop from '$lib/components/layout/BackToTop.svelte';
 	import NavProgress from '$lib/components/layout/NavProgress.svelte';
 	import SiteHeader from '$lib/components/layout/SiteHeader.svelte';
-	import SubscriptionNotice from '$lib/components/layout/SubscriptionNotice.svelte';
 	import { loadFeatures, features } from '$lib/services/features';
 	import { loadSettings } from '$lib/services/settings';
 	import { startVersionWatch } from '$lib/utils/api-cache';
@@ -125,7 +124,6 @@
 <FloatingLiveChat />
 {/if}
 <SiteHeader />
-<SubscriptionNotice />
 <MobileBottomNav />
 
 {@render children()}

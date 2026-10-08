@@ -13,7 +13,7 @@ use Modules\Size\Http\Controllers\SizeController;
 |
 */
 
-Route::prefix('size')->middleware('feature:sizes')->controller(SizeController::class)->group(function () {
+Route::prefix('size')->controller(SizeController::class)->group(function () {
 
     // Public: the storefront builds its filters from these lists.
     Route::get('/', 'list')->name('size.list');

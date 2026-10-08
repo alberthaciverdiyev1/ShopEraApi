@@ -13,7 +13,7 @@ use Modules\Order\Http\Controllers\OrderController;
 |
 */
 
-Route::prefix('order')->middleware('feature:orders')->controller(OrderController::class)->group(function () {
+Route::prefix('order')->controller(OrderController::class)->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', 'getAll')->name('order.list');
@@ -21,7 +21,7 @@ Route::prefix('order')->middleware('feature:orders')->controller(OrderController
         Route::post('/', 'orderFromBasket')->name('order.orderFromBasket');
         Route::get('/preview', 'previewOrder')->name('order.previewOrder');
         Route::post('/{product_id}', 'buyOne')->name('order.buyOne');
-        Route::get('/whatsapp-link', 'whatsappLink')->middleware('feature:whatsapp_orders')->name('order.whatsappLink');
+        Route::get('/whatsapp-link', 'whatsappLink')->name('order.whatsappLink');
         Route::get('/completed', 'completedOrders')->name('order.completed');
 
         Route::get('/{id}', 'details')->whereNumber('id')->name('order.details');
@@ -29,8 +29,8 @@ Route::prefix('order')->middleware('feature:orders')->controller(OrderController
 
         Route::put('/{id}', 'update')->name('order.update');
         Route::delete('/{id}', 'delete')->name('order.delete');
-        Route::get('/receipt/{order_id}', 'getReceipt')->middleware('feature:order_receipt')->name('order.getReceipt');
-        Route::get('/download-receipt/{order_id}', 'downloadReceipt')->middleware('feature:order_receipt')->name('order.downloadReceipt');
-        Route::get('/calculate-delivery-price', 'calculateDeliveryPrice')->middleware('feature:delivery_prices')->name('order.calculateDeliveryPrice');
+        Route::get('/receipt/{order_id}', 'getReceipt')->name('order.getReceipt');
+        Route::get('/download-receipt/{order_id}', 'downloadReceipt')->name('order.downloadReceipt');
+        Route::get('/calculate-delivery-price', 'calculateDeliveryPrice')->name('order.calculateDeliveryPrice');
     });
 });

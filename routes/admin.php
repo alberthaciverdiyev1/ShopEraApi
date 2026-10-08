@@ -11,10 +11,6 @@ use Illuminate\Support\Facades\Route;
 | Loaded from bootstrap/app.php under the /admin prefix with the "web"
 | middleware group (session + CSRF) and the admin.* route-name prefix.
 |
-| Feature/plan access is decided by EnforceAdminMenuAccess ("admin.menu"):
-| a locked section is viewable read-only (GET) but cannot be changed
-| (non-GET returns 403), so we no longer hard-block the feature routes here.
-|
 */
 
 Route::middleware('guest:admin')->group(function () {
@@ -22,7 +18,7 @@ Route::middleware('guest:admin')->group(function () {
     Route::post('login', [Admin\AuthController::class, 'login'])->name('login.attempt');
 });
 
-Route::middleware(['admin.auth', 'subscribed', 'admin.menu'])->group(function () {
+Route::middleware(['admin.auth'])->group(function () {
     Route::post('logout', [Admin\AuthController::class, 'logout'])->name('logout');
 
     Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');

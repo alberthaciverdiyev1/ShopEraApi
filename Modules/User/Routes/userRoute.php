@@ -2,7 +2,7 @@
 
 use Modules\User\Http\Controllers\UserController;
 
-Route::controller(UserController::class)->middleware(['auth:sanctum', 'feature:users'])->prefix('user')->group(function () {
+Route::controller(UserController::class)->middleware(['auth:sanctum'])->prefix('user')->group(function () {
     Route::put('/change-email', 'changeEmail')->name('auth.changeEmail');
     Route::put('/change-name', 'changeName')->name('auth.changeName');
     Route::put('/change-surname', 'changeSurname')->name('auth.changeSurname');

@@ -15,7 +15,7 @@ use Modules\Balance\Http\Controllers\BalanceController;
 */
 
 Route::controller(BalanceController::class)
-    ->middleware(['auth:sanctum', 'feature:balance_wallet'])
+    ->middleware(['auth:sanctum'])
     ->prefix('balance')
     ->group(function () {
         Route::post('/deposit', 'deposit')->name('balance.deposit');

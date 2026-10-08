@@ -98,44 +98,20 @@ if (! function_exists('admin_label')) {
 
 if (! function_exists('plan')) {
     /**
-     * Current plan of this site.
-     *   plan()                       => 'Premium' | null
-     *   plan('premium')              => bool
-     *   plan(['premium', 'business']) => bool
+     * There are no plans any more, so this always reports "no plan".
      */
     function plan(string|array|null $name = null): string|bool|null
     {
-        $current = \App\Support\Subscription::plan();
-
-        if ($name === null) {
-            return $current;
-        }
-
-        $names = array_map('strtolower', (array) $name);
-
-        return $current !== null && in_array(strtolower($current), $names, true);
+        return $name === null ? null : false;
     }
 }
 
 if (! function_exists('feature')) {
     /**
-     * Is a feature enabled for this site? Accepts a single key or a list.
-     *   feature('chat')                          => bool
-     *   feature(['chat', 'reviews'])             => bool  (any by default)
-     *   feature(['chat', 'reviews'], all: true)  => bool  (every one)
+     * Feature gating was removed; every feature is enabled.
      */
     function feature(string|array $key, bool $all = false): bool
     {
-        try {
-            if (is_array($key)) {
-                return $all
-                    ? array_reduce($key, fn (bool $carry, string $k): bool => $carry && \App\Support\Features::enabled($k), true)
-                    : \App\Support\Features::any($key);
-            }
-
-            return \App\Support\Features::enabled($key);
-        } catch (\Throwable) {
-            return false;
-        }
+        return true;
     }
 }

@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\Gender;
-use App\Support\Features;
-use App\Support\PlanLimits;
 use App\Support\TenantContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -124,12 +122,6 @@ class ProductController extends AdminController
     public function store(Request $request)
     {
         $this->requirePermission('add product');
-
-        if (PlanLimits::reached('max_products', 1)) {
-            $limit = Features::limit('max_products');
-
-            return back()->withInput()->withErrors(['limit' => "Məhsul limitinə çatdınız ($limit). Planı yüksəldin."]);
-        }
 
         $this->guardStorage($request);
 
@@ -429,11 +421,6 @@ class ProductController extends AdminController
             }
         }
 
-        if ($bytes > 0 && PlanLimits::storageFull($bytes)) {
-            throw ValidationException::withMessages([
-                'new_images' => __('Yaddaş limitinə çatdınız. Fayl yükləmək üçün planı yüksəldin.'),
-            ]);
-        }
     }
 
     private function syncVideos(Product $product, Request $request): void

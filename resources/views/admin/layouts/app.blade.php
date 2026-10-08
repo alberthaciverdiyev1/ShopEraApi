@@ -66,18 +66,6 @@
         <main class="flex-1 p-4 sm:p-6">
             @include('admin.partials.flash')
 
-            @if (\App\Support\Subscription::isBlocked())
-                <div class="mb-4 flex items-center gap-3 rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-800 dark:border-red-800 dark:bg-gray-800 dark:text-red-400" role="alert">
-                    <strong>Abunə aktiv deyil</strong>
-                    <span>({{ \App\Support\Subscription::status() ?? 'naməlum' }}). Yalnız baxış rejimi — dəyişiklik etmək üçün planı yeniləyin.</span>
-                </div>
-            @elseif (\App\Support\Subscription::isPastDue())
-                <div class="mb-4 flex items-center gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800 dark:bg-gray-800 dark:text-amber-400" role="alert">
-                    <strong>Ödəniş gecikib.</strong>
-                    <span>Xahiş edirik abunə ödənişini yeniləyin.</span>
-                </div>
-            @endif
-
             <div>
                 @yield('content')
             </div>

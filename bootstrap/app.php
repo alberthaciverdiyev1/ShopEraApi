@@ -1,8 +1,6 @@
 <?php
 
 use App\Http\Middleware\AdminAuthenticate;
-use App\Http\Middleware\EnsureFeatureEnabled;
-use App\Http\Middleware\EnsureSubscriptionActive;
 use App\Http\Middleware\SetLocaleFromHeader;
 use App\Http\Middleware\TrustProxies;
 use Illuminate\Auth\AuthenticationException;
@@ -45,9 +43,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => PermissionMiddleware::class,
             'role_or_permission' => RoleOrPermissionMiddleware::class,
             'admin.auth' => AdminAuthenticate::class,
-            'subscribed' => EnsureSubscriptionActive::class,
-            'feature' => EnsureFeatureEnabled::class,
-            'admin.menu' => \App\Http\Middleware\EnforceAdminMenuAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

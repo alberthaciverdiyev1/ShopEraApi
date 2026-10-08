@@ -13,7 +13,7 @@ use Modules\Brand\Http\Controllers\BrandController;
 |
 */
 
-Route::prefix('brand')->middleware('feature:brands')->controller(BrandController::class)->group(function () {
+Route::prefix('brand')->controller(BrandController::class)->group(function () {
 
     Route::get('/', 'list')->name('brand.list');
     Route::get('/{id}', 'details')->name('brand.details');

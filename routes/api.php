@@ -2,11 +2,8 @@
 
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\DataVersionController;
-use App\Http\Controllers\Api\FeaturesController;
 use App\Http\Controllers\Api\HomeController;
-use App\Http\Controllers\Api\PlanController;
 use App\Http\Controllers\Api\PromoBlockController;
-use App\Http\Controllers\Api\SubscriptionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -23,16 +20,7 @@ Route::get('/home', [HomeController::class, 'index'])->name('api.home');
 // Cheap revision token for the storefront's in-memory cache.
 Route::get('/data-version', [DataVersionController::class, 'index'])->name('api.data-version');
 
-// Public feature flags for the storefront (from Manager.Snaker entitlements).
-Route::get('/features', [FeaturesController::class, 'index'])->name('api.features');
-
-// Subscription status for the storefront (read-only mode, notices).
-Route::get('/subscription', [SubscriptionController::class, 'show'])->name('api.subscription');
-
-// Plan limits + current usage, mirrored from Manager.Snaker entitlements.
-Route::get('/plan', [PlanController::class, 'index'])->name('api.plan');
-
-// Offer / ad blocks managed in Manager.Snaker (Free plan only).
+// Offer / ad blocks for the storefront.
 Route::get('/promo-blocks', [PromoBlockController::class, 'index'])->name('api.promo-blocks');
 
 // Contact info and form submission

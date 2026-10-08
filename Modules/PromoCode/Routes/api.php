@@ -2,7 +2,7 @@
 
 use Modules\PromoCode\Http\Controllers\PromoCodeController;
 
-Route::prefix('promo-code')->middleware('feature:promo_codes')->controller(PromoCodeController::class)->group(function () {
+Route::prefix('promo-code')->controller(PromoCodeController::class)->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', 'getAll')->name('promo-code.list');

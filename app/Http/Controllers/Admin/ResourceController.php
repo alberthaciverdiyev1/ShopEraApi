@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Support\PlanLimits;
 use App\Support\TenantContext;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -298,12 +297,6 @@ abstract class ResourceController extends AdminController
                 unset($data[$name]);
 
                 if ($request->hasFile($name)) {
-                    if (PlanLimits::storageFull((int) $request->file($name)->getSize())) {
-                        throw ValidationException::withMessages([
-                            $name => __('Yaddaş limitinə çatdınız. Fayl yükləmək üçün planı yüksəldin.'),
-                        ]);
-                    }
-
                     $data[$name] = $request->file($name)->store(
                         TenantContext::storagePath($field['path'] ?? $this->defaultStoragePath()),
                         'public'
@@ -402,22 +395,12 @@ abstract class ResourceController extends AdminController
     }
 
     /**
-     * Fields the controller decides to show: a field is hidden when its
-     * `feature` flag is off or its `plan` does not match. Hidden fields are
-     * also skipped by validation/saving (buildRules/prepareData use this).
-     *
-     * Declare per field: ['name' => 'x', 'feature' => 'chat'] or ['plan' => ['premium','business']].
+     * Fields the controller decides to show. There is no feature/plan gating
+     * any more, so every declared field is visible.
      */
     protected function visibleFields(): array
     {
         return array_values(array_filter($this->fields, function (array $field): bool {
-            if (! empty($field['feature']) && ! feature($field['feature'])) {
-                return false;
-            }
-
-            if (! empty($field['plan']) && ! plan($field['plan'])) {
-                return false;
-            }
 
             return true;
         }));

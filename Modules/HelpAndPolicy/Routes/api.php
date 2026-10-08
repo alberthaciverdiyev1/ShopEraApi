@@ -14,7 +14,7 @@ use Modules\HelpAndPolicy\Http\Controllers\LegalTermController;
 |
 */
 
-Route::prefix('faq')->middleware('feature:faq')->controller(FaqController::class)->group(function () {
+Route::prefix('faq')->controller(FaqController::class)->group(function () {
     Route::get('/', 'getAll')->name('faq.list');
 
     Route::middleware('auth:sanctum')->group(function () {
@@ -26,7 +26,7 @@ Route::prefix('faq')->middleware('feature:faq')->controller(FaqController::class
 
 });
 
-Route::prefix('legal-terms')->middleware('feature:legal_terms')->controller(LegalTermController::class)->group(function () {
+Route::prefix('legal-terms')->controller(LegalTermController::class)->group(function () {
     Route::get('/', 'getAll')->name('legal_terms.list');
 
     Route::middleware('auth:sanctum')->group(function () {

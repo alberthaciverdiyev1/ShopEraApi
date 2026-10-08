@@ -18,10 +18,10 @@ use Modules\Setting\Http\Controllers\ThemeColorController;
 
 Route::prefix('setting')->controller(SettingController::class)->group(function () {
     Route::get('/', 'list')->name('setting.list');
-    Route::put('/', 'update')->name('setting.update')->middleware(['auth:sanctum', 'feature:settings']);
+    Route::put('/', 'update')->name('setting.update')->middleware(['auth:sanctum']);
 });
-Route::post('/change-locale', [SettingController::class, 'changeLocale'])->name('change-locale')->middleware([SetLocaleFromHeader::class, 'feature:multi_language']);
-Route::get('/global-statistics', [StatisticController::class, 'statistics'])->middleware('feature:statistics')->name('global-statistics');
+Route::post('/change-locale', [SettingController::class, 'changeLocale'])->name('change-locale')->middleware([SetLocaleFromHeader::class]);
+Route::get('/global-statistics', [StatisticController::class, 'statistics'])->name('global-statistics');
 
 /*
  * Storefront colour palette. GET is public so the site can theme itself;
@@ -29,5 +29,5 @@ Route::get('/global-statistics', [StatisticController::class, 'statistics'])->mi
  */
 Route::prefix('theme')->controller(ThemeColorController::class)->group(function () {
     Route::get('/', 'show')->name('theme.show');
-    Route::put('/', 'update')->middleware('feature:theme_colors')->name('theme.update');
+    Route::put('/', 'update')->name('theme.update');
 });

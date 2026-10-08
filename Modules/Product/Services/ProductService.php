@@ -5,7 +5,6 @@ namespace Modules\Product\Services;
 use App\Enums\Gender;
 use App\Helpers\TranslateHelper as Translate;
 use App\Support\DbExtensions;
-use App\Support\PlanLimits;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -601,10 +600,6 @@ class ProductService
 
     public function add($request, array $overrides = []): JsonResponse
     {
-        if (PlanLimits::reached('max_products', 1)) {
-            return responseHelper(__('Product limit reached. Please upgrade your plan.'), 403);
-        }
-
         $lock = Cache::lock('add_product_'.auth()->id(), 10);
         $productHash = '';
 

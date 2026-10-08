@@ -9,7 +9,7 @@ use Modules\RoleAndPermissions\Http\Controllers\RoleController;
 | Role Routes
 |--------------------------------------------------------------------------
 */
-Route::prefix('role')->middleware(['auth:sanctum', 'feature:roles_permissions'])->group(function () {
+Route::prefix('role')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/', [RoleController::class, 'getAll']);
     Route::post('/', [RoleController::class, 'add']);
     Route::get('/{id}', [RoleController::class, 'details']);
@@ -28,7 +28,7 @@ Route::prefix('role')->middleware(['auth:sanctum', 'feature:roles_permissions'])
 | Permission Routes
 |--------------------------------------------------------------------------
 */
-Route::prefix('permission')->middleware(['auth:sanctum', 'feature:roles_permissions'])->group(function () {
+Route::prefix('permission')->middleware(['auth:sanctum'])->group(function () {
     Route::get('/', [PermissionController::class, 'getAll']);
     Route::post('/', [PermissionController::class, 'store']);
     Route::get('/{id}', [PermissionController::class, 'show']);

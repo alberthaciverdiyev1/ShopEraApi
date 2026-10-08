@@ -2,7 +2,7 @@
 
 use Modules\User\Http\Controllers\AddressController;
 
-Route::controller(AddressController::class)->middleware(['auth:sanctum', 'feature:addresses'])->prefix('user/address')->group(function () {
+Route::controller(AddressController::class)->middleware(['auth:sanctum'])->prefix('user/address')->group(function () {
     Route::get('/', 'getAll')->name('address.getAll');
     Route::post('/', 'add')->name('address.add');
     Route::get('/{id}', 'details')->name('address.details');

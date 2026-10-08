@@ -13,7 +13,7 @@ use Modules\Category\Http\Controllers\CategoryController;
 |
 */
 
-Route::prefix('category')->middleware('feature:categories')->controller(CategoryController::class)->group(function () {
+Route::prefix('category')->controller(CategoryController::class)->group(function () {
 
     Route::get('/with-products', 'listWithProducts')->name('category.listWithProducts');
     Route::get('/admin', 'listAdmin')->name('category.listAdmin');
