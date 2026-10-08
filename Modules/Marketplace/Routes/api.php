@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\Marketplace\Http\Controllers\ListingChatController;
 use Modules\Marketplace\Http\Controllers\ListingController;
 
 /*
@@ -8,11 +9,7 @@ use Modules\Marketplace\Http\Controllers\ListingController;
 |
 | Products are the listings: the public read side already exists on the
 | /product endpoints, so nothing is duplicated here. These routes only cover
-| posting and managing a listing.
-|
-| Guests post without an account and manage their listing through a secret
-| link (PUT/DELETE /listings/manage/{token}); signed-in sellers use the
-| authenticated group.
+| posting and managing a listing, and the buyer<->seller chat per listing.
 */
 Route::prefix('listings')->controller(ListingController::class)->group(function () {
     Route::get('/fields', 'fields')->name('listing.fields');
@@ -32,4 +29,13 @@ Route::prefix('listings')->controller(ListingController::class)->group(function 
         Route::put('/{id}', 'update')->whereNumber('id')->name('listing.update');
         Route::delete('/{id}', 'destroy')->whereNumber('id')->name('listing.destroy');
     });
+});
+
+// Buyer <-> seller chat (signed-in only).
+Route::prefix('listings')->controller(ListingChatController::class)->middleware('auth:sanctum')->group(function () {
+    Route::get('/chats', 'index')->name('listing.chats');
+    Route::get('/chats/unread', 'unread')->name('listing.chats.unread');
+    Route::get('/chats/{id}', 'show')->whereNumber('id')->name('listing.chats.show');
+    Route::post('/chats/{id}/messages', 'send')->whereNumber('id')->name('listing.chats.send');
+    Route::post('/{id}/chat', 'start')->whereNumber('id')->name('listing.chat.start');
 });
