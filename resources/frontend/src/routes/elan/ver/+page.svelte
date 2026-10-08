@@ -32,15 +32,16 @@
 	let copied = $state(false);
 
 	const currentList = $derived<Category[]>(path.length ? path[path.length - 1].children : $categories);
-	const currentNode = $derived<Category | null>(path.length ? path[path.length - 1] : null);
 
 	function initial(name: string): string {
 		return name?.trim()?.charAt(0)?.toUpperCase() ?? '?';
 	}
 
 	function choose(category: Category) {
-		if (category.children?.length) {
-			path = [...path, category];
+		// Level 1: a parent with children opens its subcategory list; a leaf
+		// goes straight to the form. Level 2: any subcategory opens the form.
+		if (path.length === 0 && category.children?.length) {
+			path = [category];
 		} else {
 			select(category);
 		}
@@ -213,13 +214,10 @@
 					{/each}
 				</div>
 
-				{#if currentNode}
+				{#if path.length}
 					<div class="extra">
 						<button type="button" class="btn btn-outline-secondary" onclick={back}>
 							<i class="fas fa-arrow-left"></i> Geri
-						</button>
-						<button type="button" class="select-current" onclick={() => select(currentNode)}>
-							“{categoryName(currentNode, $locale)}” kateqoriyasını seç
 						</button>
 					</div>
 				{/if}
@@ -365,8 +363,7 @@
 	.cat-name { font-weight: 700; color: #0f172a; font-size: 15px; line-height: 1.25; }
 	.cat-count { font-size: 12px; color: #94a3b8; }
 
-	.extra { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 20px; }
-	.select-current { border: 0; background: none; color: var(--theme); font-weight: 700; text-decoration: underline; cursor: pointer; }
+	.extra { display: flex; align-items: center; gap: 12px; margin-top: 20px; }
 
 	.picked-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; margin-bottom: 20px; border-radius: 14px; background: #fff; border: 1.5px solid #e6e9f0; }
 	.picked-bar .muted { display: block; font-size: 12px; color: #94a3b8; }
