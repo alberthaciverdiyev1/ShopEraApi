@@ -3,7 +3,6 @@
 use App\Http\Middleware\AdminAuthenticate;
 use App\Http\Middleware\EnsureFeatureEnabled;
 use App\Http\Middleware\EnsureSubscriptionActive;
-use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\SetLocaleFromHeader;
 use App\Http\Middleware\TrustProxies;
 use Illuminate\Auth\AuthenticationException;
@@ -32,23 +31,18 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->web(prepend: [ResolveTenant::class]);
         $middleware->api(prepend: [
-            ResolveTenant::class,
             SetLocaleFromHeader::class,
         ]);
         $middleware->api(append: [\App\Http\Middleware\CachePublicApi::class]);
         $middleware->append([TrustProxies::class]);
 
-        // Unauthenticated users are sent to the manager login on control hosts,
+        // Unauthenticated users are sent to the manager login under /manager,
         // otherwise to the storefront admin login.
         $middleware->redirectGuestsTo(function (Request $request): string {
-            $controlHosts = array_map('strtolower', (array) config('tenant.control_hosts', []));
-            if ($controlHosts !== [] && in_array(strtolower($request->getHost()), $controlHosts, true)) {
-                return route('manager.login');
-            }
-
-            return route('admin.login');
+            return $request->is('manager', 'manager/*')
+                ? route('manager.login')
+                : route('admin.login');
         });
 
         $middleware->alias([
@@ -73,8 +67,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             // Manager panel: send unauthenticated visitors to its own login.
-            $controlHosts = array_map('strtolower', (array) config('tenant.control_hosts', []));
-            if ($controlHosts !== [] && in_array(strtolower($request->getHost()), $controlHosts, true)) {
+            if ($request->is('manager', 'manager/*')) {
                 return redirect()->guest(route('manager.login'));
             }
         });

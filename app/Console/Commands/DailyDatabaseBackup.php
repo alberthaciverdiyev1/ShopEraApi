@@ -2,7 +2,6 @@
 
 namespace App\Console\Commands;
 
-use App\Support\TenantDatabase;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\Process\Process;
@@ -11,7 +10,7 @@ class DailyDatabaseBackup extends Command
 {
     protected $signature = 'db:backup';
 
-    protected $description = 'Backup the central and every tenant database locally';
+    protected $description = 'Backup the single application database locally';
 
     public function handle(): int
     {
@@ -21,31 +20,17 @@ class DailyDatabaseBackup extends Command
             mkdir($path, 0755, true);
         }
 
-        // The central catalog plus every tenant database on the same server.
-        $databases = [(string) config('database.connections.pgsql.database')];
-        foreach (array_keys(TenantDatabase::databases()) as $tenantDatabase) {
-            if (! in_array($tenantDatabase, $databases, true)) {
-                $databases[] = $tenantDatabase;
-            }
-        }
+        $database = (string) config('database.connections.pgsql.database');
 
-        $failed = 0;
-
-        foreach (array_filter($databases) as $database) {
-            if (! $this->backup($database, $path)) {
-                $failed++;
-            }
-        }
-
-        if ($failed > 0) {
-            $this->error("{$failed} database backup(s) failed. Check laravel.log for details.");
+        if ($database === '' || ! $this->backup($database, $path)) {
+            $this->error('Database backup failed. Check laravel.log for details.');
 
             return self::FAILURE;
         }
 
         $this->cleanupOldBackups();
 
-        $this->info('Backup completed for '.count($databases).' database(s).');
+        $this->info("Backup completed for {$database}.");
 
         return self::SUCCESS;
     }

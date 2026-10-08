@@ -2,15 +2,10 @@
 
 namespace App\Jobs\Concerns;
 
-use App\Jobs\Middleware\RestoreTenantContext;
-use App\Support\TenantContext;
-
 /**
- * Captures the active tenant when a job is dispatched (inside the request that
- * still has the tenant connection) so the worker — which has no request host —
- * can restore the same tenant database before the job runs.
- *
- * Call captureTenant() at the end of the job's constructor.
+ * Single-database deployment: a queued job no longer has to restore a tenant
+ * connection, so this trait is a no-op kept for backwards compatibility with
+ * jobs that still call captureTenant().
  */
 trait TenantAware
 {
@@ -22,14 +17,12 @@ trait TenantAware
 
     protected function captureTenant(): void
     {
-        $this->tenantHost = TenantContext::host();
-        $this->tenantDatabase = TenantContext::database();
-        $this->tenantStorageRoot = config('tenant.current_storage_root');
+        // no-op
     }
 
     /** @return array<int,object> */
     public function middleware(): array
     {
-        return [new RestoreTenantContext];
+        return [];
     }
 }

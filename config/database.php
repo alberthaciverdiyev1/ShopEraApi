@@ -96,28 +96,13 @@ return [
             'search_path' => 'public',
             'sslmode' => 'prefer',
         ],
-        // Per-tenant database; the database name is set at runtime by ResolveTenant.
-        'tenant' => [
-            'driver' => 'pgsql',
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '5432'),
-            'database' => env('DB_DATABASE', 'shopera'),
-            'username' => env('DB_USERNAME', 'admin'),
-            'password' => env('DB_PASSWORD', ''),
-            'charset' => env('DB_CHARSET', 'utf8'),
-            'prefix' => '',
-            'prefix_indexes' => true,
-            'search_path' => 'public',
-            'sslmode' => 'prefer',
-        ],
-
-        // Central "main" database created once: SaaS control data (site owners,
-        // plans, features, subscriptions, themes). Independent of tenant DBs.
+        // Operator ("control") connection. The platform is a single-database
+        // deployment now, so this points at the same database as the default.
         'control' => [
             'driver' => 'pgsql',
             'host' => env('DB_CONTROL_HOST', env('DB_HOST', '127.0.0.1')),
             'port' => env('DB_CONTROL_PORT', env('DB_PORT', '5432')),
-            'database' => env('DB_CONTROL_DATABASE', 'snaker_main'),
+            'database' => env('DB_CONTROL_DATABASE', env('DB_DATABASE', 'shopera')),
             'username' => env('DB_CONTROL_USERNAME', env('DB_USERNAME', 'admin')),
             'password' => env('DB_CONTROL_PASSWORD', env('DB_PASSWORD', '')),
             'charset' => env('DB_CHARSET', 'utf8'),

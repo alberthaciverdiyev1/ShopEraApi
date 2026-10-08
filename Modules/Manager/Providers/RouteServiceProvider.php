@@ -35,15 +35,12 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapWebRoutes(): void
     {
-        $hosts = (array) config('tenant.control_hosts', []);
-        $registrar = Route::middleware('web')->name('manager.');
-
-        // The operator panel only answers on the configured control host(s).
-        if ($hosts !== []) {
-            $registrar->domain($hosts[0]);
-        }
-
-        $registrar->group(module_path($this->name, '/Routes/web.php'));
+        // Single-database deployment: the operator panel lives under /manager
+        // instead of a dedicated control host.
+        Route::middleware('web')
+            ->prefix('manager')
+            ->name('manager.')
+            ->group(module_path($this->name, '/Routes/web.php'));
     }
 
     /**
