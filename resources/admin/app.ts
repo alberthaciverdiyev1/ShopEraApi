@@ -260,3 +260,24 @@ document.addEventListener('submit', (event) => {
     const button = form.querySelector<HTMLButtonElement>('button[type="submit"], button:not([type])');
     startLoading(button ?? form);
 });
+
+/**
+ * Password visibility toggle. Any input wrapped in `[data-password-field]`
+ * with a `[data-password-toggle]` button flips between hidden/visible and
+ * swaps the eye / eye-off icons.
+ */
+document.addEventListener('click', (event) => {
+    const button = (event.target as HTMLElement | null)?.closest<HTMLElement>('[data-password-toggle]');
+    if (!button) return;
+
+    event.preventDefault();
+    const field = button.closest('[data-password-field]');
+    const input = field?.querySelector<HTMLInputElement>('input');
+    if (!input) return;
+
+    const reveal = input.type === 'password';
+    input.type = reveal ? 'text' : 'password';
+    button.setAttribute('aria-label', reveal ? 'Şifrəni gizlət' : 'Şifrəni göstər');
+    button.querySelector('[data-eye]')?.classList.toggle('hidden', reveal);
+    button.querySelector('[data-eye-off]')?.classList.toggle('hidden', !reveal);
+});

@@ -57,8 +57,18 @@
                 <p class="mb-3 font-semibold text-gray-700">Şifrə dəyiş</p>
                 <form method="POST" action="{{ route('admin.users.password', $user->id) }}" class="grid grid-cols-2 gap-3">
                     @csrf @method('PUT')
-                    <input type="password" name="password" placeholder="Yeni şifrə" class="rounded-lg border border-gray-200 px-3 py-2 text-sm">
-                    <input type="password" name="password_confirmation" placeholder="Təkrar" class="rounded-lg border border-gray-200 px-3 py-2 text-sm">
+                    @include('admin.partials.password-input', [
+                        'name' => 'password',
+                        'placeholder' => 'Yeni şifrə',
+                        'autocomplete' => 'new-password',
+                        'class' => 'w-full rounded-lg border border-gray-200 px-3 py-2 text-sm',
+                    ])
+                    @include('admin.partials.password-input', [
+                        'name' => 'password_confirmation',
+                        'placeholder' => 'Təkrar',
+                        'autocomplete' => 'new-password',
+                        'class' => 'w-full rounded-lg border border-gray-200 px-3 py-2 text-sm',
+                    ])
                     <button class="col-span-2 rounded-lg bg-gray-800 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-900">Şifrəni yenilə</button>
                 </form>
             </div>

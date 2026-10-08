@@ -164,7 +164,13 @@
             @csrf
             <div class="min-w-56 flex-1">
                 <label class="mb-1 block text-xs font-medium text-gray-600">Yeni şifrə (min 6 simvol)</label>
-                <input type="password" name="password" minlength="6" required class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm focus:border-brand-500 focus:ring-brand-500">
+                @include('admin.partials.password-input', [
+                    'name' => 'password',
+                    'minlength' => 6,
+                    'required' => true,
+                    'autocomplete' => 'new-password',
+                    'class' => 'block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm focus:border-brand-500 focus:ring-brand-500',
+                ])
             </div>
             <button class="rounded-lg bg-brand-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-700">Şifrəni yenilə</button>
             @error('password')<div class="w-full text-sm text-rose-600">{{ $message }}</div>@enderror

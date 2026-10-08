@@ -15,19 +15,34 @@
 
             <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">Cari şifrə</label>
-                <input type="password" name="current_password" required autocomplete="current-password" class="{{ $input }}">
+                @include('admin.partials.password-input', [
+                    'name' => 'current_password',
+                    'required' => true,
+                    'autocomplete' => 'current-password',
+                    'class' => $input,
+                ])
                 @error('current_password')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
             </div>
 
             <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">Yeni şifrə</label>
-                <input type="password" name="password" required autocomplete="new-password" class="{{ $input }}">
+                @include('admin.partials.password-input', [
+                    'name' => 'password',
+                    'required' => true,
+                    'autocomplete' => 'new-password',
+                    'class' => $input,
+                ])
                 @error('password')<p class="mt-1 text-xs text-rose-600">{{ $message }}</p>@enderror
             </div>
 
             <div>
                 <label class="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200">Yeni şifrə (təkrar)</label>
-                <input type="password" name="password_confirmation" required autocomplete="new-password" class="{{ $input }}">
+                @include('admin.partials.password-input', [
+                    'name' => 'password_confirmation',
+                    'required' => true,
+                    'autocomplete' => 'new-password',
+                    'class' => $input,
+                ])
             </div>
 
             <div class="flex justify-end border-t border-gray-200 pt-4 dark:border-gray-700">

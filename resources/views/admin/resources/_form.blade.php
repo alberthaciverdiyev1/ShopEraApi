@@ -161,7 +161,11 @@
                             <input type="date" name="{{ $name }}" value="{{ $dateVal }}" class="{{ $input }}">
 
                         @elseif ($type === 'password')
-                            <input type="password" name="{{ $name }}" class="{{ $input }}">
+                            @include('admin.partials.password-input', [
+                                'name' => $name,
+                                'autocomplete' => 'new-password',
+                                'class' => $input,
+                            ])
 
                         @else
                             <input type="{{ $type === 'number' ? 'number' : 'text' }}"

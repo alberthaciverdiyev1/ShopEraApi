@@ -31,8 +31,11 @@
             </div>
             <div>
                 <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">Şifrə</label>
-                <input type="password" name="password" required
-                       class="w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-brand-500">
+                @include('admin.partials.password-input', [
+                    'name' => 'password',
+                    'required' => true,
+                    'class' => 'w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-brand-500 focus:ring-brand-500',
+                ])
             </div>
             <label class="flex items-center gap-2 text-sm text-gray-600">
                 <input type="checkbox" name="remember" value="1" class="h-4 w-4 rounded border-gray-300 text-brand-600">
