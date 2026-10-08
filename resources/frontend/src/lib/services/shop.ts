@@ -32,6 +32,7 @@ export interface ShopFilters {
 	has_delivery?: boolean;
 	/** Marketplace feed ordering (promoted first). */
 	marketplace?: boolean;
+	vendor_id?: number;
 }
 
 export interface ShopResult {

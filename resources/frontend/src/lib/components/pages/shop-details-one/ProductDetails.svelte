@@ -694,13 +694,16 @@
 						<div class="seller-contact">
 							<div class="seller-info">
 								<span class="seller-avatar"><i class="fa-solid fa-user"></i></span>
-								<span class="seller-name">
-									{product.seller?.name ?? product.contact_name ?? $translate('Seller')}
-								</span>
 								{#if product.seller}
+									<a class="seller-name" href={`/magaza/${product.seller.slug}`}>
+										{product.seller.name}
+									</a>
 									<span class="seller-badge">{$translate('Store')}</span>
-								{:else if product.seller_type === 'guest'}
-									<span class="seller-badge">{$translate('Private')}</span>
+								{:else}
+									<span class="seller-name">{product.contact_name ?? $translate('Seller')}</span>
+									{#if product.seller_type === 'guest'}
+										<span class="seller-badge">{$translate('Private')}</span>
+									{/if}
 								{/if}
 							</div>
 

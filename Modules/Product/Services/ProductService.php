@@ -120,6 +120,10 @@ class ProductService
             $query->where('city_id', $params['city_id']);
         }
 
+        if (! empty($params['vendor_id'])) {
+            $query->where('vendor_id', $params['vendor_id']);
+        }
+
         if (! empty($params['condition']) && in_array($params['condition'], ['new', 'used'], true)) {
             $query->where('condition', $params['condition']);
         }

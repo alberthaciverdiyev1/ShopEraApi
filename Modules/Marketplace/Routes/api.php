@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Modules\Marketplace\Http\Controllers\ListingChatController;
 use Modules\Marketplace\Http\Controllers\ListingController;
+use Modules\Marketplace\Http\Controllers\VendorController;
 
 /*
 | Marketplace listing writing/management.
@@ -38,4 +39,15 @@ Route::prefix('listings')->controller(ListingChatController::class)->middleware(
     Route::get('/chats/{id}', 'show')->whereNumber('id')->name('listing.chats.show');
     Route::post('/chats/{id}/messages', 'send')->whereNumber('id')->name('listing.chats.send');
     Route::post('/{id}/chat', 'start')->whereNumber('id')->name('listing.chat.start');
+});
+
+// Stores (vendors): public profile + signed-in management.
+Route::prefix('vendors')->controller(VendorController::class)->group(function () {
+    Route::get('/{slug}', 'show')->name('vendor.show');
+});
+
+Route::prefix('vendor')->controller(VendorController::class)->middleware('auth:sanctum')->group(function () {
+    Route::get('/', 'mine')->name('vendor.mine');
+    Route::post('/', 'create')->name('vendor.create');
+    Route::put('/', 'update')->name('vendor.update');
 });

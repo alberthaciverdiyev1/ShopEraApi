@@ -97,6 +97,7 @@
                             {/if}
                             {$user?.name ?? $translate('My account')}
                         </a>
+                        <a href="/magaza/panel">{$translate('My store')}</a>
                         <button class="user-logout" type="button" onclick={handleLogout}>{$translate('Logout')}</button>
                     {:else}
                         <a href="/login">
