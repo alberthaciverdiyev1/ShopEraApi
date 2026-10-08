@@ -68,7 +68,21 @@
 		}
 	}
 
+	/** Filters live on some category in the chain; use the nearest one that has them. */
+	async function loadFilters(chain: number[]) {
+		for (const id of [...chain].reverse()) {
+			const tree = await loadFilterTree(id);
+			if (tree.length) {
+				filterTree = tree;
+				return;
+			}
+		}
+		filterTree = [];
+	}
+
 	function select(category: Category | ApiCategory) {
+		const chain = [...path.map((c) => c.id), category.id];
+
 		picked = {
 			id: category.id,
 			name: categoryName(category, $locale),
@@ -78,7 +92,7 @@
 		filterTree = [];
 		filterSel = {};
 		schema = {};
-		loadFilterTree(category.id).then((tree) => (filterTree = tree));
+		loadFilters(chain);
 		loadListingFields(category.id).then((s) => (schema = s));
 		window.scrollTo({ top: 0, behavior: 'smooth' });
 	}
