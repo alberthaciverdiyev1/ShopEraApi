@@ -5,6 +5,7 @@ export interface ApiCategory {
 	id: number;
 	name: string | Record<string, string>;
 	parent_id: number | null;
+	needs_brand?: boolean;
 	image?: string | null;
 	is_active?: boolean;
 	sort_order?: number;

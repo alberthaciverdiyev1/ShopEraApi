@@ -22,6 +22,8 @@ class StoreListingRequest extends FormRequest
             'title' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string', 'max:5000'],
             'category_id' => ['required', 'exists:categories,id'],
+            'brand_id' => ['nullable', 'exists:brands,id'],
+            'model' => ['nullable', 'string', 'max:255'],
             'price' => ['required', 'numeric', 'min:0'],
             'city_key' => ['required', 'string', Rule::exists('cities', 'key')],
             'condition' => ['required', Rule::in(['new', 'used'])],

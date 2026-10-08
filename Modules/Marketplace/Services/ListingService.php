@@ -4,6 +4,8 @@ namespace Modules\Marketplace\Services;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Modules\Category\Entities\Category;
 use Modules\Delivery\Entities\City;
 use Modules\Marketplace\Entities\Vendor;
 use Modules\Product\Entities\Product;
@@ -22,10 +24,20 @@ class ListingService
         $vendor = $user ? Vendor::query()->where('user_id', $user->id)->first() : null;
         $sellerType = ! $user ? 'guest' : ($vendor ? 'vendor' : 'user');
 
+        // Hybrid taxonomy: some leaf categories require a brand.
+        $category = Category::query()->find($data['category_id']);
+        if ($category?->needs_brand && empty($data['brand_id'])) {
+            throw ValidationException::withMessages([
+                'brand_id' => 'Bu kateqoriya üçün marka seçmək lazımdır.',
+            ]);
+        }
+
         $listing = Product::create([
             'title' => $this->translations($data['title']),
             'description' => $this->translations($data['description']),
             'category_id' => $data['category_id'],
+            'brand_id' => $data['brand_id'] ?? null,
+            'model' => $data['model'] ?? null,
             'city_id' => $this->resolveCityId($data['city_key'] ?? null),
             'condition' => $data['condition'],
             'price' => $data['price'],
@@ -64,7 +76,7 @@ class ListingService
             $listing->description = $this->translations($data['description']);
         }
 
-        foreach (['category_id', 'condition', 'price', 'stock_count', 'contact_name', 'contact_phone', 'contact_email'] as $field) {
+        foreach (['category_id', 'brand_id', 'model', 'condition', 'price', 'stock_count', 'contact_name', 'contact_phone', 'contact_email'] as $field) {
             if (array_key_exists($field, $data)) {
                 $listing->{$field} = $data[$field];
             }

@@ -17,6 +17,9 @@ class ListingResource extends JsonResource
             'seller_type' => $this->seller_type,
             'condition' => $this->condition,
             'category_id' => $this->category_id,
+            'brand_id' => $this->brand_id,
+            'brand' => $this->whenLoaded('brand', fn () => $this->brand?->name),
+            'model' => $this->model,
             'city_id' => $this->city_id,
             'city' => $this->whenLoaded('city', fn () => $this->city?->name),
             'vendor' => $this->whenLoaded('vendor', fn () => $this->vendor ? [

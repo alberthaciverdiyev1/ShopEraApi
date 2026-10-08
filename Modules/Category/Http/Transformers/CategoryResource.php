@@ -15,6 +15,7 @@ class CategoryResource extends JsonResource
             'image' => $this->image,
             'description' => $this->description,
             'parent_id' => $this->parent_id,
+            'needs_brand' => (bool) $this->needs_brand,
             'is_active' => $this->is_active,
             'sort_order' => $this->sort_order,
             'products_count' => $this->whenCounted('products'),

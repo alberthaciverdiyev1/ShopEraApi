@@ -10,6 +10,9 @@ export interface ApiListing {
 	seller_type: SellerType;
 	condition: string | null;
 	category_id: number | null;
+	brand_id?: number | null;
+	brand?: string | null;
+	model?: string | null;
 	city_id: number | null;
 	city?: string | null;
 	vendor?: { id: number; name: Record<string, string> | string; slug: string } | null;

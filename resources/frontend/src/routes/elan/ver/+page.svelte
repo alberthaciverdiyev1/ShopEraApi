@@ -5,8 +5,9 @@
 	import { createGuestListing, createListing, buildListingForm, type ApiListing } from '$lib/services/listings';
 	import { loadCategories, categories, categoryName, type Category, type ApiCategory } from '$lib/services/categories';
 	import { loadDeliveryCities, deliveryCities } from '$lib/services/delivery';
+	import { loadBrands, type ApiBrand } from '$lib/services/brands';
 
-	type Picked = { id: number; name: string };
+	type Picked = { id: number; name: string; needsBrand: boolean };
 
 	let phase = $state<'category' | 'form'>('category');
 	let path = $state<Category[]>([]); // chosen ancestors while drilling down
@@ -17,6 +18,9 @@
 	let cityKey = $state('');
 	let condition = $state('used');
 	let price = $state('');
+	let brandId = $state('');
+	let model = $state('');
+	let brands = $state<ApiBrand[]>([]);
 	let contactName = $state('');
 	let contactPhone = $state('');
 	let contactEmail = $state('');
@@ -48,7 +52,11 @@
 	}
 
 	function select(category: Category | ApiCategory) {
-		picked = { id: category.id, name: categoryName(category, $locale) };
+		picked = {
+			id: category.id,
+			name: categoryName(category, $locale),
+			needsBrand: !!(category as ApiCategory).needs_brand
+		};
 		phase = 'form';
 		window.scrollTo({ top: 0, behavior: 'smooth' });
 	}
@@ -104,6 +112,12 @@
 		error = null;
 		submitting = true;
 
+		if (picked.needsBrand && !brandId) {
+			error = 'Bu kateqoriya üçün marka seçmək lazımdır.';
+			submitting = false;
+			return;
+		}
+
 		const fields: Record<string, string | number> = {
 			title,
 			description,
@@ -112,6 +126,11 @@
 			condition,
 			price
 		};
+
+		if (picked.needsBrand) {
+			fields.brand_id = brandId;
+			if (model) fields.model = model;
+		}
 
 		if (!$isLoggedIn) {
 			fields.contact_name = contactName;
@@ -139,6 +158,7 @@
 	onMount(() => {
 		loadCategories();
 		loadDeliveryCities();
+		loadBrands().then((list) => (brands = list));
 	});
 </script>
 
@@ -269,6 +289,21 @@
 							<label class="form-label" for="l-price">Qiymət (₼) *</label>
 							<input id="l-price" class="form-control" type="number" min="0" step="0.01" bind:value={price} required />
 						</div>
+						{#if picked?.needsBrand}
+							<div class="col-md-6">
+								<label class="form-label" for="l-brand">Marka *</label>
+								<select id="l-brand" class="form-select" bind:value={brandId} required>
+									<option value="">Seçin…</option>
+									{#each brands as brand (brand.id)}
+										<option value={brand.id}>{brand.name}</option>
+									{/each}
+								</select>
+							</div>
+							<div class="col-md-6">
+								<label class="form-label" for="l-model">Model</label>
+								<input id="l-model" class="form-control" bind:value={model} placeholder="Məsələn: iPhone 15 Pro" />
+							</div>
+						{/if}
 					</div>
 				</div>
 
