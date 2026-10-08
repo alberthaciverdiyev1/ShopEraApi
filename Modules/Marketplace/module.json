@@ -1,0 +1,11 @@
+{
+    "name": "Marketplace",
+    "alias": "marketplace",
+    "description": "Multi-seller marketplace: vendors (stores) and listings sold by guests, users or vendors.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Marketplace\\Providers\\MarketplaceServiceProvider"
+    ],
+    "files": []
+}

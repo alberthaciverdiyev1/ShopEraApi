@@ -19,5 +19,6 @@
     "Chat": true,
     "Filter": true,
     "Blog": true,
-    "Story": true
+    "Story": true,
+    "Marketplace": true
 }

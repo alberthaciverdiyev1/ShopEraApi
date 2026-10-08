@@ -73,6 +73,12 @@ class Product extends Model
         return $this->belongsTo(Category::class, 'category_id', 'id');
     }
 
+    /** The store that sells this listing, when it was posted by a vendor. */
+    public function vendor(): BelongsTo
+    {
+        return $this->belongsTo(\Modules\Marketplace\Entities\Vendor::class, 'vendor_id');
+    }
+
     public function productFilters(): HasMany
     {
         return $this->hasMany(ProductFilter::class, 'product_id');

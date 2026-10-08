@@ -1,0 +1,10 @@
+{
+    "name": "nwidart/marketplace",
+    "description": "",
+    "authors": [{"name": "Snaker"}],
+    "autoload": {
+        "psr-4": {
+            "Modules\\Marketplace\\": "app/"
+        }
+    }
+}

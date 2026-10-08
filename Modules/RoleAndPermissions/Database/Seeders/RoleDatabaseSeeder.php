@@ -18,5 +18,6 @@ class RoleDatabaseSeeder extends Seeder
         Role::firstOrCreate(['name' => 'user', 'guard_name' => $this->guard]);
         Role::firstOrCreate(['name' => 'developer', 'guard_name' => $this->guard]);
         Role::firstOrCreate(['name' => 'manager', 'guard_name' => $this->guard]);
+        Role::firstOrCreate(['name' => 'vendor', 'guard_name' => $this->guard]);
     }
 }
