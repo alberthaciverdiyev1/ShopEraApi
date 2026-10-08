@@ -18,6 +18,7 @@
 	const navLinks = [
 		{ href: '/', labelKey: 'Home' },
 		{ href: '/shop', labelKey: 'Shop' },
+		{ href: '/elan/ver', labelKey: 'Elan ver' },
 		{ href: '/about', labelKey: 'About' },
 		{ href: '/blog', labelKey: 'Blog' },
 		{ href: '/contact', labelKey: 'Contact' }

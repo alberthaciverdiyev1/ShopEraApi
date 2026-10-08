@@ -46,7 +46,7 @@ class ListingService
             // Guests manage their listing through a secret link (no account, no OTP).
             $plainToken = Str::random(48);
             $listing->forceFill(['manage_token' => hash('sha256', $plainToken)])->save();
-            $manageUrl = url('/ilan/idaresi/'.$plainToken);
+            $manageUrl = url('/elan/idaresi/'.$plainToken);
         }
 
         $this->storeImages($listing, $request);

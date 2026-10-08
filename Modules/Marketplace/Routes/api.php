@@ -4,22 +4,23 @@ use Illuminate\Support\Facades\Route;
 use Modules\Marketplace\Http\Controllers\ListingController;
 
 /*
-| Marketplace listings.
+| Marketplace listing writing/management.
 |
-| Guest listings need no account and are managed through a secret link
-| (PUT/DELETE /listings/manage/{token}). Signed-in sellers (users and vendors)
-| manage their listings under the authenticated group.
+| Products are the listings: the public read side already exists on the
+| /product endpoints, so nothing is duplicated here. These routes only cover
+| posting and managing a listing.
+|
+| Guests post without an account and manage their listing through a secret
+| link (PUT/DELETE /listings/manage/{token}); signed-in sellers use the
+| authenticated group.
 */
 Route::prefix('listings')->controller(ListingController::class)->group(function () {
-    Route::get('/', 'index')->name('listing.index');
     Route::post('/guest', 'storeGuest')->name('listing.guest');
 
-    // Token routes must come before the numeric {id} route.
+    // Secret-link management for guest listings.
     Route::get('/manage/{token}', 'manageShow')->name('listing.manage.show');
     Route::put('/manage/{token}', 'manageUpdate')->name('listing.manage.update');
     Route::delete('/manage/{token}', 'manageDestroy')->name('listing.manage.destroy');
-
-    Route::get('/{id}', 'show')->whereNumber('id')->name('listing.show');
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', 'store')->name('listing.store');

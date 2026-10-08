@@ -14,37 +14,6 @@ class ListingController extends Controller
 {
     public function __construct(private readonly ListingService $service) {}
 
-    /** Public listing feed. Promoted listings surface first. */
-    public function index(Request $request)
-    {
-        $listings = Product::query()
-            ->with(['images', 'city', 'vendor'])
-            ->where('is_active', true)
-            ->when($request->filled('category_id'), fn ($q) => $q->where('category_id', $request->integer('category_id')))
-            ->when($request->filled('city_id'), fn ($q) => $q->where('city_id', $request->integer('city_id')))
-            ->when($request->filled('condition'), fn ($q) => $q->where('condition', $request->string('condition')))
-            ->when($request->filled('min_price'), fn ($q) => $q->where('price', '>=', $request->input('min_price')))
-            ->when($request->filled('max_price'), fn ($q) => $q->where('price', '<=', $request->input('max_price')))
-            ->when($request->filled('q'), fn ($q) => $q->whereRaw("title->>'az' ILIKE ?", ['%'.$request->string('q').'%']))
-            ->orderByDesc('is_promoted')
-            ->orderByDesc('id')
-            ->paginate(20)
-            ->withQueryString();
-
-        return ListingResource::collection($listings)->additional([
-            'success' => true,
-            'status_code' => 200,
-            'message' => 'OK',
-        ]);
-    }
-
-    public function show(int $id)
-    {
-        $listing = Product::query()->with(['images', 'city', 'vendor'])->findOrFail($id);
-
-        return responseHelper('OK', 200, new ListingResource($listing));
-    }
-
     /** Guest listing — no account; returns the secret manage URL. */
     public function storeGuest(StoreListingRequest $request)
     {
