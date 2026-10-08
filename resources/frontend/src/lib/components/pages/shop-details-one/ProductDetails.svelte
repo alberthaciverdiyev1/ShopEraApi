@@ -8,7 +8,7 @@
 	import { toggleFavoriteProduct } from '$lib/services/favorite-actions';
 	import { fetchRecommendedProducts, subscribeToStock, unsubscribeFromStock } from '$lib/services/products';
 	import { createReview, type ApiReview } from '$lib/services/reviews';
-	import { fetchListingContact, type ListingContact } from '$lib/services/listings';
+	import { fetchListingContact, reportListing, type ListingContact, type ReportReason } from '$lib/services/listings';
 	import ChatModal from '$lib/components/chat/ChatModal.svelte';
 	import { features } from '$lib/services/features';
 	import { isLoggedIn, user } from '$lib/services/auth';
@@ -141,6 +141,42 @@
 	let revealing = $state(false);
 	let chatOpen = $state(false);
 	let chatProductId = $state<number | null>(null);
+	let shared = $state(false);
+
+	// Report the listing.
+	let reportOpen = $state(false);
+	let reportReason = $state<ReportReason>('spam');
+	let reportComment = $state('');
+	let reporting = $state(false);
+	let reportSent = $state(false);
+
+	async function submitReport() {
+		reporting = true;
+		try {
+			await reportListing(product.id, { reason: reportReason, comment: reportComment || undefined });
+			reportSent = true;
+			setTimeout(() => (reportOpen = false), 1200);
+		} catch {
+			/* ignore */
+		} finally {
+			reporting = false;
+		}
+	}
+
+	async function share() {
+		const url = typeof window !== 'undefined' ? window.location.href : '';
+		try {
+			if (typeof navigator !== 'undefined' && navigator.share) {
+				await navigator.share({ title: productTitle(product), url });
+				return;
+			}
+			await navigator.clipboard.writeText(url);
+			shared = true;
+			setTimeout(() => (shared = false), 2000);
+		} catch {
+			/* dismissed */
+		}
+	}
 	async function revealContact() {
 		if (contact || revealing) return;
 		revealing = true;
@@ -544,6 +580,7 @@
 					<!-- Məhsul Kodu Nişanı -->
 					<div class="code-badge-wrap">
 						<span class="code-badge">{$translate('Product code')}: {productCode}</span>
+						<span class="code-badge"><i class="fa-regular fa-eye"></i> {product.views ?? 0} {$translate('views')}</span>
 					</div>
 
 					<!-- Spesifikasiyalar Qutusu (3-lü Grid — Yalnız Dinamik Filtrlər Olduqda) -->
@@ -675,6 +712,16 @@
 							>
 								<i class={isWishlisted ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}></i>
 								<span>{isWishlisted ? $translate('Remove favorite') : $translate('Add to wishlist')}</span>
+							</button>
+
+							<button type="button" class="sub-action-btn" onclick={share}>
+								<i class="fa-solid fa-share-nodes"></i>
+								<span>{shared ? $translate('Link copied') : $translate('Share')}</span>
+							</button>
+
+							<button type="button" class="sub-action-btn" onclick={() => { reportOpen = true; reportSent = false; }}>
+								<i class="fa-regular fa-flag"></i>
+								<span>{$translate('Report')}</span>
 							</button>
 
 							{#if outOfStock}
@@ -902,6 +949,37 @@
 		{/if}
 	</div>
 </div>
+
+
+{#if reportOpen}
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<div class="report-overlay" onclick={(e) => e.target === e.currentTarget && (reportOpen = false)} role="presentation">
+		<div class="report-modal" role="dialog" aria-modal="true" aria-label={$translate('Report')}>
+			<div class="d-flex justify-content-between align-items-center mb-3">
+				<h5 class="mb-0">{$translate('Report listing')}</h5>
+				<button type="button" class="report-close" onclick={() => (reportOpen = false)} aria-label={$translate('Close')}>×</button>
+			</div>
+			{#if reportSent}
+				<div class="alert alert-success mb-0">{$translate('Thanks, your report was recorded.')}</div>
+			{:else}
+				<label class="form-label" for="rep-reason">{$translate('Reason')}</label>
+				<select id="rep-reason" class="form-select mb-3" bind:value={reportReason}>
+					<option value="spam">{$translate('Spam / advertising')}</option>
+					<option value="fraud">{$translate('Fraud')}</option>
+					<option value="wrong_category">{$translate('Wrong category')}</option>
+					<option value="offensive">{$translate('Offensive content')}</option>
+					<option value="duplicate">{$translate('Duplicate listing')}</option>
+					<option value="other">{$translate('Other')}</option>
+				</select>
+				<label class="form-label" for="rep-comment">{$translate('Comment (optional)')}</label>
+				<textarea id="rep-comment" class="form-control mb-3" rows="3" bind:value={reportComment}></textarea>
+				<button class="theme-btn" type="button" disabled={reporting} onclick={submitReport}>
+					{reporting ? $translate('Sending…') : $translate('Report')}
+				</button>
+			{/if}
+		</div>
+	</div>
+{/if}
 
 <ChatModal bind:open={chatOpen} productId={chatProductId} />
 
@@ -2317,4 +2395,8 @@
 
 	.seller-actions { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
 	.contact-btn.chat-btn { background: #128c7e; }
+
+	.report-overlay { position: fixed; inset: 0; z-index: 1090; background: rgba(15,23,42,.55); display: flex; align-items: center; justify-content: center; padding: 16px; }
+	.report-modal { width: min(460px, 100%); background: #fff; border-radius: 16px; padding: 22px; box-shadow: 0 24px 60px rgba(15,23,42,.3); }
+	.report-close { border: 0; background: none; font-size: 26px; line-height: 1; cursor: pointer; color: #64748b; }
 </style>

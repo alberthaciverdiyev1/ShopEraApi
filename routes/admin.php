@@ -60,6 +60,10 @@ Route::middleware(['admin.auth'])->group(function () {
     Route::get('categories/children', [Admin\CategoryController::class, 'children'])->name('categories.children');
     $resource('categories', Admin\CategoryController::class);
 
+    // Listing reports (moderation).
+    Route::get('listing-reports', [Admin\ListingReportController::class, 'index'])->name('listing-reports.index');
+    Route::put('listing-reports/{id}', [Admin\ListingReportController::class, 'resolve'])->name('listing-reports.resolve');
+
     // Per-category listing form schema (which fields show / are required).
     Route::get('category-fields', [Admin\CategoryFieldController::class, 'index'])->name('category-fields.index');
     Route::put('category-fields', [Admin\CategoryFieldController::class, 'update'])->name('category-fields.update');

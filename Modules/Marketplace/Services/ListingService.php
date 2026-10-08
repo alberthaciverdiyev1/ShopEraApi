@@ -10,6 +10,7 @@ use Modules\Delivery\Entities\City;
 use Modules\Filter\Entities\Filter;
 use Modules\Filter\Entities\FilterValue;
 use Modules\Filter\Entities\ProductFilterValue;
+use Modules\Marketplace\Entities\ListingReport;
 use Modules\Marketplace\Entities\Vendor;
 use Modules\Product\Entities\Product;
 use Modules\User\Entities\User;
@@ -122,6 +123,17 @@ class ListingService
             'phone' => $listing->contact_phone ?: $user?->phone ?: $vendor?->phone,
             'email' => $listing->contact_email ?: $user?->email ?: $vendor?->email,
         ];
+    }
+
+    /** Record a report against a listing (guest or signed-in). */
+    public function report(Product $listing, ?User $user, array $data): ListingReport
+    {
+        return ListingReport::query()->create([
+            'product_id' => $listing->id,
+            'user_id' => $user?->id,
+            'reason' => $data['reason'],
+            'comment' => $data['comment'] ?? null,
+        ]);
     }
 
     public function findByManageToken(string $token): ?Product

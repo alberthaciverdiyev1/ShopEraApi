@@ -24,6 +24,9 @@ Route::prefix('listings')->controller(ListingController::class)->group(function 
     // Public: reveal the seller's contact details.
     Route::get('/{id}/contact', 'contact')->whereNumber('id')->name('listing.contact');
 
+    // Public: report a listing.
+    Route::post('/{id}/report', 'report')->whereNumber('id')->name('listing.report');
+
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', 'store')->name('listing.store');
         Route::get('/mine', 'myListings')->name('listing.mine');

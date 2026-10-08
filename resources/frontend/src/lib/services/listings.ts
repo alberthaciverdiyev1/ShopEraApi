@@ -1,4 +1,4 @@
-import { apiGet, apiGetWithMeta, apiPostForm, apiDelete } from '$lib/utils/api';
+import { apiGet, apiGetWithMeta, apiPost, apiPostForm, apiDelete } from '$lib/utils/api';
 
 export type SellerType = 'guest' | 'user' | 'vendor';
 
@@ -117,4 +117,16 @@ export interface ListingContact {
 /** Reveal the seller's contact details for a listing. */
 export async function fetchListingContact(id: number): Promise<ListingContact> {
 	return apiGet<ListingContact>(`/listings/${id}/contact`);
+}
+
+export type ReportReason = 'spam' | 'fraud' | 'wrong_category' | 'offensive' | 'duplicate' | 'other';
+
+export interface ReportPayload {
+	reason: ReportReason;
+	comment?: string;
+}
+
+/** Report a listing (guest or signed-in). */
+export async function reportListing(id: number, payload: ReportPayload): Promise<void> {
+	await apiPost(`/listings/${id}/report`, { reason: payload.reason, comment: payload.comment });
 }

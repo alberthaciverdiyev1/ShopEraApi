@@ -4,6 +4,7 @@ namespace Modules\Marketplace\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Validation\Rule;
 use Modules\Marketplace\Http\Requests\StoreListingRequest;
 use Modules\Marketplace\Http\Requests\UpdateListingRequest;
 use Modules\Marketplace\Http\Resources\ListingResource;
@@ -14,6 +15,20 @@ use Modules\Product\Entities\Product;
 class ListingController extends Controller
 {
     public function __construct(private readonly ListingService $service) {}
+
+    /** Report a listing (public, signed-in users are recorded). */
+    public function report(Request $request, int $id)
+    {
+        $data = $request->validate([
+            'reason' => ['required', Rule::in(['spam', 'fraud', 'wrong_category', 'offensive', 'duplicate', 'other'])],
+            'comment' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $listing = Product::query()->findOrFail($id);
+        $this->service->report($listing, $request->user('sanctum'), $data);
+
+        return responseHelper('Şikayətiniz qeydə alındı.', 201);
+    }
 
     /** Reveal the seller's contact details for a listing (public). */
     public function contact(int $id)
