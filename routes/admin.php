@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Admin;
-use App\Http\Middleware\LogOwnerActivity;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -23,13 +22,10 @@ Route::middleware('guest:admin')->group(function () {
     Route::post('login', [Admin\AuthController::class, 'login'])->name('login.attempt');
 });
 
-Route::middleware(['admin.auth', 'subscribed', 'admin.menu', LogOwnerActivity::class])->group(function () {
+Route::middleware(['admin.auth', 'subscribed', 'admin.menu'])->group(function () {
     Route::post('logout', [Admin\AuthController::class, 'logout'])->name('logout');
 
     Route::get('/', [Admin\DashboardController::class, 'index'])->name('dashboard');
-
-    // Upgrade page linked from the read-only "Premium" notice.
-    Route::get('plan', [Admin\PlanController::class, 'index'])->name('plan.index');
 
     // The signed-in admin's own password.
     Route::get('profile/password', [Admin\ProfileController::class, 'edit'])->name('profile.password');
@@ -137,7 +133,6 @@ Route::middleware(['admin.auth', 'subscribed', 'admin.menu', LogOwnerActivity::c
     // System
     Route::get('theme', [Admin\ThemeController::class, 'index'])->name('theme.index');
     Route::put('theme', [Admin\ThemeController::class, 'update'])->name('theme.update');
-    Route::post('theme/select', [Admin\ThemeController::class, 'select'])->name('theme.select');
 
     Route::get('settings', [Admin\SettingsController::class, 'index'])->name('settings.index');
     Route::put('settings', [Admin\SettingsController::class, 'update'])->name('settings.update');

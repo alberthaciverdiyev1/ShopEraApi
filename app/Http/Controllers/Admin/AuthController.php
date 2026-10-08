@@ -7,8 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use Modules\Manager\Entities\OwnerActivity;
-use Modules\Manager\Entities\SiteOwner;
 use Modules\User\Entities\User;
 
 class AuthController extends AdminController
@@ -64,23 +62,11 @@ class AuthController extends AdminController
         Auth::guard('admin')->login($user, $request->boolean('remember'));
         $request->session()->regenerate();
 
-        $owner = SiteOwner::findForCurrentTenant();
-        if ($owner) {
-            $owner->forceFill(['last_login_at' => now(), 'last_seen_at' => now()])->save();
-            OwnerActivity::record($owner, 'login', __('Panelə daxil oldu'), $request->ip());
-        }
-
         return redirect()->intended(route('admin.dashboard'));
     }
 
     public function logout(Request $request)
     {
-        $owner = SiteOwner::findForCurrentTenant();
-        if ($owner) {
-            $owner->forceFill(['last_logout_at' => now()])->save();
-            OwnerActivity::record($owner, 'logout', __('Paneldən çıxdı'), $request->ip());
-        }
-
         Auth::guard('admin')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

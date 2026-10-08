@@ -48,6 +48,9 @@
                                             </div>
                                         @endforeach
                                     </div>
+                                @elseif ($type === 'textarea')
+                                    <textarea name="{{ $name }}" rows="3"
+                                              class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-brand-500">{{ $value }}</textarea>
                                 @else
                                     <input type="{{ $type === 'number' ? 'number' : 'text' }}" step="any" name="{{ $name }}" value="{{ $value }}"
                                            class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-brand-500">

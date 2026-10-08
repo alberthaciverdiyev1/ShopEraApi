@@ -3,12 +3,12 @@
 
     $isActive = fn (string $match) => request()->routeIs($match);
 
-    // Global disclaimer pushed from the Manager panel (control DB). Optional.
+    // Operator-authored disclaimer shown at the very bottom. Optional.
     $disclaimer = null;
     try {
-        $disclaimer = trim((string) \Modules\Manager\Entities\Setting::query()->where('key', 'admin_disclaimer')->value('value'));
+        $disclaimer = trim((string) \Modules\Setting\Entities\Setting::query()->value('admin_disclaimer'));
     } catch (\Throwable) {
-        // Control DB unreachable — the sidebar still renders without it.
+        // Settings not available — the sidebar still renders without it.
     }
 @endphp
 

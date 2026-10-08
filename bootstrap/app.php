@@ -37,13 +37,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(append: [\App\Http\Middleware\CachePublicApi::class]);
         $middleware->append([TrustProxies::class]);
 
-        // Unauthenticated users are sent to the manager login under /manager,
-        // otherwise to the storefront admin login.
-        $middleware->redirectGuestsTo(function (Request $request): string {
-            return $request->is('manager', 'manager/*')
-                ? route('manager.login')
-                : route('admin.login');
-        });
+        // Unauthenticated users are sent to the storefront admin login.
+        $middleware->redirectGuestsTo(fn (Request $request): string => route('admin.login'));
 
         $middleware->alias([
             'role' => RoleMiddleware::class,
@@ -64,11 +59,6 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json([
                     'message' => __('Unauthenticated'),
                 ], 401);
-            }
-
-            // Manager panel: send unauthenticated visitors to its own login.
-            if ($request->is('manager', 'manager/*')) {
-                return redirect()->guest(route('manager.login'));
             }
         });
     })->create();
