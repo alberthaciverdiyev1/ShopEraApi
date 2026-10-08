@@ -2,6 +2,7 @@
 	import Breadcrumb from '$lib/components/layout/Breadcrumb.svelte';
 	import TestimonialSection from '$lib/components/pages/home/TestimonialSection.svelte';
 	import { translate } from '$lib/i18n';
+	import { features } from '$lib/services/features';
 
 	let { data } = $props();
 </script>
@@ -21,7 +22,7 @@
 </section>
 
 <!-- The same admin-selected reviews as the home page (same gating) -->
-{#if data.true}
+{#if $features.reviews ?? false}
 	<TestimonialSection featured={data.featuredReviews} />
 {/if}
 
