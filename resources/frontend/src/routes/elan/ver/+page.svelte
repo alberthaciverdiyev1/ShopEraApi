@@ -38,10 +38,10 @@
 	}
 
 	function choose(category: Category) {
-		// Level 1: a parent with children opens its subcategory list; a leaf
-		// goes straight to the form. Level 2: any subcategory opens the form.
-		if (path.length === 0 && category.children?.length) {
-			path = [category];
+		// Arbitrary depth: while the chosen node has children we keep drilling
+		// (phones → brands → models → …); a leaf opens the form.
+		if (category.children?.length) {
+			path = [...path, category];
 		} else {
 			select(category);
 		}
