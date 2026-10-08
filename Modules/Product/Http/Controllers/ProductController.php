@@ -50,6 +50,11 @@ class ProductController extends Controller
     /**
      * Show the specified resource.
      */
+    public function detailsBySlug(string $slug)
+    {
+        return $this->service->detailsBySlug($slug);
+    }
+
     public function details(int $id)
     {
         return $this->service->details($id);

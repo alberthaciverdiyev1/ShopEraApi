@@ -4,6 +4,7 @@ namespace Modules\Product\Entities;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -48,6 +49,40 @@ class Product extends Model
         'last_approved_at' => 'datetime',
         'expires_at' => 'datetime',
     ];
+
+    private const SLUG_TRANSLIT = [
+        'ə' => 'e', 'ğ' => 'g', 'ş' => 's', 'ç' => 'c', 'ö' => 'o', 'ü' => 'u', 'ı' => 'i',
+        'Ə' => 'e', 'Ğ' => 'g', 'Ş' => 's', 'Ç' => 'c', 'Ö' => 'o', 'Ü' => 'u', 'İ' => 'i',
+    ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Product $product) {
+            if (empty($product->slug)) {
+                $title = $product->getTranslation('title', 'az', false)
+                    ?: $product->getTranslation('title', 'en', false)
+                    ?: 'elan';
+                $product->slug = static::makeSlug((string) $title);
+            }
+        });
+    }
+
+    /** SEO slug from a title, made unique. */
+    public static function makeSlug(string $title, ?int $excludeId = null): string
+    {
+        $base = Str::slug(strtr($title, self::SLUG_TRANSLIT)) ?: 'elan';
+        $slug = $base;
+        $i = 2;
+
+        while (static::query()
+            ->where('slug', $slug)
+            ->when($excludeId, fn ($q) => $q->where('id', '!=', $excludeId))
+            ->exists()) {
+            $slug = $base.'-'.$i++;
+        }
+
+        return $slug;
+    }
 
     public function scopePubliclyAvailable($query)
     {

@@ -40,6 +40,7 @@ class ProductResource extends JsonResource
             'description' => ucfirst((string) $this->description),
 
             'sku' => $this->sku,
+            'slug' => $this->slug,
             'is_favorite' => $this->is_favorite,
             'is_subscribe' => $this->is_subscribe,
             'is_suggest' => $this->is_suggest,

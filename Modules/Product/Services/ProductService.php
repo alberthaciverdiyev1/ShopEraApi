@@ -365,6 +365,17 @@ class ProductService
     /**
      * Product details
      */
+    public function detailsBySlug(string $slug): JsonResponse
+    {
+        $id = $this->model->newQuery()->where('slug', $slug)->value('id');
+
+        if (! $id) {
+            return responseHelper(__('Product not found.'), 404, []);
+        }
+
+        return $this->details((int) $id);
+    }
+
     public function details(int $id): JsonResponse
     {
         try {

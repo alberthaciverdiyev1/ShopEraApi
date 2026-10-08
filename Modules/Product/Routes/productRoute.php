@@ -9,6 +9,7 @@ Route::prefix('product')->controller(ProductController::class)->group(function (
     Route::get('/story-videos', 'storyVideos')->name('product.storyVideos');
     Route::match(['get', 'post'], '/', 'list')->name('product.list');
     Route::get('/filters', 'filters')->name('product.filters');
+    Route::get('/slug/{slug}', 'detailsBySlug')->name('product.detailsBySlug');
     Route::get('/{id}', 'details')->name('product.details')->whereNumber('id');
     Route::get('/recommend', 'recommendedProductsList')->name('product.recommendedProductsList');
 

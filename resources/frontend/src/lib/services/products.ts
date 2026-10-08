@@ -45,6 +45,7 @@ export interface ApiProduct {
 	views?: number;
 	stock_count?: number;
 	sku?: string;
+	slug?: string | null;
 	weight?: number | null;
 	gender?: string | null;
 	is_favorite?: boolean;
@@ -74,7 +75,7 @@ export function productTitle(product: ApiProduct): string {
 }
 
 export function productUrl(product: ApiProduct): string {
-	return `/shop/details?id=${product.id}`;
+	return product.slug ? `/elan/${product.slug}` : `/shop/details?id=${product.id}`;
 }
 
 export function hasDiscount(product: ApiProduct): boolean {
