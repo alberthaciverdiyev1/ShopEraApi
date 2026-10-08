@@ -33,6 +33,7 @@ class CategoryController extends ResourceController
         ['name' => 'sort_order', 'label' => 'Sıra', 'type' => 'number', 'col' => 3],
         ['name' => 'is_active', 'label' => 'Aktivdir', 'type' => 'checkbox', 'col' => 3],
         ['name' => 'needs_brand', 'label' => 'Elan verməkdə marka tələb olunsun', 'type' => 'checkbox', 'col' => 12],
+        ['name' => 'show_on_home', 'label' => 'Ana səhifədə göstər', 'type' => 'checkbox', 'col' => 12],
     ];
 
     /** Categories are shown as a tree, so paginate generously. */

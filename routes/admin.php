@@ -60,6 +60,14 @@ Route::middleware(['admin.auth'])->group(function () {
     Route::get('categories/children', [Admin\CategoryController::class, 'children'])->name('categories.children');
     $resource('categories', Admin\CategoryController::class);
 
+    // Dependent filters (categories -> filters -> values).
+    Route::get('listing-filters', [Admin\FilterAdminController::class, 'index'])->name('listing-filters.index');
+    Route::post('listing-filters/filter', [Admin\FilterAdminController::class, 'storeFilter'])->name('listing-filters.storeFilter');
+    Route::put('listing-filters/filter/{id}', [Admin\FilterAdminController::class, 'updateFilter'])->name('listing-filters.updateFilter');
+    Route::delete('listing-filters/filter/{id}', [Admin\FilterAdminController::class, 'destroyFilter'])->name('listing-filters.destroyFilter');
+    Route::post('listing-filters/value', [Admin\FilterAdminController::class, 'storeValue'])->name('listing-filters.storeValue');
+    Route::delete('listing-filters/value/{id}', [Admin\FilterAdminController::class, 'destroyValue'])->name('listing-filters.destroyValue');
+
     // Listing reports (moderation).
     Route::get('listing-reports', [Admin\ListingReportController::class, 'index'])->name('listing-reports.index');
     Route::put('listing-reports/{id}', [Admin\ListingReportController::class, 'resolve'])->name('listing-reports.resolve');

@@ -5,19 +5,22 @@
     import {translate} from "$lib/i18n";
 
 	onMount(() => loadCategories());
+
+	// Only the categories flagged 'show on home' (all, if none are flagged).
+	const shown = $derived($categories.some((c) => c.show_on_home) ? $categories.filter((c) => c.show_on_home) : $categories);
 </script>
 
-{#if $categories.length > 0}
+{#if shown.length > 0}
 	<!-- Product Section (Popular Categories) -->
 	<section class="product-section section-padding fix">
 		<div class="product-contianer-wrapper style1">
 			<div class="container">
 				<div class="row">
-					{#key $categories.length}
+					{#key shown.length}
 					<div class="swiper gt-slider productSliderOne" id="productSliderOne" use:slider
 						data-slider-options='&#123;"loop": true,"autoplay": true,"spaceBetween":16,"breakpoints":&#123;"0":&#123;"slidesPerView":2.8,"spaceBetween":8&#125;,"430":&#123;"slidesPerView":3.45,"spaceBetween":10&#125;,"576":&#123;"slidesPerView":4.1,"spaceBetween":12&#125;,"768":&#123;"slidesPerView":3&#125;,"992":&#123;"slidesPerView":4&#125;,"1200":&#123;"slidesPerView":6&#125;&#125;&#125;'>
 						<div class="swiper-wrapper">
-							{#each $categories as category (category.id)}
+							{#each shown as category (category.id)}
 								<div class="swiper-slide">
 									<a href={`/shop?category=${category.id}`} class="product-box-items-one">
 										<div class="product-box-items-one__icon">
