@@ -21,7 +21,9 @@
 	const stats = $derived({
 		total: listings.length,
 		promoted: listings.filter((l) => l.is_promoted).length,
-		premium: listings.filter((l) => l.is_premium).length
+		premium: listings.filter((l) => l.is_premium).length,
+		views: listings.reduce((sum, l) => sum + (l.views ?? 0), 0),
+		contacts: listings.reduce((sum, l) => sum + (l.contact_reveals ?? 0), 0)
 	});
 
 	function fill(v: ApiVendor) {
@@ -87,6 +89,8 @@
 				<div class="col-6 col-md-3"><div class="p-3 rounded bg-white border"><div class="text-muted small">Elanlar</div><div class="fs-4 fw-bold">{stats.total}</div></div></div>
 				<div class="col-6 col-md-3"><div class="p-3 rounded bg-white border"><div class="text-muted small">İrəli çəkilmiş</div><div class="fs-4 fw-bold">{stats.promoted}</div></div></div>
 				<div class="col-6 col-md-3"><div class="p-3 rounded bg-white border"><div class="text-muted small">Premium</div><div class="fs-4 fw-bold">{stats.premium}</div></div></div>
+				<div class="col-6 col-md-3"><div class="p-3 rounded bg-white border"><div class="text-muted small">Baxış</div><div class="fs-4 fw-bold">{stats.views}</div></div></div>
+				<div class="col-6 col-md-3"><div class="p-3 rounded bg-white border"><div class="text-muted small">Əlaqə</div><div class="fs-4 fw-bold">{stats.contacts}</div></div></div>
 			</div>
 
 			<div class="row g-4">
@@ -133,6 +137,9 @@
 										<div class="flex-grow-1 min-w-0">
 											<p class="mb-0 fw-semibold text-truncate">{listingTitle(listing)}</p>
 											<p class="mb-0 small text-primary">{Number(listing.price ?? 0).toFixed(2)} ₼</p>
+											<p class="mb-0 text-muted" style="font-size:12px;">
+												<i class="fa-regular fa-eye"></i> {listing.views ?? 0} · <i class="fa-solid fa-phone"></i> {listing.contact_reveals ?? 0}
+											</p>
 										</div>
 										<button class="btn btn-sm btn-outline-danger" type="button" onclick={() => remove(listing.id)}>Sil</button>
 									</div>

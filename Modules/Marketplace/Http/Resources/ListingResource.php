@@ -34,6 +34,8 @@ class ListingResource extends JsonResource
             'is_promoted' => (bool) $this->is_promoted,
             'is_premium' => (bool) $this->is_premium,
             'expires_at' => $this->expires_at?->toIso8601String(),
+            'views' => (int) $this->views,
+            'contact_reveals' => (int) $this->contact_reveals,
             'is_active' => (bool) $this->is_active,
             'images' => $this->whenLoaded('images', fn () => $this->images->map(fn ($image) => $image->image_path)),
             'created_at' => $this->created_at?->toIso8601String(),

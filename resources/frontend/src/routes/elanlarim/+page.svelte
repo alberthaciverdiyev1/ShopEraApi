@@ -94,6 +94,11 @@
 							<div class="card-body d-flex flex-column">
 								<p class="fw-semibold mb-1">{listingTitle(listing)}</p>
 								<p class="text-primary fw-bold mb-1">{Number(listing.price ?? 0).toFixed(2)} ₼</p>
+								<p class="small text-muted mb-2">
+									<i class="fa-regular fa-eye"></i> {listing.views ?? 0}
+									&nbsp;·&nbsp;
+									<i class="fa-solid fa-phone"></i> {listing.contact_reveals ?? 0}
+								</p>
 								{#if listing.expires_at}
 									<p class="small mb-2 {isExpired(listing) ? 'text-danger' : 'text-muted'}">
 										{isExpired(listing) ? 'Müddəti bitib' : `Bitir: ${new Date(listing.expires_at).toLocaleDateString()}`}

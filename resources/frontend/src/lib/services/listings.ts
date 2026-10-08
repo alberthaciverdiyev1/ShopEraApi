@@ -11,6 +11,8 @@ export interface ApiListing {
 	condition: string | null;
 	has_delivery?: boolean;
 	expires_at?: string | null;
+	views?: number;
+	contact_reveals?: number;
 	is_active?: boolean;
 	category_id: number | null;
 	brand_id?: number | null;
