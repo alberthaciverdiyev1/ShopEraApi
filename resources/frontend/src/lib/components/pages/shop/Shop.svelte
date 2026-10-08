@@ -10,6 +10,8 @@
 	import { categories, categoryName, loadCategories } from '$lib/services/categories';
 	import { fetchShopFilters, fetchShopProducts, type ShopFacets, type ShopMeta } from '$lib/services/shop';
 	import type { ApiProduct } from '$lib/services/products';
+	import ShopFilterTree from '$lib/components/shop/ShopFilterTree.svelte';
+	import { loadFilterTree, type ApiFilterNode } from '$lib/services/filters-tree';
 	import type { ApiPromoBlock } from '$lib/services/promoBlocks';
 	import { locale, translate } from '$lib/i18n';
 
@@ -80,6 +82,9 @@
 
 	let dynamicFilters = $state<FilterDefinition[]>([]);
 	let selectedFilters = $state<Record<number, string[]>>({});
+	// Dependent filter tree for the chosen category (brand → model → storage …).
+	let filterTree = $state<ApiFilterNode[]>([]);
+	let treeSel = $state<Record<number, number>>({});
 	let loading = $state(false);
 	let loadingMore = $state(false);
 	let error = $state<string | null>(null);
@@ -113,6 +118,31 @@
 		apply();
 	}
 
+	/** Load the dependent filter tree for the current category. */
+	async function loadTree() {
+		treeSel = {};
+		filterTree = categoryId ? await loadFilterTree(categoryId) : [];
+	}
+
+	/** A selection resets everything that depended on it. */
+	function onTreeChange(filter: ApiFilterNode, valueId: number | null) {
+		const next = { ...treeSel };
+		if (valueId) next[filter.id] = valueId;
+		else delete next[filter.id];
+
+		const resetDependents = (id: number) => {
+			for (const f of filterTree) {
+				if (f.depends_on_filter_id === id) {
+					delete next[f.id];
+					resetDependents(f.id);
+				}
+			}
+		};
+		resetDependents(filter.id);
+		treeSel = next;
+		apply();
+	}
+
 	/** Choosing a category re-scopes the whole sidebar. */
 	function selectCategory(id: number | null, parentId?: number | null) {
 		const isSubcategoryClick = parentId !== undefined && parentId !== null;
@@ -139,6 +169,7 @@
 			loadFacets();
 		}
 
+		loadTree();
 		apply();
 	}
 
@@ -165,7 +196,8 @@
 				page: targetPage,
 				filters: Object.fromEntries(
 					Object.entries(selectedFilters).filter(([, values]) => values.length)
-				)
+				),
+				filter_value_ids: Object.values(treeSel).filter(Boolean)
 			});
 
 			if (requestId !== requestSerial) return;
@@ -236,6 +268,7 @@
 		if (priceCap > 0 && priceMax < priceCap) count++;
 		if (search.trim()) count++;
 		count += Object.values(selectedFilters).filter((arr) => arr.length > 0).length;
+		if (Object.values(treeSel).some(Boolean)) count++;
 		return count;
 	});
 
@@ -248,6 +281,8 @@
 		search = '';
 		priceMax = priceCap;
 		selectedFilters = {};
+		treeSel = {};
+		filterTree = [];
 		loadFacets();
 		apply();
 	}
@@ -308,6 +343,7 @@
 			}
 
 			loadFacets();
+			await loadTree();
 			await load(1);
 		})();
 
@@ -524,6 +560,13 @@
 			/>
 		{/each}
 
+		{#if filterTree.length}
+			<div class="single-sidebar-widget">
+				<h3 class="single-sidebar-widget__wid-title--title">{$translate('Filters')}</h3>
+				<ShopFilterTree tree={filterTree} selection={treeSel} onchange={onTreeChange} />
+			</div>
+		{/if}
+
 		{#if facets.sizes.length}
 			<div class="single-sidebar-widget">
 				<button
@@ -705,6 +748,10 @@
 							</label>
 						{/if}
 					{/each}
+
+					{#if filterTree.length}
+						<ShopFilterTree tree={filterTree} selection={treeSel} onchange={onTreeChange} />
+					{/if}
 				</div>
 			</div>
 

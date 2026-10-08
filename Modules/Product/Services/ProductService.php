@@ -137,6 +137,21 @@ class ProductService
             }
         }
 
+        // Dependent filter tree: ?filter_value_ids[]=… matches products that
+        // hold every one of the selected values (one per filter in the chain).
+        if (! empty($params['filter_value_ids']) && is_array($params['filter_value_ids'])) {
+            $valueIds = array_values(array_filter(array_map('intval', $params['filter_value_ids'])));
+
+            if ($valueIds !== []) {
+                $query->whereHas(
+                    'filterValues',
+                    fn ($q) => $q->whereIn('filter_value_id', $valueIds),
+                    '=',
+                    count($valueIds)
+                );
+            }
+        }
+
         if (! empty($params['search'])) {
             filterLike($query, ['title', 'description', 'sku'], $params);
         }

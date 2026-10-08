@@ -23,6 +23,8 @@ export interface ShopFilters {
 	per_page?: number;
 	/** Dynamic filters: { filterId: [value, ...] } -> `filters[<id>][]=value`. */
 	filters?: Record<string, string[]>;
+	/** Dependent filter tree values: `filter_value_ids[]=…`. */
+	filter_value_ids?: Array<string | number>;
 }
 
 export interface ShopResult {

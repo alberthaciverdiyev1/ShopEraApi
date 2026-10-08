@@ -93,6 +93,12 @@ class Product extends Model
         return $this->hasMany(ProductFilter::class, 'product_id');
     }
 
+    /** Values chosen from the dependent filter tree (brand/model/storage/…). */
+    public function filterValues(): HasMany
+    {
+        return $this->hasMany(\Modules\Filter\Entities\ProductFilterValue::class, 'product_id');
+    }
+
     public function brand(): BelongsTo
     {
         return $this->belongsTo(Brand::class, 'brand_id', 'id');
