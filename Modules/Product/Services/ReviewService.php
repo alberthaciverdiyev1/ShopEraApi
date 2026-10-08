@@ -116,11 +116,15 @@ class ReviewService
 
         $validated['status'] = ReviewStatus::PENDING->value;
 
-        return handleTransaction(
+        $response = handleTransaction(
             fn () => $this->model->create($validated)->refresh(),
             'Review added successfully.',
             ReviewResource::class
         );
+
+        $this->recalcVendor((int) $validated['product_id']);
+
+        return $response;
     }
 
     public function changeStatus(int $review_id, string $status): JsonResponse
@@ -147,6 +151,7 @@ class ReviewService
                 }
 
                 $review->delete();
+                $this->recalcVendor((int) $review->product_id);
 
                 return $review;
             },
@@ -161,6 +166,7 @@ class ReviewService
                 $review = $this->model->findOrFail($id);
 
                 $review->delete();
+                $this->recalcVendor((int) $review->product_id);
 
                 return $review;
             },
@@ -208,6 +214,20 @@ class ReviewService
 
     public function remove(int $id): void
     {
-        $this->model->newQuery()->findOrFail($id)->delete();
+        $review = $this->model->newQuery()->findOrFail($id);
+        $productId = (int) $review->product_id;
+        $review->delete();
+        $this->recalcVendor($productId);
+    }
+
+    /** Keep the product's store rating in sync after any review change. */
+    private function recalcVendor(int $productId): void
+    {
+        $product = \Modules\Product\Entities\Product::query()->find($productId);
+
+        if ($product?->vendor_id) {
+            app(\Modules\Marketplace\Services\VendorService::class)
+                ->recalcRating(\Modules\Marketplace\Entities\Vendor::find($product->vendor_id));
+        }
     }
 }

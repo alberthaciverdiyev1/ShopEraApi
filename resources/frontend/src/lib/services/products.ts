@@ -33,7 +33,7 @@ export interface ApiProduct {
 	is_promoted?: boolean;
 	seller_type?: 'guest' | 'user' | 'vendor' | null;
 	contact_name?: string | null;
-	seller?: { id: number; name: string; slug: string } | null;
+	seller?: { id: number; name: string; slug: string; rating_avg?: number; rating_count?: number } | null;
 	/** Dependent filter values chosen when the listing was posted. */
 	filter_values?: Array<{
 		filter_id?: number;

@@ -11,6 +11,8 @@ export interface ApiVendor {
 	email?: string | null;
 	address?: string | null;
 	status?: string;
+	rating_avg?: number;
+	rating_count?: number;
 	listings_count?: number;
 }
 

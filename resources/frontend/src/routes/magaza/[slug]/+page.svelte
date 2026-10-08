@@ -62,7 +62,13 @@
 					</span>
 				{/if}
 				<div>
-					<h2 class="mb-1">{vendorName(vendor)}</h2>
+					<h2 class="mb-1">
+						{vendorName(vendor)}
+						{#if (vendor.rating_count ?? 0) > 0}
+							<span class="fs-6 text-warning ms-2">★ {Number(vendor.rating_avg ?? 0).toFixed(1)}</span>
+							<span class="fs-6 text-muted">({vendor.rating_count})</span>
+						{/if}
+					</h2>
 					{#if vendorDescription(vendor)}<p class="text-muted mb-1">{vendorDescription(vendor)}</p>{/if}
 					<p class="mb-0 small text-muted">
 						{vendor.listings_count ?? 0} elan

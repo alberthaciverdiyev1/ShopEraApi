@@ -83,6 +83,8 @@ class ProductResource extends JsonResource
                 'id' => $this->vendor->id,
                 'name' => $this->vendor->name,
                 'slug' => $this->vendor->slug,
+                'rating_avg' => (float) $this->vendor->rating_avg,
+                'rating_count' => (int) $this->vendor->rating_count,
             ] : null),
 
             // Values chosen from the dependent filter tree (brand/model/storage/…).

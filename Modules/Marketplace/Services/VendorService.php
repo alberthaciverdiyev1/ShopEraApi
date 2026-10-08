@@ -72,6 +72,25 @@ class VendorService
         return $vendor->refresh();
     }
 
+    /** Recompute a store's average rating from its products' approved reviews. */
+    public function recalcRating(?Vendor $vendor): void
+    {
+        if (! $vendor) {
+            return;
+        }
+
+        $productIds = $vendor->products()->pluck('id');
+
+        $reviews = \Modules\Product\Entities\Review::query()
+            ->whereIn('product_id', $productIds)
+            ->where('status', \App\Enums\ReviewStatus::APPROVED->value);
+
+        $vendor->forceFill([
+            'rating_avg' => round((float) ($reviews->clone()->avg('rate') ?? 0), 2),
+            'rating_count' => $reviews->clone()->count(),
+        ])->save();
+    }
+
     public function findBySlug(string $slug): ?Vendor
     {
         return Vendor::query()->where('slug', $slug)->first();
@@ -90,6 +109,8 @@ class VendorService
             'email' => $vendor->email,
             'address' => $vendor->address,
             'status' => $vendor->status,
+            'rating_avg' => (float) $vendor->rating_avg,
+            'rating_count' => (int) $vendor->rating_count,
             'listings_count' => $vendor->products()->count(),
         ];
     }

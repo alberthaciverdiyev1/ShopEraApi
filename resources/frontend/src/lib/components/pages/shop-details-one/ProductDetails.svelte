@@ -746,6 +746,10 @@
 										{product.seller.name}
 									</a>
 									<span class="seller-badge">{$translate('Store')}</span>
+									{#if (product.seller.rating_count ?? 0) > 0}
+										<span class="seller-rating text-warning">★ {Number(product.seller.rating_avg ?? 0).toFixed(1)}</span>
+										<span class="seller-rating text-muted">({product.seller.rating_count})</span>
+									{/if}
 								{:else}
 									<span class="seller-name">{product.contact_name ?? $translate('Seller')}</span>
 									{#if product.seller_type === 'guest'}
@@ -2379,6 +2383,7 @@
 		background: color-mix(in srgb, var(--theme) 12%, #fff); color: var(--theme);
 	}
 	.seller-name { font-weight: 700; color: #0f172a; }
+	.seller-rating { font-size: 13px; font-weight: 700; }
 	.seller-badge {
 		padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700;
 		background: color-mix(in srgb, var(--theme) 12%, #fff); color: var(--theme);
