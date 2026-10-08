@@ -14,27 +14,25 @@
 	const leafCategories = $derived(activeChild?.children ?? []);
 	const panelColumns = $derived(1 + (activeParent ? 1 : 0) + (activeChild && leafCategories.length ? 1 : 0));
 
-	function setParent(category: Category) {
-		if (!category.children.length) {
-			window.location.href = `/shop?category=${category.id}`;
-			return;
-		}
-
-		activeParentId = activeParentId === category.id ? null : category.id;
+	/** Hover drives the columns (like tap.az); clicking navigates. */
+	function hoverParent(category: Category) {
+		if (!category.children.length || activeParentId === category.id) return;
+		activeParentId = category.id;
 		activeChildId = null;
 	}
 
-	function setChild(category: Category) {
-		if (!category.children.length) {
-			window.location.href = `/shop?category=${category.id}`;
-			return;
-		}
-
-		activeChildId = activeChildId === category.id ? null : category.id;
+	function hoverChild(category: Category) {
+		if (!category.children.length || activeChildId === category.id) return;
+		activeChildId = category.id;
 	}
 
 	onMount(async () => {
 		await loadCategories();
+
+		// Preselect the first parent so the second column is not empty on open.
+		if (activeParentId === null && $categories[0]) {
+			activeParentId = $categories[0].id;
+		}
 	});
 </script>
 
@@ -50,12 +48,8 @@
 					class="catalog-row"
 					class:active={activeParent?.id === category.id}
 					href={`/shop?category=${category.id}`}
-					onclick={(event) => {
-						if (category.children.length) {
-							event.preventDefault();
-							setParent(category);
-						}
-					}}
+					onmouseenter={() => hoverParent(category)}
+					onfocus={() => hoverParent(category)}
 				>
 					<span class="catalog-thumb">
 						{#if category.image}
@@ -83,12 +77,8 @@
 						class="catalog-row catalog-row-text"
 						class:active={activeChild?.id === child.id}
 						href={`/shop?category=${child.id}`}
-						onclick={(event) => {
-							if (child.children.length) {
-								event.preventDefault();
-								setChild(child);
-							}
-						}}
+						onmouseenter={() => hoverChild(child)}
+						onfocus={() => hoverChild(child)}
 					>
 						<span>{categoryName(child, $locale)}</span>
 						{#if child.children.length}
