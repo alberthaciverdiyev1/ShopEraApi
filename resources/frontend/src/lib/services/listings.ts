@@ -10,6 +10,8 @@ export interface ApiListing {
 	seller_type: SellerType;
 	condition: string | null;
 	has_delivery?: boolean;
+	expires_at?: string | null;
+	is_active?: boolean;
 	category_id: number | null;
 	brand_id?: number | null;
 	brand?: string | null;
@@ -158,4 +160,9 @@ export async function fetchPromotionPackages(): Promise<PromotionPackage[]> {
 /** Create a promotion order for a listing (activated after payment). */
 export async function promoteListing(id: number, packageId: number): Promise<void> {
 	await apiPost(`/listings/${id}/promote`, { package_id: packageId });
+}
+
+/** Re-publish an expired/archived listing. */
+export async function renewListing(id: number): Promise<void> {
+	await apiPost(`/listings/${id}/renew`);
 }

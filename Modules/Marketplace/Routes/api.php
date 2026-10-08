@@ -31,6 +31,7 @@ Route::prefix('listings')->controller(ListingController::class)->group(function 
     Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', 'store')->name('listing.store');
         Route::post('/{id}/promote', 'promote')->whereNumber('id')->name('listing.promote');
+        Route::post('/{id}/renew', 'renew')->whereNumber('id')->name('listing.renew');
         Route::get('/mine', 'myListings')->name('listing.mine');
         Route::put('/{id}', 'update')->whereNumber('id')->name('listing.update');
         Route::delete('/{id}', 'destroy')->whereNumber('id')->name('listing.destroy');

@@ -18,6 +18,16 @@ class ListingController extends Controller
 {
     public function __construct(private readonly ListingService $service, private readonly PromotionService $promotions) {}
 
+    /** Re-publish the owner's expired/archived listing. */
+    public function renew(Request $request, int $id)
+    {
+        $listing = Product::query()->findOrFail($id);
+        $this->authorizeOwner($listing, $request->user('sanctum')->id);
+        $this->service->renew($listing);
+
+        return responseHelper('Elan yenidən dərc edildi.', 200, new ListingResource($listing->fresh()));
+    }
+
     /** Active promotion packages (public). */
     public function packages()
     {

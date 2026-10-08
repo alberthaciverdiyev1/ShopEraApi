@@ -54,6 +54,7 @@ class ListingService
             'contact_phone' => $data['contact_phone'] ?? $user?->phone,
             'contact_email' => $data['contact_email'] ?? $user?->email,
             'is_active' => true,
+            'expires_at' => now()->addDays($this->listingDays()),
             'approval_status' => 'approved',
         ]);
 
@@ -123,6 +124,27 @@ class ListingService
             'phone' => $listing->contact_phone ?: $user?->phone ?: $vendor?->phone,
             'email' => $listing->contact_email ?: $user?->email ?: $vendor?->email,
         ];
+    }
+
+    /** Extend a listing's lifetime and re-activate it. */
+    public function renew(Product $listing): void
+    {
+        $listing->forceFill([
+            'expires_at' => now()->addDays($this->listingDays()),
+            'is_active' => true,
+        ])->save();
+    }
+
+    /** Default listing lifetime in days (admin setting, 30 by default). */
+    private function listingDays(): int
+    {
+        try {
+            $days = (int) app(\Modules\Setting\Services\SettingService::class)->current()?->listing_active_days;
+        } catch (\Throwable) {
+            $days = 0;
+        }
+
+        return $days > 0 ? $days : 30;
     }
 
     /** Record a report against a listing (guest or signed-in). */

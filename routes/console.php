@@ -23,3 +23,4 @@ Artisan::command('orders:expire-pending-payments {--hours=3} {--limit=200}', fun
 Schedule::command('orders:expire-pending-payments --hours=3 --limit=200')->everyFifteenMinutes()->withoutOverlapping();
 
 Schedule::command('listings:expire-promotions')->hourly();
+Schedule::command('listings:expire')->hourly();

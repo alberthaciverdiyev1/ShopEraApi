@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { isLoggedIn } from '$lib/services/auth';
-	import { fetchMyListings, deleteListing, listingTitle, listingImage, fetchPromotionPackages, promoteListing, packageName, type ApiListing, type PromotionPackage } from '$lib/services/listings';
+	import { fetchMyListings, deleteListing, listingTitle, listingImage, fetchPromotionPackages, promoteListing, packageName, renewListing, type ApiListing, type PromotionPackage } from '$lib/services/listings';
 
 	let listings = $state<ApiListing[]>([]);
 	let loading = $state(true);
@@ -22,6 +22,16 @@
 	async function remove(id: number) {
 		if (!confirm('Elan silinsin?')) return;
 		await deleteListing(id);
+		await load();
+	}
+
+	function isExpired(listing: ApiListing): boolean {
+		if (listing.is_active === false) return true;
+		return !!listing.expires_at && new Date(listing.expires_at).getTime() < Date.now();
+	}
+
+	async function renew(id: number) {
+		await renewListing(id);
 		await load();
 	}
 
@@ -83,10 +93,20 @@
 							     style="height:180px;object-fit:cover;">
 							<div class="card-body d-flex flex-column">
 								<p class="fw-semibold mb-1">{listingTitle(listing)}</p>
-								<p class="text-primary fw-bold mb-2">{Number(listing.price ?? 0).toFixed(2)} ₼</p>
+								<p class="text-primary fw-bold mb-1">{Number(listing.price ?? 0).toFixed(2)} ₼</p>
+								{#if listing.expires_at}
+									<p class="small mb-2 {isExpired(listing) ? 'text-danger' : 'text-muted'}">
+										{isExpired(listing) ? 'Müddəti bitib' : `Bitir: ${new Date(listing.expires_at).toLocaleDateString()}`}
+									</p>
+								{/if}
 								<div class="d-flex gap-2 mt-auto">
-									<button class="btn btn-outline-primary btn-sm flex-grow-1" type="button"
-									        onclick={() => openPromote(listing)}>İrəli çək</button>
+									{#if isExpired(listing)}
+										<button class="btn btn-outline-success btn-sm flex-grow-1" type="button"
+										        onclick={() => renew(listing.id)}>Yenidən dərc</button>
+									{:else}
+										<button class="btn btn-outline-primary btn-sm flex-grow-1" type="button"
+										        onclick={() => openPromote(listing)}>İrəli çək</button>
+									{/if}
 									<button class="btn btn-outline-danger btn-sm" type="button"
 									        onclick={() => remove(listing.id)}>Sil</button>
 								</div>

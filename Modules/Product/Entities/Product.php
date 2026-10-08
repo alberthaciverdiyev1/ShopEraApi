@@ -46,6 +46,7 @@ class Product extends Model
         'premium_until' => 'datetime',
         'approved_at' => 'datetime',
         'last_approved_at' => 'datetime',
+        'expires_at' => 'datetime',
     ];
 
     public function scopePubliclyAvailable($query)

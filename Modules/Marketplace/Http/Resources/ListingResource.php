@@ -33,6 +33,8 @@ class ListingResource extends JsonResource
             'contact_email' => $this->contact_email,
             'is_promoted' => (bool) $this->is_promoted,
             'is_premium' => (bool) $this->is_premium,
+            'expires_at' => $this->expires_at?->toIso8601String(),
+            'is_active' => (bool) $this->is_active,
             'images' => $this->whenLoaded('images', fn () => $this->images->map(fn ($image) => $image->image_path)),
             'created_at' => $this->created_at?->toIso8601String(),
         ];
