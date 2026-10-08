@@ -65,15 +65,29 @@
 - [ ] Səbət/checkout **yalnız vendor (mağaza)** elanları üçün.
 - [ ] Sifariş vendora bağlanır; status/tracking; vendor–alıcı mesajlaşması (Chat).
 
-## 5. Həll edilməli əsas arxitektura sualı
+## 5. QƏRAR: Tək database (multi-tenant ləğv edilir)
 
-Hazırda sistem **multi-tenant**-dır (hər sahib = öz DB). "**Vahid** marketplace" isə
-tək instansiya tələb edir. Seçim lazımdır:
+> **Qərar:** Sistem **tək (vahid) database** üzərində işləyəcək. Multi-tenancy
+> (hər host → ayrı DB) ləğv edilir. Bütün satıcılar/mağazalar/elanlar bir DB-də.
 
-- **(A)** Marketplace ayrıca tək app/DB (tenant mağazalardan asılı olmayan) — "vahid" üçün tövsiyə.
-- **(B)** Mövcud control/main DB üzərində qurulur.
+### Mövcud mexanizm (nəyi dəyişmək lazımdır)
+- `config/tenant.php` → `enabled` açarı (`TENANCY_ENABLED`).
+- `App\Http\Middleware\ResolveTenant` — host-a görə `tenant` connection seçir.
+- İki connection: `tenant` (runtime) və `control` (Manager üçün mərkəzi DB).
+- `App\Support\TenantContext` / `TenantDatabase` — storage prefiksi, cache açarları.
+- `manager:map`, `tenant:provision`, `tenant:list`, `tenant:migrate` əmrləri.
+- Storage: hər tenant üçün ayrı qovluq (`storageSlug`).
 
-> Bu qərar Faza 0-ın ilk addımıdır; bütün qalan işi təyin edir.
+### Faza 0 — Tək DB keçidi (addımlar)
+- [ ] `TENANCY_ENABLED=false`; `ResolveTenant`-i tək DB üçün söndür/sadələşdir.
+- [ ] `control` connection-ı tək DB-yə yönləndir (Manager cədvəlləri eyni DB-də).
+- [ ] Storage prefiksini sil (`TenantContext::storagePath` → olduğu kimi qaytar).
+- [ ] **Data miqrasiyası**: mövcud tenant DB-ləri + control → tək DB-yə birləşdir.
+- [ ] `manager:map` / `tenant:provision` / `tenant:*` əmrlərini çıxar və ya no-op et.
+- [ ] Subscription/entitlement (control) cədvəllərini tək DB-yə köçür.
+
+> **Diqqət:** Data miqrasiyası geri dönməzdir. İcra etməzdən əvvəl mövcud DB-lərin
+> siyahısı və birləşdirmə qaydası (host → satıcı/mağaza) təsdiqlənməlidir.
 
 ## 6. Açıq suallar
 - Qonaq elanlar üçün moderasiya tam yoxdursa, spam/captcha necə idarə olunur?
