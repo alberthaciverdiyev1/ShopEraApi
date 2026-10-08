@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use League\Flysystem\Filesystem;
 use App\Support\TenantContext;
@@ -29,6 +31,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        $this->configureRateLimiting();
+
         /*
          * Saytın başlığı və altlığı hər səhifədə eyni məlumatı istəyir.
          * Əvvəllər onu hər metod ayrıca ötürürdü — yeni səhifə əlavə edən
@@ -72,5 +76,14 @@ class AppServiceProvider extends ServiceProvider
                 $config
             );
         });
+    }
+    /** Throttle the abuse-prone public/customer endpoints. */
+    private function configureRateLimiting(): void
+    {
+        RateLimiter::for('guest-listings', fn ($request) => Limit::perHour(5)->by($request->ip()));
+        RateLimiter::for('listings', fn ($request) => Limit::perMinute(10)->by($request->user()?->id ?: $request->ip()));
+        RateLimiter::for('reports', fn ($request) => Limit::perHour(5)->by($request->user()?->id ?: $request->ip()));
+        RateLimiter::for('chat', fn ($request) => Limit::perMinute(30)->by($request->user()?->id ?: $request->ip()));
+        RateLimiter::for('otp', fn ($request) => Limit::perMinute(5)->by($request->ip()));
     }
 }

@@ -15,7 +15,7 @@ use Modules\Marketplace\Http\Controllers\VendorController;
 Route::prefix('listings')->controller(ListingController::class)->group(function () {
     Route::get('/fields', 'fields')->name('listing.fields');
     Route::get('/promotion-packages', 'packages')->name('listing.packages');
-    Route::post('/guest', 'storeGuest')->name('listing.guest');
+    Route::post('/guest', 'storeGuest')->middleware('throttle:guest-listings')->name('listing.guest');
 
     // Secret-link management for guest listings.
     Route::get('/manage/{token}', 'manageShow')->name('listing.manage.show');
@@ -26,12 +26,12 @@ Route::prefix('listings')->controller(ListingController::class)->group(function 
     Route::get('/{id}/contact', 'contact')->whereNumber('id')->name('listing.contact');
 
     // Public: report a listing.
-    Route::post('/{id}/report', 'report')->whereNumber('id')->name('listing.report');
+    Route::post('/{id}/report', 'report')->whereNumber('id')->middleware('throttle:reports')->name('listing.report');
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/', 'store')->name('listing.store');
-        Route::post('/{id}/promote', 'promote')->whereNumber('id')->name('listing.promote');
-        Route::post('/{id}/renew', 'renew')->whereNumber('id')->name('listing.renew');
+        Route::post('/', 'store')->middleware('throttle:listings')->name('listing.store');
+        Route::post('/{id}/promote', 'promote')->whereNumber('id')->middleware('throttle:listings')->name('listing.promote');
+        Route::post('/{id}/renew', 'renew')->whereNumber('id')->middleware('throttle:listings')->name('listing.renew');
         Route::get('/mine', 'myListings')->name('listing.mine');
         Route::put('/{id}', 'update')->whereNumber('id')->name('listing.update');
         Route::delete('/{id}', 'destroy')->whereNumber('id')->name('listing.destroy');
@@ -43,7 +43,7 @@ Route::prefix('listings')->controller(ListingChatController::class)->middleware(
     Route::get('/chats', 'index')->name('listing.chats');
     Route::get('/chats/unread', 'unread')->name('listing.chats.unread');
     Route::get('/chats/{id}', 'show')->whereNumber('id')->name('listing.chats.show');
-    Route::post('/chats/{id}/messages', 'send')->whereNumber('id')->name('listing.chats.send');
+    Route::post('/chats/{id}/messages', 'send')->whereNumber('id')->middleware('throttle:chat')->name('listing.chats.send');
     Route::post('/{id}/chat', 'start')->whereNumber('id')->name('listing.chat.start');
 });
 
