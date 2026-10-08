@@ -27,6 +27,9 @@ class Product extends Model
 
     protected $guarded = [];
 
+    /** Never leak the guest management token in API payloads. */
+    protected $hidden = ['manage_token'];
+
     // Mirrors the column default so a product created without an explicit
     // approval_status does not serialize as null before it is reloaded.
     protected $attributes = [
@@ -77,6 +80,12 @@ class Product extends Model
     public function vendor(): BelongsTo
     {
         return $this->belongsTo(\Modules\Marketplace\Entities\Vendor::class, 'vendor_id');
+    }
+
+    /** Where the listing is, for marketplace listings. */
+    public function city(): BelongsTo
+    {
+        return $this->belongsTo(\Modules\Delivery\Entities\City::class, 'city_id');
     }
 
     public function productFilters(): HasMany
