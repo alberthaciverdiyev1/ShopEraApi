@@ -4,8 +4,11 @@ namespace Modules\Category\Services;
 
 use App\Helpers\TranslateHelper as Translate;
 use App\Support\TenantContext;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Pagination\AbstractPaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -66,6 +69,7 @@ class CategoryService
                 'id' => $category->id,
                 'name' => $name,
                 'image' => $category->image,
+                'background_color' => $category->background_color,
                 'description' => $category->description,
                 'parent_id' => $category->parent_id,
                 'is_active' => $category->is_active,
@@ -356,7 +360,7 @@ class CategoryService
     }
 
     /** Admin listing query: tree order (children after parent) with optional q=. */
-    public function adminQuery(\Illuminate\Http\Request $request, array $locales): \Illuminate\Database\Eloquent\Builder
+    public function adminQuery(Request $request, array $locales): Builder
     {
         $query = $this->model->newQuery();
         $term = trim((string) $request->query('q', ''));
@@ -377,7 +381,7 @@ class CategoryService
     /** Flatten rows into depth-annotated nodes so children follow parents. */
     public function treeNodes($rows): array
     {
-        $items = $rows instanceof \Illuminate\Pagination\AbstractPaginator ? $rows->getCollection() : collect($rows);
+        $items = $rows instanceof AbstractPaginator ? $rows->getCollection() : collect($rows);
         $byParent = $items->groupBy(fn (Category $c) => $c->parent_id ?? 0);
         $withChildren = $items->pluck('parent_id')->filter()->unique()->flip();
 

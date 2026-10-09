@@ -8,6 +8,7 @@ export interface ApiCategory {
 	needs_brand?: boolean;
 	show_on_home?: boolean;
 	image?: string | null;
+	background_color?: string | null;
 	is_active?: boolean;
 	sort_order?: number;
 	products_count?: number;

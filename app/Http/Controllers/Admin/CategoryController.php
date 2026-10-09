@@ -30,6 +30,7 @@ class CategoryController extends ResourceController
         ['name' => 'name', 'label' => 'Ad', 'type' => 'translatable_text', 'rules' => ['required', 'max:255'], 'col' => 6],
         ['name' => 'parent_id', 'label' => 'Üst kateqoriya', 'type' => 'select', 'col' => 6],
         ['name' => 'image', 'label' => 'Şəkil', 'type' => 'image', 'path' => 'categories', 'col' => 6],
+        ['name' => 'background_color', 'label' => 'Kartın arxa fon rəngi', 'type' => 'color', 'col' => 6],
         ['name' => 'sort_order', 'label' => 'Sıra', 'type' => 'number', 'col' => 3],
         ['name' => 'is_active', 'label' => 'Aktivdir', 'type' => 'checkbox', 'col' => 3],
         ['name' => 'needs_brand', 'label' => 'Elan verməkdə marka tələb olunsun', 'type' => 'checkbox', 'col' => 12],

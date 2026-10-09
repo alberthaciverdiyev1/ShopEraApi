@@ -21,9 +21,19 @@
                                         title="Alt kateqoriyaları göstər / gizlət">
                                     <svg class="tree-chevron h-3.5 w-3.5 shrink-0 text-gray-400 transition-transform" fill="none" viewBox="0 0 24 24" stroke-width="2.2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/></svg>
                                     @if ($category->image)
-                                        <img src="{{ $category->image }}" class="h-8 w-8 rounded-lg object-cover ring-1 ring-gray-200">
+                                        <div class="relative">
+                                            <img src="{{ $category->image }}" class="h-8 w-8 rounded-lg object-cover ring-1 ring-gray-200" style="@if($category->background_color) background-color: {{ $category->background_color }}; @endif">
+                                            @if ($category->background_color)
+                                                <span class="absolute -bottom-1 -right-1 h-3 w-3 rounded-full border border-white" style="background-color: {{ $category->background_color }}" title="Fon: {{ $category->background_color }}"></span>
+                                            @endif
+                                        </div>
                                     @else
-                                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-300">—</span>
+                                        <div class="relative">
+                                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-300" style="@if($category->background_color) background-color: {{ $category->background_color }}; @endif">—</span>
+                                            @if ($category->background_color)
+                                                <span class="absolute -bottom-1 -right-1 h-3 w-3 rounded-full border border-white" style="background-color: {{ $category->background_color }}" title="Fon: {{ $category->background_color }}"></span>
+                                            @endif
+                                        </div>
                                     @endif
                                     <span class="font-medium {{ $node['depth'] > 0 ? 'text-gray-600' : 'text-gray-800' }}">{{ $label }}</span>
                                 </button>
@@ -31,9 +41,19 @@
                                 <span class="flex items-center gap-2 px-1.5 py-1">
                                     <span class="h-3.5 w-3.5 shrink-0"></span>
                                     @if ($category->image)
-                                        <img src="{{ $category->image }}" class="h-8 w-8 rounded-lg object-cover ring-1 ring-gray-200">
+                                        <div class="relative">
+                                            <img src="{{ $category->image }}" class="h-8 w-8 rounded-lg object-cover ring-1 ring-gray-200" style="@if($category->background_color) background-color: {{ $category->background_color }}; @endif">
+                                            @if ($category->background_color)
+                                                <span class="absolute -bottom-1 -right-1 h-3 w-3 rounded-full border border-white" style="background-color: {{ $category->background_color }}" title="Fon: {{ $category->background_color }}"></span>
+                                            @endif
+                                        </div>
                                     @else
-                                        <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-300">—</span>
+                                        <div class="relative">
+                                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-100 text-gray-300" style="@if($category->background_color) background-color: {{ $category->background_color }}; @endif">—</span>
+                                            @if ($category->background_color)
+                                                <span class="absolute -bottom-1 -right-1 h-3 w-3 rounded-full border border-white" style="background-color: {{ $category->background_color }}" title="Fon: {{ $category->background_color }}"></span>
+                                            @endif
+                                        </div>
                                     @endif
                                     <span class="font-medium {{ $node['depth'] > 0 ? 'text-gray-600' : 'text-gray-800' }}">{{ $label }}</span>
                                 </span>

@@ -118,10 +118,19 @@
                             </select>
 
                         @elseif ($type === 'color')
+                            @php $currCol = $fieldValue($field); @endphp
                             <div class="flex items-center gap-3">
-                                <input type="color" name="{{ $name }}" value="{{ $fieldValue($field) ?: '#000000' }}"
-                                       class="h-11 w-14 cursor-pointer rounded-lg border border-gray-300 bg-gray-50 dark:border-gray-600">
-                                <span class="text-sm text-gray-500">{{ $fieldValue($field) }}</span>
+                                <input type="color" value="{{ $currCol ?: '#f1f5f9' }}"
+                                       oninput="this.nextElementSibling.value = this.value; this.parentElement.querySelector('input[type=hidden]').value = this.value;"
+                                       class="h-10 w-14 cursor-pointer rounded-lg border border-gray-300 bg-gray-50 p-1 dark:border-gray-600">
+                                <input type="text" placeholder="#f1f5f9" value="{{ $currCol }}"
+                                       oninput="if (/^#[0-9A-Fa-f]{6}$/.test(this.value)) { this.previousElementSibling.value = this.value; } this.parentElement.querySelector('input[type=hidden]').value = this.value;"
+                                       class="w-32 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm uppercase text-gray-900 focus:border-brand-500 focus:ring-brand-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                <input type="hidden" name="{{ $name }}" value="{{ $currCol }}">
+                                @if ($currCol)
+                                    <button type="button" onclick="this.parentElement.querySelector('input[type=text]').value = ''; this.parentElement.querySelector('input[type=hidden]').value = '';"
+                                            class="text-xs text-rose-500 hover:underline">Sıfırla</button>
+                                @endif
                             </div>
 
                         @elseif (in_array($type, ['file', 'image', 'video']))
