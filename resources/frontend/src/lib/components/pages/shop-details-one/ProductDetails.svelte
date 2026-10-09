@@ -420,26 +420,44 @@
 			});
 		}
 
-		// Show every category level (root → leaf), e.g. Elektronika / Telefon.
+		// Category + its parent (only the last two levels).
 		const categoryPath =
 			product.category_path && product.category_path.length
 				? product.category_path
 				: product.category
 					? [{ id: product.category.id, name: product.category.name }]
 					: [];
+		const categoryLevels = categoryPath.filter((c) => c.name);
 
-		if (categoryPath.length) {
-			const leaf = categoryPath[categoryPath.length - 1];
+		if (categoryLevels.length >= 2) {
+			const parent = categoryLevels[categoryLevels.length - 2];
+			const leaf = categoryLevels[categoryLevels.length - 1];
 			list.push({
 				label: 'Kateqoriya',
-				value: categoryPath.map((c) => c.name).filter(Boolean).join(' / '),
-				link: leaf?.id ? `/shop?category=${leaf.id}` : undefined
+				value: parent.name,
+				link: parent.id ? `/shop?category=${parent.id}` : undefined
+			});
+			list.push({
+				label: 'Alt kateqoriya',
+				value: leaf.name,
+				link: leaf.id ? `/shop?category=${leaf.id}` : undefined
+			});
+		} else if (categoryLevels.length === 1) {
+			list.push({
+				label: 'Kateqoriya',
+				value: categoryLevels[0].name,
+				link: categoryLevels[0].id ? `/shop?category=${categoryLevels[0].id}` : undefined
 			});
 		} else {
 			const categoryName = getFilterVal(['kateqoriya', 'category']);
 			if (categoryName) {
 				list.push({ label: 'Kateqoriya', value: categoryName });
 			}
+		}
+
+		const cityName = product.city ?? getFilterVal(['şəhər', 'seher', 'city']);
+		if (cityName) {
+			list.push({ label: 'Şəhər', value: cityName });
 		}
 
 		const styleVal = getFilterVal(['üslub', 'uslub', 'style']) ?? product.gender;
