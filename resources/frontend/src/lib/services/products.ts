@@ -33,6 +33,9 @@ export interface ApiProduct {
 	is_promoted?: boolean;
 	is_vip?: boolean;
 	is_premium?: boolean;
+	promoted_until?: string | null;
+	vip_until?: string | null;
+	premium_until?: string | null;
 	seller_type?: 'guest' | 'user' | 'vendor' | null;
 	contact_name?: string | null;
 	seller?: { id: number; name: string; slug: string; rating_avg?: number; rating_count?: number } | null;

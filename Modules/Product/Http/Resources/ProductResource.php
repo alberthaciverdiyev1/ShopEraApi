@@ -80,6 +80,9 @@ class ProductResource extends JsonResource
             'is_promoted' => (bool) $this->is_promoted,
             'is_vip' => (bool) $this->is_vip,
             'is_premium' => (bool) $this->is_premium,
+            'promoted_until' => $this->promoted_until?->toIso8601String(),
+            'vip_until' => $this->vip_until?->toIso8601String(),
+            'premium_until' => $this->premium_until?->toIso8601String(),
             'city' => $this->whenLoaded('city', fn () => $this->city?->name),
             'seller' => $this->whenLoaded('vendor', fn () => $this->vendor ? [
                 'id' => $this->vendor->id,

@@ -16,7 +16,6 @@
 		promoteListing,
 		packageName,
 		packageDescription,
-		packageBonus,
 		type ListingContact,
 		type ReportReason,
 		type PromotionPackage
@@ -161,12 +160,31 @@
 		premium: { title: 'Premium et', before: '1 dəfə irəli çək + VIP', after: 'Hər gün irəli çək + VIP' }
 	};
 
+	// Store (vendor) listings are promoted from the store panel, not here.
+	const canPromote = $derived(product.seller_type !== 'vendor');
+
 	const promoOptions = $derived(promoPackages.filter((pkg) => pkg.type === promoType));
 	const promoLead = $derived(promoOptions[0] ? packageDescription(promoOptions[0], $locale) : '');
-	const promoBonus = $derived(promoOptions[0] ? packageBonus(promoOptions[0], $locale) : '');
 	const promoTitle = $derived(promoType ? promoMeta[promoType].title : '');
 	const promoBefore = $derived(promoType ? promoMeta[promoType].before ?? '' : '');
 	const promoAfter = $derived(promoType ? promoMeta[promoType].after ?? '' : '');
+
+	const MONTHS_AZ = ['Yanvar', 'Fevral', 'Mart', 'Aprel', 'May', 'İyun', 'İyul', 'Avqust', 'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr'];
+
+	/** "14 Oktyabr 2026, 17:09" for an active placement, otherwise null. */
+	function placementEndsAt(type: 'promoted' | 'vip' | 'premium'): string | null {
+		const iso = type === 'premium' ? product.premium_until : type === 'vip' ? product.vip_until : product.promoted_until;
+		if (!iso) return null;
+
+		const date = new Date(iso);
+		if (Number.isNaN(date.getTime()) || date.getTime() <= Date.now()) return null;
+
+		const pad = (n: number) => String(n).padStart(2, '0');
+		return `${pad(date.getDate())} ${MONTHS_AZ[date.getMonth()]} ${date.getFullYear()}, ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+	}
+
+	// Paid-until note, shown only while that placement is still active.
+	const promoBonus = $derived(promoType ? placementEndsAt(promoType) : null);
 
 	async function openPromo(type: 'promoted' | 'vip' | 'premium') {
 		promoType = type;
@@ -826,23 +844,28 @@
 								</button>
 							{/if}
 						</div>
-
-						<!-- Ödənişli yerləşdirmə: irəli çək / VIP / Premium -->
-						<div class="promo-actions">
-							<button type="button" class="promo-action-btn promoted" onclick={() => openPromo('promoted')}>
-								<i class="fa-solid fa-arrow-up"></i>
-								<span>Elanı irəli çək</span>
-							</button>
-							<button type="button" class="promo-action-btn vip" onclick={() => openPromo('vip')}>
-								<i class="fa-solid fa-crown"></i>
-								<span>VIP et</span>
-							</button>
-							<button type="button" class="promo-action-btn premium" onclick={() => openPromo('premium')}>
-								<i class="fa-solid fa-gem"></i>
-								<span>Premium et</span>
-							</button>
-						</div>
 					</div>
+
+					{#if canPromote}
+						<!-- Ödənişli yerləşdirmə: ayrı kart -->
+						<div class="promo-card">
+							<h3 class="promo-card-title">Elanı önə çıxar</h3>
+							<div class="promo-actions">
+								<button type="button" class="promo-action-btn promoted" onclick={() => openPromo('promoted')}>
+									<i class="fa-solid fa-arrow-up"></i>
+									<span>Elanı irəli çək</span>
+								</button>
+								<button type="button" class="promo-action-btn vip" onclick={() => openPromo('vip')}>
+									<i class="fa-solid fa-crown"></i>
+									<span>VIP et</span>
+								</button>
+								<button type="button" class="promo-action-btn premium" onclick={() => openPromo('premium')}>
+									<i class="fa-solid fa-gem"></i>
+									<span>Premium et</span>
+								</button>
+							</div>
+						</div>
+					{/if}
 				</div>
 			</div>
 		</div>
@@ -1072,7 +1095,7 @@
 			{/if}
 
 			{#if promoBonus}
-				<div class="promo-bonus"><b>Bonus</b> {promoBonus}</div>
+				<div class="promo-bonus"><b>Bonus</b> {promoBonus} tarixinə kimi ödənilib</div>
 			{/if}
 
 			{#if promoLoading}
@@ -1388,6 +1411,14 @@
 	.details-content {
 		display: flex;
 		flex-direction: column;
+	}
+
+	@media (min-width: 992px) {
+		.details-content {
+			position: sticky;
+			top: 90px;
+			z-index: 10;
+		}
 	}
 
 	.product-header-top {
@@ -2509,8 +2540,10 @@
 	.report-modal { width: min(460px, 100%); background: #fff; border-radius: 16px; padding: 22px; box-shadow: 0 24px 60px rgba(15,23,42,.3); }
 	.report-close { border: 0; background: none; font-size: 26px; line-height: 1; cursor: pointer; color: #64748b; }
 
-	/* Paid placement buttons + modal */
-	.promo-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+	/* Paid placement card + buttons + modal */
+	.promo-card { margin-top: 14px; padding: 16px; border: 1px solid #e6e9f0; border-radius: 16px; background: #fff; }
+	.promo-card-title { margin-bottom: 12px; font-size: 15px; font-weight: 700; color: #0f172a; }
+	.promo-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 	.promo-action-btn {
 		display: flex; flex-direction: column; align-items: center; gap: 6px;
 		padding: 12px 6px; border: 1.5px solid #e6e9f0; border-radius: 12px;

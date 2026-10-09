@@ -75,7 +75,6 @@ class PromotionController extends AdminController
             'price' => ['required', 'numeric', 'min:0'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
             'description' => ['nullable', 'string', 'max:1000'],
-            'bonus' => ['nullable', 'string', 'max:255'],
         ]);
     }
 
@@ -89,7 +88,6 @@ class PromotionController extends AdminController
         return [
             'name' => array_fill_keys($locales, $data['name']),
             'description' => $translateOrNull($data['description'] ?? null),
-            'bonus' => $translateOrNull($data['bonus'] ?? null),
             'type' => $data['type'],
             'days' => $data['days'],
             'price' => $data['price'],

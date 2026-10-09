@@ -140,7 +140,6 @@ export interface PromotionPackage {
 	id: number;
 	name: Record<string, string> | string | null;
 	description?: Record<string, string> | string | null;
-	bonus?: Record<string, string> | string | null;
 	type: 'promoted' | 'vip' | 'premium' | string;
 	days: number;
 	price: string | number;
@@ -159,10 +158,6 @@ export function packageName(pkg: PromotionPackage, locale = 'az'): string {
 
 export function packageDescription(pkg: PromotionPackage, locale = 'az'): string {
 	return localizedValue(pkg.description, locale);
-}
-
-export function packageBonus(pkg: PromotionPackage, locale = 'az'): string {
-	return localizedValue(pkg.bonus, locale);
 }
 
 /** Active promotion packages. */

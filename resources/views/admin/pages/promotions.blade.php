@@ -38,10 +38,6 @@
                 <label class="{{ $labelCls }}">Təsvir (modalda göstərilir)</label>
                 <textarea name="description" rows="2" class="{{ $input }}" placeholder="Elan bütün və axtarış nəticələrinin içində birinci yerə qalxacaq."></textarea>
             </div>
-            <div class="mt-3">
-                <label class="{{ $labelCls }}">Bonus (modalda göstərilir, opsional)</label>
-                <input name="bonus" class="{{ $input }}" placeholder="14 Oktyabr 2026, 17:09 tarixinə kimi ödənilib">
-            </div>
             <label class="mt-3 inline-flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
                 <input type="checkbox" name="is_active" value="1" checked class="h-4 w-4 rounded border-gray-300 text-brand-600"> Aktiv
             </label>
@@ -69,10 +65,6 @@
                         <div class="w-full">
                             <label class="{{ $labelCls }}">Təsvir (modalda göstərilir)</label>
                             <textarea name="description" rows="2" class="{{ $input }}">{{ admin_label($package, 'description', '') }}</textarea>
-                        </div>
-                        <div class="w-full">
-                            <label class="{{ $labelCls }}">Bonus (modalda göstərilir, opsional)</label>
-                            <input name="bonus" value="{{ admin_label($package, 'bonus', '') }}" class="{{ $input }}">
                         </div>
                         <button class="rounded-lg bg-gray-800 px-4 py-2 text-sm font-semibold text-white hover:bg-gray-900">Yadda saxla</button>
                     </form>
