@@ -461,6 +461,13 @@
 		return list;
 	});
 
+	// Key characteristics are merged with the filter specifications and shown
+	// together instead of as a separate "Key characteristics" block.
+	const detailsList = $derived<Array<{ label: string; value: string; link?: string }>>([
+		...specs,
+		...characteristics
+	]);
+
 	function formatPrice(val: number): string {
 		return val.toFixed(2);
 	}
@@ -656,32 +663,17 @@
 			<div class="col-lg-4">
 				<div class="details-content">
 
-					<!-- Spesifikasiyalar Qutusu (3-lü Grid — Yalnız Dinamik Filtrlər Olduqda) -->
-					{#if specs.length}
+					<!-- Spesifikasiyalar + Əsas xarakteristikalar (filtrlərlə birlikdə) -->
+					{#if detailsList.length}
 						<div class="specs-grid-box">
 							<div class="specs-grid">
-								{#each specs as item}
+								{#each detailsList as item}
 									<div class="spec-col">
 										<div class="spec-label">{item.label}</div>
-										<div class="spec-val">{item.value}</div>
-									</div>
-								{/each}
-							</div>
-						</div>
-					{/if}
-
-					<!-- Əsas Xarakteristikalar -->
-					{#if characteristics.length}
-						<div class="characteristics-section">
-							<h3 class="char-title">{$translate('Key characteristics')}</h3>
-							<div class="chars-grid">
-								{#each characteristics as char}
-									<div class="char-col">
-										<div class="char-label">{char.label}</div>
-										{#if char.link}
-											<a href={char.link} class="char-val char-link">{char.value}</a>
+										{#if item.link}
+											<a href={item.link} class="spec-val spec-link">{item.value}</a>
 										{:else}
-											<div class="char-val">{char.value}</div>
+											<div class="spec-val">{item.value}</div>
 										{/if}
 									</div>
 								{/each}
@@ -923,19 +915,15 @@
 							</div>
 						{:else if activeTab === 'specs'}
 							<div class="specs-table-body">
-								{#if specs.length || characteristics.length || product.weight}
+								{#if detailsList.length || product.weight}
 									<table class="table specs-table">
 										<tbody>
-											{#each specs as s}
+											{#each detailsList as s}
 												<tr>
 													<td class="table-label">{s.label}</td>
-													<td class="table-val">{s.value}</td>
-												</tr>
-											{/each}
-											{#each characteristics as c}
-												<tr>
-													<td class="table-label">{c.label}</td>
-													<td class="table-val">{c.value}</td>
+													<td class="table-val">
+														{#if s.link}<a href={s.link} class="spec-link">{s.value}</a>{:else}{s.value}{/if}
+													</td>
 												</tr>
 											{/each}
 											{#if product.weight}
@@ -1495,44 +1483,11 @@
 		color: var(--theme);
 	}
 
-	/* Əsas Xarakteristikalar */
-	.characteristics-section {
-		margin-bottom: 24px;
-	}
-
-	.char-title {
-		font-size: 16px;
-		font-weight: 700;
-		color: #1e2532;
-		margin: 0 0 14px;
-		line-height: 1.3;
-	}
-
-	.chars-grid {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 16px 20px;
-	}
-
-	.char-col {
-		display: flex;
-		flex-direction: column;
-	}
-
-	.char-label {
-		font-size: 13px;
-		color: #6c7588;
-		margin-bottom: 4px;
-	}
-
-	.char-val {
-		font-size: 14px;
-		font-weight: 600;
-		color: var(--theme);
+	.spec-link {
 		text-decoration: none;
 	}
 
-	.char-link:hover {
+	.spec-link:hover {
 		text-decoration: underline;
 	}
 
@@ -2009,8 +1964,7 @@
 			font-size: 13px;
 		}
 
-		.specs-grid,
-		.chars-grid {
+		.specs-grid {
 			grid-template-columns: repeat(2, 1fr);
 		}
 	}
@@ -2114,48 +2068,30 @@
 			background: #ffffff;
 		}
 
-		.specs-grid,
-		.chars-grid {
+		.specs-grid {
 			grid-template-columns: repeat(2, minmax(0, 1fr));
 			gap: 8px;
 		}
 
-		.spec-col,
-		.char-col {
+		.spec-col {
 			min-width: 0;
 			padding: 10px;
 			border-radius: 12px;
 			background: #f8fafc;
 		}
 
-		.spec-label,
-		.char-label {
+		.spec-label {
 			font-size: 10.5px;
 			margin-bottom: 5px;
 			color: #7b8496;
 		}
 
-		.spec-val,
-		.char-val {
+		.spec-val {
 			font-size: 13px;
 			line-height: 1.3;
 			color: var(--theme);
 			font-weight: 700;
 			overflow-wrap: anywhere;
-		}
-
-		.characteristics-section {
-			margin-bottom: 14px;
-			padding: 12px;
-			border: 1px solid #e6edf7;
-			border-radius: 16px;
-			background: #ffffff;
-		}
-
-		.char-title {
-			margin-bottom: 10px;
-			font-size: 15px;
-			line-height: 1.2;
 		}
 
 		.option-group {
