@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\Brand\Database\Factories\BrandFactory;
+use Modules\Category\Entities\Category;
 use Modules\Product\Entities\Product;
 
 class Brand extends Model
@@ -35,6 +36,12 @@ class Brand extends Model
     public function products()
     {
         return $this->hasMany(Product::class);
+    }
+
+    /** Categories this brand is offered in (a brand can belong to many). */
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'brand_category');
     }
 
     public static function newFactory(): BrandFactory

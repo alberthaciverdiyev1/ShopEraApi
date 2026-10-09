@@ -29,6 +29,18 @@ class BrandService
         $query = $this->model->query()->select(['id', 'name', 'image', 'is_active', 'sort_order']);
         $query = filterLike($query, ['name'], $params);
 
+        // When a category is given, list only the brands linked to it (falling
+        // back to every brand when that category has no links yet).
+        if (! empty($params['category_id'])) {
+            $categoryId = (int) $params['category_id'];
+            $hasLinked = \Illuminate\Support\Facades\DB::table('brand_category')
+                ->where('category_id', $categoryId)->exists();
+
+            if ($hasLinked) {
+                $query->whereHas('categories', fn ($q) => $q->where('categories.id', $categoryId));
+            }
+        }
+
         if (isset($params['is_active'])) {
             $query->where('is_active', $params['is_active']);
         } else {
