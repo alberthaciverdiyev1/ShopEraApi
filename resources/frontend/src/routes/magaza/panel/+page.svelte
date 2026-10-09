@@ -21,6 +21,7 @@
 	const stats = $derived({
 		total: listings.length,
 		promoted: listings.filter((l) => l.is_promoted).length,
+		vip: listings.filter((l) => l.is_vip).length,
 		premium: listings.filter((l) => l.is_premium).length,
 		views: listings.reduce((sum, l) => sum + (l.views ?? 0), 0),
 		contacts: listings.reduce((sum, l) => sum + (l.contact_reveals ?? 0), 0)
@@ -88,6 +89,7 @@
 			<div class="row g-3 mb-4">
 				<div class="col-6 col-md-3"><div class="p-3 rounded bg-white border"><div class="text-muted small">Elanlar</div><div class="fs-4 fw-bold">{stats.total}</div></div></div>
 				<div class="col-6 col-md-3"><div class="p-3 rounded bg-white border"><div class="text-muted small">İrəli çəkilmiş</div><div class="fs-4 fw-bold">{stats.promoted}</div></div></div>
+				<div class="col-6 col-md-3"><div class="p-3 rounded bg-white border"><div class="text-muted small">VIP</div><div class="fs-4 fw-bold">{stats.vip}</div></div></div>
 				<div class="col-6 col-md-3"><div class="p-3 rounded bg-white border"><div class="text-muted small">Premium</div><div class="fs-4 fw-bold">{stats.premium}</div></div></div>
 				<div class="col-6 col-md-3"><div class="p-3 rounded bg-white border"><div class="text-muted small">Baxış</div><div class="fs-4 fw-bold">{stats.views}</div></div></div>
 				<div class="col-6 col-md-3"><div class="p-3 rounded bg-white border"><div class="text-muted small">Əlaqə</div><div class="fs-4 fw-bold">{stats.contacts}</div></div></div>

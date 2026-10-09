@@ -114,9 +114,9 @@
 								<div class="tab-pane fade" class:show={active === tab.key} class:active={active === tab.key}
 									 id={tab.target} role="tabpanel" aria-labelledby="{tab.target}-tab" tabindex="0">
 									<div class="best-seller-tab-content-wrapper">
-										<div class="row g-4">
+										<div class="home-product-grid">
 											{#each lists[tab.key] as product (product.id)}
-												<div class="col-xl-3 col-md-4 col-6">
+												<div class="home-product-grid-item">
 													<ShopProductCard {product} />
 												</div>
 											{/each}
@@ -195,6 +195,16 @@
 		background: var(--theme);
 		color: #ffffff;
 		box-shadow: 0 8px 18px rgba(var(--theme-rgb), 0.18);
+	}
+
+	.home-product-grid {
+		display: grid;
+		grid-template-columns: repeat(5, minmax(0, 1fr));
+		gap: 16px;
+	}
+
+	.home-product-grid-item {
+		min-width: 0;
 	}
 
 	.feature-banner {
@@ -333,6 +343,11 @@
 	}
 
 	@media (max-width: 991.98px) {
+		.home-product-grid {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 13px;
+		}
+
 		.feature-banner {
 			grid-template-columns: 1fr;
 			gap: 30px;
@@ -391,9 +406,9 @@
 			font-size: 12px;
 		}
 
-		.best-seller-tab-content-wrapper :global(.row) {
-			--bs-gutter-x: 12px;
-			--bs-gutter-y: 12px;
+		.home-product-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 8px;
 		}
 
 		.feature-banner {

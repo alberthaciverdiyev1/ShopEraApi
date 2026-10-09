@@ -11,7 +11,7 @@
 	onMount(async () => {
 		if (products.length > 0) return;
 		try {
-			clientProducts = await fetchProducts({ order_by: 'created_at', order_type: 'desc', per_page: 12 });
+			clientProducts = await fetchProducts({ order_by: 'created_at', order_type: 'desc', per_page: 12, featured: 1 });
 		} catch (error) {
 			console.error('Failed to load featured products', error);
 		}
@@ -32,9 +32,9 @@
 				<div class="tab-content" id="pills-tabContent2">
 					<div class="tab-pane fade show active" id="pills-one" role="tabpanel" aria-labelledby="pills-one-tab">
 						<div class="feature-tab-content">
-							<div class="row g-4">
+							<div class="home-product-grid">
 								{#each products as product (product.id)}
-									<div class="col-xl-3 col-md-4 col-6">
+									<div class="home-product-grid-item">
 										<ShopProductCard {product} />
 									</div>
 								{/each}
@@ -48,14 +48,31 @@
 {/if}
 
 <style>
+	.home-product-grid {
+		display: grid;
+		grid-template-columns: repeat(5, minmax(0, 1fr));
+		gap: 13px;
+	}
+
+	.home-product-grid-item {
+		min-width: 0;
+	}
+
+	@media (max-width: 991.98px) {
+		.home-product-grid {
+			grid-template-columns: repeat(3, minmax(0, 1fr));
+			gap: 11px;
+		}
+	}
+
 	@media (max-width: 575.98px) {
 		.featured-product-section {
 			padding-top: 44px;
 		}
 
-		.feature-tab-content :global(.row) {
-			--bs-gutter-x: 12px;
-			--bs-gutter-y: 12px;
+		.home-product-grid {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 8px;
 		}
 
 		.feature-tab-content :global(.best-seller-one) {

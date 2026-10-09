@@ -9,7 +9,8 @@
     let activeIndex = $state(0);
 
     const banners = $derived(clientBanners ?? serverBanners);
-    const slides = $derived(banners.filter((banner) => banner.image || banner.product));
+    // const slides = $derived(banners.filter((banner) => banner.image || banner.product));
+    const slides: any = [];
     const activeBanner = $derived(slides[activeIndex] ?? slides[0]);
     const activeProduct = $derived(activeBanner?.product ?? null);
     const activeTitle = $derived(
@@ -30,6 +31,7 @@
         }
     });
 </script>
+
 
 {#if slides.length > 0 && activeBanner && activeImage}
     <section class="hero-section">

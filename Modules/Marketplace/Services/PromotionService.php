@@ -54,11 +54,11 @@ class PromotionService
             return;
         }
 
-        if ($promotion->type === PromotionPackage::TYPE_PREMIUM) {
-            $product->forceFill(['is_premium' => true, 'premium_until' => $ends])->save();
-        } else {
-            $product->forceFill(['is_promoted' => true, 'promoted_until' => $ends])->save();
-        }
+        match ($promotion->type) {
+            PromotionPackage::TYPE_PREMIUM => $product->forceFill(['is_premium' => true, 'premium_until' => $ends])->save(),
+            PromotionPackage::TYPE_VIP => $product->forceFill(['is_vip' => true, 'vip_until' => $ends])->save(),
+            default => $product->forceFill(['is_promoted' => true, 'promoted_until' => $ends])->save(),
+        };
     }
 
     public function cancel(ListingPromotion $promotion): void
@@ -79,6 +79,11 @@ class PromotionService
             ->whereNotNull('premium_until')->where('premium_until', '<', now())
             ->update(['is_premium' => false]);
 
-        return $promoted + $premium;
+        $vip = Product::query()
+            ->where('is_vip', true)
+            ->whereNotNull('vip_until')->where('vip_until', '<', now())
+            ->update(['is_vip' => false]);
+
+        return $promoted + $premium + $vip;
     }
 }

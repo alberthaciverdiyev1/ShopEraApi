@@ -3,7 +3,8 @@
 	import { page } from '$app/state';
 	import { fetchVendor, vendorName, vendorDescription, type ApiVendor } from '$lib/services/vendors';
 	import { fetchShopProducts, type ShopMeta } from '$lib/services/shop';
-	import { productImage, productTitle, productUrl, type ApiProduct } from '$lib/services/products';
+	import { type ApiProduct } from '$lib/services/products';
+	import ShopProductCard from '$lib/components/cards/ShopProductCard.svelte';
 
 	const slug = $derived((page.params as Record<string, string>).slug ?? '');
 
@@ -86,15 +87,7 @@
 				<div class="row g-4">
 					{#each items as product (product.id)}
 						<div class="col-6 col-md-4 col-lg-3">
-							<a href={productUrl(product)} class="d-block h-100 text-decoration-none text-reset">
-								<div class="card h-100 border-0 shadow-sm">
-									<img src={productImage(product)} alt={productTitle(product)} class="card-img-top" style="height:200px;object-fit:cover;">
-									<div class="card-body">
-										<p class="mb-1 fw-semibold">{productTitle(product)}</p>
-										<p class="mb-0 text-primary fw-bold">{Number(product.discount || product.price || 0).toFixed(2)} ₼</p>
-									</div>
-								</div>
-							</a>
+							<ShopProductCard {product} />
 						</div>
 					{/each}
 				</div>

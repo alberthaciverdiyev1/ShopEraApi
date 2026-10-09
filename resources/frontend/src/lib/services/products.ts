@@ -31,6 +31,8 @@ export interface ApiProduct {
 	condition?: 'new' | 'used' | string | null;
 	has_delivery?: boolean;
 	is_promoted?: boolean;
+	is_vip?: boolean;
+	is_premium?: boolean;
 	seller_type?: 'guest' | 'user' | 'vendor' | null;
 	contact_name?: string | null;
 	seller?: { id: number; name: string; slug: string; rating_avg?: number; rating_count?: number } | null;
@@ -51,6 +53,7 @@ export interface ApiProduct {
 	is_favorite?: boolean;
 	is_subscribe?: boolean;
 	is_new?: boolean;
+	created_at?: string | null;
 	filters?: ApiProductFilter[];
 	specifications?: Record<string, string>;
 	colors?: { id: number; name?: string; hex?: string | null }[];

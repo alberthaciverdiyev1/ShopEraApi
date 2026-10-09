@@ -17,6 +17,36 @@
             ? Math.round(((Number(product.price) - Number(product.discount)) / Number(product.price)) * 100)
             : 0
     );
+    const listingMeta = $derived([product.city || 'Bakı', formatListingDate(product.created_at)].filter(Boolean).join(', '));
+
+    // Paid placement badge: Premium > VIP > İrəli çək.
+    const placement = $derived(
+        product.is_premium
+            ? { label: 'Premium', cls: 'is-premium' }
+            : product.is_vip
+                ? { label: 'VIP', cls: 'is-vip' }
+                : product.is_promoted
+                    ? { label: 'İrəli çəkildi', cls: 'is-promoted' }
+                    : null
+    );
+
+    function formatListingDate(value?: string | null): string {
+        if (!value) return '';
+
+        const date = new Date(value.replace(' ', 'T'));
+        if (Number.isNaN(date.getTime())) return '';
+
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const listingDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const diffDays = Math.round((today.getTime() - listingDay.getTime()) / 86400000);
+        const time = date.toLocaleTimeString('az-AZ', { hour: '2-digit', minute: '2-digit' });
+
+        if (diffDays === 0) return `Bu gün, ${time}`;
+        if (diffDays === 1) return `Dünən, ${time}`;
+
+        return `${date.toLocaleDateString('az-AZ', { day: '2-digit', month: '2-digit', year: 'numeric' })}, ${time}`;
+    }
 </script>
 
 <div class="best-seller-product-items-two item-border">
@@ -49,18 +79,24 @@
                 <span>({product.rate_count ?? 0})</span>
             </div>
         {/if}
+        {#if placement}
+            <span class="card-placement {placement.cls}">{placement.label}</span>
+        {/if}
     </div>
     <div class="best-seller-product-items-two__content">
         <div class="best-seller-product-items-two__details">
-            <p class="best-seller-product-items-two__details--subtitle">{product.category?.name ?? ''}</p>
-            <h6 class="best-seller-product-items-two__details--title">
-                <a href={productUrl(product)}>{productTitle(product)}</a>
-            </h6>
+<!--            <p class="best-seller-product-items-two__details&#45;&#45;subtitle">{product.category?.name ?? ''}</p>-->
             <div class="best-seller-product-items-two__details--price"> <span
                 class="offer-price">${Number(product.discount || product.price).toFixed(2)}</span>
                 {#if hasDiscount(product)}<span
                     class="original-price">${Number(product.price).toFixed(2)}</span>{/if}
             </div>
+            <h6 class="best-seller-product-items-two__details--title">
+                <a href={productUrl(product)}>{productTitle(product)}</a>
+            </h6>
+            {#if listingMeta}
+                <a href={productUrl(product)} class="listing-card-meta">{listingMeta}</a>
+            {/if}
         </div>
     </div>
 </div>
@@ -113,6 +149,56 @@
     .card-rating span {
         color: #cbd5e1;
         font-weight: 600;
+    }
+
+    /* Paid placement pill, bottom-right of the photo. */
+    .card-placement {
+        position: absolute;
+        right: 10px;
+        bottom: 10px;
+        z-index: 6;
+        padding: 3px 10px;
+        border-radius: 999px;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+    }
+
+    .card-placement.is-promoted {
+        background: #0ea5e9;
+    }
+
+    .card-placement.is-vip {
+        background: #f59e0b;
+    }
+
+    .card-placement.is-premium {
+        background: #7c3aed;
+    }
+
+    .listing-card-meta {
+        display: block;
+        margin-top: 5px;
+        overflow: hidden;
+        color: #8b95a5 !important;
+        font-size: 13px;
+        font-weight: 400;
+        line-height: 1.25;
+        text-decoration: none;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .listing-card-meta:hover {
+        color: #6b7280 !important;
+    }
+
+    @media (max-width: 767.98px) {
+        .listing-card-meta {
+            font-size: 12px;
+        }
     }
 
     .best-seller-product-items-two :global(.best-seller-product-items-two__badge1) {

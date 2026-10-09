@@ -5,6 +5,7 @@
 	import { translate } from '$lib/i18n';
 
 	let isOpen = $state(false);
+	let { expanded = false }: { expanded?: boolean } = $props();
 	let query = $state('');
 	let results = $state<ApiProduct[]>([]);
 	let total = $state(0);
@@ -90,18 +91,8 @@
 
 <svelte:window onclick={handleWindowClick} onkeydown={handleKeydown} />
 
-<div class="navbar-search-wrapper" bind:this={containerEl} onclick={(e) => e.stopPropagation()}>
-	{#if !isOpen}
-		<button
-			type="button"
-			class="search-trigger-btn"
-			onclick={toggleSearch}
-			aria-label={$translate('Search products or categories...')}
-			title={$translate('Search products...')}
-		>
-			<i class="fal fa-search"></i>
-		</button>
-	{:else}
+<div class="navbar-search-wrapper" class:expanded bind:this={containerEl} onclick={(e) => e.stopPropagation()}>
+	{#if expanded || isOpen}
 		<div class="search-bar-inline">
 			<form class="search-form" onsubmit={handleSubmit}>
 				<i class="fal fa-search search-form-icon"></i>
@@ -135,19 +126,23 @@
 					</button>
 				{/if}
 
-				<button
-					type="button"
-					class="search-close-btn"
-					onclick={closeSearch}
-					aria-label={$translate('Close')}
-					title={$translate('Close')}
-				>
-					<i class="fa-regular fa-times"></i>
-				</button>
+				{#if expanded}
+					<button type="submit" class="search-submit-btn">{$translate('Search')}</button>
+				{:else}
+					<button
+						type="button"
+						class="search-close-btn"
+						onclick={closeSearch}
+						aria-label={$translate('Close')}
+						title={$translate('Close')}
+					>
+						<i class="fa-regular fa-times"></i>
+					</button>
+				{/if}
 			</form>
 
 			<!-- Canlı Nəticələr Pəncərəsi (Dropdown) -->
-			{#if isOpen && query.trim().length >= 2}
+			{#if (expanded || isOpen) && query.trim().length >= 2}
 				<div class="search-dropdown-menu">
 					{#if loading && !results.length}
 						<div class="search-status-box">
@@ -213,6 +208,16 @@
 				</div>
 			{/if}
 		</div>
+	{:else}
+		<button
+			type="button"
+			class="search-trigger-btn"
+			onclick={toggleSearch}
+			aria-label={$translate('Search products or categories...')}
+			title={$translate('Search products...')}
+		>
+			<i class="fal fa-search"></i>
+		</button>
 	{/if}
 </div>
 
@@ -221,6 +226,12 @@
 		position: relative;
 		display: inline-flex;
 		align-items: center;
+	}
+
+	.navbar-search-wrapper.expanded,
+	.navbar-search-wrapper.expanded .search-bar-inline,
+	.navbar-search-wrapper.expanded .search-form {
+		width: 100%;
 	}
 
 	.search-trigger-btn {
@@ -274,6 +285,37 @@
 		box-shadow: none;
 		transition: border-color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
 		overflow: hidden;
+	}
+
+	.expanded .search-form {
+		gap: 10px;
+		height: 46px;
+		width: 100%;
+		padding: 0 0 0 16px;
+		border: 1px solid #e5eaf2;
+		border-radius: 13px;
+		background: #ffffff;
+	}
+
+	.expanded .search-form:focus-within {
+		background: #ffffff;
+		box-shadow: 0 0 0 3px rgba(var(--theme-rgb), 0.08);
+	}
+
+	.search-submit-btn {
+		align-self: stretch;
+		min-width: 66px;
+		padding: 0 20px;
+		border: 0;
+		background: var(--theme);
+		color: #ffffff;
+		font-size: 14px;
+		font-weight: 700;
+		cursor: pointer;
+	}
+
+	.search-submit-btn:hover {
+		background: #e5411f;
 	}
 
 	.search-form:focus-within {

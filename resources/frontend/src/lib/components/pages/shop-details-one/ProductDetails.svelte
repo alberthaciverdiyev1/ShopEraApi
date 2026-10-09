@@ -32,24 +32,6 @@
 	let activeIndex = $state(0);
 	const mainImage = $derived(images[activeIndex] ?? images[0] ?? productImage(product));
 
-	// Hover zoom / lens state
-	let isZooming = $state(false);
-	let zoomOrigin = $state('50% 50%');
-
-	function handleMouseMove(e: MouseEvent) {
-		const target = e.currentTarget as HTMLElement;
-		const rect = target.getBoundingClientRect();
-		const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-		const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
-		zoomOrigin = `${x.toFixed(1)}% ${y.toFixed(1)}%`;
-		isZooming = true;
-	}
-
-	function handleMouseLeave() {
-		isZooming = false;
-		zoomOrigin = '50% 50%';
-	}
-
 	// Touch swipe navigation for mobile
 	let touchStartX = 0;
 	let touchStartY = 0;
@@ -85,11 +67,14 @@
 
 	let thumbnailRowEl: HTMLElement | null = $state(null);
 
-	function scrollThumbnails(direction: 'left' | 'right') {
-		if (!thumbnailRowEl) return;
-		const offset = direction === 'left' ? -160 : 160;
-		thumbnailRowEl.scrollBy({ left: offset, behavior: 'smooth' });
-	}
+	$effect(() => {
+		if (thumbnailRowEl && images.length > 1) {
+			const activeBtn = thumbnailRowEl.children[activeIndex] as HTMLElement | undefined;
+			if (activeBtn) {
+				activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+			}
+		}
+	});
 
 	async function openFullscreen(startIndex = activeIndex) {
 		try {
@@ -424,17 +409,27 @@
 
 <div class="product-details-container">
 	<div class="container">
+		<!-- Məhsul Başlığı (Fotoşəkilin Üzərində) -->
+		<div class="row gx-5">
+			<div class="col-lg-6">
+				<div class="product-header-top">
+					<h1 class="product-title">{productTitle(product)}</h1>
+					{#if (product.views ?? 0) > 0}
+						<span class="views-badge">
+							<i class="fa-regular fa-eye"></i> {product.views} {$translate('views')}
+						</span>
+					{/if}
+				</div>
+			</div>
+		</div>
+
 		<div class="row gx-5 gy-4">
 			<!-- Sol Tərəf: Şəkil Qalereyası -->
 			<div class="col-lg-6">
 				<div class="gallery-wrapper">
-					<!-- Əsas Şəkil Kartı (Tam Ekran, Zoom və Swipe Dəstəyi ilə) -->
+					<!-- Əsas Şəkil Kartı (Tam Ekran və Swipe Dəstəyi ilə) -->
 					<div
 						class="main-image-card"
-						class:zooming={isZooming}
-						style="--zoom-origin: {zoomOrigin};"
-						onmousemove={handleMouseMove}
-						onmouseleave={handleMouseLeave}
 						ontouchstart={handleTouchStart}
 						ontouchend={handleTouchEnd}
 						onclick={() => openFullscreen(activeIndex)}
@@ -443,6 +438,15 @@
 						onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && openFullscreen(activeIndex)}
 						aria-label={$translate('View fullscreen image')}
 					>
+						<!-- Arxa fon: Şəkil yerləşmədikdə kənarları bulanıqlaşdıran qat -->
+						<img
+							src={mainImage}
+							alt=""
+							class="main-image-blur-bg"
+							aria-hidden="true"
+							loading="eager"
+						/>
+
 						<!-- Nişanlar: Endirim və Yenilik -->
 						<div class="gallery-badges">
 							{#if discountPercent > 0}
@@ -525,64 +529,32 @@
 								<span>{activeIndex + 1} / {images.length}</span>
 							</div>
 						{/if}
-
-						<!-- Hover zamanı klikləmə ipucu -->
-						<div class="gallery-hint">
-							<i class="fa-solid fa-magnifying-glass-plus me-1"></i>
-							<span>{$translate('Click to enlarge')}</span>
-						</div>
 					</div>
 
 					<!-- Miniatürlər Zolağı -->
 					{#if images.length > 1}
-						<div class="thumbnail-bar-wrap">
-							<button
-								type="button"
-								class="thumb-scroll-btn left"
-								onclick={() => scrollThumbnails('left')}
-								aria-label={$translate('Scroll thumbnails left')}
-							>
-								<i class="fa-solid fa-chevron-left"></i>
-							</button>
-
-							<div class="thumbnail-row" bind:this={thumbnailRowEl}>
-								{#each images as img, index (index)}
-									<button
-										type="button"
-										class="thumb-btn"
-										class:active={index === activeIndex}
-										onclick={() => (activeIndex = index)}
-										aria-label={`${$translate('View')} ${index + 1}`}
-									>
-										<img src={img} alt="" loading="lazy" />
-									</button>
-								{/each}
-							</div>
-
-							<button
-								type="button"
-								class="thumb-scroll-btn right"
-								onclick={() => scrollThumbnails('right')}
-								aria-label={$translate('Scroll thumbnails right')}
-							>
-								<i class="fa-solid fa-chevron-right"></i>
-							</button>
+						<div class="thumbnail-row" bind:this={thumbnailRowEl}>
+							{#each images as img, index (index)}
+								<button
+									type="button"
+									class="thumb-btn"
+									class:active={index === activeIndex}
+									onmouseenter={() => (activeIndex = index)}
+									onclick={() => (activeIndex = index)}
+									onfocus={() => (activeIndex = index)}
+									aria-label={`${$translate('View')} ${index + 1}`}
+								>
+									<img src={img} alt="" loading="lazy" />
+								</button>
+							{/each}
 						</div>
 					{/if}
 				</div>
 			</div>
 
 			<!-- Sağ Tərəf: Məhsul Məlumatları və Fəaliyyətlər -->
-			<div class="col-lg-6">
+			<div class="col-lg-4">
 				<div class="details-content">
-					<!-- Başlıq -->
-					<h1 class="product-title">{productTitle(product)}</h1>
-
-					<!-- Məhsul Kodu Nişanı -->
-					<div class="code-badge-wrap">
-						<span class="code-badge">{$translate('Product code')}: {productCode}</span>
-						<span class="code-badge"><i class="fa-regular fa-eye"></i> {product.views ?? 0} {$translate('views')}</span>
-					</div>
 
 					<!-- Spesifikasiyalar Qutusu (3-lü Grid — Yalnız Dinamik Filtrlər Olduqda) -->
 					{#if specs.length}
@@ -706,41 +678,6 @@
 						</button>
 						{/if}
 
-						<div class="sub-actions">
-							<button
-								type="button"
-								class="sub-action-btn"
-								class:active={isWishlisted}
-								onclick={toggleWishlist}
-							>
-								<i class={isWishlisted ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}></i>
-								<span>{isWishlisted ? $translate('Remove favorite') : $translate('Add to wishlist')}</span>
-							</button>
-
-							<button type="button" class="sub-action-btn" onclick={share}>
-								<i class="fa-solid fa-share-nodes"></i>
-								<span>{shared ? $translate('Link copied') : $translate('Share')}</span>
-							</button>
-
-							<button type="button" class="sub-action-btn" onclick={() => { reportOpen = true; reportSent = false; }}>
-								<i class="fa-regular fa-flag"></i>
-								<span>{$translate('Report')}</span>
-							</button>
-
-							{#if outOfStock}
-								<button
-									type="button"
-									class="sub-action-btn"
-									class:active={subscribed}
-									disabled={busySubscribe}
-									onclick={toggleSubscription}
-								>
-									<i class="fa-regular fa-bell"></i>
-									<span>{subscribed ? $translate('Stock alert is on') : $translate('Notify me when in stock')}</span>
-								</button>
-							{/if}
-						</div>
-
 						<div class="seller-contact">
 							<div class="seller-info">
 								<span class="seller-avatar"><i class="fa-solid fa-user"></i></span>
@@ -784,6 +721,41 @@
 									</button>
 								{/if}
 							</div>
+						</div>
+
+						<div class="sub-actions">
+							<button
+								type="button"
+								class="sub-action-btn"
+								class:active={isWishlisted}
+								onclick={toggleWishlist}
+							>
+								<i class={isWishlisted ? 'fa-solid fa-heart' : 'fa-regular fa-heart'}></i>
+								<span>{isWishlisted ? $translate('Remove favorite') : $translate('Add to wishlist')}</span>
+							</button>
+
+							<button type="button" class="sub-action-btn" onclick={share}>
+								<i class="fa-solid fa-share-nodes"></i>
+								<span>{shared ? $translate('Link copied') : $translate('Share')}</span>
+							</button>
+
+							<button type="button" class="sub-action-btn" onclick={() => { reportOpen = true; reportSent = false; }}>
+								<i class="fa-regular fa-flag"></i>
+								<span>{$translate('Report')}</span>
+							</button>
+
+							{#if outOfStock}
+								<button
+									type="button"
+									class="sub-action-btn"
+									class:active={subscribed}
+									disabled={busySubscribe}
+									onclick={toggleSubscription}
+								>
+									<i class="fa-regular fa-bell"></i>
+									<span>{subscribed ? $translate('Stock alert is on') : $translate('Notify me when in stock')}</span>
+								</button>
+							{/if}
 						</div>
 					</div>
 				</div>
@@ -1041,45 +1013,47 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 16px;
+		gap: 10px;
 		width: 100%;
 	}
 
 	.main-image-card {
 		position: relative;
 		width: 100%;
-		max-width: 540px;
-		height: 480px;
-		background: #ffffff;
-		border: 1px solid #edf2f7;
-		border-radius: 20px;
+		aspect-ratio: 4 / 3;
+		background: #000000;
+		border-radius: 12px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		padding: 24px;
+		padding: 0;
 		overflow: hidden;
-		box-shadow: 0 4px 24px rgba(15, 23, 42, 0.04);
-		cursor: zoom-in;
+		box-shadow: 0 4px 20px rgba(15, 23, 42, 0.08);
+		cursor: pointer;
 		user-select: none;
-		transition: border-color 0.2s, box-shadow 0.2s;
 	}
 
-	.main-image-card:hover {
-		border-color: #cbd5e1;
-		box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
+	.main-image-blur-bg {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		filter: blur(28px) brightness(0.72);
+		transform: scale(1.15);
+		pointer-events: none;
+		user-select: none;
+		z-index: 1;
 	}
 
 	.main-image {
-		max-width: 100%;
-		max-height: 100%;
+		position: relative;
+		z-index: 2;
+		width: 100%;
+		height: 100%;
 		object-fit: contain;
-		transform-origin: var(--zoom-origin, 50% 50%);
-		transition: transform 0.15s ease-out;
 		pointer-events: none;
-	}
-
-	.main-image-card.zooming .main-image {
-		transform: scale(2);
+		user-select: none;
 	}
 
 	/* Top badges */
@@ -1211,72 +1185,14 @@
 		pointer-events: none;
 	}
 
-	/* Hint overlay on hover */
-	.gallery-hint {
-		position: absolute;
-		bottom: 16px;
-		left: 16px;
-		padding: 4px 10px;
-		border-radius: 999px;
-		background: rgba(15, 23, 42, 0.65);
-		backdrop-filter: blur(6px);
-		color: #ffffff;
-		font-size: 11.5px;
-		font-weight: 500;
-		display: flex;
-		align-items: center;
-		opacity: 0;
-		transform: translateY(4px);
-		transition: opacity 0.2s, transform 0.2s;
-		z-index: 3;
-		pointer-events: none;
-	}
-
-	.main-image-card:hover .gallery-hint {
-		opacity: 1;
-		transform: translateY(0);
-	}
-
-	/* Thumbnail bar wrap */
-	.thumbnail-bar-wrap {
-		width: 100%;
-		max-width: 540px;
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		position: relative;
-	}
-
-	.thumb-scroll-btn {
-		flex: 0 0 28px;
-		height: 60px;
-		border: 1px solid #e2e8f0;
-		background: #ffffff;
-		border-radius: 8px;
-		color: #64748b;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 12px;
-		cursor: pointer;
-		transition: all 0.15s ease;
-	}
-
-	.thumb-scroll-btn:hover {
-		background: #f8fafc;
-		color: var(--theme);
-		border-color: #cbd5e1;
-	}
-
+	/* Miniatürlər Zolağı */
 	.thumbnail-row {
-		flex: 1;
 		display: flex;
-		gap: 10px;
-		justify-content: flex-start;
-		flex-wrap: nowrap;
+		gap: 8px;
+		width: 100%;
 		overflow-x: auto;
 		overflow-y: hidden;
-		padding: 4px 2px 8px;
+		padding: 2px 0 6px;
 		scrollbar-width: thin;
 		scroll-snap-type: x proximity;
 		-webkit-overflow-scrolling: touch;
@@ -1292,41 +1208,39 @@
 	}
 
 	.thumb-btn {
-		flex: 0 0 auto;
-		width: 70px;
-		height: 70px;
-		border-radius: 12px;
+		flex: 0 0 calc((100% - 6 * 8px) / 7);
+		min-width: 58px;
+		max-width: 82px;
+		aspect-ratio: 4 / 3;
+		height: auto;
+		border-radius: 6px;
 		border: 2px solid transparent;
-		background: #ffffff;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-		padding: 6px;
+		background: #f1f5f9;
+		padding: 0;
 		cursor: pointer;
-		display: flex;
-		align-items: center;
-		justify-content: center;
+		display: block;
 		overflow: hidden;
 		scroll-snap-align: start;
-		transition: all 0.2s ease;
+		transition: opacity 0.15s ease, border-color 0.15s ease;
 		opacity: 0.7;
 	}
 
 	.thumb-btn:hover {
 		opacity: 1;
-		border-color: #cbd5e1;
-		transform: translateY(-2px);
+		border-color: color-mix(in srgb, var(--theme) 40%, transparent);
 	}
 
 	.thumb-btn.active {
 		opacity: 1;
 		border-color: var(--theme);
-		box-shadow: 0 0 0 2px color-mix(in srgb, var(--theme) 20%, transparent);
-		transform: translateY(-2px);
+		box-shadow: 0 0 0 1px var(--theme);
 	}
 
 	.thumb-btn img {
-		max-width: 100%;
-		max-height: 100%;
-		object-fit: contain;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
 	}
 
 	/* Məhsul Məlumatları */
@@ -1335,26 +1249,34 @@
 		flex-direction: column;
 	}
 
+	.product-header-top {
+		width: 100%;
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 12px;
+		margin-bottom: 14px;
+		flex-wrap: wrap;
+	}
+
 	.product-title {
-		font-size: 28px;
-		font-weight: 600;
+		font-size: 26px;
+		font-weight: 700;
 		color: #1e2532;
-		margin: 0 0 10px;
+		margin: 0;
 		line-height: 1.3;
 	}
 
-	.code-badge-wrap {
-		margin-bottom: 22px;
-	}
-
-	.code-badge {
-		display: inline-block;
-		background: #edf0f5;
-		color: #556075;
+	.views-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		background: #f1f5f9;
+		color: #64748b;
+		padding: 4px 10px;
+		border-radius: 999px;
 		font-size: 13px;
 		font-weight: 500;
-		padding: 4px 12px;
-		border-radius: 6px;
 	}
 
 	/* Spesifikasiyalar Qutusu (Boz/Lavant Grid) */
@@ -1397,7 +1319,8 @@
 		font-size: 16px;
 		font-weight: 700;
 		color: #1e2532;
-		margin-bottom: 14px;
+		margin: 0 0 14px;
+		line-height: 1.3;
 	}
 
 	.chars-grid {
@@ -1890,7 +1813,8 @@
 
 	@media (max-width: 991px) {
 		.main-image-card {
-			height: 380px;
+			aspect-ratio: 4 / 3;
+			height: auto;
 		}
 
 		.gallery-nav-btn {
@@ -1898,10 +1822,6 @@
 			width: 36px;
 			height: 36px;
 			font-size: 13px;
-		}
-
-		.gallery-hint {
-			display: none;
 		}
 
 		.specs-grid,
@@ -1925,17 +1845,17 @@
 		}
 
 		.gallery-wrapper {
-			gap: 12px;
+			gap: 8px;
 			align-items: stretch;
 		}
 
 		.main-image-card {
 			height: auto;
-			aspect-ratio: 1 / 1;
+			aspect-ratio: 4 / 3;
 			max-width: none;
-			padding: 12px;
-			border-radius: 18px;
-			background: #f8fafc;
+			padding: 0;
+			border-radius: 12px;
+			background: #000000;
 		}
 
 		.main-image {
@@ -1947,7 +1867,7 @@
 		.thumbnail-row {
 			justify-content: flex-start;
 			flex-wrap: nowrap;
-			gap: 8px;
+			gap: 6px;
 			overflow-x: auto;
 			padding-bottom: 2px;
 			scrollbar-width: none;
@@ -1957,15 +1877,12 @@
 			display: none;
 		}
 
-		.thumb-scroll-btn {
-			display: none;
-		}
-
 		.thumb-btn {
-			flex: 0 0 auto;
-			width: 54px;
-			height: 54px;
-			border-radius: 12px;
+			flex: 0 0 60px;
+			min-width: 60px;
+			height: auto;
+			aspect-ratio: 4 / 3;
+			border-radius: 6px;
 		}
 
 		.gallery-action-btn {
@@ -1999,19 +1916,9 @@
 			letter-spacing: 0;
 		}
 
-		.code-badge-wrap {
-			margin-bottom: 14px;
-		}
-
-		.code-badge {
-			display: inline-flex;
-			align-items: center;
-			min-height: 30px;
-			font-size: 12px;
-			padding: 6px 12px;
-			border-radius: 999px;
-			background: #f1f5f9;
-			color: #64748b;
+		.contact-btn {
+			padding: 10px 8px;
+			font-size: 13px;
 		}
 
 		.specs-grid-box {
@@ -2369,40 +2276,93 @@
 
 	.seller-contact {
 		display: flex;
-		align-items: center;
-		justify-content: space-between;
+		flex-direction: column;
 		gap: 12px;
-		flex-wrap: wrap;
 		margin-top: 16px;
-		padding: 14px 16px;
+		padding: 16px;
 		border: 1.5px solid #e6e9f0;
 		border-radius: 14px;
 		background: #f8fafc;
 	}
-	.seller-info { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
-	.seller-avatar {
-		display: inline-flex; align-items: center; justify-content: center;
-		width: 34px; height: 34px; border-radius: 50%;
-		background: color-mix(in srgb, var(--theme) 12%, #fff); color: var(--theme);
+	.seller-info {
+		display: inline-flex;
+		align-items: center;
+		gap: 10px;
+		width: 100%;
+		min-width: 0;
 	}
-	.seller-name { font-weight: 700; color: #0f172a; }
-	.seller-rating { font-size: 13px; font-weight: 700; }
+	.seller-avatar {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 36px;
+		height: 36px;
+		border-radius: 50%;
+		background: color-mix(in srgb, var(--theme) 12%, #fff);
+		color: var(--theme);
+		flex-shrink: 0;
+	}
+	.seller-name {
+		font-weight: 700;
+		color: #0f172a;
+		font-size: 15px;
+	}
+	.seller-rating {
+		font-size: 13px;
+		font-weight: 700;
+	}
 	.seller-badge {
-		padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700;
-		background: color-mix(in srgb, var(--theme) 12%, #fff); color: var(--theme);
+		padding: 2px 8px;
+		border-radius: 999px;
+		font-size: 11px;
+		font-weight: 700;
+		background: color-mix(in srgb, var(--theme) 12%, #fff);
+		color: var(--theme);
+	}
+	.seller-actions {
+		display: flex;
+		flex-direction: row;
+		gap: 10px;
+		align-items: stretch;
+		width: 100%;
 	}
 	.contact-btn {
-		display: inline-flex; align-items: center; gap: 8px;
-		padding: 10px 18px; border: 0; border-radius: 12px;
-		background: var(--theme); color: #fff; font-weight: 700; text-decoration: none;
+		flex: 1;
+		min-width: 0;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		padding: 11px 14px;
+		border: 0;
+		border-radius: 12px;
+		background: var(--theme);
+		color: #fff;
+		font-weight: 700;
+		font-size: 14px;
+		text-decoration: none;
 		cursor: pointer;
+		white-space: nowrap;
+		text-align: center;
+		transition: filter 0.15s ease;
 	}
-	.contact-btn:hover { color: #fff; filter: brightness(0.95); }
-	.contact-btn:disabled { opacity: 0.7; cursor: default; }
-	.contact-empty { color: #94a3b8; font-size: 14px; }
-
-	.seller-actions { display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
-	.contact-btn.chat-btn { background: #128c7e; }
+	.contact-btn:hover {
+		color: #fff;
+		filter: brightness(0.95);
+	}
+	.contact-btn:disabled {
+		opacity: 0.7;
+		cursor: default;
+	}
+	.contact-empty {
+		color: #94a3b8;
+		font-size: 14px;
+		flex: 1;
+		text-align: center;
+	}
+	.contact-btn.chat-btn {
+		background: #128c7e;
+	}
 
 	.report-overlay { position: fixed; inset: 0; z-index: 1090; background: rgba(15,23,42,.55); display: flex; align-items: center; justify-content: center; padding: 16px; }
 	.report-modal { width: min(460px, 100%); background: #fff; border-radius: 16px; padding: 22px; box-shadow: 0 24px 60px rgba(15,23,42,.3); }

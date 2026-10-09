@@ -2,7 +2,7 @@
 Theme Name: EcomArts
 Author: namespace-it
 Author URI: https://themeforest.net/user/namespace-it
-Version: 1.0.0 
+Version: 1.0.0
 Description: EcomArts - Multipurpose Ecommerce HTML Template <
 
 -------------------------------------------------------------------
@@ -12,33 +12,33 @@ Description: EcomArts - Multipurpose Ecommerce HTML Template <
     01.Mixins
     02.Variables
     03.Typography
-    04.Buttons 
-    05.Gutter 
-    06.Container 
-    07.Animation 
-    08.Helping 
-    09.MeanMenu 
+    04.Buttons
+    05.Gutter
+    06.Container
+    07.Animation
+    08.Helping
+    09.MeanMenu
     10.Preloader
-    11.Title 
-    12.Common 
+    11.Title
+    12.Common
     13.Header
     14.Breadcumb
     15.Footer
-    16.Intro 
-    17.Brand 
+    16.Intro
+    17.Brand
     18.About
-    19.Work Process 
+    19.Work Process
     20.Advantage
     21.Wcu
     22.Counter
     23.Faq
     24.Testimonial
     25.Feature
-    26.Pricing 
+    26.Pricing
     27.Cta
     28.Blog
     29.Services
-    30.Project 
+    30.Project
     31.Team
     32.Team Extra
     33.Sidebar
@@ -8787,7 +8787,7 @@ textarea.is-invalid {
   font-family: "Albert Sans", sans-serif;
   font-size: 18px;
   font-style: normal;
-  font-weight: 600;
+  font-weight: 400;
   line-height: 26px;
 }
 @media (max-width: 1399px) {

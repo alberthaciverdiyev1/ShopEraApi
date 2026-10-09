@@ -21,6 +21,7 @@
                     <label class="{{ $labelCls }}">Növ</label>
                     <select name="type" class="{{ $input }}">
                         <option value="promoted">İrəli çəkilmiş</option>
+                        <option value="vip">VIP</option>
                         <option value="premium">Premium</option>
                     </select>
                 </div>
@@ -49,6 +50,7 @@
                         <input name="name" value="{{ admin_label($package, 'name') }}" required class="{{ $input }} min-w-40 flex-1">
                         <select name="type" class="{{ $input }} w-40">
                             <option value="promoted" @selected($package->type === 'promoted')>İrəli çəkilmiş</option>
+                            <option value="vip" @selected($package->type === 'vip')>VIP</option>
                             <option value="premium" @selected($package->type === 'premium')>Premium</option>
                         </select>
                         <input name="days" type="number" min="1" value="{{ $package->days }}" class="{{ $input }} w-20">

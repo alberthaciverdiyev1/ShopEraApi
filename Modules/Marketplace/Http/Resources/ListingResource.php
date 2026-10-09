@@ -32,6 +32,7 @@ class ListingResource extends JsonResource
             'contact_phone' => $this->contact_phone,
             'contact_email' => $this->contact_email,
             'is_promoted' => (bool) $this->is_promoted,
+            'is_vip' => (bool) $this->is_vip,
             'is_premium' => (bool) $this->is_premium,
             'expires_at' => $this->expires_at?->toIso8601String(),
             'views' => (int) $this->views,

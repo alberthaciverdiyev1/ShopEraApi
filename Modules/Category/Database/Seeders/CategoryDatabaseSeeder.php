@@ -7,156 +7,25 @@ use Modules\Category\Entities\Category;
 
 class CategoryDatabaseSeeder extends Seeder
 {
-    /**
-     * Curated, translatable catalog of categories (parents + children).
-     */
+    private const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=640&q=80';
+
     public function run(): void
     {
-        $catalog = [
-            [
-                'az' => 'Elektronika', 'en' => 'Electronics', 'ru' => 'Электроника', 'tr' => 'Elektronik',
-                'image' => 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=640&q=80',
-                'children' => [
-                    [
-                        'az' => 'Telefonlar', 'en' => 'Phones', 'ru' => 'Телефоны', 'tr' => 'Telefonlar',
-                        'image' => 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=640&q=80',
-                        'children' => [
-                            ['az' => 'Smartfonlar', 'en' => 'Smartphones', 'ru' => 'Смартфоны', 'tr' => 'Akıllı Telefonlar', 'image' => 'https://images.unsplash.com/photo-1598327105666-5b89351aff97?auto=format&fit=crop&w=640&q=80'],
-                            ['az' => 'Telefon aksesuarları', 'en' => 'Phone Accessories', 'ru' => 'Аксессуары для телефонов', 'tr' => 'Telefon Aksesuarları', 'image' => 'https://images.unsplash.com/photo-1601972599720-36938d4ecd31?auto=format&fit=crop&w=640&q=80'],
-                            ['az' => 'Düyməli telefonlar', 'en' => 'Feature Phones', 'ru' => 'Кнопочные телефоны', 'tr' => 'Tuşlu Telefonlar', 'image' => 'https://images.unsplash.com/photo-1535303311164-664fc9ec6532?auto=format&fit=crop&w=640&q=80'],
-                        ],
-                    ],
-                    [
-                        'az' => 'Noutbuklar', 'en' => 'Laptops', 'ru' => 'Ноутбуки', 'tr' => 'Dizüstü Bilgisayarlar',
-                        'image' => 'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=640&q=80',
-                        'children' => [
-                            ['az' => 'Gaming noutbuklar', 'en' => 'Gaming Laptops', 'ru' => 'Игровые ноутбуки', 'tr' => 'Oyuncu Laptopları', 'image' => 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&w=640&q=80'],
-                            ['az' => 'Ultrabuklar', 'en' => 'Ultrabooks', 'ru' => 'Ультрабуки', 'tr' => 'Ultrabooklar', 'image' => 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=640&q=80'],
-                            ['az' => 'Noutbuk aksesuarları', 'en' => 'Laptop Accessories', 'ru' => 'Аксессуары для ноутбуков', 'tr' => 'Laptop Aksesuarları', 'image' => 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=640&q=80'],
-                        ],
-                    ],
-                    ['az' => 'Planşetlər', 'en' => 'Tablets', 'ru' => 'Планшеты', 'tr' => 'Tabletler', 'image' => 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&w=640&q=80'],
-                    ['az' => 'Televizorlar', 'en' => 'TVs', 'ru' => 'Телевизоры', 'tr' => 'Televizyonlar', 'image' => 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?auto=format&fit=crop&w=640&q=80'],
-                ],
-            ],
-            [
-                'az' => 'Geyim', 'en' => 'Fashion', 'ru' => 'Одежда', 'tr' => 'Giyim',
-                'image' => 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=640&q=80',
-                'children' => [
-                    [
-                        'az' => 'Kişi geyimi', 'en' => 'Men', 'ru' => 'Мужское', 'tr' => 'Erkek',
-                        'image' => 'https://images.unsplash.com/photo-1516826957135-700dedea698c?auto=format&fit=crop&w=640&q=80',
-                        'children' => [
-                            ['az' => 'Köynəklər', 'en' => 'Shirts', 'ru' => 'Рубашки', 'tr' => 'Gömlekler', 'image' => 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?auto=format&fit=crop&w=640&q=80'],
-                            ['az' => 'Şalvarlar', 'en' => 'Trousers', 'ru' => 'Брюки', 'tr' => 'Pantolonlar', 'image' => 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=640&q=80'],
-                            ['az' => 'Gödəkçələr', 'en' => 'Jackets', 'ru' => 'Куртки', 'tr' => 'Ceketler', 'image' => 'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=640&q=80'],
-                        ],
-                    ],
-                    [
-                        'az' => 'Qadın geyimi', 'en' => 'Women', 'ru' => 'Женское', 'tr' => 'Kadın',
-                        'image' => 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=640&q=80',
-                        'children' => [
-                            ['az' => 'Donlar', 'en' => 'Dresses', 'ru' => 'Платья', 'tr' => 'Elbiseler', 'image' => 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=640&q=80'],
-                            ['az' => 'Bluzlar', 'en' => 'Blouses', 'ru' => 'Блузки', 'tr' => 'Bluzlar', 'image' => 'https://images.unsplash.com/photo-1551489186-cf8726f514f8?auto=format&fit=crop&w=640&q=80'],
-                            ['az' => 'Ətəklər', 'en' => 'Skirts', 'ru' => 'Юбки', 'tr' => 'Etekler', 'image' => 'https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=640&q=80'],
-                        ],
-                    ],
-                    ['az' => 'Uşaq geyimi', 'en' => 'Kids', 'ru' => 'Детское', 'tr' => 'Çocuk', 'image' => 'https://images.unsplash.com/photo-1503919005314-30d93d07d823?auto=format&fit=crop&w=640&q=80'],
-                    ['az' => 'Ayaqqabı', 'en' => 'Shoes', 'ru' => 'Обувь', 'tr' => 'Ayakkabı', 'image' => 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=640&q=80'],
-                ],
-            ],
-            [
-                'az' => 'Ev və Yaşayış', 'en' => 'Home & Living', 'ru' => 'Дом и быт', 'tr' => 'Ev ve Yaşam',
-                'image' => 'https://images.unsplash.com/photo-1484101403633-562f891dc89a?auto=format&fit=crop&w=640&q=80',
-                'children' => [
-                    [
-                        'az' => 'Mebel', 'en' => 'Furniture', 'ru' => 'Мебель', 'tr' => 'Mobilya',
-                        'image' => 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=640&q=80',
-                        'children' => [
-                            ['az' => 'Divanlar', 'en' => 'Sofas', 'ru' => 'Диваны', 'tr' => 'Kanepeler', 'image' => 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=640&q=80'],
-                            ['az' => 'Masalar', 'en' => 'Tables', 'ru' => 'Столы', 'tr' => 'Masalar', 'image' => 'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?auto=format&fit=crop&w=640&q=80'],
-                            ['az' => 'Şkaflar', 'en' => 'Wardrobes', 'ru' => 'Шкафы', 'tr' => 'Dolaplar', 'image' => 'https://images.unsplash.com/photo-1595428774223-ef52624120d2?auto=format&fit=crop&w=640&q=80'],
-                        ],
-                    ],
-                    [
-                        'az' => 'Mətbəx', 'en' => 'Kitchen', 'ru' => 'Кухня', 'tr' => 'Mutfak',
-                        'image' => 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=640&q=80',
-                        'children' => [
-                            ['az' => 'Qab-qacaq', 'en' => 'Tableware', 'ru' => 'Посуда', 'tr' => 'Sofra Takımı', 'image' => 'https://images.unsplash.com/photo-1603199506016-b9a594b593c0?auto=format&fit=crop&w=640&q=80'],
-                            ['az' => 'Mətbəx alətləri', 'en' => 'Kitchen Tools', 'ru' => 'Кухонные инструменты', 'tr' => 'Mutfak Gereçleri', 'image' => 'https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=640&q=80'],
-                            ['az' => 'Saxlama qabları', 'en' => 'Storage Containers', 'ru' => 'Контейнеры для хранения', 'tr' => 'Saklama Kapları', 'image' => 'https://images.unsplash.com/photo-1556911261-6bd341186b2f?auto=format&fit=crop&w=640&q=80'],
-                        ],
-                    ],
-                    ['az' => 'Dekor', 'en' => 'Decor', 'ru' => 'Декор', 'tr' => 'Dekorasyon', 'image' => 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?auto=format&fit=crop&w=640&q=80'],
-                    ['az' => 'İşıqlandırma', 'en' => 'Lighting', 'ru' => 'Освещение', 'tr' => 'Aydınlatma', 'image' => 'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=640&q=80'],
-                ],
-            ],
-            [
-                'az' => 'Gözəllik', 'en' => 'Beauty', 'ru' => 'Красота', 'tr' => 'Güzellik',
-                'image' => 'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=640&q=80',
-                'children' => [
-                    ['az' => 'Makiyaj', 'en' => 'Makeup', 'ru' => 'Макияж', 'tr' => 'Makyaj', 'image' => 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=640&q=80'],
-                    ['az' => 'Dəriyə qulluq', 'en' => 'Skincare', 'ru' => 'Уход за кожей', 'tr' => 'Cilt Bakımı', 'image' => 'https://images.unsplash.com/photo-1570194065650-d99fb4bedf0a?auto=format&fit=crop&w=640&q=80'],
-                    ['az' => 'Ətir', 'en' => 'Fragrance', 'ru' => 'Парфюмерия', 'tr' => 'Parfüm', 'image' => 'https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=640&q=80'],
-                    ['az' => 'Saç', 'en' => 'Hair', 'ru' => 'Волосы', 'tr' => 'Saç', 'image' => 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=640&q=80'],
-                ],
-            ],
-            [
-                'az' => 'İdman', 'en' => 'Sports', 'ru' => 'Спорт', 'tr' => 'Spor',
-                'image' => 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=640&q=80',
-                'children' => [
-                    ['az' => 'Fitnes', 'en' => 'Fitness', 'ru' => 'Фитнес', 'tr' => 'Fitness', 'image' => 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=640&q=80'],
-                    ['az' => 'Futbol', 'en' => 'Football', 'ru' => 'Футбол', 'tr' => 'Futbol', 'image' => 'https://images.unsplash.com/photo-1431324155629-1a6deb1dec8d?auto=format&fit=crop&w=640&q=80'],
-                    ['az' => 'Velosiped', 'en' => 'Cycling', 'ru' => 'Велоспорт', 'tr' => 'Bisiklet', 'image' => 'https://images.unsplash.com/photo-1485965120184-e220f721d03e?auto=format&fit=crop&w=640&q=80'],
-                    ['az' => 'Açıq hava', 'en' => 'Outdoor', 'ru' => 'Туризм', 'tr' => 'Outdoor', 'image' => 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=640&q=80'],
-                ],
-            ],
-            [
-                'az' => 'Oyuncaqlar', 'en' => 'Toys', 'ru' => 'Игрушки', 'tr' => 'Oyuncaklar',
-                'image' => 'https://images.unsplash.com/photo-1558877385-81a1c7e67d72?auto=format&fit=crop&w=640&q=80',
-                'children' => [
-                    ['az' => 'Uşaq oyuncaqları', 'en' => 'Kids Toys', 'ru' => 'Детские игрушки', 'tr' => 'Çocuk Oyuncakları', 'image' => 'https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=640&q=80'],
-                    ['az' => 'Təhsil', 'en' => 'Educational', 'ru' => 'Развивающие', 'tr' => 'Eğitici', 'image' => 'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?auto=format&fit=crop&w=640&q=80'],
-                    ['az' => 'Puzzle', 'en' => 'Puzzles', 'ru' => 'Пазлы', 'tr' => 'Puzzle', 'image' => 'https://images.unsplash.com/photo-1611996575749-79a3a250f948?auto=format&fit=crop&w=640&q=80'],
-                ],
-            ],
-            [
-                'az' => 'Kitablar', 'en' => 'Books', 'ru' => 'Книги', 'tr' => 'Kitaplar',
-                'image' => 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&w=640&q=80',
-                'children' => [
-                    ['az' => 'Bədii ədəbiyyat', 'en' => 'Fiction', 'ru' => 'Художественная', 'tr' => 'Roman', 'image' => 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=640&q=80'],
-                    ['az' => 'Elm', 'en' => 'Science', 'ru' => 'Наука', 'tr' => 'Bilim', 'image' => 'https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&w=640&q=80'],
-                    ['az' => 'Uşaq kitabları', 'en' => 'Children', 'ru' => 'Детские', 'tr' => 'Çocuk', 'image' => 'https://images.unsplash.com/photo-1516627145497-ae6968895b74?auto=format&fit=crop&w=640&q=80'],
-                ],
-            ],
-            [
-                'az' => 'Ərzaq', 'en' => 'Grocery', 'ru' => 'Продукты', 'tr' => 'Gıda',
-                'image' => 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=640&q=80',
-                'children' => [
-                    ['az' => 'Meyvə-tərəvəz', 'en' => 'Fruits & Vegetables', 'ru' => 'Фрукты и овощи', 'tr' => 'Meyve & Sebze', 'image' => 'https://images.unsplash.com/photo-1610348725531-843dff563e2c?auto=format&fit=crop&w=640&q=80'],
-                    ['az' => 'Süd məhsulları', 'en' => 'Dairy', 'ru' => 'Молочные', 'tr' => 'Süt Ürünleri', 'image' => 'https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=640&q=80'],
-                    ['az' => 'İçkilər', 'en' => 'Beverages', 'ru' => 'Напитки', 'tr' => 'İçecekler', 'image' => 'https://images.unsplash.com/photo-1544145945-f90425340c7e?auto=format&fit=crop&w=640&q=80'],
-                ],
-            ],
-        ];
-
+        $catalog = $this->catalog();
         $sort = count($catalog);
 
         foreach ($catalog as $parent) {
             $parentCategory = Category::updateOrCreate([
-                'name->en' => $parent['en'],
+                'name->az' => $parent['name'],
                 'parent_id' => null,
             ], [
-                'name' => [
-                    'az' => $parent['az'], 'en' => $parent['en'],
-                    'ru' => $parent['ru'], 'tr' => $parent['tr'],
-                ],
-                'image' => $parent['image'],
+                'name' => $this->translations($parent['name']),
+                'image' => $parent['image'] ?? self::DEFAULT_IMAGE,
                 'is_active' => true,
                 'sort_order' => $sort--,
             ]);
 
-            $this->syncChildren($parent['children'], $parentCategory->id);
+            $this->syncChildren($parent['children'] ?? [], $parentCategory->id);
         }
     }
 
@@ -166,14 +35,11 @@ class CategoryDatabaseSeeder extends Seeder
 
         foreach ($children as $child) {
             $category = Category::updateOrCreate([
-                'name->en' => $child['en'],
+                'name->az' => $child['name'],
                 'parent_id' => $parentId,
             ], [
-                'name' => [
-                    'az' => $child['az'], 'en' => $child['en'],
-                    'ru' => $child['ru'], 'tr' => $child['tr'],
-                ],
-                'image' => $child['image'],
+                'name' => $this->translations($child['name']),
+                'image' => $child['image'] ?? self::DEFAULT_IMAGE,
                 'is_active' => true,
                 'sort_order' => $sort--,
             ]);
@@ -182,5 +48,358 @@ class CategoryDatabaseSeeder extends Seeder
                 $this->syncChildren($child['children'], $category->id);
             }
         }
+    }
+
+    private function translations(string $name): array
+    {
+        return ['az' => $name, 'en' => $name, 'ru' => $name, 'tr' => $name];
+    }
+
+    private function category(string $name, array $children = [], ?string $image = null): array
+    {
+        return array_filter([
+            'name' => $name,
+            'image' => $image,
+            'children' => $children,
+        ], fn ($value) => $value !== null && $value !== []);
+    }
+
+    private function catalog(): array
+    {
+        return [
+            $this->category('Elektronika', [
+                $this->category('Telefonlar', [
+                    $this->category('Mobil telefonlar'),
+                    $this->category('Smartfonlar'),
+                    $this->category('Düyməli telefonlar'),
+                    $this->category('Telefon aksesuarları'),
+                    $this->category('Ehtiyat hissələri'),
+                    $this->category('Nömrələr və SIM-kartlar'),
+                ]),
+                $this->category('Kompüterlər, noutbuklar və planşetlər', [
+                    $this->category('Noutbuklar'),
+                    $this->category('Masaüstü kompüterlər'),
+                    $this->category('Planşetlər'),
+                    $this->category('Monitorlar'),
+                    $this->category('Kompüter hissələri'),
+                    $this->category('Kompüter aksesuarları'),
+                    $this->category('Printerlər və skanerlər'),
+                    $this->category('Şəbəkə avadanlığı'),
+                ]),
+                $this->category('TV, audio və video', [
+                    $this->category('Televizorlar'),
+                    $this->category('Audio sistemlər'),
+                    $this->category('Səsgücləndiricilər'),
+                    $this->category('Qulaqlıqlar'),
+                    $this->category('Proyektorlar'),
+                    $this->category('Video kameralar'),
+                    $this->category('Fotoaparatlar'),
+                ]),
+                $this->category('Məişət texnikası', [
+                    $this->category('Soyuducular'),
+                    $this->category('Paltaryuyan maşınlar'),
+                    $this->category('Qabyuyan maşınlar'),
+                    $this->category('Kondisionerlər'),
+                    $this->category('Tozsoranlar'),
+                    $this->category('Mətbəx texnikası'),
+                    $this->category('Ütülər'),
+                    $this->category('Su qızdırıcıları'),
+                ]),
+                $this->category('Oyun konsolları və oyunlar', [
+                    $this->category('PlayStation'),
+                    $this->category('Xbox'),
+                    $this->category('Nintendo'),
+                    $this->category('Oyunlar'),
+                    $this->category('Oyun aksesuarları'),
+                ]),
+                $this->category('Ağıllı saatlar və qadcetlər'),
+            ], 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=640&q=80'),
+            $this->category('Mebel', [
+                $this->category('Qonaq otağı mebeli', [
+                    $this->category('Divanlar və kreslolar'),
+                    $this->category('Jurnal masaları'),
+                    $this->category('TV stendləri'),
+                    $this->category('Vitrinlər və rəflər'),
+                ]),
+                $this->category('Yataq otağı mebeli', [
+                    $this->category('Çarpayılar'),
+                    $this->category('Döşəklər'),
+                    $this->category('Şkaflar'),
+                    $this->category('Komodlar'),
+                    $this->category('Güzgülər'),
+                ]),
+                $this->category('Mətbəx mebeli', [
+                    $this->category('Mətbəx dəstləri'),
+                    $this->category('Masa və stullar'),
+                    $this->category('Bar stulları'),
+                ]),
+                $this->category('Ofis mebeli', [
+                    $this->category('Ofis masaları'),
+                    $this->category('Ofis stulları'),
+                    $this->category('Dolablar və arxivlər'),
+                ]),
+                $this->category('Uşaq mebeli'),
+                $this->category('Bağ mebeli'),
+            ], 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=640&q=80'),
+            $this->category('Ev və bağ', [
+                $this->category('Ev tekstili', [
+                    $this->category('Yataq dəstləri'),
+                    $this->category('Pərdələr'),
+                    $this->category('Xalçalar'),
+                    $this->category('Dəsmallar'),
+                    $this->category('Yastıqlar və yorğanlar'),
+                ]),
+                $this->category('Qab-qacaq və mətbəx', [
+                    $this->category('Qazan və tavalar'),
+                    $this->category('Servis dəstləri'),
+                    $this->category('Bıçaq və alətlər'),
+                    $this->category('Saxlama qabları'),
+                ]),
+                $this->category('Dekor və interyer', [
+                    $this->category('Rəsmlər və posterlər'),
+                    $this->category('Güldanlar'),
+                    $this->category('Saatlar'),
+                    $this->category('Şamdanlar'),
+                ]),
+                $this->category('Bağ və bostan', [
+                    $this->category('Bitkilər və toxumlar'),
+                    $this->category('Bağ alətləri'),
+                    $this->category('Suvarma sistemləri'),
+                    $this->category('Manqal və aksesuarlar'),
+                ]),
+                $this->category('Təmizlik vasitələri'),
+                $this->category('İşıqlandırma'),
+            ], 'https://images.unsplash.com/photo-1484101403633-562f891dc89a?auto=format&fit=crop&w=640&q=80'),
+            $this->category('Təmir və tikinti', [
+                $this->category('Tikinti materialları', [
+                    $this->category('Sement və qum'),
+                    $this->category('Kərpic və bloklar'),
+                    $this->category('Taxta materiallar'),
+                    $this->category('İzolyasiya materialları'),
+                ]),
+                $this->category('Alətlər', [
+                    $this->category('Elektrik alətləri'),
+                    $this->category('Əl alətləri'),
+                    $this->category('Ölçü alətləri'),
+                    $this->category('Bağ alətləri'),
+                ]),
+                $this->category('Santexnika', [
+                    $this->category('Kranlar'),
+                    $this->category('Unitaz və çanaqlar'),
+                    $this->category('Duş kabinləri'),
+                    $this->category('Borular və fitinqlər'),
+                ]),
+                $this->category('Elektrik malları', [
+                    $this->category('Kabellər'),
+                    $this->category('Rozetka və açarlar'),
+                    $this->category('Lampalar'),
+                    $this->category('Avtomatlar'),
+                ]),
+                $this->category('Qapılar və pəncərələr'),
+                $this->category('Boya və laklar'),
+            ], 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=640&q=80'),
+            $this->category('Daşınmaz əmlak', [
+                $this->category('Mənzillər', [
+                    $this->category('Yeni tikili'),
+                    $this->category('Köhnə tikili'),
+                    $this->category('Günlük kirayə'),
+                    $this->category('Uzunmüddətli kirayə'),
+                ]),
+                $this->category('Ev və villalar', [
+                    $this->category('Satılır'),
+                    $this->category('Kirayə verilir'),
+                    $this->category('Bağ evləri'),
+                ]),
+                $this->category('Torpaq sahələri'),
+                $this->category('Qarajlar'),
+                $this->category('Obyektlər və ofislər'),
+                $this->category('Xaricdə əmlak'),
+            ], 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=640&q=80'),
+            $this->category('Nəqliyyat', [
+                $this->category('Avtomobillər', [
+                    $this->category('Sedan'),
+                    $this->category('SUV və krossover'),
+                    $this->category('Hetçbek'),
+                    $this->category('Universal'),
+                    $this->category('Elektromobil'),
+                ]),
+                $this->category('Ehtiyat hissələri və aksesuarlar', [
+                    $this->category('Təkərlər və disklər'),
+                    $this->category('Akkumulyatorlar'),
+                    $this->category('Avto kosmetika'),
+                    $this->category('Audio və video'),
+                    $this->category('Siqnalizasiya'),
+                    $this->category('GPS naviqatorlar'),
+                    $this->category('Avtomobil üçün alətlər'),
+                ]),
+                $this->category('Motosikletlər və mopedlər', [
+                    $this->category('Motosikletlər'),
+                    $this->category('Skuterlər'),
+                    $this->category('Mopedlər'),
+                    $this->category('Moto aksesuarlar'),
+                ]),
+                $this->category('Su nəqliyyatı'),
+                $this->category('Yük maşınları və qoşqular'),
+                $this->category('Avtobuslar'),
+                $this->category('Xüsusi texnika'),
+            ], 'https://images.unsplash.com/photo-1503736334956-4c8f8e92946d?auto=format&fit=crop&w=640&q=80'),
+            $this->category('İdman və hobbi', [
+                $this->category('İdman malları', [
+                    $this->category('Trenajorlar'),
+                    $this->category('Velosipedlər'),
+                    $this->category('Toplar'),
+                    $this->category('İdman geyimi'),
+                    $this->category('Balıqçılıq'),
+                ]),
+                $this->category('Musiqi alətləri', [
+                    $this->category('Gitara'),
+                    $this->category('Piano və sintezator'),
+                    $this->category('Zərb alətləri'),
+                    $this->category('Səs avadanlığı'),
+                ]),
+                $this->category('Kitablar və jurnallar'),
+                $this->category('Kolleksiya'),
+                $this->category('Turizm və kampinq'),
+                $this->category('Biletlər'),
+            ], 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=640&q=80'),
+            $this->category('Şəxsi əşyalar', [
+                $this->category('Geyim', [
+                    $this->category('Qadın geyimi'),
+                    $this->category('Kişi geyimi'),
+                    $this->category('Uşaq geyimi'),
+                    $this->category('Üst geyimi'),
+                    $this->category('Alt geyimi'),
+                ]),
+                $this->category('Ayaqqabı', [
+                    $this->category('Qadın ayaqqabısı'),
+                    $this->category('Kişi ayaqqabısı'),
+                    $this->category('Uşaq ayaqqabısı'),
+                    $this->category('İdman ayaqqabısı'),
+                ]),
+                $this->category('Aksesuarlar', [
+                    $this->category('Çantalar'),
+                    $this->category('Saatlar'),
+                    $this->category('Eynəklər'),
+                    $this->category('Zərgərlik'),
+                ]),
+                $this->category('Gözəllik və sağlamlıq', [
+                    $this->category('Kosmetika'),
+                    $this->category('Ətirlər'),
+                    $this->category('Saç baxımı'),
+                    $this->category('Dəri baxımı'),
+                ]),
+            ], 'https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=640&q=80'),
+            $this->category('İş', [
+                $this->category('Vakansiyalar', [
+                    $this->category('Satış'),
+                    $this->category('Ofis işi'),
+                    $this->category('Restoran və turizm'),
+                    $this->category('Sürücü və kuryer'),
+                    $this->category('Tikinti'),
+                    $this->category('Təhsil'),
+                    $this->category('İT və telekom'),
+                ]),
+                $this->category('İş axtarıram', [
+                    $this->category('CV-lər'),
+                    $this->category('Part-time iş'),
+                    $this->category('Uzaqdan iş'),
+                ]),
+            ], 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=640&q=80'),
+            $this->category('Xidmətlər', [
+                $this->category('Təmir və tikinti xidmətləri', [
+                    $this->category('Mənzil təmiri'),
+                    $this->category('Santexnik'),
+                    $this->category('Elektrik'),
+                    $this->category('Kondisioner ustası'),
+                    $this->category('Mebel yığımı'),
+                ]),
+                $this->category('Nəqliyyat və logistika', [
+                    $this->category('Yükdaşıma'),
+                    $this->category('Evakuator'),
+                    $this->category('Taksi və sürücü'),
+                    $this->category('Kuryer'),
+                ]),
+                $this->category('Təlim və kurslar', [
+                    $this->category('Dil kursları'),
+                    $this->category('Kompüter kursları'),
+                    $this->category('Musiqi dərsləri'),
+                    $this->category('Repetitorlar'),
+                ]),
+                $this->category('Gözəllik xidmətləri', [
+                    $this->category('Bərbər'),
+                    $this->category('Manikür'),
+                    $this->category('Vizajist'),
+                    $this->category('Masaj'),
+                ]),
+                $this->category('Foto və video'),
+                $this->category('Təmizlik xidməti'),
+                $this->category('Hüquq və mühasibatlıq'),
+            ], 'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=640&q=80'),
+            $this->category('Heyvanlar', [
+                $this->category('İtlər', [
+                    $this->category('Cins itlər'),
+                    $this->category('Bala itlər'),
+                    $this->category('İt aksesuarları'),
+                    $this->category('İt yemləri'),
+                ]),
+                $this->category('Pişiklər', [
+                    $this->category('Cins pişiklər'),
+                    $this->category('Bala pişiklər'),
+                    $this->category('Pişik aksesuarları'),
+                    $this->category('Pişik yemləri'),
+                ]),
+                $this->category('Quşlar'),
+                $this->category('Balıqlar və akvariumlar'),
+                $this->category('Kənd təsərrüfatı heyvanları'),
+                $this->category('Heyvanlar üçün məhsullar'),
+            ], 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=640&q=80'),
+            $this->category('Biznes üçün avadanlıq', [
+                $this->category('Mağaza avadanlığı', [
+                    $this->category('Vitrinlər'),
+                    $this->category('Kassa aparatları'),
+                    $this->category('Rəflər'),
+                    $this->category('Barkod skanerləri'),
+                ]),
+                $this->category('Restoran avadanlığı', [
+                    $this->category('Sobalar'),
+                    $this->category('Soyuducu vitrinlər'),
+                    $this->category('Qəhvə aparatları'),
+                    $this->category('Mətbəx avadanlığı'),
+                ]),
+                $this->category('Ofis avadanlığı'),
+                $this->category('İstehsalat avadanlığı'),
+                $this->category('Tibbi avadanlıq'),
+                $this->category('Salon avadanlığı'),
+            ], 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=640&q=80'),
+            $this->category('Uşaq dünyası', [
+                $this->category('Uşaq geyimi və ayaqqabısı', [
+                    $this->category('Uşaq geyimi'),
+                    $this->category('Uşaq ayaqqabısı'),
+                    $this->category('Məktəb forması'),
+                    $this->category('Yeni doğulanlar üçün'),
+                ]),
+                $this->category('Uşaq arabaları və oturacaqlar', [
+                    $this->category('Uşaq arabaları'),
+                    $this->category('Avtokreslolar'),
+                    $this->category('Uşaq çantaları'),
+                ]),
+                $this->category('Oyuncaqlar', [
+                    $this->category('Konstruktorlar'),
+                    $this->category('Kuklalar'),
+                    $this->category('Maşın oyuncaqları'),
+                    $this->category('İnkişaf etdirici oyuncaqlar'),
+                ]),
+                $this->category('Uşaq mebeli'),
+                $this->category('Məktəb ləvazimatları'),
+                $this->category('Uşaq qidası və gigiyena'),
+            ], 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&w=640&q=80'),
+            $this->category('Tibbi məhsullar', [
+                $this->category('Tibbi avadanlıq'),
+                $this->category('Ortopedik məhsullar'),
+                $this->category('Gigiyena məhsulları'),
+                $this->category('Vitaminlər və əlavələr'),
+                $this->category('Maskalar və qoruyucu vasitələr'),
+            ], 'https://images.unsplash.com/photo-1584362917165-526a968579e8?auto=format&fit=crop&w=640&q=80'),
+        ];
     }
 }

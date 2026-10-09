@@ -68,6 +68,9 @@
                 <i class="icon-telephone"></i>
                 <a href={phoneHref(headerPhone)}>{headerPhone}</a>
             </div>
+            <nav class="top-nav-links" aria-label={$translate('Main menu')}>
+                <NavMenu/>
+            </nav>
             <div class="lang">
                 {#if $languageOptions.length > 1}
                     <div class="language">
@@ -92,7 +95,7 @@
 
                 <div class="user">
                     {#if $isLoggedIn}
-                        <a href="/dashboard" class="d-inline-flex align-items-center">
+                        <a href="/dashboard" class="d-inline-flex align-items-center top-account-link">
                             {#if $user?.avatar}
                                 <img src={$user.avatar} alt={$user?.name ?? 'User'} class="header-avatar me-2"/>
                             {:else}
@@ -102,15 +105,9 @@
                         </a>
                         <a href="/magaza/panel">{$translate('My store')}</a>
                         <button class="user-logout" type="button" onclick={handleLogout}>{$translate('Logout')}</button>
-                    {:else}
-                        <a href="/login">
-                            <i class="fa-solid fa-user"></i>
-                            {$translate('Login')}
-                        </a>
                     {/if}
                 </div>
             </div>
-
         </div>
 
         <div class="container-fluid">
@@ -138,20 +135,19 @@
                         </div>
                     </div>
                     <div class="header-right d-flex justify-content-end align-items-center">
-                        <div class="mean__menu-wrapper d-none d-xl-block">
-                            <div class="main-menu">
-                                <nav id="mobile-menu">
-                                    <NavMenu/>
-                                </nav>
-                            </div>
+                        <div class="header-search-shell">
+                            <NavbarSearch expanded/>
                         </div>
-                        <NavbarSearch/>
                         {#if $isLoggedIn}
                             <button type="button" class="header-chat-icon" aria-label={$translate('Messages')}
                                     onclick={() => (chatOpen = true)}>
                                 <i class="fa-regular fa-comment-dots"></i>
                                 {#if $chatUnread > 0}<span class="cart-count">{$chatUnread}</span>{/if}
                             </button>
+                        {:else}
+                            <a href="/login" class="header-chat-icon" aria-label={$translate('Messages')}>
+                                <i class="fa-regular fa-comment-dots"></i>
+                            </a>
                         {/if}
                         {#if CART_ENABLED}
                         <div class="menu-cart">
@@ -273,6 +269,22 @@
                             </div>
                         {/if}
 
+                        <a href="/elan/ver" class="header-new-listing">
+                            <i class="fa-regular fa-plus"></i>
+                            {$translate('New listing')}
+                        </a>
+                        {#if $isLoggedIn}
+                            <a href="/dashboard" class="header-login-btn">
+                                {#if $user?.avatar}
+                                    <img src={$user.avatar} alt={$user?.name ?? 'User'} class="header-avatar"/>
+                                {:else}
+                                    <i class="fa-regular fa-user"></i>
+                                {/if}
+                                <span>{$user?.name ?? $translate('My account')}</span>
+                            </a>
+                        {:else}
+                            <a href="/login" class="header-login-btn">{$translate('Login')}</a>
+                        {/if}
                     </div>
                 </div>
             </div>
@@ -911,4 +923,224 @@
         padding: 6px 8px;
     }
     .header-chat-icon:hover { color: var(--theme); }
+
+    :global(.header-top-one) {
+        grid-template-columns: minmax(140px, auto) minmax(360px, 1fr) minmax(220px, auto) !important;
+        padding-inline: clamp(18px, 3.2vw, 44px) !important;
+    }
+
+    .top-nav-links {
+        min-width: 0;
+        justify-self: center;
+    }
+
+    .top-nav-links :global(ul) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 22px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .top-nav-links :global(li) {
+        margin: 0 !important;
+    }
+
+    .top-nav-links :global(a) {
+        color: rgba(255, 255, 255, 0.86) !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        line-height: 1;
+        text-decoration: none !important;
+        white-space: nowrap;
+    }
+
+    .top-nav-links :global(a:hover),
+    .top-nav-links :global(li.active > a),
+    .top-nav-links :global(a.active) {
+        color: #ffffff !important;
+    }
+
+    :global(.header-1 .container-fluid) {
+        padding-inline: clamp(18px, 3.2vw, 44px) !important;
+    }
+
+    :global(.header-1 .header-main) {
+        min-height: 74px;
+        gap: 18px !important;
+        align-items: center !important;
+    }
+
+    :global(.header-1 .header-main .header-left) {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+    :global(.header-1 .header-cataegory-item) {
+        margin-left: 0 !important;
+    }
+
+    :global(.header-1 .header-cataegory-item .header-cataegory) {
+        min-width: 110px !important;
+        height: 46px !important;
+        padding: 0 15px !important;
+        border: 0 !important;
+        border-radius: 13px !important;
+        background: var(--theme) !important;
+    }
+
+    :global(.header-1 .header-cataegory > li > a) {
+        min-height: 46px !important;
+        gap: 8px !important;
+        color: #ffffff !important;
+        font-size: 14px !important;
+        font-weight: 700 !important;
+    }
+
+    :global(.header-1 .header-cataegory .left-icon),
+    :global(.header-1 .header-cataegory .right-icon) {
+        color: #ffffff !important;
+    }
+
+    :global(.header-1 .header-cataegory .right-icon) {
+        display: none !important;
+    }
+
+    :global(.header-1 .header-cataegory-item .header-cataegory:hover) {
+        background: #e5411f !important;
+    }
+
+    :global(.header-1 .header-main .header-right) {
+        flex: 1 1 auto;
+        gap: 18px !important;
+    }
+
+    .header-search-shell {
+        flex: 1 1 auto;
+        min-width: 260px;
+    }
+
+    .header-new-listing,
+    .header-login-btn {
+        display: inline-flex;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 0 18px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .header-new-listing {
+        background: #35b969;
+        color: #ffffff;
+    }
+
+    .header-new-listing:hover {
+        background: #2fa55e;
+        color: #ffffff;
+    }
+
+    .header-new-listing i {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 17px;
+        height: 17px;
+        border: 1.5px solid currentColor;
+        border-radius: 50%;
+        font-size: 11px;
+    }
+
+    .header-login-btn {
+        min-width: 86px;
+        background: #dbeafe;
+        color: #2f6fd6;
+    }
+
+    .header-login-btn:hover {
+        background: #cfe0ff;
+        color: #235fbd;
+    }
+
+    .header-login-btn .header-avatar {
+        width: 24px;
+        height: 24px;
+    }
+
+    :global(.header-right .cart-icon),
+    :global(.header-right .wishlist-icon),
+    .header-chat-icon {
+        display: inline-flex;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        padding: 0;
+        border-radius: 50%;
+        color: #0f172a;
+        font-size: 21px;
+        text-decoration: none;
+    }
+
+    :global(.header-right .cart-icon:hover),
+    :global(.header-right .wishlist-icon:hover),
+    .header-chat-icon:hover {
+        background: #f1f5f9;
+        color: var(--theme);
+    }
+
+    @media (max-width: 1199.98px) {
+        :global(.header-top-one) {
+            grid-template-columns: 1fr auto !important;
+        }
+
+        .top-nav-links {
+            display: none;
+        }
+
+        .header-search-shell {
+            min-width: 220px;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        :global(.header-top-one) {
+            display: grid !important;
+            grid-template-columns: 1fr !important;
+            min-height: 42px;
+            padding-block: 6px !important;
+        }
+
+        :global(.header-top-one .phone-icon),
+        :global(.header-top-one .lang) {
+            display: none !important;
+        }
+
+        :global(.header-1 .header-main) {
+            flex-wrap: wrap;
+            padding-block: 12px;
+        }
+
+        :global(.header-1 .header-main .header-left),
+        :global(.header-1 .header-main .header-right),
+        .header-search-shell {
+            width: 100%;
+        }
+
+        :global(.header-1 .header-main .header-right) {
+            justify-content: flex-start !important;
+        }
+    }
 </style>

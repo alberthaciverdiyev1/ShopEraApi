@@ -78,6 +78,8 @@ class ProductResource extends JsonResource
             'condition' => $this->condition,
             'has_delivery' => (bool) $this->has_delivery,
             'is_promoted' => (bool) $this->is_promoted,
+            'is_vip' => (bool) $this->is_vip,
+            'is_premium' => (bool) $this->is_premium,
             'city' => $this->whenLoaded('city', fn () => $this->city?->name),
             'seller' => $this->whenLoaded('vendor', fn () => $this->vendor ? [
                 'id' => $this->vendor->id,

@@ -25,6 +25,7 @@ export interface ApiListing {
 	contact_phone?: string | null;
 	contact_email?: string | null;
 	is_promoted?: boolean;
+	is_vip?: boolean;
 	is_premium?: boolean;
 	images?: string[] | null;
 	created_at?: string | null;
@@ -138,7 +139,7 @@ export async function reportListing(id: number, payload: ReportPayload): Promise
 export interface PromotionPackage {
 	id: number;
 	name: Record<string, string> | string | null;
-	type: 'promoted' | 'premium' | string;
+	type: 'promoted' | 'vip' | 'premium' | string;
 	days: number;
 	price: string | number;
 }

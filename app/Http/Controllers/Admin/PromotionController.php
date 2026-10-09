@@ -70,7 +70,7 @@ class PromotionController extends AdminController
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:120'],
-            'type' => ['required', 'in:promoted,premium'],
+            'type' => ['required', 'in:'.implode(',', PromotionPackage::TYPES)],
             'days' => ['required', 'integer', 'min:1', 'max:365'],
             'price' => ['required', 'numeric', 'min:0'],
             'sort_order' => ['nullable', 'integer', 'min:0'],

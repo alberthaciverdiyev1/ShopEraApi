@@ -45,10 +45,21 @@ class Product extends Model
         'discount_expire_date' => 'datetime',
         'promoted_until' => 'datetime',
         'premium_until' => 'datetime',
+        'vip_until' => 'datetime',
         'approved_at' => 'datetime',
         'last_approved_at' => 'datetime',
         'expires_at' => 'datetime',
     ];
+
+    /**
+     * SQL expression ranking paid placements above free listings so promoted
+     * ones can be ordered with `orderByRaw(... desc)`. Higher = further up:
+     * Premium outranks VIP, which outranks a plain İrəli çək bump.
+     */
+    public const PLACEMENT_PRIORITY_SQL = '(case when is_premium then 3 when is_vip then 2 when is_promoted then 1 else 0 end)';
+
+    /** Home-page expression: only Premium stays on the front page. */
+    public const HOME_PRIORITY_SQL = '(case when is_premium then 1 else 0 end)';
 
     private const SLUG_TRANSLIT = [
         'ə' => 'e', 'ğ' => 'g', 'ş' => 's', 'ç' => 'c', 'ö' => 'o', 'ü' => 'u', 'ı' => 'i',

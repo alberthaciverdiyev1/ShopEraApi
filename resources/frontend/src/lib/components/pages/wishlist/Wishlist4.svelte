@@ -99,9 +99,5 @@
 			padding-right: 4px;
 			padding-left: 4px;
 		}
-
-		:global(.wishlist-wrapper .best-seller-product-items-two) {
-			border-radius: 11px !important;
-		}
 	}
 </style>

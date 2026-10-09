@@ -27,7 +27,7 @@ export function load({ fetch }: { fetch: typeof globalThis.fetch }) {
 		latestProducts: products('created_at', 8),
 		popularProducts: products('sales_count', 8),
 		saleProducts: products('created_at', 8, { discount: 1 }),
-		featuredProducts: products('created_at', 12),
+		featuredProducts: products('created_at', 12, { featured: 1 }),
 		recentBlogs: list(fetchRecentBlogs(4, fetch))
 	};
 }

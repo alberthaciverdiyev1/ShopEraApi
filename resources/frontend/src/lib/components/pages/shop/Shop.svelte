@@ -2135,43 +2135,6 @@
 			padding-left: 8px;
 		}
 
-		.shop-section :global(.product-card),
-		.shop-section :global(.featured-product-item-one),
-		.shop-section :global(.best-seller-product-items-two) {
-			border-radius: 11px !important;
-		}
-
-		.shop-section :global(.best-seller-product-items-two__thumb) {
-			height: 170px;
-		}
-
-		.shop-section :global(.best-seller-product-items-two__content) {
-			padding: 6px 4px;
-		}
-
-		.shop-section :global(.best-seller-product-items-two__details--title a) {
-			font-size: 10.5px;
-			line-height: 1.22;
-		}
-
-		.shop-section :global(.best-seller-product-items-two__details--subtitle),
-		.shop-section :global(.best-seller-product-items-two__details--price) {
-			font-size: 10px;
-			line-height: 1.2;
-		}
-
-		.shop-section :global(.best-seller-product-items-two .icon-box2) {
-			top: 6px !important;
-			inset-inline-end: 6px !important;
-			gap: 5px !important;
-		}
-
-		.shop-section :global(.best-seller-product-items-two .icon-box2 .fav-btn),
-		.shop-section :global(.best-seller-product-items-two .icon-box2 .add-to-cart-btn) {
-			width: 30px !important;
-			height: 30px !important;
-			font-size: 12.5px !important;
-		}
 	}
 
 	@media (min-width: 768px) and (max-width: 991.98px) {
@@ -2230,26 +2193,6 @@
 			padding-left: calc(var(--bs-gutter-x) * 0.5);
 		}
 
-		.shop-section :global(.best-seller-product-items-two) {
-			border-radius: 14px !important;
-		}
-
-		.shop-section :global(.best-seller-product-items-two__thumb) {
-			height: 220px;
-		}
-
-		.shop-section :global(.best-seller-product-items-two__content) {
-			padding: 10px 8px;
-		}
-
-		.shop-section :global(.best-seller-product-items-two__details--title a) {
-			font-size: 13px;
-		}
-
-		.shop-section :global(.best-seller-product-items-two__details--subtitle),
-		.shop-section :global(.best-seller-product-items-two__details--price) {
-			font-size: 12px;
-		}
 	}
 
 	@media (min-width: 768px) {
@@ -2261,20 +2204,6 @@
 			height: 190px;
 		}
 
-		.shop-section :global(.best-seller-product-items-two__thumb) {
-			height: 190px;
-		}
-
-		.shop-section :global(.best-seller-product-items-two__content) {
-			padding: 8px;
-		}
-
-		.shop-section :global(.best-seller-product-items-two .icon-box2 .fav-btn),
-		.shop-section :global(.best-seller-product-items-two .icon-box2 .add-to-cart-btn) {
-			width: 32px !important;
-			height: 32px !important;
-			font-size: 12px !important;
-		}
 	}
 
 	@media (min-width: 1200px) {
@@ -2286,8 +2215,5 @@
 			height: 210px;
 		}
 
-		.shop-section :global(.best-seller-product-items-two__thumb) {
-			height: 210px;
-		}
 	}
 </style>

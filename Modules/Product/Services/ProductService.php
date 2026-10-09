@@ -205,13 +205,25 @@ class ProductService
         // it, which is the same rule the house catalogue follows above.
         $pinnedFirst = empty($params['order_by']);
 
-        if (! empty($params['marketplace'])) {
-            // Marketplace feed: promoted listings always float to the top, then
-            // the shopper's sort (or newest).
-            $query->orderByDesc('is_promoted');
+        if (! empty($params['is_admin'])) {
             orderBy($query, $params);
-        } elseif (! empty($params['is_admin'])) {
+        } elseif (! empty($params['featured'])) {
+            // Home page ("əsas səhifə"): only Premium stays pinned to the front
+            // for the whole duration of its placement, then the usual order.
+            $query->orderByRaw(Product::HOME_PRIORITY_SQL.' desc');
             orderBy($query, $params);
+        } elseif (! empty($params['marketplace']) || ! empty($params['search'])) {
+            // Marketplace feed and search: paid placements always float above
+            // free listings (Premium > VIP > İrəli çək). Without a sort the
+            // shopper picked, listings of the same tier rotate randomly so every
+            // paid ad gets equal exposure — Premium/VIP within their category.
+            $query->orderByRaw(Product::PLACEMENT_PRIORITY_SQL.' desc');
+
+            if (empty($params['order_by'])) {
+                $query->orderByRaw('random()');
+            } else {
+                orderBy($query, $params);
+            }
         } elseif (! $isFiltered) {
             if ($pinnedFirst) {
                 $query->orderByDesc('is_pinned');
