@@ -2,6 +2,7 @@
     import {translate} from '$lib/i18n';
     import CategorySection from '$lib/components/pages/home/CategorySection.svelte';
     import FeaturedProductSection from '$lib/components/pages/home/FeaturedProductSection.svelte';
+    import PremiumListingsSection from '$lib/components/pages/home/PremiumListingsSection.svelte';
     import PopupModal from '$lib/components/layout/PopupModal.svelte';
     import {features} from '$lib/services/features';
 
@@ -26,6 +27,12 @@
         {@render loader('50vh')}
     {:then featured}
         <FeaturedProductSection products={featured}/>
+    {/await}
+
+    {#await data.premiumListings}
+        {@render loader('40vh')}
+    {:then premium}
+        <PremiumListingsSection products={premium}/>
     {/await}
 </div>
 

@@ -132,6 +132,29 @@ class ProductService
             $query->where('has_delivery', true);
         }
 
+        // Paid placements: ?placement=premium,vip (or a single kind) keeps only
+        // listings carrying at least one of the requested placements.
+        if (! empty($params['placement'])) {
+            $kinds = array_values(array_intersect(
+                array_map('strval', is_array($params['placement']) ? $params['placement'] : explode(',', (string) $params['placement'])),
+                ['promoted', 'vip', 'premium']
+            ));
+
+            if ($kinds !== []) {
+                $query->where(function ($q) use ($kinds) {
+                    if (in_array('promoted', $kinds, true)) {
+                        $q->orWhere('is_promoted', true);
+                    }
+                    if (in_array('vip', $kinds, true)) {
+                        $q->orWhere('is_vip', true);
+                    }
+                    if (in_array('premium', $kinds, true)) {
+                        $q->orWhere('is_premium', true);
+                    }
+                });
+            }
+        }
+
         if (! empty($params['color_ids']) && is_array($params['color_ids'])) {
             $query->whereHas('colors', fn ($q) => $q->whereIn('colors.id', $params['color_ids']));
         }
@@ -187,6 +210,7 @@ class ProductService
             $params['search'] ?? null,
             $params['gender'] ?? null,
             $params['discount'] ?? null,
+            $params['placement'] ?? null,
             $params['order_type'] ?? null,
             $params['order_by'] ?? null,
             $params['search'] ?? null,
@@ -212,7 +236,7 @@ class ProductService
             // for the whole duration of its placement, then the usual order.
             $query->orderByRaw(Product::HOME_PRIORITY_SQL.' desc');
             orderBy($query, $params);
-        } elseif (! empty($params['marketplace']) || ! empty($params['search'])) {
+        } elseif (! empty($params['marketplace']) || ! empty($params['search']) || ! empty($params['placement'])) {
             // Marketplace feed and search: paid placements always float above
             // free listings (Premium > VIP > İrəli çək). Without a sort the
             // shopper picked, listings of the same tier rotate randomly so every
