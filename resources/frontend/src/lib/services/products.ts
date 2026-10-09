@@ -26,6 +26,8 @@ export interface ApiProduct {
 	rate_count?: number;
 	images?: ApiProductImage[];
 	category?: { id: number; name: string } | null;
+	/** Full category path, root → leaf (details endpoint). */
+	category_path?: { id: number; name: string }[];
 	brand?: { id: number; name: string } | null;
 	city?: string | null;
 	condition?: 'new' | 'used' | string | null;

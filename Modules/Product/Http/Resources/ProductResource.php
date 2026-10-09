@@ -123,6 +123,14 @@ class ProductResource extends JsonResource
             'images' => ProductImageResource::collection($this->whenLoaded('images')),
             'videos' => ProductVideoResource::collection($this->whenLoaded('videos')),
             'category' => new CategoryResource($this->whenLoaded('category')),
+            // Full category path (root → leaf), included only when the ancestors
+            // were eager loaded (the details endpoint) so list responses stay
+            // free of per-row queries.
+            'category_path' => $this->when(
+                $this->resource->relationLoaded('category')
+                    && $this->resource->getRelation('category')?->relationLoaded('parent'),
+                fn () => $this->resource->getRelation('category')->ancestorChain(),
+            ),
             'user' => new UserResource($this->whenLoaded('user')),
             'approval_status' => $this->approval_status,
             'approved_at' => $this->approved_at ? Carbon::parse($this->approved_at)->format('Y-m-d H:i:s') : null,

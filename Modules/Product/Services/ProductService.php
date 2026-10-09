@@ -392,7 +392,7 @@ class ProductService
     {
         try {
             $product = $this->model->with([
-                'colors', 'sizes', 'images', 'videos', 'category', 'brand', 'reviews.user', 'user', 'vendor',
+                'colors', 'sizes', 'images', 'videos', 'category.parent.parent.parent.parent', 'brand', 'reviews.user', 'user', 'vendor',
                 'productFilters.filter', 'filterValues.filter', 'filterValues.value',
             ])->publiclyAvailable()->findOrFail($id);
 

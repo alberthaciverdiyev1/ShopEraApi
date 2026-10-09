@@ -420,13 +420,26 @@
 			});
 		}
 
-		const categoryName = product.category?.name ?? getFilterVal(['kateqoriya', 'category']);
-		if (categoryName) {
+		// Show every category level (root → leaf), e.g. Elektronika / Telefon.
+		const categoryPath =
+			product.category_path && product.category_path.length
+				? product.category_path
+				: product.category
+					? [{ id: product.category.id, name: product.category.name }]
+					: [];
+
+		if (categoryPath.length) {
+			const leaf = categoryPath[categoryPath.length - 1];
 			list.push({
 				label: 'Kateqoriya',
-				value: categoryName,
-				link: product.category?.id ? `/shop?category=${product.category.id}` : undefined
+				value: categoryPath.map((c) => c.name).filter(Boolean).join(' / '),
+				link: leaf?.id ? `/shop?category=${leaf.id}` : undefined
 			});
+		} else {
+			const categoryName = getFilterVal(['kateqoriya', 'category']);
+			if (categoryName) {
+				list.push({ label: 'Kateqoriya', value: categoryName });
+			}
 		}
 
 		const styleVal = getFilterVal(['üslub', 'uslub', 'style']) ?? product.gender;
