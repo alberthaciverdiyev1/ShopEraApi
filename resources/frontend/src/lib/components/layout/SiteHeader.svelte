@@ -21,6 +21,9 @@
     let catalogItem = $state<HTMLDivElement | null>(null);
     let chatOpen = $state(false);
 
+    // Basket UI is hidden for now (API/services stay).
+    const CART_ENABLED = false;
+
     onMount(() => {
         if ($isLoggedIn) refreshChatUnread();
         const timer = setInterval(() => {
@@ -150,6 +153,7 @@
                                 {#if $chatUnread > 0}<span class="cart-count">{$chatUnread}</span>{/if}
                             </button>
                         {/if}
+                        {#if CART_ENABLED}
                         <div class="menu-cart">
                             <div class="cart-box">
                                 {#if $basketItems.length}
@@ -211,6 +215,7 @@
                             </a>
                         </div>
 
+                        {/if}
                         <!-- Wishlist (Sevimlilər) Dropdown -->
                         {#if $features.favorites}
                             <div class="menu-wishlist menu-cart">

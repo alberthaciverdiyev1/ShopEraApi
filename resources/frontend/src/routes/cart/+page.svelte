@@ -1,4 +1,5 @@
 <script lang="ts">
+	const CART_ENABLED = false;
 	import { translate } from '$lib/i18n';
 	import Breadcrumb from '$lib/components/layout/Breadcrumb.svelte';
 	import Cart3 from '$lib/components/pages/cart/Cart3.svelte';
@@ -8,4 +9,4 @@
 	<title>{$translate('Cart')} — Snaker</title>
 </svelte:head>
 <Breadcrumb title="Cart List" />
-<Cart3 />
+{#if CART_ENABLED}<Cart3 />{/if}

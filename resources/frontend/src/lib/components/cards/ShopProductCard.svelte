@@ -1,4 +1,5 @@
 <script lang="ts">
+	const CART_ENABLED = false;
     import {hasDiscount, productImage, productTitle, productUrl, type ApiProduct} from '$lib/services/products';
     import {basketProductIds} from '$lib/services/basket';
     import {favoriteIds} from '$lib/services/favorites';
@@ -28,11 +29,13 @@
                 <i class="fa-regular fa-heart"></i>
             </button>
         {/if}
+        {#if CART_ENABLED}
         <button type="button" class="add-to-cart-btn" class:active={$basketProductIds.has(product.id)}
                 aria-label={$translate('Add to cart')}
                 onclick={() => addProductToCart(product.id)}>
             <i class="fa-solid fa-cart-shopping"></i>
         </button>
+        {/if}
     </div>
     {#if discountPercent > 0}
         <Badge text={`-${discountPercent}%`} variant="off"/>

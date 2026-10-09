@@ -1,4 +1,5 @@
 <script lang="ts">
+	const CART_ENABLED = false;
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
@@ -112,7 +113,7 @@
 </script>
 
 <nav class="mobile-bottom-nav" class:nav-hidden={hidden} aria-label="Mobile primary navigation">
-	{#each items as item (item.href)}
+	{#each items.filter((i) => i.href !== '/cart') as item (item.href)}
 		<a class:active={item.match(path)} href={item.href} aria-label={item.label}>
 			<span class="icon-wrap">
 				<i class={item.icon}></i>
@@ -212,6 +213,7 @@
 					<small>{$favoritesCount}</small>
 				{/if}
 			</button>
+			{#if CART_ENABLED}
 			<button type="button" onclick={() => navigateFromDrawer('/cart')}>
 				<i class="fa-solid fa-cart-shopping"></i>
 				<span>{$translate('Cart')}</span>
@@ -219,6 +221,7 @@
 					<small>{$basketCount}</small>
 				{/if}
 			</button>
+			{/if}
 		</div>
 
 		{#if $isLoggedIn}

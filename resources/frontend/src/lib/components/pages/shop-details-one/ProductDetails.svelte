@@ -1,4 +1,5 @@
 <script lang="ts">
+	const CART_ENABLED = false;
 	import { onMount } from 'svelte';
 	import { apiGet } from '$lib/utils/api';
 	import { hasDiscount, fetchProducts, productImage, productTitle, type ApiProduct, type ApiProductFilter } from '$lib/services/products';
@@ -688,6 +689,7 @@
 							</div>
 						</div>
 
+						{#if CART_ENABLED}
 						<button
 							type="button"
 							class="add-to-cart-btn"
@@ -702,6 +704,7 @@
 								<span>{$translate('Add to cart')}</span>
 							{/if}
 						</button>
+						{/if}
 
 						<div class="sub-actions">
 							<button
