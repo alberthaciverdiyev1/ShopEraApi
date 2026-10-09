@@ -276,21 +276,21 @@
 		similarLoading = true;
 		try {
 			const categoryId = product.category?.id;
-			const queryParams: Record<string, string | number | boolean | Array<string | number>> = { per_page: 8 };
+			const queryParams: Record<string, string | number | boolean | Array<string | number>> = { per_page: 10 };
 			if (categoryId) {
 				queryParams.category_ids = [categoryId];
 			}
 			const list = await fetchProducts(queryParams);
 			const filtered = list.filter((p) => p.id !== product.id);
-			if (filtered.length >= 4) {
-				similarProducts = filtered.slice(0, 4);
+			if (filtered.length >= 5) {
+				similarProducts = filtered.slice(0, 5);
 			} else {
 				// `GET /product/recommend` personalises from the shopper's orders.
-				const fallback = await fetchRecommendedProducts(8);
+				const fallback = await fetchRecommendedProducts(10);
 				const extra = fallback.filter(
 					(p) => p.id !== product.id && !filtered.some((f) => f.id === p.id)
 				);
-				similarProducts = [...filtered, ...extra].slice(0, 4);
+				similarProducts = [...filtered, ...extra].slice(0, 5);
 			}
 		} catch (err) {
 			console.error('Similar products loading error:', err);
@@ -1043,9 +1043,9 @@
 						{/if}
 					</div>
 
-					<div class="row g-4 mt-1 similar-products-grid">
+					<div class="similar-products-grid mt-3">
 						{#each similarProducts as similar (similar.id)}
-							<div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-6">
+							<div class="similar-grid-item">
 								<ShopProductCard product={similar} />
 							</div>
 						{/each}
