@@ -139,15 +139,30 @@ export async function reportListing(id: number, payload: ReportPayload): Promise
 export interface PromotionPackage {
 	id: number;
 	name: Record<string, string> | string | null;
+	description?: Record<string, string> | string | null;
+	bonus?: Record<string, string> | string | null;
 	type: 'promoted' | 'vip' | 'premium' | string;
 	days: number;
 	price: string | number;
 }
 
+/** Reads a translatable value that may arrive as a plain string or a locale map. */
+export function localizedValue(value: Record<string, string> | string | null | undefined, locale = 'az'): string {
+	if (!value) return '';
+	if (typeof value === 'string') return value;
+	return value[locale] ?? value.az ?? Object.values(value)[0] ?? '';
+}
+
 export function packageName(pkg: PromotionPackage, locale = 'az'): string {
-	if (!pkg.name) return '';
-	if (typeof pkg.name === 'string') return pkg.name;
-	return pkg.name[locale] ?? pkg.name.az ?? Object.values(pkg.name)[0] ?? '';
+	return localizedValue(pkg.name, locale);
+}
+
+export function packageDescription(pkg: PromotionPackage, locale = 'az'): string {
+	return localizedValue(pkg.description, locale);
+}
+
+export function packageBonus(pkg: PromotionPackage, locale = 'az'): string {
+	return localizedValue(pkg.bonus, locale);
 }
 
 /** Active promotion packages. */

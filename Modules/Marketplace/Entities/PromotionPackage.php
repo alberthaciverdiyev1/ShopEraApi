@@ -13,10 +13,12 @@ class PromotionPackage extends Model
 
     protected $guarded = [];
 
-    public array $translatable = ['name'];
+    public array $translatable = ['name', 'description', 'bonus'];
 
     protected $casts = [
         'name' => 'array',
+        'description' => 'array',
+        'bonus' => 'array',
         'price' => 'decimal:2',
         'is_active' => 'boolean',
     ];

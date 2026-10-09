@@ -9,11 +9,22 @@
 	import { toggleFavoriteProduct } from '$lib/services/favorite-actions';
 	import { fetchRecommendedProducts, subscribeToStock, unsubscribeFromStock } from '$lib/services/products';
 	import { createReview, type ApiReview } from '$lib/services/reviews';
-	import { fetchListingContact, reportListing, type ListingContact, type ReportReason } from '$lib/services/listings';
+	import {
+		fetchListingContact,
+		reportListing,
+		fetchPromotionPackages,
+		promoteListing,
+		packageName,
+		packageDescription,
+		packageBonus,
+		type ListingContact,
+		type ReportReason,
+		type PromotionPackage
+	} from '$lib/services/listings';
 	import ChatModal from '$lib/components/chat/ChatModal.svelte';
 	import { features } from '$lib/services/features';
 	import { isLoggedIn, user } from '$lib/services/auth';
-	import { translate } from '$lib/i18n';
+	import { translate, locale } from '$lib/i18n';
 
 	let { product }: { product: ApiProduct } = $props();
 
@@ -135,6 +146,64 @@
 	let reportComment = $state('');
 	let reporting = $state(false);
 	let reportSent = $state(false);
+
+	// Paid placement ("Elanı irəli çək" / "VIP et" / "Premium et").
+	let promoType = $state<'promoted' | 'vip' | 'premium' | null>(null);
+	let promoPackages = $state<PromotionPackage[]>([]);
+	let promoLoading = $state(false);
+	let selectedPromoPackage = $state<number | null>(null);
+	let promoting = $state(false);
+	let promoMsg = $state<string | null>(null);
+
+	const promoMeta: Record<'promoted' | 'vip' | 'premium', { title: string; before?: string; after?: string }> = {
+		promoted: { title: 'Elanı irəli çək' },
+		vip: { title: 'VIP et', before: '1 dəfə irəli çək', after: 'Hər gün irəli çək' },
+		premium: { title: 'Premium et', before: '1 dəfə irəli çək + VIP', after: 'Hər gün irəli çək + VIP' }
+	};
+
+	const promoOptions = $derived(promoPackages.filter((pkg) => pkg.type === promoType));
+	const promoLead = $derived(promoOptions[0] ? packageDescription(promoOptions[0], $locale) : '');
+	const promoBonus = $derived(promoOptions[0] ? packageBonus(promoOptions[0], $locale) : '');
+	const promoTitle = $derived(promoType ? promoMeta[promoType].title : '');
+	const promoBefore = $derived(promoType ? promoMeta[promoType].before ?? '' : '');
+	const promoAfter = $derived(promoType ? promoMeta[promoType].after ?? '' : '');
+
+	async function openPromo(type: 'promoted' | 'vip' | 'premium') {
+		promoType = type;
+		promoMsg = null;
+		selectedPromoPackage = null;
+
+		if (promoPackages.length > 0) return;
+
+		promoLoading = true;
+		try {
+			promoPackages = await fetchPromotionPackages();
+		} catch {
+			promoPackages = [];
+		} finally {
+			promoLoading = false;
+		}
+	}
+
+	async function submitPromo() {
+		if (!selectedPromoPackage) return;
+
+		if (!$isLoggedIn) {
+			promoMsg = 'Bunun üçün hesabınıza daxil olmalısınız.';
+			return;
+		}
+
+		promoting = true;
+		promoMsg = null;
+		try {
+			await promoteListing(product.id, selectedPromoPackage);
+			promoMsg = 'Sifariş yaradıldı. Ödəniş təsdiqləndikdən sonra tətbiq olunacaq.';
+		} catch (e) {
+			promoMsg = e instanceof Error ? e.message : 'Alınmadı.';
+		} finally {
+			promoting = false;
+		}
+	}
 
 	async function submitReport() {
 		reporting = true;
@@ -757,6 +826,22 @@
 								</button>
 							{/if}
 						</div>
+
+						<!-- Ödənişli yerləşdirmə: irəli çək / VIP / Premium -->
+						<div class="promo-actions">
+							<button type="button" class="promo-action-btn promoted" onclick={() => openPromo('promoted')}>
+								<i class="fa-solid fa-arrow-up"></i>
+								<span>Elanı irəli çək</span>
+							</button>
+							<button type="button" class="promo-action-btn vip" onclick={() => openPromo('vip')}>
+								<i class="fa-solid fa-crown"></i>
+								<span>VIP et</span>
+							</button>
+							<button type="button" class="promo-action-btn premium" onclick={() => openPromo('premium')}>
+								<i class="fa-solid fa-gem"></i>
+								<span>Premium et</span>
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -954,6 +1039,62 @@
 				<textarea id="rep-comment" class="form-control mb-3" rows="3" bind:value={reportComment}></textarea>
 				<button class="theme-btn" type="button" disabled={reporting} onclick={submitReport}>
 					{reporting ? $translate('Sending…') : $translate('Report')}
+				</button>
+			{/if}
+		</div>
+	</div>
+{/if}
+
+{#if promoType}
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<div class="report-overlay" onclick={(e) => e.target === e.currentTarget && (promoType = null)} role="presentation">
+		<div class="report-modal promo-modal" role="dialog" aria-modal="true" aria-label={promoTitle}>
+			<div class="d-flex justify-content-between align-items-center mb-2">
+				<h5 class="mb-0">{promoTitle}</h5>
+				<button type="button" class="report-close" onclick={() => (promoType = null)} aria-label={$translate('Close')}>×</button>
+			</div>
+
+			{#if promoLead}
+				<p class="promo-lead">{promoLead}</p>
+			{/if}
+
+			{#if promoBefore}
+				<div class="promo-compare">
+					<div class="promo-compare-row">
+						<span class="promo-compare-label">Əvvəl</span>
+						<span class="promo-compare-val">{promoBefore}</span>
+					</div>
+					<div class="promo-compare-row">
+						<span class="promo-compare-label">İndi</span>
+						<span class="promo-compare-val strong">{promoAfter}</span>
+					</div>
+				</div>
+			{/if}
+
+			{#if promoBonus}
+				<div class="promo-bonus"><b>Bonus</b> {promoBonus}</div>
+			{/if}
+
+			{#if promoLoading}
+				<p class="text-muted mb-0">{$translate('Loading...')}</p>
+			{:else if promoMsg}
+				<div class="alert alert-info mb-0">{promoMsg}</div>
+			{:else if promoOptions.length === 0}
+				<p class="text-muted mb-0">Hazırda paket yoxdur.</p>
+			{:else}
+				<p class="promo-section-label">Xidmətin müddəti</p>
+				<div class="d-flex flex-column gap-2 mb-3">
+					{#each promoOptions as pkg (pkg.id)}
+						<label class="promo-option" class:active={selectedPromoPackage === pkg.id}>
+							<input type="radio" name="promo-pkg" value={pkg.id} checked={selectedPromoPackage === pkg.id}
+							       onchange={() => (selectedPromoPackage = pkg.id)} />
+							<span>{packageName(pkg, $locale)}</span>
+							<span class="ms-auto fw-bold">{Number(pkg.price).toFixed(2)} ₼</span>
+						</label>
+					{/each}
+				</div>
+				<button class="theme-btn" type="button" disabled={!selectedPromoPackage || promoting} onclick={submitPromo}>
+					{promoting ? $translate('Sending…') : 'Sifariş et'}
 				</button>
 			{/if}
 		</div>
@@ -2367,4 +2508,34 @@
 	.report-overlay { position: fixed; inset: 0; z-index: 1090; background: rgba(15,23,42,.55); display: flex; align-items: center; justify-content: center; padding: 16px; }
 	.report-modal { width: min(460px, 100%); background: #fff; border-radius: 16px; padding: 22px; box-shadow: 0 24px 60px rgba(15,23,42,.3); }
 	.report-close { border: 0; background: none; font-size: 26px; line-height: 1; cursor: pointer; color: #64748b; }
+
+	/* Paid placement buttons + modal */
+	.promo-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+	.promo-action-btn {
+		display: flex; flex-direction: column; align-items: center; gap: 6px;
+		padding: 12px 6px; border: 1.5px solid #e6e9f0; border-radius: 12px;
+		background: #fff; color: #334155; font-size: 12.5px; font-weight: 600;
+		cursor: pointer; transition: border-color .15s, transform .15s, color .15s;
+	}
+	.promo-action-btn i { font-size: 16px; }
+	.promo-action-btn:hover { transform: translateY(-1px); }
+	.promo-action-btn.promoted:hover { border-color: #0ea5e9; color: #0ea5e9; }
+	.promo-action-btn.vip:hover { border-color: #f59e0b; color: #f59e0b; }
+	.promo-action-btn.premium:hover { border-color: #7c3aed; color: #7c3aed; }
+
+	.promo-modal { width: min(500px, 100%); max-height: 90vh; overflow-y: auto; }
+	.promo-lead { color: #475569; font-size: 14px; line-height: 1.5; margin-bottom: 14px; }
+	.promo-compare { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+	.promo-compare-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13.5px; }
+	.promo-compare-label { color: #94a3b8; font-weight: 600; }
+	.promo-compare-val { color: #64748b; }
+	.promo-compare-val.strong { color: #0f172a; font-weight: 700; }
+	.promo-bonus { margin-bottom: 14px; padding: 9px 12px; border-radius: 10px; background: #f0fdf4; color: #15803d; font-size: 13px; }
+	.promo-section-label { margin-bottom: 8px; color: #64748b; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+	.promo-option { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border: 1.5px solid #e6e9f0; border-radius: 12px; cursor: pointer; }
+	.promo-option.active { border-color: var(--theme); background: color-mix(in srgb, var(--theme) 8%, #fff); }
+
+	@media (max-width: 575.98px) {
+		.promo-actions { grid-template-columns: 1fr; }
+	}
 </style>

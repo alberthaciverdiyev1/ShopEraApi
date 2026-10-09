@@ -74,13 +74,22 @@ class PromotionController extends AdminController
             'days' => ['required', 'integer', 'min:1', 'max:365'],
             'price' => ['required', 'numeric', 'min:0'],
             'sort_order' => ['nullable', 'integer', 'min:0'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'bonus' => ['nullable', 'string', 'max:255'],
         ]);
     }
 
     private function packageData(array $data, Request $request): array
     {
+        $locales = ['az', 'en', 'ru', 'tr'];
+        $translateOrNull = fn (?string $value) => $value !== null && $value !== ''
+            ? array_fill_keys($locales, $value)
+            : null;
+
         return [
-            'name' => array_fill_keys(['az', 'en', 'ru', 'tr'], $data['name']),
+            'name' => array_fill_keys($locales, $data['name']),
+            'description' => $translateOrNull($data['description'] ?? null),
+            'bonus' => $translateOrNull($data['bonus'] ?? null),
             'type' => $data['type'],
             'days' => $data['days'],
             'price' => $data['price'],
