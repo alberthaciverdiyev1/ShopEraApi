@@ -52,7 +52,9 @@ class AppServiceProvider extends ServiceProvider
         //            URL::forceScheme('https');
         //        }
 
-        if (app()->environment('production') || app()->environment('staging')) {
+        // Generate https URLs in production/staging, or anywhere the app sits
+        // behind a TLS-terminating proxy (e.g. Cloudflare Tunnel) — set FORCE_HTTPS=true.
+        if (app()->environment('production') || app()->environment('staging') || config('app.force_https')) {
             URL::forceScheme('https');
         }
 
