@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Modules\Balance\Entities\Balance;
 use Modules\Balance\Http\Resources\BalanceResource;
-use Modules\Payment\Service\EPointService;
+use Modules\Payment\Service\PayPalService;
 
 class BalanceService
 {
@@ -61,22 +61,30 @@ class BalanceService
         $successUrl = route('api.balance.success', ['transaction_id' => $transactionId]);
         $errorUrl = route('api.balance.error', ['transaction_id' => $transactionId]);
 
-        $paymentResponse = EPointService::typeCard(
-            config('app.epoint_private_key'),
-            config('app.epoint_public_key'),
-            $transactionId,
-            $amount,
-            $description,
-            $successUrl,
-            $errorUrl
-        );
+        $paypal = app(PayPalService::class);
 
-        if (isset($paymentResponse->error)) {
-            return responseHelper($paymentResponse->error, 400);
+        try {
+            $paypalOrder = $paypal->createOrder(
+                $transactionId,
+                $amount,
+                (string) config('app.paypal_currency'),
+                $description,
+                $successUrl,
+                $errorUrl
+            );
+
+            $paymentUrl = $paypal->approveUrl($paypalOrder);
+        } catch (\Throwable $e) {
+            \Log::error('PayPal balance order failed', [
+                'transaction_id' => $transactionId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return responseHelper($e->getMessage() ?: 'Payment error', 400);
         }
-        $paymentUrl = $paymentResponse->redirect_url ?? null;
+
         if ($paymentUrl) {
-            $balance = $this->model->create([
+            $this->model->create([
                 'user_id' => $user->id,
                 'transaction_order' => $transactionId,
                 'type' => BalanceType::WAITING->value,
@@ -87,7 +95,7 @@ class BalanceService
 
         return responseHelper($paymentUrl ? 'Payment initialized successfully.' : 'Payment error', $paymentUrl ? 200 : 400, [
             'payment_url' => $paymentUrl,
-            'message' => $paymentUrl ? '' : $paymentResponse->message,
+            'message' => $paymentUrl ? '' : 'Payment error',
             'transaction_order' => $paymentUrl ? $transactionId : null,
         ]);
     }
@@ -136,6 +144,7 @@ class BalanceService
         $transactionId = $request->query('transaction_id');
 
         $lang = app()->getLocale();
+        $currency = (string) config('app.paypal_currency');
 
         $translations = [
             'balance_not_found_title' => __('balance_not_found_title'),
@@ -238,14 +247,24 @@ class BalanceService
         ", 404)->header('Content-Type', 'text/html');
         }
 
-        $response = EPointService::checkPayment(
-            config('app.epoint_private_key'),
-            config('app.epoint_public_key'),
-            $transactionId
-        );
+        $success = false;
+        $amountPaid = 0.0;
 
-        $success = isset($response->code) && (string) $response->code === '000';
-        $amountPaid = (float) ($response->amount ?? 0);
+        try {
+            $capture = app(PayPalService::class)->captureOrder((string) $request->query('token'));
+
+            $success = ($capture->status ?? null) === 'COMPLETED';
+            $amountPaid = (float) ($capture->purchase_units[0]->payments->captures[0]->amount->value ?? 0);
+        } catch (\Throwable $e) {
+            \Log::error('PayPal balance capture failed', [
+                'transaction_id' => $transactionId,
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        if ($success && abs($amountPaid - (float) $balance->amount) >= 0.01) {
+            $success = false;
+        }
 
         if ($success) {
             $balance->update([
@@ -267,7 +286,7 @@ class BalanceService
                         <h2 style='color:#e65100'>{$title}</h2>
                         <p>{$text}</p>
                         <p class='code'>{$code}: {$transactionId}</p>
-                        <p><b>{$amount}:</b> <span class='amount'>{$amountPaid} ₼</span></p>
+                        <p><b>{$amount}:</b> <span class='amount'>{$amountPaid} {$currency}</span></p>
                     </div>
                 </body>
             </html>

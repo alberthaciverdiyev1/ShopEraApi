@@ -110,6 +110,25 @@ class PayPalService
     }
 
     /**
+     * Refund a captured payment. Omit $amount to refund in full.
+     */
+    public function refund(string $captureId, ?float $amount = null): object
+    {
+        $payload = [];
+
+        if ($amount !== null) {
+            $payload['amount'] = [
+                'value' => number_format($amount, 2, '.', ''),
+                'currency_code' => (string) config('app.paypal_currency'),
+            ];
+        }
+
+        $response = $this->request()->post("{$this->baseUrl}/v2/payments/captures/{$captureId}/refund", $payload);
+
+        return $this->decode($response, 'refund');
+    }
+
+    /**
      * Verify a webhook event signature against the configured webhook id.
      * Returns true only when PayPal reports verification_status = SUCCESS.
      */

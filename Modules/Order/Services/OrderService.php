@@ -27,7 +27,7 @@ use Modules\Order\Entities\OrderItem;
 use Modules\Order\Entities\OrderStatus;
 use Modules\Order\Http\Resources\OrderDetailResource;
 use Modules\Order\Http\Resources\OrderResource;
-use Modules\Payment\Service\EPointService;
+use Modules\Payment\Service\PayPalService;
 use Modules\Product\Entities\Product;
 use Modules\Product\Http\Resources\ProductResource;
 use Modules\Product\Services\ProductPricingService;
@@ -49,7 +49,7 @@ class OrderService
 
     private PromoCodeService $promoCodeService;
 
-    private EPointService $paymentService;
+    private PayPalService $paymentService;
 
     private ProductService $productService;
 
@@ -67,7 +67,7 @@ class OrderService
         DeliveryService $deliveryService,
         BalanceService $balanceService,
         PromoCodeService $promoCodeService,
-        EPointService $paymentService,
+        PayPalService $paymentService,
         ProductService $productService,
         PickupPointService $pickupPointService,
         AddressService $addressService,
@@ -1333,20 +1333,16 @@ class OrderService
                         //                            "Refund for cancelled order #{$order->id}"
                         //                        );
 
-                        $cancelResponse = EPointService::cancel(
-                            config('app.epoint_private_key'),
-                            config('app.epoint_public_key'),
-                            $order->e_point_transaction,
-                            (float) $refundAmount,
-                        );
+                        try {
+                            $this->paymentService->refund($order->paypal_capture_id, (float) $refundAmount);
+                        } catch (\Throwable $e) {
+                            \Log::error('PayPal refund failed', [
+                                'order_id' => $order->id,
+                                'error' => $e->getMessage(),
+                            ]);
 
-                        if (isset($cancelResponse->status) && (string) $cancelResponse->status === 'failed') {
-                            return responseHelper(
-                                $cancelResponse->message ?? 'Failed to refund the order.',
-                                403,
-                            );
+                            return responseHelper($e->getMessage() ?: 'Failed to refund the order.', 403);
                         }
-                        \Log::error('Epoint cancel response', (array) $cancelResponse);
                     }
 
                     $cancelledStatus = OrderStatusEnum::CANCELLED;
@@ -1420,19 +1416,15 @@ class OrderService
                             //                                "Refund for cancelled order #{$order->id}"
                             //                            );
 
-                            $cancelResponse = EPointService::cancel(
-                                config('app.epoint_private_key'),
-                                config('app.epoint_public_key'),
-                                $order->e_point_transaction,
-                                (float) $refundAmount,
-                            );
+                            try {
+                                $this->paymentService->refund($order->paypal_capture_id, (float) $refundAmount);
+                            } catch (\Throwable $e) {
+                                \Log::error('PayPal refund failed', [
+                                    'order_id' => $order->id,
+                                    'error' => $e->getMessage(),
+                                ]);
 
-                            \Log::error('Epoint cancel response', (array) $cancelResponse);
-                            if (isset($cancelResponse->status) && (string) $cancelResponse->status === 'failed') {
-                                return responseHelper(
-                                    $cancelResponse->message ?? 'Failed to refund the order.',
-                                    403,
-                                );
+                                return responseHelper($e->getMessage() ?: 'Failed to refund the order.', 403);
                             }
                         }
 
