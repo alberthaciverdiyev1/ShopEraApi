@@ -162,6 +162,7 @@ class PaymentService
         $order = Order::where('transaction_id', $orderId)->first();
         $rawPrice = $order ? (float) $order->total_price + (float) $order->shipping_price : 0;
         $price = number_format($rawPrice, 2);
+        $currency = (string) config('app.paypal_currency');
         $assetsUrl = asset('assets');
 
         if (! $orderId || ! $order) {
@@ -194,7 +195,7 @@ class PaymentService
                 <body>
                     <div class="payment-card">
                         <img src="{$assetsUrl}/images/logo.png" style="max-width:140px; margin-bottom:2rem;" onerror="this.style.display='none'">
-                        <div class="price-badge">{$price} AZN</div>
+                        <div class="price-badge">{$price} {$currency}</div>
                         <button id="submit-btn" class="btn-pay" onclick="processPayment()">PayPal ilə ödə</button>
                         <p class="hint">Təhlükəsiz ödəniş üçün PayPal səhifəsinə yönləndiriləcəksiniz.</p>
                     </div>
@@ -293,6 +294,7 @@ class PaymentService
         ]);
 
         $lang = app()->getLocale();
+        $currency = (string) config('app.paypal_currency');
 
         $translations = [
             'payment_success_title' => __('payment_success_title'),
@@ -426,7 +428,7 @@ class PaymentService
                             <h2 style='color:#e65100'>{$title}</h2>
                             <p>{$text}</p>
                             <p class='code'>{$code}: {$transactionId}</p>
-                            <p><b>{$amount}:</b> <span class='amount'>{$amountPaid} ₼</span></p>
+                            <p><b>{$amount}:</b> <span class='amount'>{$amountPaid} {$currency}</span></p>
                         </div>
                     </body>
                 </html>
