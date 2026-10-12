@@ -125,9 +125,18 @@ return [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
-    'available_locales' => ['en', 'az','ru','tr'],
+    'available_locales' => ['en', 'az', 'ru', 'tr'],
     'epoint_private_key' => env('EPOINT_PRIVATE_KEY'),
     'epoint_public_key' => env('EPOINT_PUBLIC_KEY'),
+
+    // PayPal REST API (replaces Epoint). Mode: sandbox|live.
+    // Note: PayPal does not support AZN — amounts are sent in PAYPAL_CURRENCY.
+    'paypal_client_id' => env('PAYPAL_CLIENT_ID'),
+    'paypal_secret' => env('PAYPAL_SECRET'),
+    'paypal_mode' => env('PAYPAL_MODE', 'sandbox'),
+    'paypal_currency' => env('PAYPAL_CURRENCY', 'USD'),
+    'paypal_webhook_id' => env('PAYPAL_WEBHOOK_ID'),
+
     'app_store_url' => env('APP_STORE_URL', '#'),
     'play_store_url' => env('PLAY_STORE_URL', '#'),
 
