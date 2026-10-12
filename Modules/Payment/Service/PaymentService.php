@@ -174,8 +174,6 @@ class PaymentService
 
         $csrfToken = csrf_token();
         $createUrl = route('api.payment.create');
-        $successUrl = route('api.payment.success', ['transaction_id' => $orderId]);
-        $statusUrl = route('api.payment.status', ['transaction_id' => $orderId]);
 
         $html = <<<HTML
                 <!DOCTYPE html>
@@ -188,63 +186,20 @@ class PaymentService
                         body { background: #f8f9fa; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; font-family: sans-serif; }
                         .payment-card { background: #fff; padding: 2.5rem; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); width: 90%; max-width: 400px; text-align: center; }
                         .price-badge { background: #fff5f5; color: #e53e3e; font-size: 1.75rem; font-weight: 800; padding: 12px 24px; border-radius: 16px; display: inline-block; margin-bottom: 1.5rem; border: 1px dashed #feb2b2; }
-                        .method-btn { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; padding: 16px; margin-bottom: 14px; border: 2px solid #edf2f7; border-radius: 16px; cursor: pointer; transition: all 0.2s; background: #fff; font-weight: 600; }
-                        .method-btn.selected { border-color: #4299e1; background: #ebf8ff; }
-                        .btn-pay { background: #000; color: #fff; border: none; width: 100%; padding: 18px; border-radius: 16px; font-weight: 700; display: none; cursor: pointer; }
-                        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 1000; align-items: center; justify-content: center; flex-direction: column; }
-                        .widget-modal { display: none; position: fixed; inset: 0; background: #fff; z-index: 900; }
-                        .widget-frame { width: 100%; height: 100%; border: 0; }
-                        .widget-close { position: absolute; top: 12px; right: 12px; z-index: 901; border: 0; border-radius: 999px; width: 42px; height: 42px; background: rgba(255,255,255,0.92); font-size: 20px; cursor: pointer; }
+                        .btn-pay { background: #0070ba; color: #fff; border: none; width: 100%; padding: 18px; border-radius: 16px; font-weight: 700; font-size: 1.05rem; cursor: pointer; }
+                        .btn-pay:disabled { opacity: 0.6; cursor: wait; }
+                        .hint { color: #718096; font-size: 0.9rem; margin-top: 1.25rem; }
                     </style>
                 </head>
                 <body>
-                    <div id="loading" class="loading-overlay">
-                        <div style="font-weight: bold;">Ödəniş yoxlanılır...</div>
-                    </div>
-
-                    <div class="payment-card" id="ui">
+                    <div class="payment-card">
                         <img src="{$assetsUrl}/images/logo.png" style="max-width:140px; margin-bottom:2rem;" onerror="this.style.display='none'">
                         <div class="price-badge">{$price} AZN</div>
-                        <div id="payment-options">
-                            <button class="method-btn" onclick="selectMethod('apple_google_pay', this)">Apple/Google Pay</button>
-                            <button class="method-btn" onclick="selectMethod('card', this)">💳 Bank Kartı</button>
-                        </div>
-                        <button id="submit-btn" class="btn-pay" onclick="processPayment()">Ödənişi Tamamla</button>
-                    </div>
-
-                    <div id="widget-modal" class="widget-modal">
-                        <button type="button" class="widget-close" onclick="closeWidget()">X</button>
-                        <iframe id="widget-frame" class="widget-frame" src="about:blank" allow="payment *" allowpaymentrequest></iframe>
+                        <button id="submit-btn" class="btn-pay" onclick="processPayment()">PayPal ilə ödə</button>
+                        <p class="hint">Təhlükəsiz ödəniş üçün PayPal səhifəsinə yönləndiriləcəksiniz.</p>
                     </div>
 
                     <script>
-                        let selectedMethod = null;
-                        let finalizing = false;
-                        let widgetOrigin = null;
-                        let statusPollTimer = null;
-                        let statusPollStartedAt = null;
-                        let statusPollInFlight = false;
-                        const successUrl = "{$successUrl}";
-                        const statusUrl = "{$statusUrl}";
-                        const statusPollTimeoutMs = 10 * 60 * 1000;
-
-                        window.addEventListener('message', function(e) {
-                            if (!isTrustedEpointOrigin(e.origin)) return;
-
-                            if (e.data && (e.data.status === 'success' || e.data === 'success')) {
-                                finalizePayment();
-                            } else if (e.data && (e.data.status === 'error' || e.data.status === 'cancel')) {
-                                closeWidget();
-                            }
-                        });
-
-                        function selectMethod(method, element) {
-                            selectedMethod = method;
-                            document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('selected'));
-                            element.classList.add('selected');
-                            document.getElementById('submit-btn').style.display = 'block';
-                        }
-
                         async function processPayment() {
                             const btn = document.getElementById('submit-btn');
                             btn.disabled = true;
@@ -254,102 +209,21 @@ class PaymentService
                                 const res = await fetch("{$createUrl}", {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': "{$csrfToken}" },
-                                    body: JSON.stringify({ order_id: "{$orderId}", method: selectedMethod, price: "{$rawPrice}" })
+                                    body: JSON.stringify({ order_id: "{$orderId}", price: "{$rawPrice}" })
                                 });
                                 const data = await res.json();
                                 if (data.redirect_url) {
-                                    if (selectedMethod === 'apple_google_pay') {
-                                        openWidget(data.redirect_url);
-                                        btn.disabled = false;
-                                        btn.innerText = "Ödənişi Tamamla";
-                                    } else {
-                                        window.location.href = data.redirect_url;
-                                    }
+                                    window.location.href = data.redirect_url;
                                 } else {
                                     alert(data.message || 'Ödəniş linki alınmadı.');
                                     btn.disabled = false;
-                                    btn.innerText = "Ödənişi Tamamla";
+                                    btn.innerText = "PayPal ilə ödə";
                                 }
                             } catch (e) {
                                 alert('Xəta baş verdi.');
                                 btn.disabled = false;
-                                btn.innerText = "Ödənişi Tamamla";
+                                btn.innerText = "PayPal ilə ödə";
                             }
-                        }
-
-                        async function finalizePayment() {
-                            if (finalizing) return;
-                            finalizing = true;
-                            stopStatusPolling();
-                            document.getElementById('loading').style.display = 'flex';
-                            document.getElementById('ui').style.opacity = '0.3';
-
-                            try {
-                                await fetch(successUrl, { method: 'GET' });
-                            } catch (e) {}
-
-                            window.location.href = successUrl;
-                        }
-
-                        function openWidget(url) {
-                            const widgetUrl = new URL(url);
-                            widgetOrigin = widgetUrl.origin;
-                            document.getElementById('widget-frame').src = widgetUrl.toString();
-                            document.getElementById('widget-modal').style.display = 'block';
-                            startStatusPolling();
-                        }
-
-                        function closeWidget() {
-                            stopStatusPolling();
-                            document.getElementById('widget-modal').style.display = 'none';
-                            document.getElementById('widget-frame').src = 'about:blank';
-                            widgetOrigin = null;
-                        }
-
-                        function startStatusPolling() {
-                            stopStatusPolling();
-                            statusPollStartedAt = Date.now();
-                            checkPaymentStatus();
-                            statusPollTimer = window.setInterval(checkPaymentStatus, 3000);
-                        }
-
-                        function stopStatusPolling() {
-                            if (statusPollTimer !== null) {
-                                window.clearInterval(statusPollTimer);
-                                statusPollTimer = null;
-                            }
-
-                            statusPollStartedAt = null;
-                            statusPollInFlight = false;
-                        }
-
-                        async function checkPaymentStatus() {
-                            if (statusPollInFlight) return;
-                            if (statusPollStartedAt !== null && Date.now() - statusPollStartedAt > statusPollTimeoutMs) {
-                                stopStatusPolling();
-                                return;
-                            }
-
-                            statusPollInFlight = true;
-
-                            try {
-                                const response = await fetch(statusUrl, {
-                                    method: 'GET',
-                                    headers: { 'Accept': 'application/json' }
-                                });
-
-                                if (!response.ok) return;
-
-                                const data = await response.json();
-                                if (data.paid === true) finalizePayment();
-                            } catch (e) {
-                            } finally {
-                                statusPollInFlight = false;
-                            }
-                        }
-
-                        function isTrustedEpointOrigin(origin) {
-                            return widgetOrigin !== null && origin === widgetOrigin;
                         }
                     </script>
                 </body>
@@ -363,11 +237,9 @@ class PaymentService
     {
         $validated = $request->validate([
             'order_id' => 'required',
-            'method' => 'required|in:apple_google_pay,card',
         ]);
 
         $orderId = $validated['order_id'];
-        $method = $validated['method'];
         $order = Order::where('transaction_id', $orderId)->first();
 
         if (! $order) {
@@ -378,38 +250,37 @@ class PaymentService
             return response()->json(['message' => 'Bu sifariş üçün ödəniş müddəti bitib.'], 410);
         }
 
-        $amount = round((float) $order->total_price + (float) $order->shipping_price, 2);
+        $amount = $this->expectedAmount($order);
+        $currency = (string) config('app.paypal_currency');
 
         try {
-            if ($method === 'apple_google_pay') {
-                $paymentResponse = EPointService::widgetPay(
-                    config('app.epoint_private_key'),
-                    config('app.epoint_public_key'),
-                    $amount,
-                    $orderId,
-                    "Payment for order #{$orderId}"
-                );
-            } else {
-                $paymentResponse = EPointService::saveCardAndPayment(
-                    config('app.epoint_private_key'),
-                    config('app.epoint_public_key'),
-                    $orderId,
-                    $amount,
-                    "Payment for order #{$orderId}",
-                    route('api.payment.success', ['transaction_id' => $orderId]),
-                    route('api.payment.error', ['transaction_id' => $orderId])
-                );
-            }
+            $paypal = app(PayPalService::class);
 
-            $redirectUrl = $paymentResponse->redirect_url ?? ($paymentResponse->widget_url ?? null);
+            $paypalOrder = $paypal->createOrder(
+                $orderId,
+                $amount,
+                $currency,
+                "Payment for order #{$orderId}",
+                route('api.payment.success', ['transaction_id' => $orderId]),
+                route('api.payment.error', ['transaction_id' => $orderId])
+            );
+
+            $redirectUrl = $paypal->approveUrl($paypalOrder);
 
             if (! $redirectUrl) {
                 return response()->json(['message' => 'Ödəniş linki alınmadı'], 422);
             }
 
+            $order->update(['paypal_order_id' => $paypalOrder->id ?? null]);
+
             return response()->json(['redirect_url' => $redirectUrl]);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            Log::error('PayPal create order failed.', [
+                'order_id' => $orderId,
+                'error' => $e->getMessage(),
+            ]);
+
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
@@ -418,9 +289,9 @@ class PaymentService
     {
         Log::info('Payment success callback received.', [
             'transaction_id' => $request->query('transaction_id'),
+            'paypal_order_id' => $request->query('token'),
         ]);
 
-        $transactionId = $request->query('transaction_id');
         $lang = app()->getLocale();
 
         $translations = [
@@ -499,7 +370,8 @@ class PaymentService
             </style>
             ";
 
-        $order = Order::where('transaction_id', $transactionId)->first();
+        $order = $this->resolveOrderFromRequest($request);
+        $transactionId = $order?->transaction_id ?? $request->query('transaction_id');
 
         if (! $order) {
             $title = $translations['order_not_found_title'];
@@ -519,26 +391,26 @@ class PaymentService
                     ", 404)->header('Content-Type', 'text/html');
         }
 
-        $response = EPointService::checkPayment(
-            config('app.epoint_private_key'),
-            config('app.epoint_public_key'),
-            $order->transaction_id
-        );
-        Log::info('Epoint success response received.', [
-            'transaction_id' => $order->transaction_id,
-            'status' => $response->status ?? null,
-            'code' => $response->code ?? null,
-            'message' => $response->message ?? null,
-            'amount' => $response->amount ?? null,
-        ]);
+        if ($order->paid_at) {
+            $captured = true;
+            $amountPaid = $this->expectedAmount($order);
+        } else {
+            try {
+                [$captured, $amountPaid] = $this->capturePayPalOrder($order, $request->query('token'));
+            } catch (\Throwable $e) {
+                Log::error('PayPal capture failed.', [
+                    'order_id' => $order->id,
+                    'transaction_id' => $order->transaction_id,
+                    'error' => $e->getMessage(),
+                ]);
 
-        $success = isset($response->code) && (string) $response->code === '000';
-        $amountPaid = $response->amount ?? 0;
-        $expectedAmount = round((float) $order->total_price + (float) $order->shipping_price, 2);
-        $hasCorrectAmount = abs((float) $amountPaid - $expectedAmount) < 0.01;
+                $captured = false;
+                $amountPaid = 0;
+            }
+        }
 
-        if ($success && $hasCorrectAmount) {
-            $this->completePaidOrder($order, $response);
+        if ($captured) {
+            $this->completePaidOrder($order, (float) $amountPaid, $request->query('token'));
 
             $title = $translations['payment_success_title'];
             $text = $translations['payment_success_text'];
@@ -729,7 +601,7 @@ class PaymentService
                 return response()->json(['paid' => true]);
             }
         } catch (\Throwable $e) {
-            Log::warning('Epoint payment status polling failed.', [
+            Log::warning('PayPal payment status polling failed.', [
                 'order_id' => $order->id,
                 'transaction_id' => $order->transaction_id,
                 'error' => $e->getMessage(),
@@ -741,83 +613,80 @@ class PaymentService
 
     public function result(Request $request)
     {
-        Log::info('Epoint result callback received.', [
-            'has_data' => $request->filled('data'),
-            'has_signature' => $request->filled('signature'),
+        Log::info('PayPal webhook received.', [
+            'event_type' => $request->input('event_type'),
+            'event_id' => $request->input('id'),
             'ip' => $request->ip(),
         ]);
 
-        $transactionId = $request->query('transaction_id');
+        $paypal = app(PayPalService::class);
 
-        if ($request->filled('data') || $request->filled('signature')) {
-            $data = $request->input('data');
-            $signature = $request->input('signature');
+        if (! $paypal->verifyWebhook($request->headers->all(), $request->all())) {
+            Log::warning('PayPal webhook signature validation failed.');
 
-            if (! is_string($data) || ! is_string($signature)) {
-                return responseHelper(__('Invalid callback payload.'), 403);
-            }
-
-            if (! EPointService::verifyCallback(
-                config('app.epoint_private_key'),
-                config('app.epoint_public_key'),
-                $data,
-                $signature
-            )) {
-                Log::warning('Epoint result callback signature validation failed.');
-
-                return responseHelper(__('Invalid callback signature.'), 403);
-            }
-
-            $payload = EPointService::decodeCallbackData($data);
-            $transactionId = $payload?->order_id;
+            return responseHelper(__('Invalid callback signature.'), 403);
         }
 
-        if (! $transactionId) {
-            return responseHelper(__('Order id not found in callback.'), 403);
+        $eventType = (string) $request->input('event_type');
+        $resource = (array) $request->input('resource', []);
+
+        $handled = [
+            'PAYMENT.CAPTURE.COMPLETED',
+            'PAYMENT.CAPTURE.DENIED',
+            'PAYMENT.CAPTURE.REFUNDED',
+        ];
+
+        if (! in_array($eventType, $handled, true)) {
+            // Acknowledge unhandled events so PayPal stops retrying.
+            return responseHelper(__('Event ignored'), 200, ['event_type' => $eventType]);
         }
 
-        $order = Order::where('transaction_id', $transactionId)->first();
+        $order = $this->resolveOrderFromCaptureResource($resource);
+
         if (! $order) {
             return responseHelper(__('Order not found'), 403);
         }
 
-        $response = EPointService::checkPayment(
-            config('app.epoint_private_key'),
-            config('app.epoint_public_key'),
-            $order->transaction_id
-        );
+        if ($order->paid_at) {
+            return responseHelper(__('Payment successful'), 200, ['order_id' => $order->id]);
+        }
 
-        $success = isset($response->code) && (string) $response->code === '000';
-        $amountPaid = (float) ($response->amount ?? 0);
-        $expectedAmount = round((float) $order->total_price + (float) $order->shipping_price, 2);
-        $hasCorrectAmount = abs($amountPaid - $expectedAmount) < 0.01;
+        if ($eventType !== 'PAYMENT.CAPTURE.COMPLETED') {
+            $this->recordPaymentFailure($order);
 
-        if ($success && $hasCorrectAmount) {
-            if (! $this->completePaidOrder($order, $response)) {
-                return responseHelper(__('Payment is not confirmed yet'), 409, [
-                    'order_id' => $order->id,
-                    'message' => 'Order is no longer waiting for payment.',
-                ]);
-            }
+            return responseHelper(__('Payment failed'), 200, ['order_id' => $order->id]);
+        }
 
-            return responseHelper(__('Payment successful'), 200, [
+        $amountPaid = (float) ($resource['amount']['value'] ?? 0);
+        $expectedAmount = $this->expectedAmount($order);
+
+        if (abs($amountPaid - $expectedAmount) >= 0.01) {
+            Log::warning('PayPal webhook amount mismatch.', [
                 'order_id' => $order->id,
-                'status' => OrderStatusEnum::PLACED,
                 'amount_paid' => $amountPaid,
+                'expected_amount' => $expectedAmount,
+            ]);
+
+            return responseHelper(__('Payment is not confirmed yet'), 409, [
+                'order_id' => $order->id,
+                'message' => 'Paid amount does not match the order total.',
             ]);
         }
 
-        Log::warning('Epoint payment callback did not pass status validation.', [
-            'order_id' => $order->id,
-            'transaction_id' => $order->transaction_id,
-            'status_code' => $response->code ?? null,
-            'amount_paid' => $amountPaid,
-            'expected_amount' => $expectedAmount,
-        ]);
+        $paypalOrderId = $resource['supplementary_data']['related_ids']['order_id'] ?? $order->paypal_order_id;
+        $captureId = $resource['id'] ?? null;
 
-        return responseHelper(__('Payment is not confirmed yet'), 409, [
+        if (! $this->completePaidOrder($order, $amountPaid, $paypalOrderId, $captureId)) {
+            return responseHelper(__('Payment is not confirmed yet'), 409, [
+                'order_id' => $order->id,
+                'message' => 'Order is no longer waiting for payment.',
+            ]);
+        }
+
+        return responseHelper(__('Payment successful'), 200, [
             'order_id' => $order->id,
-            'response' => $response,
+            'status' => OrderStatusEnum::PLACED,
+            'amount_paid' => $amountPaid,
         ]);
     }
 
@@ -827,36 +696,42 @@ class PaymentService
             return true;
         }
 
-        $response = EPointService::checkPayment(
-            config('app.epoint_private_key'),
-            config('app.epoint_public_key'),
-            $order->transaction_id
-        );
+        $paypalOrderId = $order->paypal_order_id;
 
-        $success = isset($response->code) && (string) $response->code === '000';
-        $amountPaid = (float) ($response->amount ?? 0);
-        $expectedAmount = round((float) $order->total_price + (float) $order->shipping_price, 2);
-        $hasCorrectAmount = abs($amountPaid - $expectedAmount) < 0.01;
-
-        if ($success && $hasCorrectAmount) {
-            return $this->completePaidOrder($order, $response);
+        if (! $paypalOrderId) {
+            return false;
         }
 
-        if ($success && ! $hasCorrectAmount) {
-            Log::warning('Epoint polling found a payment with an unexpected amount.', [
-                'order_id' => $order->id,
-                'transaction_id' => $order->transaction_id,
-                'amount_paid' => $amountPaid,
-                'expected_amount' => $expectedAmount,
-            ]);
+        $paypal = app(PayPalService::class);
+        $paypalOrder = $paypal->getOrder($paypalOrderId);
+        $status = $paypalOrder->status ?? null;
+
+        if ($status === 'COMPLETED') {
+            $capture = $this->firstCapture($paypalOrder);
+
+            return $this->completePaidOrder(
+                $order,
+                (float) ($capture->amount->value ?? 0),
+                $paypalOrderId,
+                $capture->id ?? null
+            );
+        }
+
+        // Approved but not yet captured (e.g. the buyer never returned to success()).
+        if ($status === 'APPROVED') {
+            [$captured, $amountPaid, $captureId] = $this->capturePayPalOrder($order, $paypalOrderId);
+
+            if ($captured) {
+                return $this->completePaidOrder($order, (float) $amountPaid, $paypalOrderId, $captureId);
+            }
         }
 
         return false;
     }
 
-    private function completePaidOrder(Order $order, object $response): bool
+    private function completePaidOrder(Order $order, float $amountPaid, ?string $paypalOrderId = null, ?string $captureId = null): bool
     {
-        return DB::transaction(function () use ($order, $response) {
+        return DB::transaction(function () use ($order, $amountPaid, $paypalOrderId, $captureId) {
             $lockedOrder = Order::whereKey($order->id)->lockForUpdate()->firstOrFail();
 
             if ($lockedOrder->paid_at) {
@@ -864,7 +739,7 @@ class PaymentService
             }
 
             if (! $this->canAcceptPayment($lockedOrder)) {
-                Log::warning('Paid Epoint callback received for an order that is no longer waiting for payment.', [
+                Log::warning('Paid PayPal callback received for an order that is no longer waiting for payment.', [
                     'order_id' => $lockedOrder->id,
                     'transaction_id' => $lockedOrder->transaction_id,
                 ]);
@@ -874,31 +749,13 @@ class PaymentService
 
             $userId = $lockedOrder->user_id;
             $transactionId = $lockedOrder->transaction_id;
-            $amountPaid = (float) ($response->amount ?? 0);
-            $paymentUpdate = [
+
+            $lockedOrder->update([
                 'paid_at' => now(),
-                'e_point_transaction' => $response->transaction ?? null,
-            ];
+                'paypal_order_id' => $paypalOrderId ?? $lockedOrder->paypal_order_id,
+                'paypal_capture_id' => $captureId ?? $lockedOrder->paypal_capture_id,
+            ]);
 
-            if (! empty($response->card_id)) {
-                $paymentUpdate['card_id'] = $response->card_id;
-
-                $exists = DB::table('user_saved_cards')
-                    ->where('user_id', $userId)
-                    ->where('card_id', $response->card_id)
-                    ->exists();
-
-                if (! $exists) {
-                    DB::table('user_saved_cards')->insert([
-                        'user_id' => $userId,
-                        'card_id' => $response->card_id,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-                }
-            }
-
-            $lockedOrder->update($paymentUpdate);
             $this->recordOrderStatus($lockedOrder, OrderStatusEnum::PLACED);
 
             Basket::where('user_id', $userId)
@@ -936,6 +793,115 @@ class PaymentService
 
             return true;
         });
+    }
+
+    /**
+     * Capture an approved PayPal order and validate the paid amount.
+     *
+     * @return array{0: bool, 1: float, 2: ?string}
+     */
+    private function capturePayPalOrder(Order $order, ?string $paypalOrderId): array
+    {
+        if (! $paypalOrderId) {
+            return [false, 0.0, null];
+        }
+
+        $paypal = app(PayPalService::class);
+        $capture = $paypal->captureOrder($paypalOrderId);
+
+        if (($capture->status ?? null) !== 'COMPLETED') {
+            Log::warning('PayPal capture did not complete.', [
+                'order_id' => $order->id,
+                'status' => $capture->status ?? null,
+            ]);
+
+            return [false, 0.0, null];
+        }
+
+        $firstCapture = $this->firstCapture($capture);
+        $amountPaid = (float) ($firstCapture->amount->value ?? 0);
+        $captureId = $firstCapture->id ?? null;
+
+        if (abs($amountPaid - $this->expectedAmount($order)) >= 0.01) {
+            Log::warning('PayPal capture amount mismatch.', [
+                'order_id' => $order->id,
+                'amount_paid' => $amountPaid,
+                'expected_amount' => $this->expectedAmount($order),
+            ]);
+
+            return [false, $amountPaid, $captureId];
+        }
+
+        $order->update([
+            'paypal_order_id' => $paypalOrderId,
+            'paypal_capture_id' => $captureId,
+        ]);
+
+        return [true, $amountPaid, $captureId];
+    }
+
+    /**
+     * Pull the first capture object out of a PayPal order/capture payload.
+     */
+    private function firstCapture(object $payload): object
+    {
+        $unit = $payload->purchase_units[0] ?? null;
+
+        return $unit->payments->captures[0] ?? (object) [];
+    }
+
+    private function expectedAmount(Order $order): float
+    {
+        return round((float) $order->total_price + (float) $order->shipping_price, 2);
+    }
+
+    /**
+     * Resolve the local order from a success/error redirect
+     * (transaction_id query param or PayPal's appended token).
+     */
+    private function resolveOrderFromRequest(Request $request): ?Order
+    {
+        $transactionId = $request->query('transaction_id');
+
+        if ($transactionId) {
+            $order = Order::where('transaction_id', $transactionId)->first();
+
+            if ($order) {
+                return $order;
+            }
+        }
+
+        $paypalOrderId = $request->query('token');
+
+        if ($paypalOrderId) {
+            return Order::where('paypal_order_id', $paypalOrderId)->first();
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve the local order from a PayPal webhook capture resource.
+     */
+    private function resolveOrderFromCaptureResource(array $resource): ?Order
+    {
+        $orderId = $resource['custom_id'] ?? ($resource['invoice_id'] ?? null);
+
+        if ($orderId) {
+            $order = Order::where('transaction_id', $orderId)->first();
+
+            if ($order) {
+                return $order;
+            }
+        }
+
+        $paypalOrderId = $resource['supplementary_data']['related_ids']['order_id'] ?? null;
+
+        if ($paypalOrderId) {
+            return Order::where('paypal_order_id', $paypalOrderId)->first();
+        }
+
+        return null;
     }
 
     private function ensureBalanceOperationSucceeded($response): void

@@ -70,6 +70,8 @@ class PayPalService
             'intent' => 'CAPTURE',
             'purchase_units' => [[
                 'reference_id' => $orderId,
+                'custom_id' => $orderId,
+                'invoice_id' => $orderId,
                 'description' => $description,
                 'amount' => [
                     'currency_code' => $currency,
@@ -105,6 +107,42 @@ class PayPalService
         $response = $this->request()->get("{$this->baseUrl}/v2/checkout/orders/{$paypalOrderId}");
 
         return $this->decode($response, 'get order');
+    }
+
+    /**
+     * Verify a webhook event signature against the configured webhook id.
+     * Returns true only when PayPal reports verification_status = SUCCESS.
+     */
+    public function verifyWebhook(array $headers, array $event): bool
+    {
+        $webhookId = (string) config('app.paypal_webhook_id');
+
+        if ($webhookId === '') {
+            return false;
+        }
+
+        $response = $this->request()->post("{$this->baseUrl}/v1/notifications/verify-webhook-signature", [
+            'auth_algo' => $this->header($headers, 'paypal-auth-algo'),
+            'cert_url' => $this->header($headers, 'paypal-cert-url'),
+            'transmission_id' => $this->header($headers, 'paypal-transmission-id'),
+            'transmission_sig' => $this->header($headers, 'paypal-transmission-sig'),
+            'transmission_time' => $this->header($headers, 'paypal-transmission-time'),
+            'webhook_id' => $webhookId,
+            'webhook_event' => $event,
+        ]);
+
+        return $response->successful()
+            && $response->json('verification_status') === 'SUCCESS';
+    }
+
+    /**
+     * Read a single header value out of a Laravel headers bag array.
+     */
+    private function header(array $headers, string $key): ?string
+    {
+        $value = $headers[$key] ?? null;
+
+        return is_array($value) ? ($value[0] ?? null) : $value;
     }
 
     /**
