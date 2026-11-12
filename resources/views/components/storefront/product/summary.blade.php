@@ -95,6 +95,16 @@
         <div class="sf-product-contact__details" data-sf-contact-details hidden></div>
 
         <p class="sf-product-contact__error" data-sf-contact-error hidden>Əlaqə məlumatını yükləmək mümkün olmadı.</p>
+
+        @auth
+            <button type="button" class="sf-btn sf-btn--ghost sf-product-contact__chat" data-sf-lchat-open>
+                <i class="fa-solid fa-comment-dots"></i> Satıcıya yaz
+            </button>
+        @else
+            <a href="/login" class="sf-btn sf-btn--ghost sf-product-contact__chat">
+                <i class="fa-solid fa-comment-dots"></i> Satıcıya yaz
+            </a>
+        @endauth
     </div>
 
     <div class="sf-product-summary__actions">

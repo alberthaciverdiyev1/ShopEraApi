@@ -742,3 +742,230 @@ document.querySelectorAll('[data-sf-dash-tab]').forEach((trigger) => {
         }
     });
 })();
+
+/* Product review: star picker writes the chosen rating into the hidden input. */
+document.querySelectorAll('[data-sf-rate]').forEach((picker) => {
+    const input = picker.querySelector('[data-sf-rate-input]');
+    const stars = Array.from(picker.querySelectorAll('[data-sf-rate-value]'));
+
+    const paint = (value) => {
+        stars.forEach((star) => {
+            star.classList.toggle('is-active', Number(star.dataset.sfRateValue) <= value);
+        });
+    };
+
+    stars.forEach((star) => {
+        star.addEventListener('click', () => {
+            const value = Number(star.dataset.sfRateValue);
+            if (input) input.value = String(value);
+            paint(value);
+        });
+    });
+
+    paint(Number(input?.value || 5));
+});
+
+/* Buyer <-> seller chat modal on the product page. */
+const listingChat = document.querySelector('[data-sf-lchat]');
+
+if (listingChat) {
+    const listEl = listingChat.querySelector('[data-sf-lchat-list]');
+    const messagesEl = listingChat.querySelector('[data-sf-lchat-messages]');
+    const headEl = listingChat.querySelector('[data-sf-lchat-thread-head]');
+    const form = listingChat.querySelector('[data-sf-lchat-form]');
+    const textarea = form?.querySelector('textarea');
+    const csrf = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+
+    let activeId = null;
+    let conversations = [];
+
+    const threadUrl = (id) => listingChat.dataset.threadUrl.replace('__ID__', String(id));
+    const sendUrl = (id) => listingChat.dataset.sendUrl.replace('__ID__', String(id));
+
+    const request = async (target, options = {}) => {
+        const response = await fetch(target, {
+            credentials: 'same-origin',
+            ...options,
+            headers: {
+                Accept: 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                ...(options.method && options.method !== 'GET' ? { 'X-CSRF-TOKEN': csrf } : {}),
+                ...(options.headers ?? {}),
+            },
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            const firstError = Object.values(data.errors ?? {}).flat()?.[0];
+            throw new Error(firstError || data.message || 'Xəta baş verdi.');
+        }
+
+        return data;
+    };
+
+    const setOpen = (open) => {
+        listingChat.hidden = !open;
+        document.body.classList.toggle('sf-lchat-open', open);
+        if (open) textarea?.focus();
+    };
+
+    const formatTime = (value) => {
+        if (!value) return '';
+        const date = new Date(value);
+        return Number.isNaN(date.getTime())
+            ? ''
+            : date.toLocaleString('az-AZ', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+              });
+    };
+
+    const empty = (text) => {
+        const p = document.createElement('p');
+        p.className = 'sf-lchat__empty';
+        p.textContent = text;
+        return p;
+    };
+
+    const appendMessage = (message) => {
+        const row = document.createElement('div');
+        row.className = `sf-lchat__row${message.mine ? ' is-mine' : ''}`;
+
+        const bubble = document.createElement('div');
+        bubble.className = 'sf-lchat__bubble';
+        bubble.textContent = message.body;
+
+        const time = document.createElement('span');
+        time.className = 'sf-lchat__time';
+        time.textContent = formatTime(message.created_at);
+
+        row.append(bubble, time);
+        messagesEl.append(row);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    };
+
+    const renderThread = (thread) => {
+        activeId = thread.conversation?.id ?? null;
+        headEl.textContent = thread.conversation?.other?.name ?? 'Söhbət';
+
+        messagesEl.textContent = '';
+
+        if (!thread.messages?.length) {
+            messagesEl.append(empty('Hələ mesaj yoxdur. İlk mesajı siz yazın.'));
+        } else {
+            thread.messages.forEach(appendMessage);
+        }
+
+        if (form) form.hidden = !activeId;
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    };
+
+    const renderList = () => {
+        listEl.textContent = '';
+
+        if (!conversations.length) {
+            listEl.append(empty('Hələ söhbət yoxdur.'));
+            return;
+        }
+
+        conversations.forEach((conversation) => {
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.className = `sf-lchat__item${conversation.id === activeId ? ' is-active' : ''}`;
+            item.dataset.id = String(conversation.id);
+
+            const name = document.createElement('span');
+            name.className = 'sf-lchat__item-name';
+            name.textContent = conversation.other?.name ?? 'İstifadəçi';
+
+            const last = document.createElement('span');
+            last.className = 'sf-lchat__item-last';
+            last.textContent = conversation.last_message || conversation.product?.title || '';
+
+            item.append(name, last);
+            listEl.append(item);
+        });
+    };
+
+    const loadIndex = async () => {
+        const data = await request(listingChat.dataset.indexUrl);
+        conversations = Array.isArray(data) ? data : [];
+        renderList();
+    };
+
+    const openThread = async (id) => {
+        try {
+            renderThread(await request(threadUrl(id)));
+            await loadIndex();
+        } catch (error) {
+            messagesEl.textContent = '';
+            messagesEl.append(empty(error.message));
+        }
+    };
+
+    const openChat = async () => {
+        setOpen(true);
+        messagesEl.textContent = '';
+        messagesEl.append(empty('Yüklənir…'));
+        if (form) form.hidden = true;
+
+        try {
+            renderThread(await request(listingChat.dataset.startUrl, { method: 'POST' }));
+            await loadIndex();
+        } catch (error) {
+            messagesEl.textContent = '';
+            messagesEl.append(empty(error.message));
+            await loadIndex().catch(() => {});
+        }
+    };
+
+    document.querySelectorAll('[data-sf-lchat-open]').forEach((button) => {
+        button.addEventListener('click', openChat);
+    });
+
+    listingChat.querySelectorAll('[data-sf-lchat-close]').forEach((element) => {
+        element.addEventListener('click', () => setOpen(false));
+    });
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !listingChat.hidden) {
+            setOpen(false);
+        }
+    });
+
+    listEl.addEventListener('click', (event) => {
+        const item = event.target.closest('[data-sf-lchat-item]') ?? event.target.closest('.sf-lchat__item');
+        if (item?.dataset.id) {
+            openThread(Number(item.dataset.id));
+        }
+    });
+
+    form?.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const body = textarea?.value.trim();
+        if (!body || !activeId) return;
+
+        const submit = form.querySelector('button[type="submit"]');
+        if (submit) submit.disabled = true;
+
+        try {
+            appendMessage(
+                await request(sendUrl(activeId), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ body }),
+                })
+            );
+            textarea.value = '';
+            await loadIndex();
+        } catch (error) {
+            messagesEl.append(empty(error.message));
+        } finally {
+            if (submit) submit.disabled = false;
+        }
+    });
+}

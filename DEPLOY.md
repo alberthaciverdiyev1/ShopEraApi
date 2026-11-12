@@ -1,6 +1,6 @@
 # Snaker — Host kurulumu (Docker'sız)
 
-Proje (API + Svelte) tek host üzerinde çalışır. Önkoşullar: PHP 8.3-FPM,
+Proje (API + Blade storefront + admin paneli) tek host üzerinde çalışır. Önkoşullar: PHP 8.3-FPM,
 Node 20+, PostgreSQL, nginx. Domain Cloudflare arkasında; TLS Cloudflare'de
 biter, origin düz HTTP'dir.
 
@@ -72,39 +72,10 @@ user=www-data
 * * * * * www-data cd /var/www/Snaker && php artisan schedule:run >> /dev/null 2>&1
 ```
 
-## 2. Svelte storefront (SvelteKit adapter-node)
-
-```bash
-cd /var/www/Snaker/resources/frontend
-npm ci && npm run build
-```
-
-systemd servisi:
-```ini
-[Unit]
-Description=Snaker storefront
-After=network.target
-
-[Service]
-WorkingDirectory=/var/www/Snaker/resources/frontend
-Environment=PORT=3000
-Environment=HOST=127.0.0.1
-Environment=HOST_HEADER=x-forwarded-host
-Environment=PROTOCOL_HEADER=x-forwarded-proto
-Environment=INTERNAL_API_URL=http://127.0.0.1/api
-ExecStart=/usr/bin/node build
-Restart=always
-User=www-data
-
-[Install]
-WantedBy=multi-user.target
-```
-
-nginx'te storefront'u köke, `/api` ve `/admin`'i Laravel'e yönlendirin; SSR'ın
-`INTERNAL_API_URL`'e giderken public Host'u taşıması `hooks.server.ts` ile yapılır.
-
 ## Notlar
 - **TLS/DNS:** TLS Cloudflare edge'de biter; custom domainler aynı origin'e
   yönlendirilir, nginx değişikliği gerekmez.
 - **Güvenlik:** Laravel `TRUSTED_PROXIES` üretimde Cloudflare/proxy IP'leri olmalı
-  (X-Forwarded-Host'a güvenildiği için `*` bırakılmaz).
+  (X-Forwarded-* başlıklarına güvenildiği için `*` bırakılmaz).
+- **Storefront:** Mağaza tamamen Blade ile Laravel içinde sunulur; ayrı bir Node
+  süreci veya nginx yönlendirmesi gerekmez. Asset'ler `npm run build` ile derlenir.

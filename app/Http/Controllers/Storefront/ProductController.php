@@ -8,6 +8,8 @@ use App\Services\Storefront\ProductDetailService;
 use Illuminate\Http\Request;
 use Modules\Marketplace\Services\ListingService;
 use Modules\Product\Entities\Product;
+use Modules\Product\Http\Requests\ReviewAddRequest;
+use Modules\Product\Services\ReviewService;
 
 class ProductController extends Controller
 {
@@ -41,6 +43,24 @@ class ProductController extends Controller
         $listing = Product::query()->publiclyAvailable()->findOrFail($id);
 
         return response()->json($listings->contact($listing));
+    }
+
+    /**
+     * Store a review written on the product page. The same module request and
+     * service the API uses validate and persist it, so rules stay identical.
+     */
+    public function review(int $id, Request $request, ReviewService $reviews)
+    {
+        $product = Product::query()->publiclyAvailable()->findOrFail($id);
+
+        $form = ReviewAddRequest::createFrom($request);
+        $form->merge(['product_id' => $product->id]);
+        $form->setContainer(app())->setUserResolver(fn () => $request->user());
+        $form->validateResolved();
+
+        $reviews->add($form);
+
+        return back()->with('review_status', 'Rəyiniz təsdiq üçün göndərildi. Təşəkkürlər!');
     }
 
     private function render(?array $product)

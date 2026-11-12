@@ -26,16 +26,6 @@ node_modules/
 dist/
 build/
 
-# --- Frontend (resources/frontend — SvelteKit) ---
-resources/frontend/.svelte-kit/
-resources/frontend/.vite/
-resources/frontend/build/
-resources/frontend/package-lock.json
-# Tema varlıkları: kod bunları yalnızca yolla referans veriyor.
-resources/frontend/static/assets/images/
-resources/frontend/static/assets/webfonts/
-resources/frontend/static/assets/scss/
-
 # --- Şablon kaynakları (resources/html) ---
 # .html dosyaları okunabilir kalır; yalnızca büyük asset'ler hariç tutulur.
 resources/html/assets/

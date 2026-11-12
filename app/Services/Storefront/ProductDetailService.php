@@ -6,8 +6,8 @@ use Modules\Product\Services\ProductService;
 
 /**
  * Product details page data. ProductService::details() already builds the
- * exact payload mobile and the Svelte storefront consume, so this service
- * only resolves the listing and derives presentational values from it.
+ * exact payload mobile and the storefront consume, so this service only
+ * resolves the listing and derives presentational values from it.
  */
 class ProductDetailService
 {

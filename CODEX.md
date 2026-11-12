@@ -1,18 +1,18 @@
 # CODEX.md
 
-Bu dosya, Codex'in Snaker deposunda calisirken uymasi gereken proje kurallarini ozetler. Daha ayrintili mimari bilgi icin `GEMINI.md`, frontend kurallari icin `resources/frontend/CODEX.md` ve `resources/frontend/GEMINI.md` dosyalarina bak.
+Bu dosya, Codex'in Snaker deposunda calisirken uymasi gereken proje kurallarini ozetler. Daha ayrintili mimari bilgi icin `GEMINI.md` dosyasina bak.
 
 ## Proje Ozeti
 
-Snaker, Laravel 12 tabanli moduler monolit bir e-ticaret ve marketplace API'si ile `resources/frontend/` altindaki SvelteKit 2 + Svelte 5 frontend uygulamasindan olusur.
+Snaker, Laravel 12 tabanli moduler monolit bir e-ticaret ve marketplace uygulamasidir. Mobil uygulamalar REST API'yi tuketir; web magazasi ve admin paneli Laravel icinde Blade olarak sunulur.
 
 - Backend: PHP 8.3+, Laravel 12, `nwidart/laravel-modules`, Sanctum, Spatie Permission, Spatie Translatable.
-- Frontend: SvelteKit 2, Svelte 5 Runes, TypeScript, Vite, Bootstrap tema varliklari.
+- Web: Blade + Vite 7 + saf JavaScript, Bootstrap tabanli magaza temasi.
 - API cevaplari `responseHelper()` standardini izler: `{ success, status_code, message, data, meta }`.
 
 ## Calisma Protokolu
 
-1. Degisiklik yapmadan once ilgili controller, service, resource, type ve Svelte component dosyalarini oku.
+1. Degisiklik yapmadan once ilgili controller, service, resource ve Blade view dosyalarini oku.
 2. Kapsami dar tut; istenmeyen refactor, paket guncellemesi veya toplu formatlama yapma.
 3. Kullaniciya ait mevcut degisiklikleri geri alma. Kirli worktree varsa onunla uyumlu calis.
 4. Sir dosyalarini okuma, loglama veya yanita tasima: `.env`, `storage/firebase/`, anahtar/cert dosyalari.
@@ -25,16 +25,15 @@ Snaker, Laravel 12 tabanli moduler monolit bir e-ticaret ve marketplace API'si i
 - Response formatini bozma; endpoint alan adlarini mobil ve web istemcileriyle geriye uyumlu tut.
 - Cok dillilik icin `spatie/laravel-translatable` ve mevcut helper/resource kaliplarini koru.
 
-## Frontend Kurallari
+## Web Kurallari
 
-- `resources/frontend/` icin Svelte 5 Runes zorunludur.
-- Legacy Svelte soz dizimi kullanma: `export let`, `$:`, `<slot />`, `on:click`.
-- API cagirlari `$lib/api.ts` uzerinden yapilir: `apiGet`, `apiGetWithMeta`, `buildQuery`.
-- Tarayiciya bagimli kutuphaneleri `onMount` icinde dinamik `import()` ile yukle.
-- Frontend degisikliginden sonra `npm --prefix resources/frontend run check` calistir.
+- Magaza sayfalari `resources/views/storefront/` ve `resources/views/components/storefront/` altinda Blade ile yazilir.
+- Sayfa verisi `app/Services/Storefront/` servisleri uzerinden gelir; modul servislerini dogrudan kullan.
+- Etkilesimler `resources/js/storefront.js` icinde saf JavaScript ile yazilir.
+- Web degisikliginden sonra `npm run build` calistir.
 
 ## Dogrulama
 
 - Backend degisiklikleri: `./vendor/bin/pint` ve `php artisan test`.
-- Frontend degisiklikleri: `npm --prefix resources/frontend run check`.
+- Web degisiklikleri: `npm run build`.
 - Sadece analiz/dokuman degisikligi yapildiysa ilgili testlerin neden calistirilmadigini finalde belirt.

@@ -8,11 +8,15 @@
 
     $tabs = [
         'dashboard' => ['label' => 'Hesab paneli', 'icon' => 'fa-solid fa-grid-2'],
-        'messages' => ['label' => 'Mesajlar', 'icon' => 'fa-regular fa-comment-dots'],
         'addresses' => ['label' => 'Ünvanlar', 'icon' => 'fa-solid fa-location-dot'],
         'settings' => ['label' => 'Parametrlər', 'icon' => 'fa-regular fa-gear'],
         'logout' => ['label' => 'Çıxış', 'icon' => 'fa-solid fa-sign-out-alt'],
     ];
+
+    // Support chat is temporarily disabled on the storefront.
+    if (false) {
+        $tabs['messages'] = ['label' => 'Mesajlar', 'icon' => 'fa-regular fa-comment-dots'];
+    }
 @endphp
 
 <x-storefront.layouts.app :title="'Hesabım — ShopEra'">
@@ -145,7 +149,8 @@
                             </div>
                         </section>
 
-                        {{-- Messages: chat with support --}}
+                        {{-- Messages: chat with support (temporarily disabled) --}}
+                        @if (false)
                         <section class="sf-dash-pane {{ $tab === 'messages' ? 'is-active' : '' }}" data-sf-dash-pane="messages">
                             <div class="sf-panel">
                                 <h2 class="sf-panel__title">Dəstək ilə yazışma</h2>
@@ -199,6 +204,7 @@
                                 </div>
                             </div>
                         </section>
+                        @endif
 
                         {{-- Addresses --}}
                         <section class="sf-dash-pane {{ $tab === 'addresses' ? 'is-active' : '' }}" data-sf-dash-pane="addresses">

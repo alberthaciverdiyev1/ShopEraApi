@@ -1,12 +1,14 @@
 @props([])
 
 {{--
-    Live support widget. There is no feature gating: the storefront has a
-    single feature set, so every visitor gets the launcher. The chat stream
-    itself needs a signed-in user; until the Blade auth migration lands the
-    window shows the guest card with login/register links.
+    Live support widget.
+
+    Temporarily disabled: the support chat is switched off on the storefront
+    and in the admin panel, so the whole widget renders nothing. Keep the
+    markup and the JS/CSS that go with it for when the chat is re-enabled.
 --}}
 
+@if (false)
 <div class="sf-chat" data-sf-chat>
     <div class="sf-chat__teaser" data-sf-chat-teaser>
         <button type="button" class="sf-chat__teaser-close" data-sf-chat-teaser-close aria-label="Bağla">
@@ -73,3 +75,4 @@
         </div>
     </div>
 </div>
+@endif

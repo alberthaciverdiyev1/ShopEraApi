@@ -16,22 +16,14 @@ storage/app/firebase/
 # Dependencies
 /vendor/
 /node_modules/
-/resources/frontend/node_modules/
 
 # Generated outputs
 /public/build/
 /public/hot
 /public/storage
 /bootstrap/cache/*.php
-/resources/frontend/.svelte-kit/
-/resources/frontend/build/
-/resources/frontend/.vite/
-/resources/frontend/.output/
 
 # Frontend static and large assets
-/resources/frontend/static/assets/images/
-/resources/frontend/static/assets/webfonts/
-/resources/frontend/static/assets/scss/
 /resources/html/assets/
 
 # Media, uploads, binaries
@@ -75,7 +67,6 @@ bootstrap/cache/
 # Lock files
 composer.lock
 package-lock.json
-/resources/frontend/package-lock.json
 yarn.lock
 pnpm-lock.yaml
 

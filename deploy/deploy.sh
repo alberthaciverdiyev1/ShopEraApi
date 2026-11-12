@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 #
-# ShopEra — tek komutta tam deploy: API (Laravel) + Svelte storefront + admin panel.
+# ShopEra — tek komutta tam deploy: API (Laravel) + Blade storefront + admin panel.
 #
 # Kullanim:
 #   bash deploy/deploy.sh                          # mevcut checkout uzerinde deploy
 #   PULL=1 bash deploy/deploy.sh                   # once origin/main'den git pull
 #   PULL=1 sudo -E bash deploy/deploy.sh           # + izinleri duzelt (root)
 #   SKIP_ASSETS=1 bash deploy/deploy.sh            # asset build'ini atla
-#   SKIP_FRONTEND=1 bash deploy/deploy.sh          # storefront build'ini atla
 #
 # GitHub push'ta otomatik: .github/workflows/deploy.yml (SSH ile bu script'i cagirir).
 #
@@ -24,14 +23,11 @@ COMPOSER_BIN="${COMPOSER_BIN:-composer}"
 
 PULL="${PULL:-0}"                       # 1 => once origin/<branch>'i cek
 SKIP_ASSETS="${SKIP_ASSETS:-0}"         # 1 => root Vite build'ini atla
-SKIP_FRONTEND="${SKIP_FRONTEND:-0}"     # 1 => Svelte build'ini atla
 RUN_MIGRATIONS="${RUN_MIGRATIONS:-1}"   # 0 => migrate atla
-STOREFRONT_MODE="${STOREFRONT_MODE:-ssr}"   # ssr (adapter-node) | static (adapter-static)
 
 PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-}"                  # bos => otomatik algila
 QUEUE_SERVICE="${QUEUE_SERVICE:-shopera-worker}"        # systemd unit (varsa)
 QUEUE_PROGRAM="${QUEUE_PROGRAM:-}"                      # supervisor program adi (opsiyonel)
-STOREFRONT_SERVICE="${STOREFRONT_SERVICE:-shopera-storefront}"  # systemd unit
 
 # ── Yardimcilar ──────────────────────────────────────────────────────────────
 info() { printf '\033[1;34m==>\033[0m %s\n' "$*"; }
@@ -75,17 +71,7 @@ restart_queue() {
     fi
 }
 
-restart_storefront() {
-    if unit_exists "$STOREFRONT_SERVICE"; then
-        info "Storefront servisi yenileniyor: $STOREFRONT_SERVICE"
-        systemctl restart "$STOREFRONT_SERVICE" && ok "storefront"
-    else
-        warn "systemd unit yok: $STOREFRONT_SERVICE (atlandi)"
-    fi
-}
-
-# ── Baslangic ────────────────────────────────────────────────────────────────
-[ -d "$APP_DIR" ] || { warn "APP_DIR bulunamadi: $APP_DIR"; exit 1; }
+# ── Baslangic ────────────────────────────────────────────────────────────────[ -d "$APP_DIR" ] || { warn "APP_DIR bulunamadi: $APP_DIR"; exit 1; }
 cd "$APP_DIR"
 resolve_php_fpm
 
@@ -119,32 +105,7 @@ else
     warn "asset build atlandi (SKIP_ASSETS=1)"
 fi
 
-# 4) Svelte storefront
-if [ "$SKIP_FRONTEND" != "1" ]; then
-    ( cd resources/frontend && "$NPM_BIN" ci --no-audit --no-fund )
-
-    if [ "$STOREFRONT_MODE" = "static" ]; then
-        info "Svelte storefront (static build → public/storefront)"
-        "$PHP_BIN" artisan storefront:deploy
-        ok "public/storefront"
-    else
-        info "Svelte storefront (adapter-node SSR build)"
-        ( cd resources/frontend && "$NPM_BIN" run build )
-        ok "resources/frontend/build"
-    fi
-
-    # Mirror storefront static assets (images, media, css, fonts) into Laravel's
-    # public/assets so images ship with every deploy — not just code.
-    if [ -d resources/frontend/static/assets ]; then
-        info "Statik gor4seller/assets senkronize ediliyor (public/assets)"
-        rsync -a --delete resources/frontend/static/assets/ public/assets/
-        ok "public/assets"
-    fi
-else
-    warn "storefront build atlandi (SKIP_FRONTEND=1)"
-fi
-
-# 5) Veritabani
+# 4) Veritabani
 if [ "$RUN_MIGRATIONS" = "1" ]; then
     info "Migration"
     "$PHP_BIN" artisan migrate --force
@@ -156,7 +117,7 @@ if [ ! -L public/storage ]; then
     "$PHP_BIN" artisan storage:link || warn "storage:link basarisiz"
 fi
 
-# 6) Cache
+# 5) Cache
 # NOT: `optimize:clear` içindeki `cache:clear` mevcut cache'i tamamen siler;
 # bu yüzden hedefli temizlik yapıyoruz.
 info "Cache yenile (config/route/view + optimize)"
@@ -166,7 +127,7 @@ info "Cache yenile (config/route/view + optimize)"
 "$PHP_BIN" artisan optimize
 ok "config/route/view cache"
 
-# 7) Izinler (yalnizca root iken)
+# 6) Izinler (yalnizca root iken)
 if [ "$(id -u)" -eq 0 ] && [ -f deploy/scripts/fix-permissions.sh ]; then
     info "Izinler duzeltiliyor"
     APP_DIR="$APP_DIR" APP_USER="$APP_USER" APP_GROUP="$APP_GROUP" \
@@ -174,9 +135,8 @@ if [ "$(id -u)" -eq 0 ] && [ -f deploy/scripts/fix-permissions.sh ]; then
     ok "permissions"
 fi
 
-# 8) Servisleri yenile
+# 7) Servisleri yenile
 restart_queue
-restart_storefront
 reload_php_fpm
 
 echo "──────────────────────────────────────────────"

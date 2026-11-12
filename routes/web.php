@@ -10,12 +10,14 @@ use App\Http\Controllers\Storefront\ContentController;
 use App\Http\Controllers\Storefront\DashboardController;
 use App\Http\Controllers\Storefront\DashboardMessagesController;
 use App\Http\Controllers\Storefront\HomeController;
+use App\Http\Controllers\Storefront\ListingChatController;
 use App\Http\Controllers\Storefront\ListingController;
 use App\Http\Controllers\Storefront\ManagedListingController;
 use App\Http\Controllers\Storefront\OrderHistoryController;
 use App\Http\Controllers\Storefront\ProductController;
 use App\Http\Controllers\Storefront\SettingsController;
 use App\Http\Controllers\Storefront\ShopController;
+use App\Http\Controllers\Storefront\SitemapController;
 use App\Http\Controllers\Storefront\StoreController;
 use App\Http\Controllers\Storefront\StorePanelController;
 use App\Http\Controllers\Storefront\WishlistController;
@@ -27,9 +29,8 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 |
 | The API and the admin panel are served by Laravel; API routes live in
-| routes/api.php. The storefront is being rebuilt as Blade pages here, one
-| page at a time; the remaining SvelteKit pages are still published to
-| public/storefront by `php artisan storefront:deploy`.
+| routes/api.php. The storefront lives here too: every page is a Blade view
+| served by the Storefront controllers.
 |
 */
 
@@ -50,6 +51,18 @@ Route::middleware('auth')->group(function () {
     Route::delete('/dashboard/messages/{id}', [DashboardMessagesController::class, 'destroy'])
         ->whereNumber('id')
         ->name('storefront.dashboard.messages.destroy');
+
+    // Buyer <-> seller chat shown on the product page.
+    Route::get('/mesajlar', [ListingChatController::class, 'index'])->name('storefront.chat.index');
+    Route::post('/elan/{id}/chat', [ListingChatController::class, 'start'])
+        ->whereNumber('id')
+        ->name('storefront.chat.start');
+    Route::get('/mesajlar/{id}', [ListingChatController::class, 'show'])
+        ->whereNumber('id')
+        ->name('storefront.chat.show');
+    Route::post('/mesajlar/{id}/gonder', [ListingChatController::class, 'send'])
+        ->whereNumber('id')
+        ->name('storefront.chat.send');
     Route::get('/settings', [SettingsController::class, 'index'])->name('storefront.settings');
     Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('storefront.settings.profile');
     Route::post('/settings/avatar', [SettingsController::class, 'updateAvatar'])->name('storefront.settings.avatar');
@@ -79,6 +92,10 @@ Route::middleware('auth')->group(function () {
         ->whereNumber('id')
         ->name('storefront.listings.promote');
 
+    Route::post('/elan/{id}/rey', [ProductController::class, 'review'])
+        ->whereNumber('id')
+        ->name('storefront.product.review');
+
     Route::get('/magaza/panel', [StorePanelController::class, 'panel'])->name('storefront.store.panel');
     Route::put('/magaza/panel', [StorePanelController::class, 'update'])->name('storefront.store.panel.update');
     Route::get('/magaza/aciq', [StorePanelController::class, 'open'])->name('storefront.store.open');
@@ -105,7 +122,7 @@ Route::get('/cart', [CartController::class, 'index'])->name('storefront.cart');
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('storefront.checkout');
 
 // Listing creation is open to guests too: their listing is managed through a
-// secret link, exactly like the Svelte storefront.
+// secret link.
 Route::get('/elan/ver', [ListingController::class, 'create'])->name('storefront.listings.create');
 Route::post('/elan/ver', [ListingController::class, 'store'])->name('storefront.listings.store');
 
@@ -118,6 +135,8 @@ Route::delete('/elan/idaresi/{token}', [ManagedListingController::class, 'destro
     ->name('storefront.listings.manage.destroy');
 
 Route::get('/', [HomeController::class, 'index'])->name('storefront.home');
+Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('storefront.robots');
+Route::get('/sitemap.xml', [SitemapController::class, 'sitemap'])->name('storefront.sitemap');
 
 Route::get('/shop', [ShopController::class, 'index'])->name('storefront.shop');
 Route::get('/categories', [CategoryController::class, 'index'])->name('storefront.categories');
@@ -132,8 +151,8 @@ Route::get('/contact', [ContentController::class, 'contact'])->name('storefront.
 Route::post('/contact', [ContentController::class, 'sendContact'])->name('storefront.contact.send');
 Route::get('/shop/details', [ProductController::class, 'show'])->name('storefront.product.show');
 Route::get('/elan/{slug}', [ProductController::class, 'showBySlug'])->name('storefront.product.slug');
-// Kept outside /storefront: that path is a real directory of the old Svelte
-// build, and the built-in dev server treats it as a base path.
+// Public contact reveal for a listing: the number is fetched after a click so
+// it never sits in the HTML.
 Route::get('/shop/listings/{id}/contact', [ProductController::class, 'contact'])
     ->whereNumber('id')
     ->name('storefront.listing.contact');

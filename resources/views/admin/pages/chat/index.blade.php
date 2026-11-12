@@ -1,6 +1,8 @@
 @extends('admin.layouts.app')
 
 @section('content')
+    {{-- Support chat is temporarily disabled; the page renders nothing. --}}
+    @if (false)
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-[22rem_1fr]">
         <div class="flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
             <div class="border-b border-gray-100 p-3">
@@ -29,4 +31,5 @@
             @endif
         </div>
     </div>
+    @endif
 @endsection

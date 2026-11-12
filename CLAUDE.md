@@ -162,11 +162,10 @@ aksi halde `{success, status_code, message, data}` zarfı döner. Bu davranış�
 Sistem **tek PostgreSQL veritabanı** üzerinde çalışır; tenant/veritabanı ayrımı yoktur.
 Tüm mağaza, ürün ve sipariş verisi aynı DB'de tutulur.
 
-- **Deploy:** `deploy/deploy.sh` (API + Svelte storefront + admin assetleri + migrate).
+- **Deploy:** `deploy/deploy.sh` (API + Blade storefront + admin assetleri + migrate).
 - **TLS/DNS:** TLS Cloudflare edge'de biter; origin düz HTTP olabilir. Host nginx'i
   **catch-all** (`server_name _;`) olmalıdır — domain başına vhost gerekmez.
-- **SSR:** `resources/frontend/src/hooks.server.ts` SSR API çağrılarına
-  `X-Forwarded-Host`/`X-Forwarded-Proto` ekler; bu yüzden origin'de doğru proxy güveni
+- **Proxy güveni:** Mağaza Blade ile sunulur; yine de doğru proxy güveni
   (`TRUSTED_PROXIES`; üretimde proxy IP'leri, `*` bırakma) şarttır.
 - **Storage/cache:** `App\Support\TenantContext` artık pass-through'dur (prefix/slug
   üretmez); yeni kodda doğrudan `storage/app/public/...` yolları kullanılabilir.

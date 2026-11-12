@@ -82,8 +82,43 @@
         @endif
 
         <div class="sf-product-tabs__review-cta">
-            <p>Bu elanla bağlı rəyinizi paylaşın.</p>
-            <a href="/login" class="sf-btn sf-btn--primary">Rəy yazmaq üçün daxil olun</a>
+            @if (session('review_status'))
+                <p class="sf-review-form__ok">{{ session('review_status') }}</p>
+            @endif
+
+            @auth
+                <p>Bu elanla bağlı rəyinizi paylaşın.</p>
+
+                <form action="{{ route('storefront.product.review', $product['id']) }}" method="POST" class="sf-review-form">
+                    @csrf
+
+                    <div class="sf-rate-picker" data-sf-rate>
+                        <span>Reytinq:</span>
+                        @for ($i = 1; $i <= 5; $i++)
+                            <button type="button"
+                                    class="sf-rate-picker__star {{ $i <= (int) old('rate', 5) ? 'is-active' : '' }}"
+                                    data-sf-rate-value="{{ $i }}"
+                                    aria-label="{{ $i }} ulduz">
+                                <i class="fa-solid fa-star"></i>
+                            </button>
+                        @endfor
+                        <input type="hidden" name="rate" value="{{ old('rate', 5) }}" data-sf-rate-input>
+                    </div>
+                    @error('rate')
+                        <p class="sf-review-form__err">{{ $message }}</p>
+                    @enderror
+
+                    <textarea name="comment" rows="4" maxlength="2000" placeholder="Fikirlərinizi yazın…">{{ old('comment') }}</textarea>
+                    @error('comment')
+                        <p class="sf-review-form__err">{{ $message }}</p>
+                    @enderror
+
+                    <button type="submit" class="sf-btn sf-btn--primary">Rəyi göndər</button>
+                </form>
+            @else
+                <p>Bu elanla bağlı rəyinizi paylaşın.</p>
+                <a href="/login" class="sf-btn sf-btn--primary">Rəy yazmaq üçün daxil olun</a>
+            @endauth
         </div>
     </div>
 </section>

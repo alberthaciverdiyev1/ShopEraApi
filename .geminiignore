@@ -17,22 +17,14 @@ storage/app/firebase/
 # --- Bağımlılıklar (Vendor & Node) ---
 /vendor/
 /node_modules/
-/resources/frontend/node_modules/
 
 # --- Derlenmiş Çıktılar ve Build Dizinleri ---
 /public/build/
 /public/hot
 /public/storage
 /bootstrap/cache/*.php
-/resources/frontend/.svelte-kit/
-/resources/frontend/build/
-/resources/frontend/.vite/
-/resources/frontend/.output/
 
-# --- Frontend Statik ve Büyük Medya Varlıkları ---
-/resources/frontend/static/assets/images/
-/resources/frontend/static/assets/webfonts/
-/resources/frontend/static/assets/scss/
+# --- Büyük Medya Varlıkları ---
 /resources/html/assets/
 
 # --- Medya, Yüklemeler ve Büyük İkili (Binary) Dosyalar ---
@@ -76,7 +68,6 @@ bootstrap/cache/
 # --- Kilit (Lock) Dosyaları ---
 composer.lock
 package-lock.json
-/resources/frontend/package-lock.json
 yarn.lock
 pnpm-lock.yaml
 

@@ -7,9 +7,9 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 
 /**
- * A cheap "data revision" token for the storefront's in-memory cache. It
- * changes whenever any cacheable catalogue/content row is updated, so the
- * Svelte client can drop its cache exactly when the admin changes something.
+ * A cheap "data revision" token for the clients' in-memory cache. It changes
+ * whenever any cacheable catalogue/content row is updated, so a client can
+ * drop its cache exactly when the admin changes something.
  */
 class DataVersionController extends Controller
 {

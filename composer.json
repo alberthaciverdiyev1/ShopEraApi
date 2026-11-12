@@ -89,9 +89,7 @@
         "test": [
             "@php artisan config:clear --ansi",
             "@php artisan test"
-        ],
-        "storefront:deploy": "@php artisan storefront:deploy",
-        "storefront:publish": "@php artisan storefront:deploy --skip-build"
+        ]
     },
     "extra": {
         "laravel": {

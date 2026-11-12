@@ -41,4 +41,6 @@
             </section>
         @endif
     </div>
+
+    <x-storefront.product.chat :product="$product" />
 </x-storefront.layouts.app>
