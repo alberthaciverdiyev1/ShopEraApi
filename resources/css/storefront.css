@@ -7440,8 +7440,8 @@ body.sf-lchat-open {
 }
 
 .sf-price-field__box:focus-within {
-    border-color: var(--sf-theme);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--sf-theme) 14%, transparent);
+    border-color: color-mix(in srgb, var(--sf-theme) 70%, #fff);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--sf-theme) 18%, transparent);
 }
 
 .sf-price-field__box input {
@@ -7455,6 +7455,11 @@ body.sf-lchat-open {
     outline: none;
     -moz-appearance: textfield;
     appearance: textfield;
+}
+
+.sf-price-field__box input::placeholder {
+    color: #b3bac4;
+    opacity: 1;
 }
 
 .sf-price-field__box input::-webkit-outer-spin-button,
