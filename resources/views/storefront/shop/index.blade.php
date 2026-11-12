@@ -36,7 +36,9 @@
     :description="'ShopEra elanları: '.$pageTitle"
     :categories="$categories">
 
-    <x-storefront.breadcrumb title="Elanlar" />
+    @if (false)
+        <x-storefront.breadcrumb title="Elanlar" />
+    @endif
 
     <div class="container sf-shop">
         <header class="sf-shop__head">
