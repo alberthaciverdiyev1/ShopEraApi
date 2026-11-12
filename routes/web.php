@@ -1,13 +1,17 @@
 <?php
 
+use App\Http\Controllers\Storefront\AddressController;
 use App\Http\Controllers\Storefront\AuthController;
 use App\Http\Controllers\Storefront\BlogController;
 use App\Http\Controllers\Storefront\CategoryController;
 use App\Http\Controllers\Storefront\ContentController;
+use App\Http\Controllers\Storefront\DashboardController;
 use App\Http\Controllers\Storefront\HomeController;
 use App\Http\Controllers\Storefront\ProductController;
+use App\Http\Controllers\Storefront\SettingsController;
 use App\Http\Controllers\Storefront\ShopController;
 use App\Http\Controllers\Storefront\StoreController;
+use App\Http\Controllers\Storefront\WishlistController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -32,6 +36,27 @@ Route::middleware('guest')->group(function () {
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('storefront.logout');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('storefront.dashboard');
+    Route::get('/settings', [SettingsController::class, 'index'])->name('storefront.settings');
+    Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('storefront.settings.profile');
+    Route::post('/settings/avatar', [SettingsController::class, 'updateAvatar'])->name('storefront.settings.avatar');
+    Route::delete('/settings/avatar', [SettingsController::class, 'removeAvatar'])->name('storefront.settings.avatar.remove');
+
+    Route::get('/wishlist', [WishlistController::class, 'index'])->name('storefront.wishlist');
+    Route::delete('/wishlist/{id}', [WishlistController::class, 'destroy'])
+        ->whereNumber('id')
+        ->name('storefront.wishlist.destroy');
+
+    Route::post('/addresses', [AddressController::class, 'store'])->name('storefront.addresses.store');
+    Route::put('/addresses/{id}', [AddressController::class, 'update'])
+        ->whereNumber('id')
+        ->name('storefront.addresses.update');
+    Route::delete('/addresses/{id}', [AddressController::class, 'destroy'])
+        ->whereNumber('id')
+        ->name('storefront.addresses.destroy');
+});
 
 Route::get('/', [HomeController::class, 'index'])->name('storefront.home');
 

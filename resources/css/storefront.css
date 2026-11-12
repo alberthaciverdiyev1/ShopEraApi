@@ -4562,3 +4562,317 @@
         font-size: 13px;
     }
 }
+
+/* ---------------------------------------------------------------- */
+/* Account: dashboard, settings and wishlist                         */
+/* ---------------------------------------------------------------- */
+
+.sf-dash-panes {
+    min-width: 0;
+}
+
+.sf-dash-pane {
+    display: none;
+}
+
+.sf-dash-pane.is-active {
+    display: block;
+}
+
+.sf-panel {
+    border: 1px solid #e7edf5;
+    border-radius: 24px;
+    background: #fff;
+    box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+    padding: 24px;
+}
+
+.sf-panel--center {
+    text-align: center;
+    padding: 48px 24px;
+}
+
+.sf-panel__title {
+    margin: 0 0 18px;
+    color: #0f172a;
+    font-size: 20px;
+    font-weight: 900;
+}
+
+.sf-panel__icon {
+    display: block;
+    margin-bottom: 14px;
+    font-size: 34px;
+    color: var(--sf-theme);
+}
+
+.sf-link-button {
+    display: inline;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--sf-theme);
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.sf-dash-avatar-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    background: color-mix(in srgb, var(--sf-theme) 12%, #eef4ff);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    color: color-mix(in srgb, var(--sf-theme) 72%, #17213b);
+    font-size: 38px;
+    font-weight: 900;
+}
+
+.sf-table-wrap {
+    overflow-x: auto;
+}
+
+/* Account profile form */
+
+.sf-account {
+    display: grid;
+    gap: 24px;
+}
+
+.sf-account__avatar-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 22px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e7edf5;
+}
+
+.sf-account__avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 90px;
+    height: 90px;
+    flex: 0 0 auto;
+    overflow: hidden;
+    border: 2px solid #e6e6e6;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.92), transparent 34%),
+        linear-gradient(135deg, color-mix(in srgb, var(--sf-theme) 18%, #f8fafc), #eef4ff);
+    color: color-mix(in srgb, var(--sf-theme) 72%, #17213b);
+    font-size: 28px;
+    font-weight: 900;
+}
+
+.sf-account__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.sf-account__avatar-actions h6 {
+    margin: 0 0 4px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.sf-account__avatar-actions p {
+    margin: 0 0 12px;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.sf-account__avatar-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.sf-account__form,
+.sf-address-form {
+    display: grid;
+    gap: 14px;
+}
+
+.sf-account__form .sf-form-row,
+.sf-address-form .sf-form-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.sf-account__form label,
+.sf-address-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.sf-account__form label small {
+    font-weight: 400;
+    color: #94a3b8;
+}
+
+.sf-account__form input,
+.sf-address-form input,
+.sf-address-form select {
+    width: 100%;
+    padding: 11px 14px;
+    border: 1px solid var(--sf-border);
+    border-radius: 10px;
+    background: #fff;
+    color: #0f172a;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+}
+
+.sf-account__form input:focus,
+.sf-address-form input:focus,
+.sf-address-form select:focus {
+    border-color: var(--sf-theme);
+}
+
+.sf-account__form input:disabled {
+    background: #f8fafc;
+    color: #94a3b8;
+}
+
+.sf-account__form .sf-btn,
+.sf-address-form .sf-btn {
+    justify-self: flex-start;
+}
+
+.sf-checkbox {
+    flex-direction: row !important;
+    align-items: center;
+    gap: 8px !important;
+}
+
+.sf-checkbox input {
+    width: 16px;
+    height: 16px;
+}
+
+.sf-btn--sm {
+    padding: 8px 14px;
+    font-size: 13px;
+}
+
+.sf-btn--danger {
+    color: #dc2626;
+    border-color: #fecaca;
+}
+
+.sf-btn--danger:hover {
+    border-color: #dc2626;
+    color: #dc2626;
+}
+
+/* Addresses */
+
+.sf-address-list {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.sf-address-card {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    justify-content: space-between;
+    padding: 16px 18px;
+    border: 1px solid #e7edf5;
+    border-radius: 16px;
+    background: #f8fafc;
+}
+
+.sf-address-card.is-default {
+    border-color: color-mix(in srgb, var(--sf-theme) 35%, #e7edf5);
+    background: color-mix(in srgb, var(--sf-theme) 5%, #fff);
+}
+
+.sf-address-card__body h6 {
+    margin: 0 0 4px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.sf-address-card__body p {
+    margin: 0 0 4px;
+    font-size: 14px;
+    color: #475569;
+}
+
+.sf-address-card__body a {
+    font-size: 14px;
+    color: var(--sf-theme);
+}
+
+.sf-address-card__badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--sf-theme);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.sf-address-card__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.sf-address-form h5 {
+    margin: 0 0 4px;
+    font-size: 16px;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+/* Wishlist */
+
+.sf-wishlist-item {
+    position: relative;
+    height: 100%;
+}
+
+.sf-wishlist-item__remove {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 5;
+}
+
+.sf-wishlist-item__remove button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    color: #ef4444;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    cursor: pointer;
+}
+
+@media (max-width: 991.98px) {
+    .sf-account__form .sf-form-row,
+    .sf-address-form .sf-form-row {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

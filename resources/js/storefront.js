@@ -577,3 +577,26 @@ if (faq) {
         });
     }
 })();
+
+/* Account dashboard: tab switching (the original used Bootstrap pills). */
+document.querySelectorAll('[data-sf-dash-tab]').forEach((trigger) => {
+    trigger.addEventListener('click', (event) => {
+        const key = trigger.dataset.sfDashTab;
+        const pane = document.querySelector(`[data-sf-dash-pane="${key}"]`);
+        if (!pane) return;
+
+        event.preventDefault();
+
+        document.querySelectorAll('[data-sf-dash-pane]').forEach((item) => {
+            item.classList.toggle('is-active', item === pane);
+        });
+
+        document.querySelectorAll('.dashboard-navigation-sidebar [data-sf-dash-tab]').forEach((button) => {
+            const active = button.dataset.sfDashTab === key;
+            button.classList.toggle('active', active);
+            button.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+
+        history.replaceState(null, '', key === 'dashboard' ? location.pathname : `?tab=${key}`);
+    });
+});
