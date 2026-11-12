@@ -2,7 +2,7 @@
 
 namespace Modules\Size\Services;
 
-use App\Support\TenantContext;
+use App\Core\Support\TenantContext;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;

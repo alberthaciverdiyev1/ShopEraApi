@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Support\TenantContext;
+use App\Core\Support\TenantContext;
 use Illuminate\Http\Request;
 use Modules\Notification\Services\NotificationService;
 

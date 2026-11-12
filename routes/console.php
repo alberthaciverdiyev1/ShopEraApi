@@ -1,6 +1,6 @@
 <?php
 
-use App\Services\Order\PendingPaymentExpiryService;
+use Modules\Order\Services\PendingPaymentExpiryService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;

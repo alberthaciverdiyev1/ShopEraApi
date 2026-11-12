@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\StoreListingRequest;
-use App\Support\Concerns\InteractsWithModuleControllers;
+use App\Core\Concerns\InteractsWithModuleControllers;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;

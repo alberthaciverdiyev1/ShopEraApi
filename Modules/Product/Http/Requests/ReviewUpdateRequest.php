@@ -2,7 +2,7 @@
 
 namespace Modules\Product\Http\Requests;
 
-use App\Enums\ReviewStatus;
+use App\Core\Enums\ReviewStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 

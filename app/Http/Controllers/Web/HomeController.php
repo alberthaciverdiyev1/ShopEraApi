@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Support\Concerns\InteractsWithModuleControllers;
+use App\Core\Concerns\InteractsWithModuleControllers;
 use Modules\Popup\Http\Controllers\PopupController;
 use Modules\Product\Http\Controllers\ProductController;
 

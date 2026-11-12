@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Support\Concerns\InteractsWithModuleControllers;
+use App\Core\Concerns\InteractsWithModuleControllers;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Modules\User\Http\Controllers\FavoritesController;

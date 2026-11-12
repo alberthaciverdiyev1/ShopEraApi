@@ -2,9 +2,9 @@
 
 namespace Modules\Order\Services;
 
-use App\Enums\BalanceType;
-use App\Enums\OrderStatus as OrderStatusEnum;
-use App\Services\Notification\OrderStatusNotifier;
+use App\Core\Enums\BalanceType;
+use App\Core\Enums\OrderStatus as OrderStatusEnum;
+use Modules\Order\Services\OrderStatusNotifier;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;

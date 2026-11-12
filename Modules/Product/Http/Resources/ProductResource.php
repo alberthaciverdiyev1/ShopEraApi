@@ -2,7 +2,7 @@
 
 namespace Modules\Product\Http\Resources;
 
-use App\Enums\Gender;
+use App\Core\Enums\Gender;
 use Carbon\Carbon;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Modules\Brand\Http\Transformers\BrandResource;

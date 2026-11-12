@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\OrderStatus as OrderStatusEnum;
+use App\Core\Enums\OrderStatus as OrderStatusEnum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Modules\Order\Http\Requests\OrderUpdateRequest;

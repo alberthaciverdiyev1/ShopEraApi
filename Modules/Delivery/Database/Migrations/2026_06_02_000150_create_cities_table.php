@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\City as LegacyCity;
+use App\Core\Enums\City as LegacyCity;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;

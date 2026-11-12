@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use App\Support\TenantContext;
-use App\View\Composers\StorefrontHeaderComposer;
+use App\Core\Support\TenantContext;
+use App\Core\ViewComposers\StorefrontHeaderComposer;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Cache;

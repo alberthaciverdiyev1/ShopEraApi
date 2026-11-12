@@ -2,8 +2,8 @@
 
 namespace Modules\Chat\Services;
 
-use App\Helpers\TranslateHelper as Translate;
-use App\Support\DbExtensions;
+use App\Core\Helpers\TranslateHelper as Translate;
+use App\Core\Support\DbExtensions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;

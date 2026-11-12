@@ -2,7 +2,7 @@
 
 namespace Modules\Setting\Services;
 
-use App\Services\Notification\AdminNotifier;
+use Modules\Notification\Services\AdminNotifier;
 use Illuminate\Support\Facades\Cache;
 use Modules\Setting\Entities\ContactMessage;
 use Modules\Setting\Entities\Setting;

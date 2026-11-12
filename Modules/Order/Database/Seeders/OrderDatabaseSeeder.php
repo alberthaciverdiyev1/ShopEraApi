@@ -2,9 +2,9 @@
 
 namespace Modules\Order\Database\Seeders;
 
-use App\Enums\AddressType;
-use App\Enums\BalanceType;
-use App\Enums\OrderStatus;
+use App\Core\Enums\AddressType;
+use App\Core\Enums\BalanceType;
+use App\Core\Enums\OrderStatus;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;

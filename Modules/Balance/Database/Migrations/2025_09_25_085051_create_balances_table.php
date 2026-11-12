@@ -1,6 +1,6 @@
 <?php
 
-use App\Enums\BalanceType;
+use App\Core\Enums\BalanceType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

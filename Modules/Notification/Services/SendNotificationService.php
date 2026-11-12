@@ -2,8 +2,8 @@
 
 namespace Modules\Notification\Services;
 
-use App\Support\TenantContext;
-use App\Jobs\SendNotificationChunkJob;
+use App\Core\Support\TenantContext;
+use Modules\Notification\Jobs\SendNotificationChunkJob;
 use Google\Client as GoogleClient;
 use Illuminate\Http\Client\Pool;
 use Illuminate\Http\Client\Response;

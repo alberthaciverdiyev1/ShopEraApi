@@ -2,7 +2,7 @@
 
 namespace Modules\Notification\Services;
 
-use App\Jobs\SendUserPushJob;
+use Modules\Notification\Jobs\SendUserPushJob;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Modules\Notification\Entities\Notification;

@@ -11,7 +11,7 @@ class OrderStatus extends Model
     protected $guarded = [];
 
     protected $casts = [
-        'status' => \App\Enums\OrderStatus::class,
+        'status' => \App\Core\Enums\OrderStatus::class,
     ];
 
     public function order()
@@ -24,7 +24,7 @@ class OrderStatus extends Model
         return $this->status->label();
     }
 
-    public function scopeOfStatus($query, \App\Enums\OrderStatus $status)
+    public function scopeOfStatus($query, \App\Core\Enums\OrderStatus $status)
     {
         return $query->where('status', $status->value);
     }

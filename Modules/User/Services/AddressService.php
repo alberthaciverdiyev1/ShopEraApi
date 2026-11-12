@@ -2,7 +2,7 @@
 
 namespace Modules\User\Services;
 
-use App\Interfaces\ICrudInterface;
+use App\Core\Contracts\ICrudInterface;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Modules\Delivery\Entities\City;

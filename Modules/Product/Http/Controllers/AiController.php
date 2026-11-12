@@ -2,8 +2,8 @@
 
 namespace Modules\Product\Http\Controllers;
 
-use App\Jobs\ProcessPhotoAi;
-use App\Support\TenantContext;
+use Modules\Product\Jobs\ProcessPhotoAi;
+use App\Core\Support\TenantContext;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Product\Entities\AiPhoto;

@@ -2,9 +2,9 @@
 
 namespace Modules\Product\Services;
 
-use App\Enums\Gender;
-use App\Helpers\TranslateHelper as Translate;
-use App\Support\DbExtensions;
+use App\Core\Enums\Gender;
+use App\Core\Helpers\TranslateHelper as Translate;
+use App\Core\Support\DbExtensions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;

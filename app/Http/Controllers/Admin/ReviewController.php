@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Enums\ReviewStatus;
+use App\Core\Enums\ReviewStatus;
 use Illuminate\Http\Request;
 use Modules\Product\Services\ReviewService;
 

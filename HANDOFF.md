@@ -44,8 +44,11 @@ npm run build
   controller'ı yok. `app/Http/Controllers/` yalnızca `Admin/` ve `Web/` içerir.
 - Web controller'ları DB sorgusu yazmaz ve servis kullanmaz; ilgili modül
   controller'ını `Request::create(...)` + `setUserResolver(...)` ile çağırıp JSON
-  zarfını view verisine çevirir (`app/Support/Concerns/InteractsWithModuleControllers.php`).
-- Ortak header verisi `App\View\Composers\StorefrontHeaderComposer` üzerinden gelir.
+  zarfını view verisine çevirir (`app/Core/Concerns/InteractsWithModuleControllers.php`).
+- Ortak header verisi `App\Core\ViewComposers\StorefrontHeaderComposer` üzerinden gelir.
+- Paylaşılan trait/arayüz/enum/helper/support sınıfları `app/Core/` altında;
+  uygulama kökünde servis veya job yok. Domain servisleri ve job'ları ilgili
+  modülün `Services/` ve `Jobs/` klasörlerinde (ör. `Modules/Order/Jobs`).
 - Taşınan uçlar artık modüllerde: `Product/Routes/api.php` (`/home`),
   `Setting/Routes/api.php` (`/contact`, `/data-version`, `/promo-blocks`).
 

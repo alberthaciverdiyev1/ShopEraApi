@@ -2,7 +2,7 @@
 
 namespace Modules\Balance\Entities;
 
-use App\Enums\BalanceType;
+use App\Core\Enums\BalanceType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Modules\User\Entities\User;

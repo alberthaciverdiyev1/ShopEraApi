@@ -2,7 +2,7 @@
 
 namespace Modules\Setting\Services;
 
-use App\Support\TenantContext;
+use App\Core\Support\TenantContext;
 use Illuminate\Support\Facades\DB;
 
 /**

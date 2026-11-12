@@ -2,7 +2,7 @@
 
 namespace Modules\Blog\Entities;
 
-use App\Traits\ImagePath;
+use App\Core\Concerns\ImagePath;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;

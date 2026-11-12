@@ -4,7 +4,7 @@ namespace Modules\Setting\Services;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
-use App\Support\TenantContext;
+use App\Core\Support\TenantContext;
 use Modules\Setting\Entities\Setting;
 use Modules\Setting\Http\Resources\SettingResource;
 

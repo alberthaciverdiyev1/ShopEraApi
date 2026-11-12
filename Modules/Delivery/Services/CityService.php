@@ -2,7 +2,7 @@
 
 namespace Modules\Delivery\Services;
 
-use App\Interfaces\ICrudInterface;
+use App\Core\Contracts\ICrudInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
 use Modules\Delivery\Entities\City;

@@ -2,8 +2,8 @@
 
 namespace Modules\Payment\Service;
 
-use App\Enums\OrderStatus as OrderStatusEnum;
-use App\Services\Notification\OrderStatusNotifier;
+use App\Core\Enums\OrderStatus as OrderStatusEnum;
+use Modules\Order\Services\OrderStatusNotifier;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;

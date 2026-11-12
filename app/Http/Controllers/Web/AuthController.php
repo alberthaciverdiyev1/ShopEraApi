@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\LoginRequest;
 use App\Http\Requests\Web\RegisterRequest;
-use App\Support\Concerns\InteractsWithModuleControllers;
+use App\Core\Concerns\InteractsWithModuleControllers;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Modules\User\Http\Controllers\SessionAuthController;

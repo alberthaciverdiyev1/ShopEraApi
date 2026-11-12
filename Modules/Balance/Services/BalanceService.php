@@ -2,7 +2,7 @@
 
 namespace Modules\Balance\Services;
 
-use App\Enums\BalanceType;
+use App\Core\Enums\BalanceType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

@@ -21,6 +21,7 @@ Snaker, Laravel 12 tabanli moduler monolit bir e-ticaret ve marketplace uygulama
 ## Backend Kurallari
 
 - Katman: Controller ince kalir; is mantigi `Modules/<Module>/Services/` icinde, modeller `Modules/<Module>/Entities/` icindedir.
+- Paylasilan trait, arayuz, enum, helper ve destek siniflari `app/Core/` altindadir; uygulama kokunde servis veya job tutulmaz.
 - Validation `Modules/<Module>/Http/Requests/` siniflarinda yapilir.
 - Response formatini bozma; endpoint alan adlarini mobil ve web istemcileriyle geriye uyumlu tut.
 - Cok dillilik icin `spatie/laravel-translatable` ve mevcut helper/resource kaliplarini koru.
@@ -29,7 +30,7 @@ Snaker, Laravel 12 tabanli moduler monolit bir e-ticaret ve marketplace uygulama
 
 - Magaza sayfalari `resources/views/storefront/` ve `resources/views/components/storefront/` altinda Blade ile yazilir.
 - Uygulama seviyesinde yalnizca `app/Http/Controllers/Admin/` ve `app/Http/Controllers/Web/` vardir; API controller'lari modul icindedir.
-- `Web/` controller'lari DB sorgusu yazmaz ve `app/Services/` kullanmaz. Modul controller'ini `Request::create(...)` + `setUserResolver(...)` ile cagirir ve JSON zarfini view verisine cevirir.
+- `Web/` controller'lari DB sorgusu yazmaz ve hicbir servis sinifini dogrudan kullanmaz. Modul controller'ini `Request::create(...)` + `setUserResolver(...)` ile cagirir ve JSON zarfini view verisine cevirir.
 - Etkilesimler `resources/js/storefront.js` icinde saf JavaScript ile yazilir.
 - Admin assetleri `resources/css/admin.css` ve `resources/js/admin.ts`, magaza
   assetleri `resources/css/storefront.css` ve `resources/js/storefront.js` altindadir.

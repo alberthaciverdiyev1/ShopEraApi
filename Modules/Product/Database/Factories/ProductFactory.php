@@ -2,7 +2,7 @@
 
 namespace Modules\Product\Database\Factories;
 
-use App\Enums\Gender;
+use App\Core\Enums\Gender;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\Brand\Entities\Brand;
 use Modules\Category\Entities\Category;

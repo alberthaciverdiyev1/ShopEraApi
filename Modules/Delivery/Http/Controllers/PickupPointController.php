@@ -3,7 +3,7 @@
 namespace Modules\Delivery\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Interfaces\IBaseController;
+use App\Core\Contracts\IBaseController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Delivery\Http\Requests\PickupPointAddRequest;

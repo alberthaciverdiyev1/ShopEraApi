@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Jobs\Middleware\RestoreTenantContext;
-use App\Jobs\SendUserPushJob;
+use Modules\Notification\Jobs\SendUserPushJob;
 use App\Support\TenantDatabase;
 use Tests\TestCase;
 

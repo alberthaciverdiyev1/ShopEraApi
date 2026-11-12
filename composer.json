@@ -49,16 +49,16 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-            "app/Helpers/QueryHeplers.php",
-            "app/Helpers/TransactionHepler.php",
-            "app/Helpers/MailHepler.php",
-            "app/Helpers/ResponseHelper.php",
-            "app/Helpers/FilterHepler.php",
-            "app/Helpers/ReceiptPdfHelper.php",
-            "app/Helpers/CompressImageHelper.php",
-            "app/Helpers/CompressVideoHelper.php",
-            "app/Helpers/ImageHashHelper.php",
-            "app/Helpers/AdminHelper.php"
+            "app/Core/Helpers/QueryHeplers.php",
+            "app/Core/Helpers/TransactionHepler.php",
+            "app/Core/Helpers/MailHepler.php",
+            "app/Core/Helpers/ResponseHelper.php",
+            "app/Core/Helpers/FilterHepler.php",
+            "app/Core/Helpers/ReceiptPdfHelper.php",
+            "app/Core/Helpers/CompressImageHelper.php",
+            "app/Core/Helpers/CompressVideoHelper.php",
+            "app/Core/Helpers/ImageHashHelper.php",
+            "app/Core/Helpers/AdminHelper.php"
         ]
     },
     "autoload-dev": {

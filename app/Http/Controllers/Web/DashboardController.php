@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Support\Concerns\InteractsWithModuleControllers;
+use App\Core\Concerns\InteractsWithModuleControllers;
 use Illuminate\Contracts\View\View;
 use Modules\Chat\Http\Controllers\ChatController;
 use Modules\Delivery\Http\Controllers\DeliveryController;

@@ -2,8 +2,8 @@
 
 namespace Modules\Delivery\Services;
 
-use App\Helpers\TranslateHelper as Translate;
-use App\Interfaces\ICrudInterface;
+use App\Core\Helpers\TranslateHelper as Translate;
+use App\Core\Contracts\ICrudInterface;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

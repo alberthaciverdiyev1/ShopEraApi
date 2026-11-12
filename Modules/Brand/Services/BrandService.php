@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Storage;
-use App\Support\TenantContext;
+use App\Core\Support\TenantContext;
 use Modules\Brand\Entities\Brand;
 use Modules\Brand\Http\Transformers\BrandDetailsResource;
 use Modules\Brand\Http\Transformers\BrandResource;

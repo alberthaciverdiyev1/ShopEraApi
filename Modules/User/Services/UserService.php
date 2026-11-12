@@ -2,9 +2,9 @@
 
 namespace Modules\User\Services;
 
-use App\Helpers\DeleteAccountHtml;
-use App\Helpers\PhoneHelper;
-use App\Support\TenantContext;
+use App\Core\Helpers\DeleteAccountHtml;
+use App\Core\Helpers\PhoneHelper;
+use App\Core\Support\TenantContext;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;

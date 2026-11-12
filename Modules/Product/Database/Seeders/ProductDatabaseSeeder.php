@@ -2,7 +2,7 @@
 
 namespace Modules\Product\Database\Seeders;
 
-use App\Enums\Gender;
+use App\Core\Enums\Gender;
 use Illuminate\Database\Seeder;
 use Modules\Brand\Entities\Brand;
 use Modules\Category\Entities\Category;

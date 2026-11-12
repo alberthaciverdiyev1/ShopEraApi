@@ -2,8 +2,8 @@
 
 namespace Modules\Category\Services;
 
-use App\Helpers\TranslateHelper as Translate;
-use App\Support\TenantContext;
+use App\Core\Helpers\TranslateHelper as Translate;
+use App\Core\Support\TenantContext;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;

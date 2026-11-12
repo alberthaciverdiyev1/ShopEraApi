@@ -2,7 +2,7 @@
 
 namespace Modules\User\Services;
 
-use App\Helpers\PhoneHelper;
+use App\Core\Helpers\PhoneHelper;
 use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\JsonResponse;

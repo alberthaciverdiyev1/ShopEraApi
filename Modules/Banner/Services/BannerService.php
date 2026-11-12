@@ -2,7 +2,7 @@
 
 namespace Modules\Banner\Services;
 
-use App\Support\TenantContext;
+use App\Core\Support\TenantContext;
 use Illuminate\Http\JsonResponse;
 use Modules\Banner\Entities\Banner;
 use Modules\Banner\Http\Resources\BannerResource;

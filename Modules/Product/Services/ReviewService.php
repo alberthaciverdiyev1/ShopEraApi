@@ -2,7 +2,7 @@
 
 namespace Modules\Product\Services;
 
-use App\Enums\ReviewStatus;
+use App\Core\Enums\ReviewStatus;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -206,7 +206,7 @@ class ReviewService
 
         $review->update([
             'is_featured' => $featured,
-            'status' => $featured ? \App\Enums\ReviewStatus::APPROVED->value : $review->status->value,
+            'status' => $featured ? \App\Core\Enums\ReviewStatus::APPROVED->value : $review->status->value,
         ]);
 
         return $featured;

@@ -53,14 +53,26 @@ npm run build
 
 ## Dizin Yapısı ve Mimari
 
-### Kök `app/` — paylaşılan çekirdek
-- `app/Helpers/` — global helper fonksiyonları (`autoload.files` ile yüklenir).
-  Yeni helper eklerken dosyayı `composer.json` içindeki `autoload.files` listesine de ekle.
-- `app/Abstracts/Crud.php`, `app/Interfaces/` — CRUD sözleşmeleri.
-- `app/Enums/` — `OrderStatus`, `BalanceType`, `AddressType`, `Gender`, `ReviewStatus`, `City`.
-- `app/Jobs/` — kuyruk işleri (Starex gönderi, FCM push, bildirim).
-- `app/Services/` — çekirdek servisler (Starex entegrasyonu, bildirim, sipariş).
+### `app/Core/` — paylaşılan çekirdek
+Benzer işi gören her şey tek çatı altında toplanır:
+- `app/Core/Concerns/` — trait'ler: `ImagePath`, `TenantAware`,
+  `InteractsWithModuleControllers`.
+- `app/Core/Contracts/` — `IBaseController`, `ICrudInterface`.
+- `app/Core/Abstracts/` — `Crud` (contract'ların ortak uygulaması).
+- `app/Core/Enums/` — `OrderStatus`, `BalanceType`, `AddressType`, `Gender`,
+  `ReviewStatus`, `City`.
+- `app/Core/Helpers/` — global helper fonksiyonları (`composer.json` →
+  `autoload.files`). Yeni helper eklerken dosyayı o listeye de ekle.
+- `app/Core/Support/` — `TenantContext`, `DbExtensions`, `AdminMenu`.
+- `app/Core/ViewComposers/` — Blade view composer'ları.
+
+### `app/` kökü — yalnızca uygulama katmanları
+- `app/Console/Commands/` — Artisan komutları.
+- `app/Http/` — `Admin/`, `Web/` controller'ları, middleware ve web FormRequest'leri.
 - `app/Models/User.php` — yalnızca User kök modeli; diğer modeller modüllerin içinde.
+- `app/Providers/` — `AppServiceProvider`.
+- Servis ve job **burada tutulmaz**: iş mantığı `Modules/<Ad>/Services/`, kuyruk
+  işleri `Modules/<Ad>/Jobs/` altına yazılır.
 - `app/Http/Requests/Web/` — yalnızca Blade/web formlarına ait FormRequest'ler;
   API doğrulaması modüllerin `Http/Requests/` klasörlerindedir.
 - `resources/{css,js}/` — `admin.css` + `admin.ts` (admin paneli) ve
@@ -69,8 +81,8 @@ npm run build
 ### `app/Http/Controllers/` — yalnızca `Admin/` ve `Web/`
 - API için uygulama seviyesinde controller yoktur; API controller'ları modüllerin
   içindedir (`Modules/<Ad>/Http/Controllers/`).
-- `Web/` controller'ları doğrudan veritabanına veya `app/Services/` altındaki
-  servislere gitmez. Modül controller'ını `Request::create(...)` ile çağırır,
+- `Web/` controller'ları doğrudan veritabanına veya herhangi bir servise gitmez.
+  Modül controller'ını `Request::create(...)` ile çağırır,
   oturum kullanıcısını `setUserResolver()` ile bağlar ve dönen JSON zarfını
   view verisine çevirir.
 - Blade view'ları da DB sorgusu yazmaz; ihtiyaç duydukları veri controller'dan
@@ -91,6 +103,7 @@ Modules/Product/
 │   ├── Controllers/         # İnce: sadece servise delege eder
 │   ├── Requests/            # FormRequest doğrulama
 │   └── Resources/           # API Resource dönüşümleri
+├── Jobs/                    # Modüle ait kuyruk işleri
 ├── Providers/               # ServiceProvider + RouteServiceProvider
 ├── Routes/api.php           # Ana route dosyası (diğerlerini require eder)
 ├── Routes/<x>Route.php
@@ -130,7 +143,7 @@ aksi halde `{success, status_code, message, data}` zarfı döner. Bu davranış�
 ### Çok dillilik
 - Çevrilebilir alanlar `spatie/laravel-translatable` ile `az/en/ru/tr` dillerinde tutulur.
 - Modelde `public array $translatable = [...]` tanımlanır; alanlar JSON/array cast edilir.
-- Otomatik çeviri için `App\Helpers\TranslateHelper::translate()` kullanılır (kaynak dil `az`).
+- Otomatik çeviri için `App\Core\Helpers\TranslateHelper::translate()` kullanılır (kaynak dil `az`).
 - Kullanıcı diline göre `SetLocaleFromHeader` middleware'i ile locale ayarlanır.
 
 ### Genel stil
@@ -181,12 +194,11 @@ Tüm mağaza, ürün ve sipariş verisi aynı DB'de tutulur.
   **catch-all** (`server_name _;`) olmalıdır — domain başına vhost gerekmez.
 - **Proxy güveni:** Mağaza Blade ile sunulur; yine de doğru proxy güveni
   (`TRUSTED_PROXIES`; üretimde proxy IP'leri, `*` bırakma) şarttır.
-- **Storage/cache:** `App\Support\TenantContext` artık pass-through'dur (prefix/slug
+- **Storage/cache:** `App\Core\Support\TenantContext` artık pass-through'dur (prefix/slug
   üretmez); yeni kodda doğrudan `storage/app/public/...` yolları kullanılabilir.
 
 ## Bilinmesi Gereken Entegrasyonlar
-- **Starex** — lojistik/gönderi entegrasyonu (`app/Services/Starex/`, webhook:
-  `POST /api/integrations/starex/webhook`). `.env`'de `STAREX_*` değişkenleri.
+- **EPoint** — ödeme entegrasyonu (`Modules/Payment/Service/EPointService.php`).
 - **Firebase/FCM** — push bildirimleri (`laravel-notification-channels/fcm`).
 - **Laravel Reverb / Pusher** — realtime broadcast (chat, live).
 - **Sentry** — hata izleme.

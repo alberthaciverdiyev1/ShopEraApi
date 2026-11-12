@@ -2,8 +2,8 @@
 
 namespace Modules\HelpAndPolicy\Services;
 
-use App\Helpers\TranslateHelper as Translate;
-use App\Support\TenantContext;
+use App\Core\Helpers\TranslateHelper as Translate;
+use App\Core\Support\TenantContext;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;

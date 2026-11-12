@@ -83,7 +83,7 @@ class VendorService
 
         $reviews = \Modules\Product\Entities\Review::query()
             ->whereIn('product_id', $productIds)
-            ->where('status', \App\Enums\ReviewStatus::APPROVED->value);
+            ->where('status', \App\Core\Enums\ReviewStatus::APPROVED->value);
 
         $vendor->forceFill([
             'rating_avg' => round((float) ($reviews->clone()->avg('rate') ?? 0), 2),

@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Services\Import\DresssoImportService;
+use Modules\Marketplace\Services\DresssoImportService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 

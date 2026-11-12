@@ -2,7 +2,7 @@
 
 namespace Modules\HelpAndPolicy\Services;
 
-use App\Helpers\TranslateHelper as Translate;
+use App\Core\Helpers\TranslateHelper as Translate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Response;
 use Modules\HelpAndPolicy\Entities\LegalTerm;

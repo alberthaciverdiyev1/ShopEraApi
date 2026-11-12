@@ -2,7 +2,7 @@
 
 namespace Modules\Order\Http\Requests;
 
-use App\Enums\AddressType;
+use App\Core\Enums\AddressType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 

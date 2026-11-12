@@ -5,7 +5,7 @@ namespace Modules\PromoCode\Services;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
-use App\Support\TenantContext;
+use App\Core\Support\TenantContext;
 use Modules\Delivery\Services\DeliveryService;
 use Modules\Product\Services\ProductPricingService;
 use Modules\PromoCode\Entities\PromoCode;

@@ -2,7 +2,7 @@
 
 namespace Modules\Setting\Services;
 
-use App\Enums\OrderStatus as OrderStatusEnum;
+use App\Core\Enums\OrderStatus as OrderStatusEnum;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;

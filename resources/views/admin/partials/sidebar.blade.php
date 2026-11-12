@@ -1,5 +1,5 @@
 @php
-    $groups = \App\Support\AdminMenu::groups();
+    $groups = \App\Core\Support\AdminMenu::groups();
 
     $isActive = fn (string $match) => request()->routeIs($match);
 

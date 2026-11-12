@@ -11,7 +11,7 @@ Bu dosya, Antigravity ve Gemini Code Assist araçlarının **Snaker** projesinde
 ### Teknoloji Yığını
 - **Backend**: PHP 8.3+, Laravel 12, PostgreSQL (testlerde in-memory SQLite), Redis, Laravel Sanctum, Spatie Permission, Spatie Translatable.
 - **Web**: Blade + Vite 7 + Tailwind 4, mevcut Bootstrap tabanlı mağaza teması.
-- **Entegrasyonlar**: Starex (kargo), Firebase Cloud Messaging (FCM), Laravel Reverb (realtime), Sentry, BunnyCDN.
+- **Entegrasyonlar**: Firebase Cloud Messaging (FCM), Laravel Reverb (realtime), Sentry, BunnyCDN, EPoint (ödeme).
 
 ---
 
@@ -22,7 +22,11 @@ Snaker/
 ├── GEMINI.md                     # Ana Antigravity proje kuralları
 ├── AGENTS.md                     # Çoklu ajan yönergeleri
 ├── .geminiignore                 # Antigravity bağlam dışı bırakma listesi
-├── app/                          # Paylaşılan çekirdek mantık (Helpers, Enums, Jobs, Services)
+├── app/                          # Uygulama katmanları (Console, Http, Models, Providers)
+│   ├── Core/                     # Paylaşılan çekirdek: Concerns, Contracts, Abstracts,
+│   │                             # Enums, Helpers, Support, ViewComposers
+│   ├── Http/                     # Admin/Web controller'ları, middleware, Web request'leri
+│   └── Models/User.php           # Yalnızca kök User modeli
 ├── Modules/                      # nwidart/laravel-modules iş alanı modülleri
 │   ├── Product/                  # Ürün modülü
 │   ├── Order/                    # Sipariş modülü
@@ -94,11 +98,17 @@ return responseHelper('messages.success', 200, $resource);
   public array $translatable = ['name', 'description'];
   ```
 - Diller: `az` (varsayılan), `en`, `ru`, `tr`.
-- Otomatik çeviri gerektiğinde `App\Helpers\TranslateHelper::translate()` kullanılır.
+- Otomatik çeviri gerektiğinde `App\Core\Helpers\TranslateHelper::translate()` kullanılır.
 
-### 4.4. Blade Mağaza Katmanı
+### 4.4. Core Katmanı
+- Paylaşılan her şey `app/Core/` altındadır: `Concerns/` (trait'ler), `Contracts/`
+  (arayüzler), `Abstracts/`, `Enums/`, `Helpers/`, `Support/`, `ViewComposers/`.
+- Servis ve job uygulama kökünde tutulmaz; ilgili modülün `Services/` veya `Jobs/`
+  klasörüne yazılır. `app/Http/Requests/` yalnızca web formlarının doğrulamasını taşır.
+
+### 4.5. Blade Mağaza Katmanı
 - Uygulama seviyesinde yalnızca `app/Http/Controllers/Admin/` ve `app/Http/Controllers/Web/` bulunur; API controller'ları modüllerin içindedir.
-- `Web/` controller'ları DB sorgusu yazmaz ve `app/Services/` kullanmaz. İlgili modül controller'ını `Request::create(...)` + `setUserResolver(...)` ile çağırır, `validateResolved()` ile modül FormRequest'ini doğrular ve JSON zarfını view verisine çevirir.
+- `Web/` controller’ları DB sorgusu yazmaz ve hiçbir servis sınıfını doğrudan kullanmaz. İlgili modül controller'ını `Request::create(...)` + `setUserResolver(...)` ile çağırır, `validateResolved()` ile modül FormRequest'ini doğrular ve JSON zarfını view verisine çevirir.
 - Blade view'ları DB sorgusu yazmaz; header gibi ortak veriler view composer üzerinden modül controller'larından gelir.
 - Blade view'ları `resources/views/storefront/` ve `resources/views/components/storefront/` altında yaşar.
 - Etkileşimler `resources/js/storefront.js` içinde saf JavaScript ile yazılır.
@@ -109,7 +119,7 @@ return responseHelper('messages.success', 200, $resource);
 
 1. **Önce Oku ve Analiz Et**: Bir bileşen veya modülde değişiklik yapmadan önce mevcut dosyaları, tipleri ve fonksiyonları incele.
 2. **Katmanlamayı Koru**: Controller içine iş mantığı veya doğrudan Eloquent sorgusu yazma.
-3. **Sırları Asla Sızdırma**: `.env`, `storage/firebase/*.json`, Stripe/Starex API anahtarları gibi gizli bilgileri hiçbir zaman loglara veya yanıtlara dökme.
+3. **Sırları Asla Sızdırma**: `.env`, `storage/firebase/*.json`, ödeme ve push API anahtarları gibi gizli bilgileri hiçbir zaman loglara veya yanıtlara dökme.
 4. **API Sözleşmelerini Bozma**: Frontend ve mobil uygulamaların ortak kullandığı endpoint alan adlarını değiştirmeden önce geriye dönük uyumluluğu koru.
 5. **Kapsamı Dar Tut**: İlgisiz dosyalarda toplu yeniden adlandırma veya stil değişiklikleri yapma.
 6. **Güvenli Git ve Komut Kullanımı**: `git push --force`, `git reset --hard` veya üretim veritabanına zarar verebilecek `migrate:fresh` gibi komutları asla onay almadan çalıştırma.

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Web;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\StoreAddressRequest;
 use App\Http\Requests\Web\UpdateAddressRequest;
-use App\Support\Concerns\InteractsWithModuleControllers;
+use App\Core\Concerns\InteractsWithModuleControllers;
 use Illuminate\Http\RedirectResponse;
 use Modules\User\Http\Controllers\AddressController as ModuleAddressController;
 use Modules\User\Http\Requests\Address\AddressAddRequest;
