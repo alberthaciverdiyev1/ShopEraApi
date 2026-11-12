@@ -16,6 +16,9 @@
         : request()->is(ltrim($href, '/').'*');
 
     $user = \Illuminate\Support\Facades\Auth::user();
+    $wishlist = $user
+        ? array_slice(app(\App\Services\Storefront\WishlistService::class)->products(), 0, 4)
+        : [];
 @endphp
 
 <header class="header-section-1">
@@ -101,10 +104,29 @@
 
                         <div class="menu-wishlist menu-cart">
                             <div class="cart-box wishlist-box">
-                                <div class="shopping-items text-center py-4">
-                                    <p class="text-muted mb-3" style="font-size: 14px;">İstək siyahınız boşdur.</p>
-                                    <a href="/shop" class="theme-btn" style="padding: 10px 20px; font-size: 13px;">Elanlara bax</a>
-                                </div>
+                                @if (count($wishlist))
+                                    <div class="sf-wishlist-mini">
+                                        @foreach ($wishlist as $item)
+                                            @php
+                                                $image = collect($item['images'] ?? [])->pluck('image_path')->filter()->first()
+                                                    ?? '/assets/images/top-deals-item/topDealsItemThumb1_1.png';
+                                            @endphp
+                                            <a class="sf-wishlist-mini__item" href="/elan/{{ $item['slug'] ?? $item['id'] }}">
+                                                <img src="{{ $image }}" alt="" loading="lazy">
+                                                <span>
+                                                    <strong>{{ $item['title']['az'] ?? '' }}</strong>
+                                                    <em>{{ number_format((float) ($item['discount'] ?? $item['price'] ?? 0), 2) }} ₼</em>
+                                                </span>
+                                            </a>
+                                        @endforeach
+                                        <a href="/wishlist" class="theme-btn sf-wishlist-mini__all">Hamısına bax</a>
+                                    </div>
+                                @else
+                                    <div class="shopping-items text-center py-4">
+                                        <p class="text-muted mb-3" style="font-size: 14px;">İstək siyahınız boşdur.</p>
+                                        <a href="/shop" class="theme-btn" style="padding: 10px 20px; font-size: 13px;">Elanlara bax</a>
+                                    </div>
+                                @endif
                             </div>
                             <a class="cart-icon wishlist-icon" href="/wishlist" aria-label="İstək siyahısı">
                                 <i class="fa-regular fa-heart"></i>
