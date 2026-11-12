@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace Modules\Marketplace\Console;
 
 use Illuminate\Console\Command;
 use Modules\Marketplace\Entities\Vendor;

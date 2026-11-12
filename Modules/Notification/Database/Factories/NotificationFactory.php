@@ -4,6 +4,7 @@ namespace Modules\Notification\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Modules\Notification\Entities\Notification;
+use Modules\User\Entities\User;
 
 class NotificationFactory extends Factory
 {
@@ -12,7 +13,7 @@ class NotificationFactory extends Factory
     public function definition()
     {
         $userId = $this->faker->boolean(80)
-            ? \App\Models\User::inRandomOrder()->value('id')
+            ? User::inRandomOrder()->value('id')
             : null;
 
         return [

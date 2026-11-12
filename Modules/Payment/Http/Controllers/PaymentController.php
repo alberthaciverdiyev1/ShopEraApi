@@ -4,7 +4,7 @@ namespace Modules\Payment\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Modules\Payment\Service\PaymentService;
+use Modules\Payment\Services\PaymentService;
 
 class PaymentController extends Controller
 {

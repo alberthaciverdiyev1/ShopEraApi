@@ -49,11 +49,11 @@
             "Database\\Seeders\\": "database/seeders/"
         },
         "files": [
-            "app/Core/Helpers/QueryHeplers.php",
-            "app/Core/Helpers/TransactionHepler.php",
-            "app/Core/Helpers/MailHepler.php",
+            "app/Core/Helpers/QueryHelpers.php",
+            "app/Core/Helpers/TransactionHelper.php",
+            "app/Core/Helpers/MailHelper.php",
             "app/Core/Helpers/ResponseHelper.php",
-            "app/Core/Helpers/FilterHepler.php",
+            "app/Core/Helpers/FilterHelper.php",
             "app/Core/Helpers/ReceiptPdfHelper.php",
             "app/Core/Helpers/CompressImageHelper.php",
             "app/Core/Helpers/CompressVideoHelper.php",

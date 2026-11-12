@@ -27,7 +27,7 @@ use Modules\Order\Entities\OrderItem;
 use Modules\Order\Entities\OrderStatus;
 use Modules\Order\Http\Resources\OrderDetailResource;
 use Modules\Order\Http\Resources\OrderResource;
-use Modules\Payment\Service\EPointService;
+use Modules\Payment\Services\EPointService;
 use Modules\Product\Entities\Product;
 use Modules\Product\Http\Resources\ProductResource;
 use Modules\Product\Services\ProductPricingService;

@@ -3,7 +3,6 @@
 namespace Modules\RoleAndPermissions\Services;
 
 use Spatie\Permission\Models\Permission;
-use App\Models\User;
 
 class PermissionService
 {

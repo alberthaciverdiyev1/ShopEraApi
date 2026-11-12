@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Payment\Service;
+namespace Modules\Payment\Services;
 
 use App\Core\Enums\OrderStatus as OrderStatusEnum;
 use Modules\Order\Services\OrderStatusNotifier;

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Modules\Order\Entities\Order;
 use Modules\Order\Entities\OrderStatus;
-use Modules\Payment\Service\PaymentService;
+use Modules\Payment\Services\PaymentService;
 
 class PendingPaymentExpiryService
 {

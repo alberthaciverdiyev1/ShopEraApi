@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Modules\Balance\Entities\Balance;
 use Modules\Balance\Http\Resources\BalanceResource;
-use Modules\Payment\Service\EPointService;
+use Modules\Payment\Services\EPointService;
 
 class BalanceService
 {

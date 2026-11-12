@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace Modules\Marketplace\Console;
 
 use Modules\Marketplace\Services\DresssoImportService;
 use Illuminate\Console\Command;

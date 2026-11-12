@@ -1,12 +1,12 @@
 <?php
 
-namespace Modules\Payment\Service;
+namespace Modules\Payment\Services;
 
 
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Http;
 
-class EPointService
+class EPointService2
 {
 
     public $epoint_transaction;
@@ -88,8 +88,7 @@ class EPointService
 
     public function isSignatureValid()
     {
-        return is_string($this->signature)
-            && hash_equals($this->createSignatureByData(), $this->signature);
+        return $this->signature === $this->createSignatureByData();
     }
 
     public function getDataAsJson()
@@ -335,74 +334,11 @@ class EPointService
 //            'data' => $this->data,
 //            'signature' => $this->signature
 //        ]);
+\Log::error((array)$response);
         $this->response = json_decode($response->getBody());
 
         return $this;
     }
-
-    // ===================================================================
-    //  Apple Pay & Google Pay (Web) — Widget
-    // ===================================================================
-
-    /**
-     * Widget URL-i əldə et (Apple Pay / Google Pay üçün)
-     * POST https://epoint.az/api/1/token/widget
-     */
-    public function getWidgetUrl()
-    {
-        $json_data = [
-            'public_key' => $this->public_key,
-            'amount' => $this->amount,
-            'order_id' => $this->order_id,
-            'description' => $this->description,
-        ];
-
-        $this->sign($json_data);
-
-        $response = $this->client->request('POST', 'https://epoint.az/api/1/token/widget', [
-            'form_params' => [
-                'data' => $this->data,
-                'signature' => $this->signature,
-            ]
-        ]);
-
-        $this->response = json_decode($response->getBody());
-
-        return $this;
-    }
-
-    /**
-     * Widget iframe HTML-i qaytar
-     */
-    public function renderWidgetIframe($width = 600, $height = 400): string
-    {
-        if (!empty($this->response->widget_url)) {
-            return sprintf(
-                '<iframe src="%s" width="%d" height="%d" frameborder="0" allowpaymentrequest></iframe>',
-                htmlspecialchars($this->response->widget_url, ENT_QUOTES, 'UTF-8'),
-                $width,
-                $height
-            );
-        }
-
-        $error = htmlspecialchars($this->response->message ?? 'Widget creation failed', ENT_QUOTES, 'UTF-8');
-        return "<p style='color:red;'>$error</p>";
-    }
-
-    /**
-     * Widget nəticəsini dinləmək üçün JavaScript
-     */
-//    public static function widgetResultScript(): string
-//    {
-//        return <<<'JS'
-//        <script>
-//        window.addEventListener('message', function(event) {
-//            console.log('Epoint widget result:', event.data);
-//            window.dispatchEvent(new CustomEvent('epoint-payment', { detail: event.data }));
-//        });
-//        </script>
-//        JS;
-//    }
 
     public static function instantiate($private_key, $public_key)
     {
@@ -568,53 +504,5 @@ class EPointService
         $epoint->mobilePayment();
 
         return $epoint->response;
-    }
-
-    // ===================================================================
-    //  Apple Pay & Google Pay static shortcuts
-    // ===================================================================
-
-    /**
-     * Apple Pay / Google Pay widget URL-i al
-     */
-    public static function widgetPay($private_key, $public_key, $amount, $order_id, $description)
-    {
-        $epoint = static::instantiate($private_key, $public_key);
-
-        $epoint->order_id = $order_id;
-        $epoint->amount = $amount;
-        $epoint->description = $description;
-
-        $epoint->getWidgetUrl();
-
-        return $epoint->response;
-    }
-
-    /**
-     * Callback imzasını doğrula
-     */
-    public static function verifyCallback($private_key, $public_key, $data, $signature)
-    {
-        $epoint = new self([
-            'private_key' => $private_key,
-            'public_key' => $public_key,
-            'data' => $data,
-            'signature' => $signature,
-        ]);
-
-        return $epoint->isSignatureValid();
-    }
-
-    public static function decodeCallbackData($data): ?object
-    {
-        $json = base64_decode($data, true);
-
-        if ($json === false) {
-            return null;
-        }
-
-        $payload = json_decode($json);
-
-        return is_object($payload) ? $payload : null;
     }
 }
