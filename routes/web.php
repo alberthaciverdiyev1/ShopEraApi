@@ -6,8 +6,10 @@ use App\Http\Controllers\Storefront\BlogController;
 use App\Http\Controllers\Storefront\CategoryController;
 use App\Http\Controllers\Storefront\ContentController;
 use App\Http\Controllers\Storefront\DashboardController;
+use App\Http\Controllers\Storefront\DashboardMessagesController;
 use App\Http\Controllers\Storefront\HomeController;
 use App\Http\Controllers\Storefront\ListingController;
+use App\Http\Controllers\Storefront\ManagedListingController;
 use App\Http\Controllers\Storefront\ProductController;
 use App\Http\Controllers\Storefront\SettingsController;
 use App\Http\Controllers\Storefront\ShopController;
@@ -41,6 +43,10 @@ Route::post('/logout', [AuthController::class, 'logout'])
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('storefront.dashboard');
+    Route::post('/dashboard/messages', [DashboardMessagesController::class, 'send'])->name('storefront.dashboard.messages.send');
+    Route::delete('/dashboard/messages/{id}', [DashboardMessagesController::class, 'destroy'])
+        ->whereNumber('id')
+        ->name('storefront.dashboard.messages.destroy');
     Route::get('/settings', [SettingsController::class, 'index'])->name('storefront.settings');
     Route::put('/settings/profile', [SettingsController::class, 'updateProfile'])->name('storefront.settings.profile');
     Route::post('/settings/avatar', [SettingsController::class, 'updateAvatar'])->name('storefront.settings.avatar');
@@ -80,6 +86,14 @@ Route::middleware('auth')->group(function () {
 // secret link, exactly like the Svelte storefront.
 Route::get('/elan/ver', [ListingController::class, 'create'])->name('storefront.listings.create');
 Route::post('/elan/ver', [ListingController::class, 'store'])->name('storefront.listings.store');
+
+// Guest listings are managed through the secret link handed out at creation.
+Route::get('/elan/idaresi/{token}', [ManagedListingController::class, 'show'])
+    ->name('storefront.listings.manage');
+Route::put('/elan/idaresi/{token}', [ManagedListingController::class, 'update'])
+    ->name('storefront.listings.manage.update');
+Route::delete('/elan/idaresi/{token}', [ManagedListingController::class, 'destroy'])
+    ->name('storefront.listings.manage.destroy');
 
 Route::get('/', [HomeController::class, 'index'])->name('storefront.home');
 

@@ -1,6 +1,13 @@
 @php
-    $fallback = '/assets/images/shop/shop-01.png';
-    $localeTitle = fn (array $listing) => $listing['title']['az'] ?? ($listing['title']['en'] ?? '');
+    $fallback = '/assets/images/top-deals-item/topDealsItemThumb1_1.png';
+    $localized = function ($value): string {
+        if (is_array($value)) {
+            return $value['az'] ?? $value['en'] ?? (string) reset($value);
+        }
+
+        return (string) ($value ?? '');
+    };
+    $localeTitle = fn (array $listing) => $localized($listing['title'] ?? '');
 @endphp
 
 <x-storefront.layouts.app :title="'Elanlarım — ShopEra'">

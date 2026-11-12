@@ -93,7 +93,7 @@
                         </div>
 
                         @auth
-                            <a href="/dashboard" class="header-chat-icon" aria-label="Mesajlar">
+                            <a href="/dashboard?tab=messages" class="header-chat-icon" aria-label="Mesajlar">
                                 <i class="fa-regular fa-comment-dots"></i>
                             </a>
                         @else

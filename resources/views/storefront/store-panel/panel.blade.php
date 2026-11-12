@@ -7,7 +7,7 @@
         return (string) ($value ?? '');
     };
 
-    $fallback = '/assets/images/shop/shop-01.png';
+    $fallback = '/assets/images/top-deals-item/topDealsItemThumb1_1.png';
     $stats = [
         'total' => count($listings),
         'promoted' => collect($listings)->where('is_promoted', true)->count(),
@@ -101,7 +101,7 @@
                                         <img src="{{ $listing['images'][0] ?? $fallback }}" alt=""
                                              style="width:52px;height:52px;object-fit:cover;border-radius:8px;">
                                         <div class="flex-grow-1 min-w-0">
-                                            <p class="mb-0 fw-semibold text-truncate">{{ $listing['title']['az'] ?? '' }}</p>
+                                            <p class="mb-0 fw-semibold text-truncate">{{ $localized($listing['title'] ?? '') }}</p>
                                             <p class="mb-0 small text-primary">{{ number_format((float) ($listing['price'] ?? 0), 2) }} ₼</p>
                                             <p class="mb-0 text-muted" style="font-size:12px;">
                                                 <i class="fa-regular fa-eye"></i> {{ $listing['views'] ?? 0 }} · <i class="fa-solid fa-phone"></i> {{ $listing['contact_reveals'] ?? 0 }}

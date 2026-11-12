@@ -97,6 +97,25 @@ class SellerService
     }
 
     /**
+     * Guest listing addressed by its secret management token.
+     */
+    public function findManaged(string $token): Product
+    {
+        return $this->listings->findByManageToken($token)
+            ?? abort(404, 'İdarə linki etibarsızdır və ya elan silinib.');
+    }
+
+    public function updateManaged(Product $listing, array $data, Request $request): Product
+    {
+        return $this->listings->update($listing, $data, $request);
+    }
+
+    public function deleteManaged(Product $listing): void
+    {
+        $listing->delete();
+    }
+
+    /**
      * @return array<string, mixed>|null
      */
     public function categoryTree(): array

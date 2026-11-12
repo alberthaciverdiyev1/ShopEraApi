@@ -53,7 +53,7 @@ class ListingController extends Controller
             return redirect()
                 ->route('storefront.listings.create')
                 ->with('published', [
-                    'title' => $result['listing']->title['az'] ?? null,
+                    'title' => $result['listing']->getTranslation('title', 'az') ?: null,
                     'manage_url' => $result['manage_url'],
                 ]);
         }

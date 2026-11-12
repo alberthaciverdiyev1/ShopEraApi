@@ -8,6 +8,7 @@
 
     $tabs = [
         'dashboard' => ['label' => 'Hesab paneli', 'icon' => 'fa-solid fa-grid-2'],
+        'messages' => ['label' => 'Mesajlar', 'icon' => 'fa-regular fa-comment-dots'],
         'addresses' => ['label' => 'Ünvanlar', 'icon' => 'fa-solid fa-location-dot'],
         'settings' => ['label' => 'Parametrlər', 'icon' => 'fa-regular fa-gear'],
         'logout' => ['label' => 'Çıxış', 'icon' => 'fa-solid fa-sign-out-alt'],
@@ -140,6 +141,61 @@
                                     @else
                                         <p class="text-muted mb-0">Hələ sifarişiniz yoxdur.</p>
                                     @endif
+                                </div>
+                            </div>
+                        </section>
+
+                        {{-- Messages: chat with support --}}
+                        <section class="sf-dash-pane {{ $tab === 'messages' ? 'is-active' : '' }}" data-sf-dash-pane="messages">
+                            <div class="sf-panel">
+                                <h2 class="sf-panel__title">Dəstək ilə yazışma</h2>
+
+                                <div class="sf-support-chat">
+                                    <div class="sf-support-chat__log" data-sf-support-chat-log>
+                                        @forelse ($chatMessages as $message)
+                                            @php $mine = $message['sender_type'] === 'user'; @endphp
+                                            <div class="sf-support-chat__row {{ $mine ? 'is-mine' : '' }}">
+                                                <div class="sf-support-chat__bubble">
+                                                    @if (! empty($message['message']))
+                                                        <p class="sf-support-chat__text">{{ $message['message'] }}</p>
+                                                    @endif
+                                                    @foreach ($message['attachments'] ?? [] as $attachment)
+                                                        <a href="{{ $attachment['url'] }}" target="_blank" rel="noopener">
+                                                            <img src="{{ $attachment['url'] }}" alt="" loading="lazy">
+                                                        </a>
+                                                    @endforeach
+                                                    <div class="sf-support-chat__meta">
+                                                        <time>{{ \Illuminate\Support\Carbon::parse($message['created_at'])->format('d.m H:i') }}</time>
+                                                        @if ($mine)
+                                                            <form action="{{ route('storefront.dashboard.messages.destroy', $message['id']) }}" method="POST"
+                                                                  onsubmit="return confirm('Mesaj silinsin?');">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="sf-support-chat__delete" aria-label="Mesajı sil">
+                                                                    <i class="fa-regular fa-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @empty
+                                            <p class="text-muted mb-0">Hələ mesaj yoxdur. Dəstək komandasına ilk mesajı yazın.</p>
+                                        @endforelse
+                                    </div>
+
+                                    <form action="{{ route('storefront.dashboard.messages.send') }}" method="POST" enctype="multipart/form-data" class="sf-support-chat__form">
+                                        @csrf
+                                        <textarea name="message" rows="2" maxlength="2000" placeholder="Mesajınızı yazın…"></textarea>
+                                        <div class="sf-support-chat__actions">
+                                            <label class="sf-support-chat__attach">
+                                                <input type="file" name="image" accept="image/*">
+                                                <i class="fa-regular fa-image"></i>
+                                                <span>Şəkil</span>
+                                            </label>
+                                            <button type="submit" class="theme-btn">Göndər</button>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </section>

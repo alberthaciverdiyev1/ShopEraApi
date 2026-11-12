@@ -5476,3 +5476,140 @@
     font-size: 13px;
     text-align: center;
 }
+
+.sf-check-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+    cursor: pointer;
+}
+
+.sf-check-row input[type="checkbox"] {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 18px !important;
+    height: 18px !important;
+    margin: 0;
+    accent-color: var(--sf-theme);
+    cursor: pointer;
+}
+
+/* Support chat inside the account dashboard (separate from the floating
+   live-chat widget, hence its own sf-support-chat prefix). */
+.sf-support-chat {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sf-support-chat__log {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 440px;
+    overflow-y: auto;
+    padding: 4px;
+}
+
+.sf-support-chat__row {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.sf-support-chat__row.is-mine {
+    justify-content: flex-end;
+}
+
+.sf-support-chat__bubble {
+    max-width: 78%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: #f1f5f9;
+    color: #0f172a;
+}
+
+.sf-support-chat__row.is-mine .sf-support-chat__bubble {
+    background: var(--sf-theme);
+    color: #fff;
+}
+
+.sf-support-chat__text {
+    margin: 0 0 4px;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-line;
+    word-break: break-word;
+}
+
+.sf-support-chat__bubble img {
+    display: block;
+    max-width: 220px;
+    max-height: 220px;
+    border-radius: 10px;
+    margin: 6px 0;
+    object-fit: cover;
+}
+
+.sf-support-chat__meta {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    font-size: 11px;
+    opacity: 0.72;
+}
+
+.sf-support-chat__meta form {
+    display: inline-flex;
+}
+
+.sf-support-chat__delete {
+    border: 0;
+    background: none;
+    color: inherit;
+    padding: 0;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.sf-support-chat__form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sf-support-chat__form textarea {
+    width: 100%;
+    resize: vertical;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 14px;
+}
+
+.sf-support-chat__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.sf-support-chat__attach {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    margin: 0;
+}
+
+.sf-support-chat__attach input {
+    display: none;
+}
