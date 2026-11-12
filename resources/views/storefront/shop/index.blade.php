@@ -19,6 +19,16 @@
         'price:desc' => 'Qiymət: əvvəl baha',
         'sales_count:desc' => 'Ən çox satılan',
     ];
+
+    $activeFilterCount = (! empty($query['category']) ? 1 : 0)
+        + count((array) ($query['brands'] ?? [])) + (! empty($query['brand']) ? 1 : 0)
+        + count((array) ($query['colors'] ?? [])) + (! empty($query['color']) ? 1 : 0)
+        + count((array) ($query['sizes'] ?? [])) + (! empty($query['size']) ? 1 : 0)
+        + (! empty($query['price_min']) ? 1 : 0) + (! empty($query['price_max']) ? 1 : 0)
+        + (! empty($query['search']) ? 1 : 0);
+    foreach ((array) ($query['filters'] ?? []) as $values) {
+        $activeFilterCount += count((array) $values);
+    }
 @endphp
 
 <x-storefront.layouts.app
@@ -40,6 +50,10 @@
                     @foreach (array_diff_key($query, ['sort' => true, 'page' => true]) as $name => $value)
                         @if (is_scalar($value) && $name !== 'filters')
                             <input type="hidden" name="{{ $name }}" value="{{ $value }}">
+                        @elseif (is_array($value) && in_array($name, ['brands', 'colors', 'sizes'], true))
+                            @foreach ($value as $item)
+                                <input type="hidden" name="{{ $name }}[]" value="{{ $item }}">
+                            @endforeach
                         @endif
                     @endforeach
                     @foreach ((array) ($query['filters'] ?? []) as $filterId => $values)
@@ -57,6 +71,9 @@
 
                 <button type="button" class="sf-shop__filter-toggle" data-sf-mobile-filters>
                     <i class="fa-regular fa-sliders"></i> Filtrlər
+                    @if ($activeFilterCount)
+                        <span class="sf-shop__filter-count">{{ $activeFilterCount }}</span>
+                    @endif
                 </button>
             </div>
         </header>

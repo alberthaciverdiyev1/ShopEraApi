@@ -177,6 +177,24 @@ document.querySelectorAll('[data-sf-sidebar-close]').forEach((element) => {
     element.addEventListener('click', () => setSidebarOpen(false));
 });
 
+/* Filter sections: reveal the options hidden behind "show more". */
+document.querySelectorAll('[data-sf-show-more]').forEach((button) => {
+    const card = button.closest('.sf-filter-card');
+    if (!card) return;
+
+    button.addEventListener('click', () => {
+        const extras = [...card.querySelectorAll('[data-sf-extra]')];
+        const expanded = button.getAttribute('aria-expanded') === 'true';
+        extras.forEach((option) => {
+            option.hidden = expanded;
+        });
+        button.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+        button.textContent = expanded
+            ? (button.dataset.moreLabel ?? 'Daha çox göstər')
+            : (button.dataset.lessLabel ?? 'Daha az göstər');
+    });
+});
+
 /* Product gallery: thumbnails, arrows and a lightbox. */
 const gallery = document.querySelector('[data-sf-gallery]');
 

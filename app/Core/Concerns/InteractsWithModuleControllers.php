@@ -168,12 +168,39 @@ trait InteractsWithModuleControllers
             $params['search'] = trim((string) $query['search']);
         }
 
-        foreach (['category' => 'category_ids', 'brand' => 'brand_ids', 'color' => 'color_ids', 'size' => 'size_ids'] as $input => $param) {
+        foreach (['category' => 'category_ids'] as $input => $param) {
             $value = (int) ($query[$input] ?? 0);
 
             if ($value > 0) {
                 $params[$param] = [$value];
             }
+        }
+
+        // Brand, colour and size accept both the legacy single value and the
+        // multi-select arrays the storefront filter panel submits.
+        foreach ([
+            'brand' => 'brand_ids', 'brands' => 'brand_ids',
+            'color' => 'color_ids', 'colors' => 'color_ids',
+            'size' => 'size_ids', 'sizes' => 'size_ids',
+        ] as $input => $param) {
+            $values = $query[$input] ?? null;
+
+            if ($values === null) {
+                continue;
+            }
+
+            $ids = array_values(array_unique(array_filter(
+                array_map('intval', is_array($values) ? $values : [$values]),
+                fn (int $id) => $id > 0
+            )));
+
+            if ($ids !== []) {
+                $params[$param] = array_values(array_unique(array_merge($params[$param] ?? [], $ids)));
+            }
+        }
+
+        if (isset($query['price_min']) && is_numeric($query['price_min']) && (float) $query['price_min'] > 0) {
+            $params['price_min'] = (float) $query['price_min'];
         }
 
         if (isset($query['price_max']) && is_numeric($query['price_max']) && (float) $query['price_max'] > 0) {

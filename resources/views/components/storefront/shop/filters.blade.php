@@ -10,23 +10,31 @@
 @php
     $selected = [
         'search' => $query['search'] ?? '',
-        'brand' => (int) ($query['brand'] ?? 0),
-        'color' => (int) ($query['color'] ?? 0),
-        'size' => (int) ($query['size'] ?? 0),
+        'price_min' => $query['price_min'] ?? '',
         'price_max' => $query['price_max'] ?? '',
         'sort' => $query['sort'] ?? 'created_at:desc',
     ];
+
+    $ids = function (string $plural, string $singular) use ($query): array {
+        $values = $query[$plural] ?? [];
+        $values = is_array($values) ? $values : [$values];
+
+        if (! empty($query[$singular])) {
+            $values[] = $query[$singular];
+        }
+
+        return array_values(array_unique(array_filter(array_map('intval', $values), fn (int $id) => $id > 0)));
+    };
+
+    $selectedBrands = $ids('brands', 'brand');
+    $selectedColors = $ids('colors', 'color');
+    $selectedSizes = $ids('sizes', 'size');
     $selectedDynamic = $query['filters'] ?? [];
+
     $priceMin = (float) ($facets['price']['min'] ?? 0);
     $priceMax = (float) ($facets['price']['max'] ?? 0);
 
     $sorts = $sorts ?: ['created_at:desc'];
-    $sortLabels = [
-        'created_at:desc' => 'Ən yeni',
-        'price:asc' => 'Qiymət: əvvəl ucuz',
-        'price:desc' => 'Qiymət: əvvəl baha',
-        'sales_count:desc' => 'Ən çox satılan',
-    ];
 
     $findName = function (array $list, int $id) {
         foreach ($list as $item) {
@@ -54,15 +62,47 @@
         }
     }
 
-    $buildUrl = function (array $dropKeys = [], array $dropFilterIds = []) use ($query) {
+    $buildUrl = function (array $dropKeys = [], array $dropFilterValues = [], array $removeValues = []) use ($query) {
         $params = collect($query)->except('page')->all();
 
         foreach ($dropKeys as $key) {
             unset($params[$key]);
         }
 
-        foreach ($dropFilterIds as $filterId) {
-            unset($params['filters'][$filterId]);
+        // A pair is [query key, value]; the same id can come from the legacy
+        // singular key or the multi-select array, so callers pass both.
+        foreach ($removeValues as [$key, $value]) {
+            if (! isset($params[$key])) {
+                continue;
+            }
+
+            $remaining = array_values(array_filter(
+                is_array($params[$key]) ? $params[$key] : [$params[$key]],
+                fn ($item) => (string) $item !== (string) $value
+            ));
+
+            if ($remaining === []) {
+                unset($params[$key]);
+            } else {
+                $params[$key] = $remaining;
+            }
+        }
+
+        foreach ($dropFilterValues as [$filterId, $value]) {
+            if (! isset($params['filters'][$filterId])) {
+                continue;
+            }
+
+            $remaining = array_values(array_filter(
+                (array) $params['filters'][$filterId],
+                fn ($item) => (string) $item !== (string) $value
+            ));
+
+            if ($remaining === []) {
+                unset($params['filters'][$filterId]);
+            } else {
+                $params['filters'][$filterId] = $remaining;
+            }
 
             if (isset($params['filters']) && $params['filters'] === []) {
                 unset($params['filters']);
@@ -83,16 +123,29 @@
         $chips[] = ['label' => $activeCategoryName, 'url' => $buildUrl(['category'])];
     }
 
-    if ($selected['brand']) {
-        $chips[] = ['label' => $findName($facets['brands'] ?? [], $selected['brand']) ?? 'Brend', 'url' => $buildUrl(['brand'])];
+    foreach ($selectedBrands as $brandId) {
+        $chips[] = [
+            'label' => $findName($facets['brands'] ?? [], $brandId) ?? 'Brend',
+            'url' => $buildUrl([], [], [['brands', $brandId], ['brand', $brandId]]),
+        ];
     }
 
-    if ($selected['color']) {
-        $chips[] = ['label' => $findName($facets['colors'] ?? [], $selected['color']) ?? 'Rəng', 'url' => $buildUrl(['color'])];
+    foreach ($selectedColors as $colorId) {
+        $chips[] = [
+            'label' => $findName($facets['colors'] ?? [], $colorId) ?? 'Rəng',
+            'url' => $buildUrl([], [], [['colors', $colorId], ['color', $colorId]]),
+        ];
     }
 
-    if ($selected['size']) {
-        $chips[] = ['label' => $findName($facets['sizes'] ?? [], $selected['size']) ?? 'Ölçü', 'url' => $buildUrl(['size'])];
+    foreach ($selectedSizes as $sizeId) {
+        $chips[] = [
+            'label' => $findName($facets['sizes'] ?? [], $sizeId) ?? 'Ölçü',
+            'url' => $buildUrl([], [], [['sizes', $sizeId], ['size', $sizeId]]),
+        ];
+    }
+
+    if ($selected['price_min'] !== '' && $selected['price_min'] !== null) {
+        $chips[] = ['label' => '≥ '.number_format((float) $selected['price_min'], 0).' ₼', 'url' => $buildUrl(['price_min'])];
     }
 
     if ($selected['price_max'] !== '' && $selected['price_max'] !== null) {
@@ -101,50 +154,34 @@
 
     foreach ($dynamicFilters as $filter) {
         foreach ((array) ($selectedDynamic[$filter['id']] ?? []) as $value) {
-            $chips[] = ['label' => (string) $value, 'url' => $buildUrl([], [$filter['id']])];
+            $chips[] = ['label' => (string) $value, 'url' => $buildUrl([], [[$filter['id'], $value]])];
         }
     }
 
     $activeCount = count($chips);
-    $customPrice = $selected['price_max'] !== '' && $selected['price_max'] !== null;
-
-    $priceUrl = function ($limit) use ($query) {
-        $params = collect($query)->except('page')->all();
-
-        if ($limit === null) {
-            unset($params['price_max']);
-        } else {
-            $params['price_max'] = $limit;
-        }
-
-        $qs = http_build_query($params);
-
-        return $qs === '' ? '/shop' : '/shop?'.$qs;
-    };
 @endphp
 
 <form class="sf-shop-filters" action="/shop" method="GET" data-sf-filter-form>
     <input type="hidden" name="page" value="1">
     {{-- Sorting lives in the page toolbar; keep the chosen value when filters are applied. --}}
     <input type="hidden" name="sort" value="{{ $selected['sort'] }}">
+    @if ($selected['search'] !== '')
+        <input type="hidden" name="search" value="{{ $selected['search'] }}">
+    @endif
+    @if (! empty($query['vendor_id']))
+        <input type="hidden" name="vendor_id" value="{{ $query['vendor_id'] }}">
+    @endif
 
     <div class="sf-filters-head">
         <div class="sf-filters-head__title">
-            <i class="fa-regular fa-sliders"></i>
             Filtrlər
             @if ($activeCount)
                 <span class="sf-filters-head__badge">{{ $activeCount }}</span>
             @endif
         </div>
         @if ($activeCount)
-            <a href="/shop" class="sf-filters-head__reset">Sıfırla</a>
+            <a href="/shop" class="sf-filters-head__reset">Təmizlə</a>
         @endif
-    </div>
-
-    <div class="sf-filter-search">
-        <i class="fa-regular fa-magnifying-glass"></i>
-        <input id="sf-search" type="search" name="search" value="{{ $selected['search'] }}" placeholder="Elan axtar…" aria-label="Axtarış">
-        <button type="submit" aria-label="Axtar">Axtar</button>
     </div>
 
     @if ($chips)
@@ -155,16 +192,12 @@
                     <i class="fa-solid fa-xmark"></i>
                 </a>
             @endforeach
-            <a href="/shop" class="sf-filter-chip sf-filter-chip--clear">Hamısını təmizlə</a>
         </div>
     @endif
 
     <details class="sf-filter-card" open>
         <summary class="sf-filter-head">
-            <span>Kateqoriyalar</span>
-            @if ($activeCategoryName)
-                <span class="sf-filter-head__value">{{ $activeCategoryName }}</span>
-            @endif
+            <span>Kateqoriya</span>
             <i class="fa-solid fa-chevron-down sf-filter-head__chevron"></i>
         </summary>
         <select name="category" data-sf-auto-submit>
@@ -186,48 +219,47 @@
         <details class="sf-filter-card" open>
             <summary class="sf-filter-head">
                 <span>Qiymət</span>
-                @if ($customPrice)
-                    <span class="sf-filter-head__value">≤ {{ number_format((float) $selected['price_max'], 0) }} ₼</span>
-                @endif
                 <i class="fa-solid fa-chevron-down sf-filter-head__chevron"></i>
             </summary>
-            <div class="sf-price-quick">
-                @foreach (array_values(array_filter([50, 100, 250, 500, 1000], fn ($limit) => $limit < $priceMax)) as $limit)
-                    <a href="{{ $priceUrl($limit) }}"
-                       class="sf-price-chip {{ (string) $limit === (string) $selected['price_max'] ? 'is-active' : '' }}">
-                        ≤ {{ number_format($limit, 0) }} ₼
-                    </a>
-                @endforeach
-                @if ($customPrice)
-                    <a href="{{ $priceUrl(null) }}" class="sf-price-chip">Limiti sil</a>
-                @endif
+            <div class="sf-price-range">
+                <label class="sf-price-field">
+                    <span>Ən az</span>
+                    <span class="sf-price-field__box">
+                        <input type="number" name="price_min" min="0" max="{{ ceil($priceMax) }}" step="1"
+                               value="{{ $selected['price_min'] }}" placeholder="{{ floor($priceMin) }}">
+                        <span>₼</span>
+                    </span>
+                </label>
+                <span class="sf-price-range__dash" aria-hidden="true">—</span>
+                <label class="sf-price-field">
+                    <span>Ən çox</span>
+                    <span class="sf-price-field__box">
+                        <input type="number" name="price_max" min="0" max="{{ ceil($priceMax) }}" step="1"
+                               value="{{ $selected['price_max'] }}" placeholder="{{ ceil($priceMax) }}">
+                        <span>₼</span>
+                    </span>
+                </label>
             </div>
-            <label class="sf-price-input" for="sf-price-max">
-                <span>Öz limitiniz</span>
-                <span class="sf-price-input__field">
-                    <input id="sf-price-max" type="number" name="price_max" min="{{ floor($priceMin) }}" max="{{ ceil($priceMax) }}"
-                           step="1" value="{{ $selected['price_max'] }}" placeholder="{{ ceil($priceMax) }}" data-sf-auto-submit>
-                    <span>₼</span>
-                </span>
-            </label>
-            <p class="sf-price-hint">Aralıq: {{ number_format($priceMin, 0) }} – {{ number_format($priceMax, 0) }} ₼</p>
+            <button type="submit" class="sf-price-apply">Tətbiq et</button>
+            <p class="sf-price-hint">Mövcud aralıq: {{ number_format($priceMin, 0) }} – {{ number_format($priceMax, 0) }} ₼</p>
         </details>
     @endif
 
     @if (! empty($facets['brands']))
+        @php
+            $extraBrands = collect($facets['brands'])->skip(10)
+                ->reject(fn ($brand) => in_array((int) $brand['id'], $selectedBrands, true))->count();
+        @endphp
         <details class="sf-filter-card" open>
             <summary class="sf-filter-head">
                 <span>Brendlər</span>
                 <i class="fa-solid fa-chevron-down sf-filter-head__chevron"></i>
             </summary>
             <div class="sf-filter-options">
-                <label class="sf-filter-option">
-                    <input type="radio" name="brand" value="" @checked(! $selected['brand']) data-sf-auto-submit>
-                    <span class="sf-filter-option__text">Hamısı</span>
-                </label>
-                @foreach (array_slice($facets['brands'], 0, 12) as $brand)
-                    <label class="sf-filter-option">
-                        <input type="radio" name="brand" value="{{ $brand['id'] }}" @checked($selected['brand'] === (int) $brand['id']) data-sf-auto-submit>
+                @foreach ($facets['brands'] as $index => $brand)
+                    <label class="sf-filter-option" @if ($index >= 10 && ! in_array((int) $brand['id'], $selectedBrands, true)) data-sf-extra hidden @endif>
+                        <input type="checkbox" name="brands[]" value="{{ $brand['id'] }}"
+                               @checked(in_array((int) $brand['id'], $selectedBrands, true)) data-sf-auto-submit>
                         <span class="sf-filter-option__text">
                             @if (! empty($brand['image']))
                                 <img src="{{ $brand['image'] }}" alt="" loading="lazy" onerror="this.remove()">
@@ -238,26 +270,29 @@
                     </label>
                 @endforeach
             </div>
+            @if ($extraBrands > 0)
+                <button type="button" class="sf-filter-more" data-sf-show-more
+                        data-more-label="Daha çox göstər (+{{ $extraBrands }})"
+                        data-less-label="Daha az göstər">Daha çox göstər (+{{ $extraBrands }})</button>
+            @endif
         </details>
     @endif
 
     @if (! empty($facets['colors']))
+        @php
+            $extraColors = collect($facets['colors'])->skip(10)
+                ->reject(fn ($color) => in_array((int) $color['id'], $selectedColors, true))->count();
+        @endphp
         <details class="sf-filter-card" open>
             <summary class="sf-filter-head">
                 <span>Rənglər</span>
-                @if ($selected['color'])
-                    <span class="sf-filter-head__value">{{ $findName($facets['colors'], $selected['color']) ?? 'Seçilib' }}</span>
-                @endif
                 <i class="fa-solid fa-chevron-down sf-filter-head__chevron"></i>
             </summary>
             <div class="sf-filter-options">
-                <label class="sf-filter-option">
-                    <input type="radio" name="color" value="" @checked(! $selected['color']) data-sf-auto-submit>
-                    <span class="sf-filter-option__text">Hamısı</span>
-                </label>
-                @foreach (array_slice($facets['colors'], 0, 12) as $color)
-                    <label class="sf-filter-option">
-                        <input type="radio" name="color" value="{{ $color['id'] }}" @checked($selected['color'] === (int) $color['id']) data-sf-auto-submit>
+                @foreach ($facets['colors'] as $index => $color)
+                    <label class="sf-filter-option" @if ($index >= 10 && ! in_array((int) $color['id'], $selectedColors, true)) data-sf-extra hidden @endif>
+                        <input type="checkbox" name="colors[]" value="{{ $color['id'] }}"
+                               @checked(in_array((int) $color['id'], $selectedColors, true)) data-sf-auto-submit>
                         <span class="sf-filter-option__text">
                             <span class="sf-swatch" style="background-color: {{ $color['hex'] ?? '#cccccc' }}"></span>
                             {{ $color['name'] ?? '—' }}
@@ -266,31 +301,39 @@
                     </label>
                 @endforeach
             </div>
+            @if ($extraColors > 0)
+                <button type="button" class="sf-filter-more" data-sf-show-more
+                        data-more-label="Daha çox göstər (+{{ $extraColors }})"
+                        data-less-label="Daha az göstər">Daha çox göstər (+{{ $extraColors }})</button>
+            @endif
         </details>
     @endif
 
     @if (! empty($facets['sizes']))
+        @php
+            $extraSizes = collect($facets['sizes'])->skip(12)
+                ->reject(fn ($size) => in_array((int) $size['id'], $selectedSizes, true))->count();
+        @endphp
         <details class="sf-filter-card" open>
             <summary class="sf-filter-head">
                 <span>Ölçülər</span>
-                @if ($selected['size'])
-                    <span class="sf-filter-head__value">{{ $findName($facets['sizes'], $selected['size']) ?? 'Seçilib' }}</span>
-                @endif
                 <i class="fa-solid fa-chevron-down sf-filter-head__chevron"></i>
             </summary>
-            <div class="sf-filter-options">
-                <label class="sf-filter-option">
-                    <input type="radio" name="size" value="" @checked(! $selected['size']) data-sf-auto-submit>
-                    <span class="sf-filter-option__text">Hamısı</span>
-                </label>
-                @foreach (array_slice($facets['sizes'], 0, 12) as $size)
-                    <label class="sf-filter-option">
-                        <input type="radio" name="size" value="{{ $size['id'] }}" @checked($selected['size'] === (int) $size['id']) data-sf-auto-submit>
-                        <span class="sf-filter-option__text">{{ $size['name'] ?? '—' }}</span>
-                        <span class="sf-filter-option__count">{{ $size['products_count'] ?? 0 }}</span>
+            <div class="sf-size-grid">
+                @foreach ($facets['sizes'] as $index => $size)
+                    <label class="sf-size-option" @if ($index >= 12 && ! in_array((int) $size['id'], $selectedSizes, true)) data-sf-extra hidden @endif>
+                        <input type="checkbox" name="sizes[]" value="{{ $size['id'] }}"
+                               @checked(in_array((int) $size['id'], $selectedSizes, true)) data-sf-auto-submit>
+                        <span>{{ $size['name'] ?? '—' }}</span>
+                        <span class="sf-size-option__count">{{ $size['products_count'] ?? 0 }}</span>
                     </label>
                 @endforeach
             </div>
+            @if ($extraSizes > 0)
+                <button type="button" class="sf-filter-more" data-sf-show-more
+                        data-more-label="Daha çox göstər (+{{ $extraSizes }})"
+                        data-less-label="Daha az göstər">Daha çox göstər (+{{ $extraSizes }})</button>
+            @endif
         </details>
     @endif
 
@@ -302,31 +345,35 @@
             $values = ! empty($filter['options']) ? $filter['options'] : ($filter['values'] ?? []);
             $values = array_values(array_unique(array_filter($values)));
             $picked = array_map('strval', (array) ($selectedDynamic[$filter['id']] ?? []));
+            $extraValues = collect($values)->skip(10)
+                ->reject(fn ($value) => in_array((string) $value, $picked, true))->count();
         @endphp
         @if ($values !== [])
             <details class="sf-filter-card" open>
                 <summary class="sf-filter-head">
                     <span>{{ $title }}</span>
-                    @if ($picked)
-                        <span class="sf-filter-head__value">{{ count($picked) }} seçilib</span>
-                    @endif
                     <i class="fa-solid fa-chevron-down sf-filter-head__chevron"></i>
                 </summary>
                 <div class="sf-filter-options sf-filter-options--check">
-                    @foreach (array_slice($values, 0, 12) as $value)
-                        <label class="sf-filter-option">
+                    @foreach ($values as $index => $value)
+                        <label class="sf-filter-option" @if ($index >= 10 && ! in_array((string) $value, $picked, true)) data-sf-extra hidden @endif>
                             <input type="checkbox" name="filters[{{ $filter['id'] }}][]" value="{{ $value }}"
                                    @checked(in_array((string) $value, $picked, true)) data-sf-auto-submit>
                             <span class="sf-filter-option__text">{{ $value }}</span>
                         </label>
                     @endforeach
                 </div>
+                @if ($extraValues > 0)
+                    <button type="button" class="sf-filter-more" data-sf-show-more
+                            data-more-label="Daha çox göstər (+{{ $extraValues }})"
+                            data-less-label="Daha az göstər">Daha çox göstər (+{{ $extraValues }})</button>
+                @endif
             </details>
         @endif
     @endforeach
 
     <div class="sf-filter-actions">
-        <button type="submit" class="sf-btn sf-btn--primary">Tətbiq et</button>
+        <button type="submit" class="sf-btn sf-btn--primary">Nəticələri göstər</button>
         <a href="/shop" class="sf-btn sf-btn--ghost">Sıfırla</a>
     </div>
 </form>
