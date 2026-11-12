@@ -3686,10 +3686,6 @@
     color: #ffffff !important;
 }
 
-.header-1 .container-fluid {
-    padding-inline: clamp(18px, 3.2vw, 44px) !important;
-}
-
 .header-1 .header-main {
     min-height: 74px;
     gap: 18px !important;
