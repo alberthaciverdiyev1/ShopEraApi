@@ -3,13 +3,16 @@
 use App\Http\Controllers\Storefront\AddressController;
 use App\Http\Controllers\Storefront\AuthController;
 use App\Http\Controllers\Storefront\BlogController;
+use App\Http\Controllers\Storefront\CartController;
 use App\Http\Controllers\Storefront\CategoryController;
+use App\Http\Controllers\Storefront\CheckoutController;
 use App\Http\Controllers\Storefront\ContentController;
 use App\Http\Controllers\Storefront\DashboardController;
 use App\Http\Controllers\Storefront\DashboardMessagesController;
 use App\Http\Controllers\Storefront\HomeController;
 use App\Http\Controllers\Storefront\ListingController;
 use App\Http\Controllers\Storefront\ManagedListingController;
+use App\Http\Controllers\Storefront\OrderHistoryController;
 use App\Http\Controllers\Storefront\ProductController;
 use App\Http\Controllers\Storefront\SettingsController;
 use App\Http\Controllers\Storefront\ShopController;
@@ -80,7 +83,26 @@ Route::middleware('auth')->group(function () {
     Route::put('/magaza/panel', [StorePanelController::class, 'update'])->name('storefront.store.panel.update');
     Route::get('/magaza/aciq', [StorePanelController::class, 'open'])->name('storefront.store.open');
     Route::post('/magaza/aciq', [StorePanelController::class, 'create'])->name('storefront.store.open.create');
+
+    // Basket and checkout actions. The pages themselves are public and show a
+    // sign-in prompt to guests.
+    Route::match(['post', 'put'], '/cart/{id}', [CartController::class, 'update'])
+        ->whereNumber('id')
+        ->name('storefront.cart.update');
+    Route::delete('/cart/{id}', [CartController::class, 'destroy'])
+        ->whereNumber('id')
+        ->name('storefront.cart.destroy');
+
+    Route::post('/checkout/address', [CheckoutController::class, 'storeAddress'])->name('storefront.checkout.address');
+    Route::post('/checkout/order', [CheckoutController::class, 'place'])->name('storefront.checkout.place');
+    Route::get('/checkout/whatsapp', [CheckoutController::class, 'whatsapp'])->name('storefront.checkout.whatsapp');
+
+    Route::get('/order/history', [OrderHistoryController::class, 'index'])->name('storefront.orders');
 });
+
+// Not linked from the navigation: kept reachable by direct URL only.
+Route::get('/cart', [CartController::class, 'index'])->name('storefront.cart');
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('storefront.checkout');
 
 // Listing creation is open to guests too: their listing is managed through a
 // secret link, exactly like the Svelte storefront.

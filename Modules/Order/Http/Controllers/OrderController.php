@@ -10,8 +10,6 @@ use Modules\Order\Http\Requests\OrderBuyOneAddRequest;
 use Modules\Order\Http\Requests\OrderUpdateRequest;
 use Modules\Order\Http\Requests\PreviewOrderRequest;
 use Modules\Order\Services\OrderService;
-use Modules\Setting\Entities\Setting;
-use Modules\User\Entities\Basket;
 
 class OrderController extends Controller
 {
@@ -39,55 +37,7 @@ class OrderController extends Controller
      */
     public function whatsappLink(Request $request): JsonResponse
     {
-        $user = $request->user();
-
-        $items = Basket::query()->with('product')->where('user_id', $user->id)->get();
-
-        if ($items->isEmpty()) {
-            return responseHelper(__('Basket is empty.'), 422);
-        }
-
-        $lines = [];
-        $total = 0.0;
-        $index = 1;
-
-        foreach ($items as $item) {
-            $product = $item->product;
-            $quantity = (int) $item->quantity;
-
-            $unit = $product?->price ?? 0;
-            if ($product?->discount !== null && (float) $product->discount > 0 && (float) $product->discount < (float) $unit) {
-                $unit = $product->discount;
-            }
-
-            $lineTotal = (float) $unit * $quantity;
-            $total += $lineTotal;
-
-            $name = is_array($product?->title) ? ($product->title['az'] ?? reset($product->title)) : ($product?->title ?? 'Məhsul');
-            $lines[] = $index++.') '.$name.' x'.$quantity.' = '.number_format($lineTotal, 2).' ₼';
-        }
-
-        $number = preg_replace('/\D/', '', (string) (Setting::query()->value('whatsapp_number') ?? ''));
-
-        if (strlen($number) === 10 && str_starts_with($number, '0')) {
-            $number = '994'.substr($number, 1);
-        } elseif (strlen($number) === 9) {
-            $number = '994'.$number;
-        }
-
-        $text = "Salam! Sifariş etmək istəyirəm:\n".implode("\n", $lines)
-            ."\n\nCəm: ".number_format($total, 2).' ₼'
-            ."\nAd: ".trim(($user->name ?? '').' '.($user->surname ?? ''));
-
-        $url = $number !== ''
-            ? 'https://wa.me/'.$number.'?text='.rawurlencode($text)
-            : null;
-
-        return responseHelper(__('WhatsApp link ready.'), 200, [
-            'number' => $number,
-            'url' => $url,
-            'total' => round($total, 2),
-        ]);
+        return $this->service->whatsappLink($request);
     }
 
     public function getAll(Request $request): JsonResponse

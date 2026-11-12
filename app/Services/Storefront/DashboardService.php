@@ -17,10 +17,16 @@ class DashboardService
      */
     public function recentOrders(int $limit = 5): array
     {
-        $orders = $this->orders
+        return array_slice($this->allOrders(), 0, $limit);
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    public function allOrders(): array
+    {
+        return $this->orders
             ->getAll(Request::create('/api/order', 'GET'))
             ->getData(true)['data'] ?? [];
-
-        return array_slice($orders, 0, $limit);
     }
 }

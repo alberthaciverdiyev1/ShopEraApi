@@ -22,7 +22,7 @@ class StoreAddressRequest extends FormRequest
     {
         return [
             'full_name' => ['required', 'string', 'max:255'],
-            'contact_number' => ['required', 'integer'],
+            'contact_number' => ['required', 'string', 'regex:/^[0-9]{9,15}$/'],
             'city' => ['required', 'string', 'max:255'],
             'town_village_district' => ['required', 'string', 'max:255'],
             'street_building_number' => ['required', 'string', 'max:255'],
@@ -36,7 +36,7 @@ class StoreAddressRequest extends FormRequest
         return [
             'full_name.required' => 'Ad və soyad mütləqdir.',
             'contact_number.required' => 'Əlaqə nömrəsi mütləqdir.',
-            'contact_number.integer' => 'Əlaqə nömrəsi rəqəmlərdən ibarət olmalıdır.',
+            'contact_number.regex' => 'Əlaqə nömrəsi 9-15 rəqəmdən ibarət olmalıdır.',
             'city.required' => 'Şəhər seçilməlidir.',
             'town_village_district.required' => 'Rayon/qəsəbə mütləqdir.',
             'street_building_number.required' => 'Küçə və bina mütləqdir.',
