@@ -139,3 +139,163 @@ if (popup) {
         });
     }
 }
+
+/* Shop filters: selects and radios submit the GET form immediately. */
+document.querySelectorAll('[data-sf-auto-submit]').forEach((input) => {
+    input.addEventListener('change', () => {
+        const form = input.closest('form');
+
+        if (!form) return;
+
+        const page = form.querySelector('input[name="page"]');
+
+        if (page) page.value = '1';
+
+        form.submit();
+    });
+});
+
+/* Mobile filter drawer. */
+const sidebar = document.querySelector('[data-sf-sidebar]');
+const sidebarToggle = document.querySelector('[data-sf-mobile-filters]');
+const sidebarBackdrop = document.querySelector('.sf-shop__backdrop');
+
+function setSidebarOpen(open) {
+    if (!sidebar) return;
+
+    sidebar.classList.toggle('is-open', open);
+    document.body.classList.toggle('sf-no-scroll', open);
+
+    if (sidebarBackdrop) sidebarBackdrop.hidden = !open;
+}
+
+if (sidebar && sidebarToggle) {
+    sidebarToggle.addEventListener('click', () => setSidebarOpen(!sidebar.classList.contains('is-open')));
+}
+
+document.querySelectorAll('[data-sf-sidebar-close]').forEach((element) => {
+    element.addEventListener('click', () => setSidebarOpen(false));
+});
+
+/* Product gallery: thumbnails, arrows and a lightbox. */
+const gallery = document.querySelector('[data-sf-gallery]');
+
+if (gallery) {
+    const image = gallery.querySelector('[data-sf-gallery-image]');
+    const thumbs = Array.from(gallery.querySelectorAll('[data-sf-gallery-thumb]'));
+    const lightbox = gallery.querySelector('[data-sf-lightbox]');
+    const lightboxImage = gallery.querySelector('[data-sf-lightbox-image]');
+    let current = 0;
+
+    const show = (index) => {
+        if (thumbs.length === 0) return;
+
+        current = (index + thumbs.length) % thumbs.length;
+        const src = thumbs[current].dataset.src;
+
+        if (image) image.src = src;
+
+        thumbs.forEach((thumb, position) => thumb.classList.toggle('is-active', position === current));
+    };
+
+    thumbs.forEach((thumb, index) => {
+        thumb.addEventListener('click', () => show(index));
+    });
+
+    gallery.querySelector('[data-sf-gallery-prev]')?.addEventListener('click', () => show(current - 1));
+    gallery.querySelector('[data-sf-gallery-next]')?.addEventListener('click', () => show(current + 1));
+
+    if (lightbox && lightboxImage) {
+        gallery.querySelector('[data-sf-gallery-open]')?.addEventListener('click', () => {
+            lightboxImage.src = image ? image.src : lightboxImage.src;
+            lightbox.hidden = false;
+            document.body.classList.add('sf-no-scroll');
+        });
+
+        const closeLightbox = () => {
+            lightbox.hidden = true;
+            document.body.classList.remove('sf-no-scroll');
+        };
+
+        gallery.querySelector('[data-sf-lightbox-close]')?.addEventListener('click', closeLightbox);
+        lightbox.addEventListener('click', (event) => {
+            if (event.target === lightbox) closeLightbox();
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (lightbox.hidden) return;
+
+            if (event.key === 'Escape') closeLightbox();
+            if (event.key === 'ArrowLeft') {
+                show(current - 1);
+                lightboxImage.src = image ? image.src : lightboxImage.src;
+            }
+            if (event.key === 'ArrowRight') {
+                show(current + 1);
+                lightboxImage.src = image ? image.src : lightboxImage.src;
+            }
+        });
+    }
+}
+
+/* Product tabs. */
+document.querySelectorAll('[data-sf-tabs]').forEach((tabs) => {
+    const buttons = Array.from(tabs.querySelectorAll('[data-sf-tab]'));
+    const panels = Array.from(tabs.querySelectorAll('[data-sf-panel]'));
+
+    buttons.forEach((button) => {
+        button.addEventListener('click', () => {
+            const name = button.dataset.sfTab;
+
+            buttons.forEach((item) => item.classList.toggle('is-active', item === button));
+            panels.forEach((panel) => {
+                const active = panel.dataset.sfPanel === name;
+
+                panel.classList.toggle('is-active', active);
+                panel.hidden = !active;
+            });
+        });
+    });
+});
+
+/* Seller contact: fetched on demand so the number never sits in the HTML. */
+const contact = document.querySelector('[data-sf-contact]');
+
+if (contact) {
+    const button = contact.querySelector('[data-sf-contact-reveal]');
+    const details = contact.querySelector('[data-sf-contact-details]');
+    const error = contact.querySelector('[data-sf-contact-error]');
+
+    button?.addEventListener('click', async () => {
+        button.disabled = true;
+        if (error) error.hidden = true;
+
+        try {
+            const response = await fetch(`/shop/listings/${contact.dataset.listing}/contact`, {
+                headers: { Accept: 'application/json' },
+            });
+
+            if (!response.ok) throw new Error('request failed');
+
+            const payload = await response.json();
+            const data = payload.data ?? payload;
+            const lines = [];
+            const escape = (value) => String(value).replace(/[&<>"']/g, (character) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+            })[character]);
+
+            if (data.name) lines.push(`<strong>${escape(data.name)}</strong>`);
+            if (data.phone) lines.push(`<a href="tel:${escape(data.phone)}">${escape(data.phone)}</a>`);
+            if (data.email) lines.push(`<a href="mailto:${escape(data.email)}">${escape(data.email)}</a>`);
+
+            if (lines.length === 0) throw new Error('empty contact');
+
+            details.innerHTML = lines.join('');
+            details.hidden = false;
+            button.hidden = true;
+        } catch (failure) {
+            button.disabled = false;
+            if (error) error.hidden = false;
+        }
+    });
+}

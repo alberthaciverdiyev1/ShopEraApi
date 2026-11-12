@@ -69,9 +69,9 @@
     <div class="best-seller-product-items-two__content">
         <div class="best-seller-product-items-two__details">
             <div class="best-seller-product-items-two__details--price">
-                <span class="offer-price">${{ number_format($displayPrice, 2) }}</span>
+                <span class="offer-price">{{ number_format($displayPrice, 2) }} ₼</span>
                 @if ($hasDiscount)
-                    <span class="original-price">${{ number_format($price, 2) }}</span>
+                    <span class="original-price">{{ number_format($price, 2) }} ₼</span>
                 @endif
             </div>
 
