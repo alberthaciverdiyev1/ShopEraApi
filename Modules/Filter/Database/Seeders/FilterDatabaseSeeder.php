@@ -136,6 +136,10 @@ class FilterDatabaseSeeder extends Seeder
             'perfume_volume' => $isPerfume ? '100 ml' : null,
             'perfume_family' => $isPerfume ? 'Fresh' : null,
             'kid_age' => $root === 'Uşaq geyimi' || str_contains($path, 'Uşaq ayaqqabıları') ? '3-6 yaş' : null,
+            'skin_type' => $root === 'Gözəllik'
+                ? (str_contains($path, 'Dəriyə qulluq') ? 'Qarışıq' : 'Normal')
+                : null,
+            'hair_type' => str_contains($path, 'Saç qulluğu') ? 'Düz' : null,
         ];
     }
 
@@ -276,6 +280,20 @@ class FilterDatabaseSeeder extends Seeder
                 'options' => ['0-2 yaş', '3-6 yaş', '7-12 yaş', '13+ yaş'],
                 'attach' => ['Uşaq geyimi', 'Ayaqqabı/Uşaq ayaqqabıları'],
                 'sort_order' => 20,
+            ],
+            'skin_type' => [
+                'title' => $this->title('Dəri tipi', 'Skin type', 'Тип кожи', 'Cilt tipi'),
+                'type' => 'select',
+                'options' => ['Quru', 'Yağlı', 'Qarışıq', 'Həssas', 'Normal'],
+                'attach' => ['Gözəllik'],
+                'sort_order' => 15,
+            ],
+            'hair_type' => [
+                'title' => $this->title('Saç tipi', 'Hair type', 'Тип волос', 'Saç tipi'),
+                'type' => 'select',
+                'options' => ['Düz', 'Dalğalı', 'Qıvrım', 'Boyalı', 'Zədələnmiş'],
+                'attach' => ['Gözəllik/Saç qulluğu'],
+                'sort_order' => 10,
             ],
         ];
     }
