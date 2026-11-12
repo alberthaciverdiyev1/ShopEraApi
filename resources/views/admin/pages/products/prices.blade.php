@@ -1,10 +1,7 @@
 @extends('admin.layouts.app')
 
 @section('content')
-    @php $access =  feature("bulk_price_update") @endphp
-    @if($access)
-
-        <form method="POST" action="{{ route('admin.products.prices.apply') }}"
+    <form method="POST" action="{{ route('admin.products.prices.apply') }}"
               class="mx-auto max-w-xl space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
             @csrf
             <h2 class="font-semibold text-gray-800">Toplu qiymət dəyişikliyi</h2>
@@ -56,12 +53,4 @@
                     onclick="return confirm('Tətbiq edilsin?')">Tətbiq et
             </button>
         </form>
-    @else
-        <form
-            class="mx-auto max-w-xl space-y-4 rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-            @csrf
-            <h2 class="font-semibold text-red-500">Toplu qiymət dəyişikliyi sizin abouneliyinize daxil deyil</h2>
-        </form>
-
-    @endif
 @endsection

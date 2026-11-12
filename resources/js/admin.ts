@@ -93,6 +93,65 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('resize', () => { if (!isMobile()) closeDrawer(); });
 });
 
+/** Sidebar quick search: filter menu links as the operator types. */
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('menu-search') as HTMLInputElement | null;
+    const nav = document.getElementById('admin-nav');
+    const empty = document.getElementById('menu-search-empty');
+    if (!input || !nav) return;
+
+    const apply = () => {
+        const term = input.value.trim().toLocaleLowerCase();
+        let visible = 0;
+
+        nav.querySelectorAll<HTMLElement>('[data-menu-group]').forEach((group) => {
+            let groupVisible = 0;
+            group.querySelectorAll<HTMLAnchorElement>('[data-menu-label]').forEach((link) => {
+                const match = term === '' || (link.dataset.menuLabel ?? '').includes(term);
+                link.parentElement?.classList.toggle('hidden', !match);
+                if (match) groupVisible++;
+            });
+            group.classList.toggle('hidden', groupVisible === 0);
+            visible += groupVisible;
+        });
+
+        empty?.classList.toggle('hidden', visible !== 0);
+    };
+
+    input.addEventListener('input', apply);
+    input.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+            input.value = '';
+            apply();
+            input.blur();
+        }
+    });
+});
+
+/** Light / dark theme toggle, persisted per browser. */
+document.addEventListener('DOMContentLoaded', () => {
+    const button = document.getElementById('theme-toggle');
+    if (!button) return;
+
+    const render = () => {
+        const dark = document.documentElement.classList.contains('dark');
+        button.querySelector('[data-theme-icon="light"]')?.classList.toggle('hidden', dark);
+        button.querySelector('[data-theme-icon="dark"]')?.classList.toggle('hidden', !dark);
+    };
+
+    render();
+
+    button.addEventListener('click', () => {
+        const dark = document.documentElement.classList.toggle('dark');
+        try {
+            localStorage.setItem('admin:theme', dark ? 'dark' : 'light');
+        } catch (e) {
+            // Private mode / blocked storage: the toggle still works for this page.
+        }
+        render();
+    });
+});
+
 /** Category tree: toggling a row shows/hides every descendant row. */
 document.addEventListener('click', (event) => {
     const button = (event.target as HTMLElement).closest<HTMLElement>('[data-toggle-children]');

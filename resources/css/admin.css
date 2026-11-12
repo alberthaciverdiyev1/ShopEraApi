@@ -1,6 +1,9 @@
 @import "tailwindcss";
 @plugin "flowbite/plugin";
 
+/* Class-based dark mode: the layout toggles `.dark` on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @source "../views/admin";
 @source "../node_modules/flowbite";
 
@@ -30,8 +33,18 @@
 #admin-shell.sidebar-collapsed .sidebar .nav-label,
 #admin-shell.sidebar-collapsed .sidebar .nav-group-title,
 #admin-shell.sidebar-collapsed .sidebar .disclaimer,
-#admin-shell.sidebar-collapsed .sidebar .brand-text { display: none; }
+#admin-shell.sidebar-collapsed .sidebar .brand-text,
+#admin-shell.sidebar-collapsed .sidebar .menu-search-wrap { display: none; }
 #admin-shell.sidebar-collapsed .sidebar .nav-link { justify-content: center; }
+#admin-shell.sidebar-collapsed .sidebar .nav-link span.absolute { display: none; }
+
+/* Sidebar scrollbar and quick-search highlight */
+#admin-nav { scrollbar-width: thin; scrollbar-color: rgba(148, 163, 184, .35) transparent; }
+#admin-nav::-webkit-scrollbar { width: 6px; }
+#admin-nav::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, .35); border-radius: 9999px; }
+
+/* Dark panel surfaces (the admin views already carry dark: variants) */
+.dark body { color-scheme: dark; }
 
 /* Mobile: sidebar becomes an off-canvas drawer with a backdrop */
 .sidebar-backdrop { display: none; }
@@ -66,8 +79,10 @@
     #admin-shell.sidebar-collapsed .sidebar .nav-label,
     #admin-shell.sidebar-collapsed .sidebar .nav-group-title,
     #admin-shell.sidebar-collapsed .sidebar .disclaimer,
-    #admin-shell.sidebar-collapsed .sidebar .brand-text { display: revert; }
+    #admin-shell.sidebar-collapsed .sidebar .brand-text,
+    #admin-shell.sidebar-collapsed .sidebar .menu-search-wrap { display: revert; }
     #admin-shell.sidebar-collapsed .sidebar .nav-link { justify-content: flex-start; }
+    #admin-shell.sidebar-collapsed .sidebar .nav-link span.absolute { display: revert; }
 
     /* Content column fills the viewport (sidebar is out of flow) */
     #admin-shell > .flex { width: 100%; }
@@ -95,10 +110,3 @@
 }
 
 #global-spinner.is-active { opacity: 1 !important; }
-
-/* Read-only "Premium required" sections: grey out and freeze the content */
-.plan-locked {
-    filter: grayscale(1);
-    opacity: .55;
-    user-select: none;
-}

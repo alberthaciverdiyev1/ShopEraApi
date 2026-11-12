@@ -17,28 +17,12 @@ abstract class AdminController extends Controller
     private ?array $enabledLocales = null;
 
     /**
-     * Locales this site has enabled (feature flags lang_az/lang_en/lang_ru/lang_tr).
-     * Defaults to all four when no flags are synced.
+     * Locales the site supports. Every store is multilingual now, so all four
+     * locales are always enabled.
      */
     protected function enabledLocales(): array
     {
-        if ($this->enabledLocales === null) {
-            // Without the multi_language feature the panel is az-only.
-            if (! feature('multi_language')) {
-                return $this->enabledLocales = ['az'];
-            }
-
-            $this->enabledLocales = array_values(array_filter(
-                ['az', 'en', 'ru', 'tr'],
-                fn (string $locale): bool => feature("lang_{$locale}")
-            ));
-
-            if ($this->enabledLocales === []) {
-                $this->enabledLocales = ['az', 'en', 'ru', 'tr'];
-            }
-        }
-
-        return $this->enabledLocales;
+        return $this->enabledLocales ??= ['az', 'en', 'ru', 'tr'];
     }
 
     protected function requirePermission(string $permission): void

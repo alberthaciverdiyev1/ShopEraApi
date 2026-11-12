@@ -14,14 +14,12 @@ use Symfony\Component\HttpFoundation\Response;
 class CachePublicApi
 {
     private const EXACT = [
-        'api/features',
         'api/theme',
         'api/setting',
         'api/promo-blocks',
         'api/home',
         'api/data-version',
         'api/contact',
-        'api/subscription',
     ];
 
     private const PREFIXES = [

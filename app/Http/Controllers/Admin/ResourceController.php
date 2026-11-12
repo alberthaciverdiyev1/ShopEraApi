@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
 use Illuminate\Support\ViewErrorBag;
-use Illuminate\Validation\ValidationException;
 
 /**
  * Declarative CRUD used by the simple catalogue/content screens. A concrete
@@ -395,15 +394,11 @@ abstract class ResourceController extends AdminController
     }
 
     /**
-     * Fields the controller decides to show. There is no feature/plan gating
-     * any more, so every declared field is visible.
+     * Fields the controller decides to show.
      */
     protected function visibleFields(): array
     {
-        return array_values(array_filter($this->fields, function (array $field): bool {
-
-            return true;
-        }));
+        return array_values($this->fields);
     }
 
     /** @return array<string,array<int|string,mixed>> Options for select fields. */

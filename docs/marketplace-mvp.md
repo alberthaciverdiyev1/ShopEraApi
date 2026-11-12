@@ -84,7 +84,8 @@
 - [ ] Storage prefiksini sil (`TenantContext::storagePath` → olduğu kimi qaytar).
 - [ ] **Data miqrasiyası**: mövcud tenant DB-ləri + control → tək DB-yə birləşdir.
 - [ ] `manager:map` / `tenant:provision` / `tenant:*` əmrlərini çıxar və ya no-op et.
-- [ ] Subscription/entitlement (control) cədvəllərini tək DB-yə köçür.
+- [x] Subscription/entitlement modeli tamamilə ləğv edildi (`tenant_subscriptions`,
+  `tenant_entitlements` cədvəlləri silinir; çoxmağazalı sistemdə abonelik yoxdur).
 
 > **Diqqət:** Data miqrasiyası geri dönməzdir. İcra etməzdən əvvəl mövcud DB-lərin
 > siyahısı və birləşdirmə qaydası (host → satıcı/mağaza) təsdiqlənməlidir.
