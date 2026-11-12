@@ -5,7 +5,7 @@
     $last = (int) ($meta['last_page'] ?? 1);
     $query = request()->query();
 
-    $url = fn (int $page) => url('/shop').'?'.http_build_query(array_merge($query, ['page' => $page]));
+    $url = fn (int $page) => url(request()->path()).'?'.http_build_query(array_merge($query, ['page' => $page]));
 
     $start = max(1, $current - 2);
     $end = min($last, $current + 2);

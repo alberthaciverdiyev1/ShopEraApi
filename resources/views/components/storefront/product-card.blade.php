@@ -1,9 +1,11 @@
 @props(['product'])
 
 @php
-    $images = collect($product['images'] ?? []);
-    $image = $images->firstWhere('image_path')['image_path']
-        ?? '/assets/images/top-deals-item/topDealsItemThumb1_1.png';
+    $fallbackImage = '/assets/images/top-deals-item/topDealsItemThumb1_1.png';
+    $image = collect($product['images'] ?? [])
+        ->pluck('image_path')
+        ->filter()
+        ->first() ?? $fallbackImage;
 
     $price = (float) ($product['price'] ?? 0);
     $discountPrice = (float) ($product['discount'] ?? 0);
@@ -51,7 +53,8 @@
     @endif
 
     <div class="best-seller-product-items-two__thumb">
-        <img src="{{ $image }}" alt="{{ $product['title'] ?? '' }}" loading="lazy">
+        <img src="{{ $image }}" alt="{{ $product['title'] ?? '' }}" loading="lazy"
+             onerror="this.onerror=null;this.src='{{ $fallbackImage }}';">
 
         @if (! empty($product['rate']))
             <div class="card-rating">

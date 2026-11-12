@@ -67,7 +67,7 @@
             </div>
 
             <div class="sf-chat__guest-note">
-                <i class="fa-solid fa-shield-halved"></i>
+                <i class="fa-solid fa-shield"></i>
                 <span>7/24 Müştəri Xidmətləri</span>
             </div>
         </div>

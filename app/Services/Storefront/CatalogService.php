@@ -131,6 +131,10 @@ class CatalogService
             $params['price_max'] = (float) $query['price_max'];
         }
 
+        if (! empty($query['vendor_id'])) {
+            $params['vendor_id'] = (int) $query['vendor_id'];
+        }
+
         if (! empty($query['sort'])) {
             [$orderBy, $orderType] = array_pad(explode(':', (string) $query['sort'], 2), 2, null);
 

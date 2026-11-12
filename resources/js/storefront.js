@@ -299,3 +299,19 @@ if (contact) {
         }
     });
 }
+
+const faq = document.querySelector('[data-sf-faq]');
+
+if (faq) {
+    faq.querySelectorAll('[data-sf-faq-toggle]').forEach((toggle) => {
+        toggle.addEventListener('click', () => {
+            const item = toggle.closest('.sf-faq__item');
+            const answer = item?.querySelector('.sf-faq__answer');
+            if (!item || !answer) return;
+
+            const isOpen = item.classList.toggle('is-open');
+            toggle.setAttribute('aria-expanded', String(isOpen));
+            answer.hidden = !isOpen;
+        });
+    });
+}
