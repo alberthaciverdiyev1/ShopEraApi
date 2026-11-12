@@ -93,7 +93,12 @@ class CatalogService
         $categories = Category::query()
             ->whereNull('parent_id')
             ->withCount('products')
-            ->with(['children' => fn ($query) => $query->withCount('products')->orderByDesc('sort_order')])
+            ->with([
+                'children' => fn ($query) => $query
+                    ->withCount('products')
+                    ->orderByDesc('sort_order')
+                    ->with(['children' => fn ($nested) => $nested->withCount('products')->orderByDesc('sort_order')]),
+            ])
             ->orderByDesc('sort_order')
             ->get();
 

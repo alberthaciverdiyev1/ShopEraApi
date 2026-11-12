@@ -315,3 +315,265 @@ if (faq) {
         });
     });
 }
+
+/* Header: sticky, catalog mega menu and search suggestions */
+(() => {
+    const header = document.getElementById('header-sticky');
+
+    if (header) {
+        const onScroll = () => header.classList.toggle('sticky', window.scrollY > 250);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+    }
+
+    const catalog = document.querySelector('[data-sf-catalog]');
+    const catalogToggle = document.querySelector('[data-sf-catalog-toggle]');
+
+    if (catalog && catalogToggle) {
+        const panel = catalog.querySelector('[data-sf-catalog-menu]');
+        const parentLinks = panel ? Array.from(panel.querySelectorAll('[data-catalog-parent]')) : [];
+
+        const setPanelColumns = (count) => {
+            if (!panel) return;
+            panel.classList.remove('columns-1', 'columns-2', 'columns-3');
+            panel.classList.add(`columns-${Math.min(count, 3)}`);
+        };
+
+        const activateParent = (id) => {
+            parentLinks.forEach((link) => link.classList.toggle('active', link.dataset.catalogParent === String(id)));
+
+            panel?.querySelectorAll('[data-catalog-children]').forEach((column) => {
+                column.hidden = column.dataset.catalogChildren !== String(id);
+            });
+            panel?.querySelectorAll('[data-catalog-leaves]').forEach((column) => {
+                column.hidden = true;
+            });
+
+            const childColumn = panel?.querySelector(`[data-catalog-children="${id}"]`);
+            setPanelColumns(childColumn ? (childColumn.querySelector('[data-catalog-child]') ? 2 : 1) : 1);
+        };
+
+        parentLinks.forEach((link) => {
+            const id = link.dataset.catalogParent;
+            link.addEventListener('mouseenter', () => activateParent(id));
+            link.addEventListener('focus', () => activateParent(id));
+        });
+
+        panel?.querySelectorAll('[data-catalog-child]').forEach((link) => {
+            const id = link.dataset.catalogChild;
+
+            const activateChild = () => {
+                panel.querySelectorAll('[data-catalog-child]').forEach((item) => {
+                    item.classList.toggle('active', item.dataset.catalogChild === id);
+                });
+                panel.querySelectorAll('[data-catalog-leaves]').forEach((column) => {
+                    column.hidden = column.dataset.catalogLeaves !== id;
+                });
+
+                const leaves = panel.querySelector(`[data-catalog-leaves="${id}"]`);
+                const parent = link.closest('[data-catalog-children]');
+                const parentId = parent?.dataset.catalogChildren;
+
+                parentLinks.forEach((item) => {
+                    item.classList.toggle('active', item.dataset.catalogParent === String(parentId));
+                });
+                panel.querySelectorAll('[data-catalog-children]').forEach((column) => {
+                    column.hidden = column.dataset.catalogChildren !== parentId;
+                });
+
+                setPanelColumns(leaves ? 3 : 2);
+            };
+
+            link.addEventListener('mouseenter', activateChild);
+            link.addEventListener('focus', activateChild);
+        });
+
+        catalogToggle.addEventListener('click', (event) => {
+            event.preventDefault();
+            const open = catalog.classList.toggle('catalog-open');
+            catalogToggle.setAttribute('aria-expanded', String(open));
+            if (open && parentLinks[0]) activateParent(parentLinks[0].dataset.catalogParent);
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!catalog.contains(event.target)) {
+                catalog.classList.remove('catalog-open');
+                catalogToggle.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        if (parentLinks[0]) activateParent(parentLinks[0].dataset.catalogParent);
+    }
+
+    const search = document.querySelector('[data-sf-search]');
+
+    if (search) {
+        const input = search.querySelector('[data-sf-search-input]');
+        const results = search.querySelector('[data-sf-search-results]');
+        const spinner = search.querySelector('[data-sf-search-spinner]');
+        const clear = search.querySelector('[data-sf-search-clear]');
+        const fallback = '/assets/images/top-deals-item/topDealsItemThumb1_1.png';
+        let timer;
+
+        const escape = (value) => String(value).replace(/[&<>"']/g, (character) => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+        })[character]);
+
+        const close = () => {
+            if (results) results.hidden = true;
+            if (results) results.innerHTML = '';
+            if (clear) clear.hidden = true;
+        };
+
+        const show = (html) => {
+            if (!results) return;
+            results.innerHTML = html;
+            results.hidden = false;
+        };
+
+        const render = (items, query) => {
+            if (!items.length) {
+                show('<div class="search-status-box"><i class="fa-regular fa-face-frown text-muted me-2"></i><span>Uyğun məhsul tapılmadı</span></div>');
+                return;
+            }
+
+            const rows = items.map((item) => {
+                const image = item.images?.[0]?.image_path || fallback;
+                const title = escape(item.title ?? '');
+                const category = item.category?.name ? escape(item.category.name) : '';
+                const price = Number(item.discount || item.price || 0).toFixed(2);
+                const url = item.slug ? `/elan/${encodeURIComponent(item.slug)}` : `/shop/details?id=${item.id}`;
+
+                return `<a href="${url}" class="result-item">
+                    <img src="${escape(image)}" alt="${title}" class="result-thumb" loading="lazy" onerror="this.onerror=null;this.src='${fallback}'">
+                    <div class="result-info">
+                        <div class="result-title">${title}</div>
+                        <div class="result-meta">
+                            ${category ? `<span class="result-category">${category}</span>` : ''}
+                            <span class="result-price">${price} ₼</span>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-chevron-right result-arrow"></i>
+                </a>`;
+            }).join('');
+
+            show(`<div class="dropdown-header"><span>Məhsullar</span></div>
+                <div class="results-list">${rows}</div>
+                <div class="dropdown-footer">
+                    <a class="btn-view-all" href="/shop?search=${encodeURIComponent(query)}">Hamısına bax <i class="fa-solid fa-arrow-right ms-1"></i></a>
+                </div>`);
+        };
+
+        const run = async (query) => {
+            if (spinner) spinner.hidden = false;
+
+            try {
+                const response = await fetch(`/api/product?search=${encodeURIComponent(query)}&per_page=5&is_application=1`, {
+                    headers: { Accept: 'application/json' },
+                });
+                if (!response.ok) throw new Error('search failed');
+
+                const payload = await response.json();
+                const items = Array.isArray(payload) ? payload : (payload.data ?? []);
+                render(items, query);
+            } catch (error) {
+                show('<div class="search-status-box">Axtarış alınmadı</div>');
+            } finally {
+                if (spinner) spinner.hidden = true;
+            }
+        };
+
+        input?.addEventListener('input', () => {
+            const query = input.value.trim();
+            clearTimeout(timer);
+
+            if (clear) clear.hidden = query.length === 0;
+
+            if (query.length < 2) {
+                close();
+                return;
+            }
+
+            timer = setTimeout(() => run(query), 250);
+        });
+
+        clear?.addEventListener('click', () => {
+            if (input) {
+                input.value = '';
+                input.focus();
+            }
+            close();
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!search.contains(event.target)) close();
+        });
+    }
+
+    /* Password visibility toggles (login/register) */
+    document.querySelectorAll('[data-sf-password-toggle]').forEach((toggle) => {
+        toggle.addEventListener('click', () => {
+            const input = toggle.closest('.sf-auth-password')?.querySelector('[data-sf-password]');
+            if (!input) return;
+
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            toggle.setAttribute('aria-label', show ? 'Şifrəni gizlət' : 'Şifrəni göstər');
+            toggle.innerHTML = `<i class="fa-regular ${show ? 'fa-eye-slash' : 'fa-eye'}"></i>`;
+        });
+    });
+
+    /* Mobile bottom navigation + account drawer */
+    const bottomNav = document.querySelector('[data-sf-bottom-nav]');
+    const drawer = document.getElementById('mobile-account-drawer');
+
+    if (bottomNav) {
+        let lastScrollY = window.scrollY;
+        let ticking = false;
+
+        window.addEventListener('scroll', () => {
+            if (ticking) return;
+
+            window.requestAnimationFrame(() => {
+                const currentScrollY = window.scrollY;
+                const diff = currentScrollY - lastScrollY;
+
+                if (Math.abs(diff) > 8) {
+                    if (currentScrollY > 80 && diff > 0) {
+                        bottomNav.classList.add('nav-hidden');
+                    } else if (diff < 0 || currentScrollY <= 80) {
+                        bottomNav.classList.remove('nav-hidden');
+                    }
+                    lastScrollY = currentScrollY;
+                }
+
+                ticking = false;
+            });
+            ticking = true;
+        }, { passive: true });
+    }
+
+    if (bottomNav && drawer) {
+        const openButton = bottomNav.querySelector('[data-sf-account-drawer-open]');
+        const closeButtons = drawer.querySelectorAll('[data-sf-account-drawer-close]');
+
+        const openDrawer = () => {
+            drawer.hidden = false;
+            document.body.style.overflow = 'hidden';
+            openButton?.setAttribute('aria-expanded', 'true');
+        };
+
+        const closeDrawer = () => {
+            drawer.hidden = true;
+            document.body.style.overflow = '';
+            openButton?.setAttribute('aria-expanded', 'false');
+        };
+
+        openButton?.addEventListener('click', openDrawer);
+        closeButtons.forEach((button) => button.addEventListener('click', closeDrawer));
+
+        window.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') closeDrawer();
+        });
+    }
+})();

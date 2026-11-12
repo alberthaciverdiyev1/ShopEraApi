@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\AdminAuthenticate;
+use App\Http\Middleware\CachePublicApi;
 use App\Http\Middleware\SetLocaleFromHeader;
 use App\Http\Middleware\TrustProxies;
 use Illuminate\Auth\AuthenticationException;
@@ -32,11 +33,13 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(prepend: [
             SetLocaleFromHeader::class,
         ]);
-        $middleware->api(append: [\App\Http\Middleware\CachePublicApi::class]);
+        $middleware->api(append: [CachePublicApi::class]);
         $middleware->append([TrustProxies::class]);
 
-        // Unauthenticated users are sent to the storefront admin login.
-        $middleware->redirectGuestsTo(fn (Request $request): string => route('admin.login'));
+        // Admin guests go to the admin login; everybody else to the storefront.
+        $middleware->redirectGuestsTo(fn (Request $request): string => $request->is('admin', 'admin/*')
+            ? route('admin.login')
+            : route('storefront.login'));
 
         $middleware->alias([
             'role' => RoleMiddleware::class,

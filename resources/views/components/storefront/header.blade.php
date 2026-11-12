@@ -1,97 +1,136 @@
-@props(['categories' => []])
-
 @php
-    $roots = collect($categories)->filter(fn ($category) => empty($category['parent_id']));
-
-    // Top-level categories read best in the catalog menu; fall back to
-    // whatever came back when the tree is flat.
-    $menuCategories = ($roots->isNotEmpty() ? $roots : collect($categories))->take(12);
+    $categories = app(\App\Services\Storefront\CatalogService::class)->categories();
 @endphp
 
-<header class="sf-header">
-    <div class="sf-header__top">
-        <div class="container-fluid sf-header__top-inner">
-            <a class="sf-header__phone" href="tel:+994500000000">
-                <i class="icon-telephone"></i>
-                <span>+994 50 000 00 00</span>
-            </a>
+@php
+    $navLinks = [
+        ['href' => '/', 'label' => 'Ana səhifə'],
+        ['href' => '/shop', 'label' => 'Elanlar'],
+        ['href' => '/about', 'label' => 'Haqqımızda'],
+        ['href' => '/blog', 'label' => 'Bloq'],
+        ['href' => '/contact', 'label' => 'Əlaqə'],
+    ];
 
-            <nav class="sf-header__links" aria-label="Əsas menyu">
-                <a href="/">Ana səhifə</a>
-                <a href="/shop">Elanlar</a>
-                <a href="/blog">Bloq</a>
-                <a href="/about">Haqqımızda</a>
-                <a href="/faq">FAQ</a>
-                <a href="/contact">Əlaqə</a>
+    $isActive = fn (string $href): bool => $href === '/'
+        ? request()->path() === '/'
+        : request()->is(ltrim($href, '/').'*');
+
+    $user = \Illuminate\Support\Facades\Auth::user();
+@endphp
+
+<header class="header-section-1">
+    <div id="header-sticky" class="header-1">
+        <div class="header-top-one">
+            <div class="phone-icon">
+                <i class="icon-telephone"></i>
+                <a href="tel:+994500000000">+994 50 000 00 00</a>
+            </div>
+
+            <nav class="top-nav-links" aria-label="Əsas menyu">
+                <ul>
+                    @foreach ($navLinks as $link)
+                        <li class="{{ $isActive($link['href']) ? 'active' : '' }}">
+                            <a href="{{ $link['href'] }}" class="{{ $isActive($link['href']) ? 'active' : '' }}">
+                                {{ $link['label'] }}
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
             </nav>
 
-            <div class="sf-header__account">
-                <a href="/login">Giriş</a>
-                <a href="/register">Qeydiyyat</a>
+            <div class="lang">
+                <div class="user">
+                    @auth
+                        <a href="/dashboard" class="d-inline-flex align-items-center top-account-link">
+                            @if ($user?->avatar)
+                                <img src="{{ $user->avatar }}" alt="{{ $user->name ?? 'User' }}" class="header-avatar me-2">
+                            @else
+                                <i class="fa-solid fa-user"></i>
+                            @endif
+                            {{ $user->name ?? 'Hesabım' }}
+                        </a>
+                        <a href="/magaza/panel">Mağazam</a>
+                        <form action="{{ route('storefront.logout') }}" method="POST" class="d-inline">
+                            @csrf
+                            <button class="user-logout" type="submit">Çıxış</button>
+                        </form>
+                    @endauth
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="sf-header__main">
-        <div class="container-fluid sf-header__main-inner">
-            <button type="button" class="sf-header__burger" data-sf-menu-toggle aria-label="Menyu" aria-expanded="false">
-                <span></span><span></span><span></span>
-            </button>
-
-            <a href="/" class="sf-header__logo">
-                <img src="/assets/images/logo/logo.svg?v=20261002" alt="ShopEra">
-            </a>
-
-            <div class="sf-header__catalog">
-                <button type="button" class="sf-header__catalog-toggle" data-sf-catalog-toggle aria-expanded="false">
-                    <i class="icon-app"></i>
-                    <span>Bütün kateqoriyalar</span>
-                    <i class="fa-regular fa-chevron-down"></i>
-                </button>
-
-                @if ($menuCategories->isNotEmpty())
-                    <div class="sf-header__dropdown" data-sf-catalog-menu hidden>
-                        @foreach ($menuCategories as $category)
-                            <a href="/shop?category={{ $category['id'] }}">
-                                @if (! empty($category['image']))
-                                    <img src="{{ $category['image'] }}" alt="" loading="lazy">
-                                @endif
-                                <span>{{ $category['name'] }}</span>
+        <div class="container-fluid">
+            <div class="mega-menu-wrapper">
+                <div class="header-main">
+                    <div class="header-left">
+                        <div class="logo">
+                            <a href="/" class="header-logo">
+                                <img src="/assets/images/logo/logo.svg?v=20261002" alt="ShopEra" class="header-logo-img">
                             </a>
-                        @endforeach
-                        <a class="sf-header__dropdown-all" href="/shop">Bütün elanlar →</a>
+                        </div>
+
+                        <div class="header-cataegory-item" data-sf-catalog>
+                            <ul class="header-cataegory">
+                                <li>
+                                    <a href="/shop" aria-expanded="false" data-sf-catalog-toggle>
+                                        <span class="left-icon"><i class="icon-app"></i></span>
+                                        Bütün kateqoriyalar
+                                        <span class="right-icon"><i class="fa-regular fa-chevron-down"></i></span>
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <x-storefront.catalog-menu :categories="$categories" />
+                        </div>
                     </div>
-                @endif
-            </div>
 
-            <form class="sf-header__search" action="/shop" method="GET" role="search">
-                <input type="search" name="search" placeholder="Elan axtar…" aria-label="Elan axtar">
-                <button type="submit" aria-label="Axtar">
-                    <i class="fa-regular fa-magnifying-glass"></i>
-                </button>
-            </form>
+                    <div class="header-right d-flex justify-content-end align-items-center">
+                        <div class="header-search-shell">
+                            <x-storefront.navbar-search />
+                        </div>
 
-            <div class="sf-header__actions">
-                <a href="/wishlist" class="sf-header__action" aria-label="Sevimlilər">
-                    <i class="fa-regular fa-heart"></i>
-                </a>
-                <a href="/dashboard" class="sf-header__action" aria-label="Hesabım">
-                    <i class="fa-regular fa-user"></i>
-                </a>
+                        @auth
+                            <a href="/dashboard" class="header-chat-icon" aria-label="Mesajlar">
+                                <i class="fa-regular fa-comment-dots"></i>
+                            </a>
+                        @else
+                            <a href="{{ route('storefront.login') }}" class="header-chat-icon" aria-label="Mesajlar">
+                                <i class="fa-regular fa-comment-dots"></i>
+                            </a>
+                        @endauth
+
+                        <div class="menu-wishlist menu-cart">
+                            <div class="cart-box wishlist-box">
+                                <div class="shopping-items text-center py-4">
+                                    <p class="text-muted mb-3" style="font-size: 14px;">İstək siyahınız boşdur.</p>
+                                    <a href="/shop" class="theme-btn" style="padding: 10px 20px; font-size: 13px;">Elanlara bax</a>
+                                </div>
+                            </div>
+                            <a class="cart-icon wishlist-icon" href="/wishlist" aria-label="İstək siyahısı">
+                                <i class="fa-regular fa-heart"></i>
+                            </a>
+                        </div>
+
+                        <a href="/elan/ver" class="header-new-listing">
+                            <i class="fa-regular fa-plus"></i>
+                            Yeni elan
+                        </a>
+
+                        @auth
+                            <a href="/dashboard" class="header-login-btn">
+                                @if ($user?->avatar)
+                                    <img src="{{ $user->avatar }}" alt="{{ $user->name ?? 'User' }}" class="header-avatar">
+                                @else
+                                    <i class="fa-regular fa-user"></i>
+                                @endif
+                                <span>{{ $user->name ?? 'Hesabım' }}</span>
+                            </a>
+                        @else
+                            <a href="{{ route('storefront.login') }}" class="header-login-btn">Giriş</a>
+                        @endauth
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-
-    <div class="sf-header__mobile" data-sf-mobile-menu hidden>
-        <nav>
-            <a href="/">Ana səhifə</a>
-            <a href="/shop">Elanlar</a>
-            <a href="/blog">Bloq</a>
-            <a href="/about">Haqqımızda</a>
-            <a href="/faq">FAQ</a>
-            <a href="/contact">Əlaqə</a>
-            <a href="/login">Giriş</a>
-            <a href="/register">Qeydiyyat</a>
-        </nav>
     </div>
 </header>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Storefront\AuthController;
 use App\Http\Controllers\Storefront\BlogController;
 use App\Http\Controllers\Storefront\CategoryController;
 use App\Http\Controllers\Storefront\ContentController;
@@ -20,6 +21,17 @@ use Illuminate\Support\Facades\Route;
 | public/storefront by `php artisan storefront:deploy`.
 |
 */
+
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('storefront.login');
+    Route::post('/login', [AuthController::class, 'login'])->name('storefront.login.attempt');
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('storefront.register');
+    Route::post('/register', [AuthController::class, 'register'])->name('storefront.register.store');
+});
+
+Route::post('/logout', [AuthController::class, 'logout'])
+    ->middleware('auth')
+    ->name('storefront.logout');
 
 Route::get('/', [HomeController::class, 'index'])->name('storefront.home');
 

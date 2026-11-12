@@ -1,7 +1,7 @@
 @props([
     'title' => config('app.name'),
     'description' => null,
-    'categories' => [],
+    'categories' => null,
     'popup' => null,
 ])
 
@@ -31,7 +31,7 @@
     @vite(['resources/css/storefront.css', 'resources/js/storefront.js'])
 </head>
 <body class="storefront">
-    <x-storefront.header :categories="$categories" />
+    <x-storefront.header />
 
     <main class="storefront-main">
         {{ $slot }}
@@ -40,6 +40,8 @@
     <x-storefront.footer />
 
     <x-storefront.live-chat />
+
+    <x-storefront.mobile-bottom-nav />
 
     <x-storefront.popup-modal :popup="$popup" />
 </body>
