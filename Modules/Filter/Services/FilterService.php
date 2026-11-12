@@ -3,6 +3,7 @@
 namespace Modules\Filter\Services;
 
 use Illuminate\Http\JsonResponse;
+use Modules\Category\Entities\Category;
 use Modules\Filter\Entities\CategoryFilter;
 use Modules\Filter\Entities\Filter;
 use Modules\Filter\Entities\FilterValue;
@@ -31,13 +32,34 @@ class FilterService
 
     /**
      * A category's filters together with the values found among its products.
+     *
+     * Filters attached to the category (or one of its ancestors) are always
+     * returned, even before any product carries a value for them. Filters that
+     * only occur through product values keep working as before.
      */
     public function categoryFilters(int $categoryId): JsonResponse
     {
+        $category = Category::query()->find($categoryId);
+
+        $categoryIds = $category
+            ? collect($category->ancestorChain())->pluck('id')->map(fn ($id) => (int) $id)->all()
+            : [$categoryId];
+
+        $attachedIds = CategoryFilter::query()
+            ->whereIn('category_id', $categoryIds)
+            ->pluck('filter_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
         $filters = $this->model->query()
-            ->whereHas('productValues.product', function ($query) use ($categoryId) {
-                $query->where('category_id', $categoryId);
+            ->where(function ($query) use ($categoryId, $attachedIds) {
+                $query->whereHas('productValues.product', fn ($q) => $q->where('category_id', $categoryId));
+
+                if ($attachedIds !== []) {
+                    $query->orWhereIn('id', $attachedIds);
+                }
             })
+            ->orderBy('sort_order')
             ->orderBy('id')
             ->get();
 
@@ -254,7 +276,7 @@ class FilterService
             return [];
         }
 
-        return \Modules\Filter\Entities\ProductFilter::query()
+        return ProductFilter::query()
             ->where('product_id', $productId)
             ->pluck('value', 'filter_id')
             ->all();
@@ -265,7 +287,7 @@ class FilterService
     {
         $options = [];
 
-        foreach (\Modules\Category\Entities\Category::query()->orderBy('id')->get() as $category) {
+        foreach (Category::query()->orderBy('id')->get() as $category) {
             $options[$category->id] = admin_label($category, 'name', '#'.$category->id);
         }
 

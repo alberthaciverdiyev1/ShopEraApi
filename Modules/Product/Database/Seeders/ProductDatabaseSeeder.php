@@ -15,13 +15,28 @@ use Modules\User\Entities\User;
 class ProductDatabaseSeeder extends Seeder
 {
     /**
+     * The catalogue uses the old English category keys; map the fashion ones
+     * onto the current Azerbaijani category paths.
+     */
+    private const CATEGORY_ALIASES = [
+        'Shoes' => 'Ayaqqabı',
+        'Men' => 'Kişi geyimi',
+        'Women' => 'Qadın geyimi',
+        'Kids' => 'Uşaq geyimi',
+        'Makeup' => 'Gözəllik/Makiyaj',
+        'Skincare' => 'Gözəllik/Dəriyə qulluq',
+        'Hair' => 'Gözəllik/Saç qulluğu',
+        'Fragrance' => 'Ətirlər',
+    ];
+
+    /**
      * The real product catalogue. Every title/description is curated in four
      * languages and each product is linked to an existing brand, category,
      * colour set and (where it makes sense) size run.
      */
     public function run(): void
     {
-        $categories = Category::query()->get()->keyBy(fn (Category $c) => $c->getTranslation('name', 'en'));
+        $categories = $this->categoryPaths();
         $brands = Brand::query()->pluck('id', 'name');
         $colors = Color::query()->get()->keyBy(fn (Color $c) => $c->getTranslation('name', 'en'));
         $sizes = Size::query()->get()->keyBy(fn (Size $s) => $s->getTranslation('name', 'en'));
@@ -36,7 +51,8 @@ class ProductDatabaseSeeder extends Seeder
         $sku = 1000;
 
         foreach ($catalogue as $row) {
-            $category = $categories[$row['category']] ?? null;
+            $path = self::CATEGORY_ALIASES[$row['category']] ?? null;
+            $category = $path ? ($categories[$path] ?? null) : null;
             $brand = $brands[$row['brand'] ?? ''] ?? null;
 
             if (! $category) {
@@ -316,6 +332,32 @@ class ProductDatabaseSeeder extends Seeder
                 'tr' => '{title} — kapınıza soğuk teslim edilen ferahlatıcı içecek.',
             ],
         ];
+    }
+
+    /**
+     * Active categories keyed by their full path ("Qadın geyimi/Üst geyim/Köynəklər").
+     *
+     * @return array<string, Category>
+     */
+    private function categoryPaths(): array
+    {
+        $categories = Category::query()->get()->keyBy('id');
+        $paths = [];
+
+        foreach ($categories as $category) {
+            $parts = [];
+            $node = $category;
+            $guard = 0;
+
+            while ($node && $guard++ < 10) {
+                array_unshift($parts, (string) $node->getTranslation('name', 'az'));
+                $node = $node->parent_id ? ($categories[$node->parent_id] ?? null) : null;
+            }
+
+            $paths[implode('/', $parts)] = $category;
+        }
+
+        return $paths;
     }
 
     private function images(): array
