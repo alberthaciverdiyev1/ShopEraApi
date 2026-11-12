@@ -30,10 +30,11 @@ Snaker/
 │   └── ...                       # Diğer modüller
 ├── config/                       # Laravel konfigürasyonları
 ├── database/                     # Ana migration ve seeders
+├── docs/                         # Proje dokümanları (deploy, marketplace notları)
 ├── routes/                       # Kök route tanımları (api.php, web.php, admin.php)
 └── resources/
-    ├── css/                      # app.css (admin) ve storefront.css
-    ├── js/                       # app.js (admin) ve storefront.js
+    ├── css/                      # admin.css ve storefront.css
+    ├── js/                       # admin.ts ve storefront.js
     └── views/
         ├── admin/                # Admin paneli Blade sayfaları
         ├── components/storefront # Mağaza Blade bileşenleri

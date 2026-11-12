@@ -31,6 +31,8 @@ Snaker, Laravel 12 tabanli moduler monolit bir e-ticaret ve marketplace uygulama
 - Uygulama seviyesinde yalnizca `app/Http/Controllers/Admin/` ve `app/Http/Controllers/Web/` vardir; API controller'lari modul icindedir.
 - `Web/` controller'lari DB sorgusu yazmaz ve `app/Services/` kullanmaz. Modul controller'ini `Request::create(...)` + `setUserResolver(...)` ile cagirir ve JSON zarfini view verisine cevirir.
 - Etkilesimler `resources/js/storefront.js` icinde saf JavaScript ile yazilir.
+- Admin assetleri `resources/css/admin.css` ve `resources/js/admin.ts`, magaza
+  assetleri `resources/css/storefront.css` ve `resources/js/storefront.js` altindadir.
 - Web degisikliginden sonra `npm run build` calistir.
 
 ## Dogrulama

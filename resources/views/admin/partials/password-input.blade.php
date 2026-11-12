@@ -1,6 +1,6 @@
 {{--
     Password input with a built-in show/hide (eye) toggle.
-    The click behaviour lives in resources/admin/app.ts (data-password-toggle).
+    The click behaviour lives in resources/js/admin.ts (data-password-toggle).
 
     Usage:
         @include('admin.partials.password-input', [

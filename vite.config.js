@@ -6,11 +6,9 @@ export default defineConfig({
     plugins: [
         laravel({
             input: [
-                'resources/css/app.css',
-                'resources/js/app.js',
                 'resources/css/storefront.css',
                 'resources/js/storefront.js',
-                'resources/admin/app.ts',
+                'resources/js/admin.ts',
             ],
             refresh: true,
         }),

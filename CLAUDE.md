@@ -61,6 +61,10 @@ npm run build
 - `app/Jobs/` — kuyruk işleri (Starex gönderi, FCM push, bildirim).
 - `app/Services/` — çekirdek servisler (Starex entegrasyonu, bildirim, sipariş).
 - `app/Models/User.php` — yalnızca User kök modeli; diğer modeller modüllerin içinde.
+- `app/Http/Requests/Web/` — yalnızca Blade/web formlarına ait FormRequest'ler;
+  API doğrulaması modüllerin `Http/Requests/` klasörlerindedir.
+- `resources/{css,js}/` — `admin.css` + `admin.ts` (admin paneli) ve
+  `storefront.css` + `storefront.js` (mağaza). Başka asset girişi yoktur.
 
 ### `app/Http/Controllers/` — yalnızca `Admin/` ve `Web/`
 - API için uygulama seviyesinde controller yoktur; API controller'ları modüllerin

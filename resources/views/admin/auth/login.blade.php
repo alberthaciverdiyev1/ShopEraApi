@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Giriş — Snaker Admin</title>
-    @vite(['resources/admin/app.ts'])
+    @vite(['resources/js/admin.ts'])
 </head>
 <body class="flex min-h-screen items-center justify-center bg-gray-900 p-4">
     <div class="w-full max-w-md rounded-lg bg-white p-8 shadow-2xl">

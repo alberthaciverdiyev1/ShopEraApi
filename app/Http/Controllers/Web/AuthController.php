@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Storefront\LoginRequest;
-use App\Http\Requests\Storefront\RegisterRequest;
+use App\Http\Requests\Web\LoginRequest;
+use App\Http\Requests\Web\RegisterRequest;
 use App\Support\Concerns\InteractsWithModuleControllers;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Storefront\StoreAddressRequest;
-use App\Http\Requests\Storefront\UpdateAddressRequest;
+use App\Http\Requests\Web\StoreAddressRequest;
+use App\Http\Requests\Web\UpdateAddressRequest;
 use App\Support\Concerns\InteractsWithModuleControllers;
 use Illuminate\Http\RedirectResponse;
 use Modules\User\Http\Controllers\AddressController as ModuleAddressController;

@@ -1,4 +1,4 @@
-import './app.css';
+import '../css/admin.css';
 import htmx from 'htmx.org';
 import 'flowbite';
 

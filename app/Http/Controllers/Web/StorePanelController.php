@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Storefront\StoreVendorRequest;
+use App\Http\Requests\Web\StoreVendorRequest;
 use App\Support\Concerns\InteractsWithModuleControllers;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
