@@ -1539,7 +1539,7 @@
 
 .sf-shop__layout {
     display: grid;
-    grid-template-columns: 264px minmax(0, 1fr);
+    grid-template-columns: 292px minmax(0, 1fr);
     gap: 26px;
     align-items: start;
 }
@@ -2441,7 +2441,7 @@
 
 @media (max-width: 1199.98px) {
     .sf-shop__layout {
-        grid-template-columns: 236px minmax(0, 1fr);
+        grid-template-columns: 260px minmax(0, 1fr);
         gap: 20px;
     }
 
