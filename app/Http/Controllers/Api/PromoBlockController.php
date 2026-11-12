@@ -7,9 +7,8 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Offer/ad blocks pushed from Manager.Snaker (Free-plan perk). Served from the
- * snapshot mirrored into this tenant's database, so the storefront never waits
- * on the Manager.
+ * Offer/ad blocks shown on the storefront home and shop pages. Served from the
+ * single application database.
  */
 class PromoBlockController extends Controller
 {

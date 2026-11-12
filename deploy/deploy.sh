@@ -26,8 +26,6 @@ PULL="${PULL:-0}"                       # 1 => once origin/<branch>'i cek
 SKIP_ASSETS="${SKIP_ASSETS:-0}"         # 1 => root Vite build'ini atla
 SKIP_FRONTEND="${SKIP_FRONTEND:-0}"     # 1 => Svelte build'ini atla
 RUN_MIGRATIONS="${RUN_MIGRATIONS:-1}"   # 0 => migrate atla
-RUN_TENANT_MIGRATIONS="${RUN_TENANT_MIGRATIONS:-1}"  # 0 => tenant bazalarina migrate atla
-SKIP_MANAGER="${SKIP_MANAGER:-0}"       # 1 => manager adimlarini atla
 STOREFRONT_MODE="${STOREFRONT_MODE:-ssr}"   # ssr (adapter-node) | static (adapter-static)
 
 PHP_FPM_SERVICE="${PHP_FPM_SERVICE:-}"                  # bos => otomatik algila
@@ -158,22 +156,9 @@ if [ ! -L public/storage ]; then
     "$PHP_BIN" artisan storage:link || warn "storage:link basarisiz"
 fi
 
-# 5b) Multi-tenant: session cookie must stay host-only. A parent-domain
-# SESSION_DOMAIN (e.g. ".snaker.store") makes every subdomain share one
-# session, so logging into one tenant logs the others out.
-if [ -f .env ] && grep -qE '^SESSION_DOMAIN=' .env; then
-    session_domain="$(grep -E '^SESSION_DOMAIN=' .env | head -1 | cut -d= -f2- | tr -d '[:space:]')"
-    if [ -n "$session_domain" ]; then
-        warn "SESSION_DOMAIN='$session_domain' subdomain-ler arasi ortaq sessiya yaradir; host-only ucun silinir"
-        cp .env ".env.bak.sessiondomain.$(date +%s)" 2>/dev/null || true
-        sed -i "/^SESSION_DOMAIN=/d" .env
-        ok "SESSION_DOMAIN silindi (host-only cookie)"
-    fi
-fi
-
 # 6) Cache
-# NOT: `optimize:clear` içindeki `cache:clear` tenant host->db haritasını
-# (file cache: tenant_map) siler; bu yüzden hedefli temizlik yapıyoruz.
+# NOT: `optimize:clear` içindeki `cache:clear` mevcut cache'i tamamen siler;
+# bu yüzden hedefli temizlik yapıyoruz.
 info "Cache yenile (config/route/view + optimize)"
 "$PHP_BIN" artisan config:clear >/dev/null 2>&1 || true
 "$PHP_BIN" artisan route:clear >/dev/null 2>&1 || true
@@ -181,34 +166,7 @@ info "Cache yenile (config/route/view + optimize)"
 "$PHP_BIN" artisan optimize
 ok "config/route/view cache"
 
-# 7) Manager control DB: migrate, rebuild the tenant map, push entitlements.
-if [ "$SKIP_MANAGER" != "1" ]; then
-    info "manager:migrate (control DB)"
-    "$PHP_BIN" artisan manager:migrate || warn "manager:migrate basarisiz (atlandi)"
-    ok "control migrate"
-
-    info "manager:map (tenant host->db map)"
-    "$PHP_BIN" artisan manager:map || warn "manager:map basarisiz; tenant map cache bos kalabilir"
-    ok "tenant map"
-
-    if [ "$RUN_TENANT_MIGRATIONS" = "1" ]; then
-        info "tenant:migrate (butun tenant bazalari)"
-        "$PHP_BIN" artisan tenant:migrate --force || warn "tenant:migrate bazi bazalarda basarisiz (atlandi)"
-        ok "tenant migrations"
-    else
-        warn "tenant migrate atlandi (RUN_TENANT_MIGRATIONS=0)"
-    fi
-
-    info "manager:push (control entitlements -> tenants)"
-    "$PHP_BIN" artisan manager:push || warn "manager:push basarisiz (atlandi)"
-    ok "entitlements pushed"
-
-    info "manager:report-usage (tenant usage counters)"
-    "$PHP_BIN" artisan manager:report-usage || warn "manager:report-usage basarisiz (atlandi)"
-    ok "usage reported"
-fi
-
-# 8) Izinler (yalnizca root iken)
+# 7) Izinler (yalnizca root iken)
 if [ "$(id -u)" -eq 0 ] && [ -f deploy/scripts/fix-permissions.sh ]; then
     info "Izinler duzeltiliyor"
     APP_DIR="$APP_DIR" APP_USER="$APP_USER" APP_GROUP="$APP_GROUP" \
@@ -216,7 +174,7 @@ if [ "$(id -u)" -eq 0 ] && [ -f deploy/scripts/fix-permissions.sh ]; then
     ok "permissions"
 fi
 
-# 9) Servisleri yenile
+# 8) Servisleri yenile
 restart_queue
 restart_storefront
 reload_php_fpm
