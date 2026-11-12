@@ -7,10 +7,12 @@ use App\Http\Controllers\Storefront\CategoryController;
 use App\Http\Controllers\Storefront\ContentController;
 use App\Http\Controllers\Storefront\DashboardController;
 use App\Http\Controllers\Storefront\HomeController;
+use App\Http\Controllers\Storefront\ListingController;
 use App\Http\Controllers\Storefront\ProductController;
 use App\Http\Controllers\Storefront\SettingsController;
 use App\Http\Controllers\Storefront\ShopController;
 use App\Http\Controllers\Storefront\StoreController;
+use App\Http\Controllers\Storefront\StorePanelController;
 use App\Http\Controllers\Storefront\WishlistController;
 use Illuminate\Support\Facades\Route;
 
@@ -56,7 +58,28 @@ Route::middleware('auth')->group(function () {
     Route::delete('/addresses/{id}', [AddressController::class, 'destroy'])
         ->whereNumber('id')
         ->name('storefront.addresses.destroy');
+
+    Route::get('/elanlarim', [ListingController::class, 'index'])->name('storefront.listings.index');
+    Route::delete('/elanlarim/{id}', [ListingController::class, 'destroy'])
+        ->whereNumber('id')
+        ->name('storefront.listings.destroy');
+    Route::post('/elanlarim/{id}/renew', [ListingController::class, 'renew'])
+        ->whereNumber('id')
+        ->name('storefront.listings.renew');
+    Route::post('/elanlarim/{id}/promote', [ListingController::class, 'promote'])
+        ->whereNumber('id')
+        ->name('storefront.listings.promote');
+
+    Route::get('/magaza/panel', [StorePanelController::class, 'panel'])->name('storefront.store.panel');
+    Route::put('/magaza/panel', [StorePanelController::class, 'update'])->name('storefront.store.panel.update');
+    Route::get('/magaza/aciq', [StorePanelController::class, 'open'])->name('storefront.store.open');
+    Route::post('/magaza/aciq', [StorePanelController::class, 'create'])->name('storefront.store.open.create');
 });
+
+// Listing creation is open to guests too: their listing is managed through a
+// secret link, exactly like the Svelte storefront.
+Route::get('/elan/ver', [ListingController::class, 'create'])->name('storefront.listings.create');
+Route::post('/elan/ver', [ListingController::class, 'store'])->name('storefront.listings.store');
 
 Route::get('/', [HomeController::class, 'index'])->name('storefront.home');
 

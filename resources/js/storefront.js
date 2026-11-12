@@ -600,3 +600,145 @@ document.querySelectorAll('[data-sf-dash-tab]').forEach((trigger) => {
         history.replaceState(null, '', key === 'dashboard' ? location.pathname : `?tab=${key}`);
     });
 });
+
+/* Seller listings: promotion modal. */
+(() => {
+    const modal = document.querySelector('[data-sf-promote-modal]');
+    if (!modal) return;
+
+    const heading = modal.querySelector('[data-sf-promote-heading]');
+    const form = modal.querySelector('[data-sf-promote-form]');
+    const close = modal.querySelector('[data-sf-promote-close]');
+
+    const open = (id, title) => {
+        if (form) form.action = `/elanlarim/${id}/promote`;
+        if (heading) heading.textContent = `İrəli çək: ${title}`;
+        modal.hidden = false;
+    };
+
+    const hide = () => {
+        modal.hidden = true;
+    };
+
+    document.querySelectorAll('[data-sf-promote-open]').forEach((button) => {
+        button.addEventListener('click', () => {
+            open(button.dataset.sfPromoteOpen, button.dataset.sfPromoteTitle || '');
+        });
+    });
+
+    close?.addEventListener('click', hide);
+    modal.addEventListener('click', (event) => {
+        if (event.target === modal) hide();
+    });
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !modal.hidden) hide();
+    });
+})();
+
+/* Listing form: dependent filter values. */
+(() => {
+    const selects = [...document.querySelectorAll('[data-sf-filter]')];
+    if (!selects.length) return;
+
+    const resetDescendants = (filterId) => {
+        selects.forEach((select) => {
+            if (select.dataset.sfFilterDepends === String(filterId)) {
+                select.value = '';
+                select.disabled = true;
+                resetDescendants(select.dataset.sfFilter);
+            }
+        });
+    };
+
+    const applyParent = (select) => {
+        const parentId = select.dataset.sfFilterDepends;
+        if (!parentId) return;
+
+        const parent = document.querySelector(`[data-sf-filter="${parentId}"]`);
+        const parentValue = parent?.value || '';
+        const shouldEnable = parentValue !== '';
+
+        select.disabled = !shouldEnable;
+        [...select.options].forEach((option) => {
+            if (!option.value) return;
+            const optionParent = option.dataset.sfParentValue || '';
+            const visible = !optionParent || optionParent === parentValue;
+            option.hidden = !visible;
+            if (!visible && option.selected) {
+                select.value = '';
+            }
+        });
+    };
+
+    selects.forEach((select) => {
+        applyParent(select);
+        select.addEventListener('change', () => {
+            resetDescendants(select.dataset.sfFilter);
+            selects.forEach((child) => {
+                if (child.dataset.sfFilterDepends) applyParent(child);
+            });
+        });
+    });
+})();
+
+/* Listing form: image dropzone with previews. */
+(() => {
+    const zone = document.querySelector('[data-sf-dropzone]');
+    const input = document.querySelector('[data-sf-dropzone-input]');
+    const preview = document.querySelector('[data-sf-dropzone-preview]');
+    if (!zone || !input || !preview) return;
+
+    const render = () => {
+        preview.innerHTML = '';
+        [...input.files].forEach((file, index) => {
+            const item = document.createElement('div');
+            item.className = 'thumb';
+
+            if (index === 0) {
+                const tag = document.createElement('span');
+                tag.className = 'cover-tag';
+                tag.textContent = 'Əsas';
+                item.appendChild(tag);
+            }
+
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            img.alt = `Şəkil ${index + 1}`;
+            item.appendChild(img);
+
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'remove';
+            remove.textContent = '×';
+            remove.setAttribute('aria-label', 'Sil');
+            remove.addEventListener('click', (event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                const transfer = new DataTransfer();
+                [...input.files].forEach((current, currentIndex) => {
+                    if (currentIndex !== index) transfer.items.add(current);
+                });
+                input.files = transfer.files;
+                render();
+            });
+            item.appendChild(remove);
+
+            preview.appendChild(item);
+        });
+    };
+
+    input.addEventListener('change', render);
+    zone.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        zone.classList.add('is-drag');
+    });
+    zone.addEventListener('dragleave', () => zone.classList.remove('is-drag'));
+    zone.addEventListener('drop', (event) => {
+        event.preventDefault();
+        zone.classList.remove('is-drag');
+        if (event.dataTransfer?.files?.length) {
+            input.files = event.dataTransfer.files;
+            render();
+        }
+    });
+})();
