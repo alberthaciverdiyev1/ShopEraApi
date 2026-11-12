@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Middleware\SetLocaleFromHeader;
+use Modules\Setting\Http\Controllers\ContactController;
+use Modules\Setting\Http\Controllers\DataVersionController;
+use Modules\Setting\Http\Controllers\PromoBlockController;
 use Modules\Setting\Http\Controllers\SettingController;
 use Modules\Setting\Http\Controllers\StatisticController;
 use Modules\Setting\Http\Controllers\ThemeColorController;
@@ -31,3 +34,13 @@ Route::prefix('theme')->controller(ThemeColorController::class)->group(function 
     Route::get('/', 'show')->name('theme.show');
     Route::put('/', 'update')->name('theme.update');
 });
+
+// Contact info and form submission.
+Route::get('/contact', [ContactController::class, 'info'])->name('api.contact.info');
+Route::post('/contact', [ContactController::class, 'send'])->name('api.contact.send');
+
+// Cheap revision token for clients' in-memory caches.
+Route::get('/data-version', [DataVersionController::class, 'index'])->name('api.data-version');
+
+// Offer / ad blocks for the storefront.
+Route::get('/promo-blocks', [PromoBlockController::class, 'index'])->name('api.promo-blocks');

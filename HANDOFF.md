@@ -39,6 +39,16 @@ npm run build
 - `sitemap.xml` ve `robots.txt` Laravel route'ları olarak eklendi.
 - Ürün detayında alıcı–satıcı sohbeti ve yorum yazma formu eklendi.
 
+### Mimari
+- `app/Services/Storefront/` tamamen kaldırıldı; uygulama seviyesinde API
+  controller'ı yok. `app/Http/Controllers/` yalnızca `Admin/` ve `Web/` içerir.
+- Web controller'ları DB sorgusu yazmaz ve servis kullanmaz; ilgili modül
+  controller'ını `Request::create(...)` + `setUserResolver(...)` ile çağırıp JSON
+  zarfını view verisine çevirir (`app/Support/Concerns/InteractsWithModuleControllers.php`).
+- Ortak header verisi `App\View\Composers\StorefrontHeaderComposer` üzerinden gelir.
+- Taşınan uçlar artık modüllerde: `Product/Routes/api.php` (`/home`),
+  `Setting/Routes/api.php` (`/contact`, `/data-version`, `/promo-blocks`).
+
 ### Veri
 - Dressso verileri `php artisan dressso:import` ile aktarıldı (katalog, kullanıcı,
   mağaza, sipariş, adres). Komut yeniden çalıştırılabilir (idempotent).
@@ -54,7 +64,11 @@ npm run build
 - **OTP / e-posta akışları** (şifre sıfırlama, doğrulama) — bu turda kapsam dışı.
 - **Çok dillilik:** Blade mağaza şu an yalnızca Azerice metinlerle çalışıyor;
   az/en/ru/tr dil değiştirici taşınmadı.
-- **Testler:** Yeni storefront controller'ları ve `DresssoImportService` için
+- **Admin katmanı:** `app/Http/Controllers/Admin/` altındaki controller'lar hâlâ
+  doğrudan modül `Entities` sınıflarıyla DB sorgusu yapıyor (24 dosya). "Admin de
+  doğrudan DB işlemi yapamaz" kuralına uyması için bunların modül controller/service
+  çağrılarına çevrilmesi gerekiyor — henüz başlanmadı.
+- **Testler:** Yeni web controller'ları ve `DresssoImportService` için
   feature testleri yok.
 - **Dağıtım:** `deploy/deploy.sh` Svelte adımlarından arındırıldı; üretim geçişi
   (nginx catch-all + asset build) doğrulanmalı.

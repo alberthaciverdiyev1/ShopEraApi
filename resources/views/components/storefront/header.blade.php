@@ -1,8 +1,4 @@
 @php
-    $categories = app(\App\Services\Storefront\CatalogService::class)->categories();
-@endphp
-
-@php
     $navLinks = [
         ['href' => '/', 'label' => 'Ana səhifə'],
         ['href' => '/shop', 'label' => 'Elanlar'],
@@ -15,10 +11,6 @@
         ? request()->path() === '/'
         : request()->is(ltrim($href, '/').'*');
 
-    $user = \Illuminate\Support\Facades\Auth::user();
-    $wishlist = $user
-        ? array_slice(app(\App\Services\Storefront\WishlistService::class)->products(), 0, 4)
-        : [];
 @endphp
 
 <header class="header-section-1">

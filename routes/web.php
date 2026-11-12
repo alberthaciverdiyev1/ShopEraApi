@@ -1,26 +1,26 @@
 <?php
 
-use App\Http\Controllers\Storefront\AddressController;
-use App\Http\Controllers\Storefront\AuthController;
-use App\Http\Controllers\Storefront\BlogController;
-use App\Http\Controllers\Storefront\CartController;
-use App\Http\Controllers\Storefront\CategoryController;
-use App\Http\Controllers\Storefront\CheckoutController;
-use App\Http\Controllers\Storefront\ContentController;
-use App\Http\Controllers\Storefront\DashboardController;
-use App\Http\Controllers\Storefront\DashboardMessagesController;
-use App\Http\Controllers\Storefront\HomeController;
-use App\Http\Controllers\Storefront\ListingChatController;
-use App\Http\Controllers\Storefront\ListingController;
-use App\Http\Controllers\Storefront\ManagedListingController;
-use App\Http\Controllers\Storefront\OrderHistoryController;
-use App\Http\Controllers\Storefront\ProductController;
-use App\Http\Controllers\Storefront\SettingsController;
-use App\Http\Controllers\Storefront\ShopController;
-use App\Http\Controllers\Storefront\SitemapController;
-use App\Http\Controllers\Storefront\StoreController;
-use App\Http\Controllers\Storefront\StorePanelController;
-use App\Http\Controllers\Storefront\WishlistController;
+use App\Http\Controllers\Web\AddressController;
+use App\Http\Controllers\Web\AuthController;
+use App\Http\Controllers\Web\BlogController;
+use App\Http\Controllers\Web\CartController;
+use App\Http\Controllers\Web\CategoryController;
+use App\Http\Controllers\Web\CheckoutController;
+use App\Http\Controllers\Web\ContentController;
+use App\Http\Controllers\Web\DashboardController;
+use App\Http\Controllers\Web\DashboardMessagesController;
+use App\Http\Controllers\Web\HomeController;
+use App\Http\Controllers\Web\ListingChatController;
+use App\Http\Controllers\Web\ListingController;
+use App\Http\Controllers\Web\ManagedListingController;
+use App\Http\Controllers\Web\OrderHistoryController;
+use App\Http\Controllers\Web\ProductController;
+use App\Http\Controllers\Web\SettingsController;
+use App\Http\Controllers\Web\ShopController;
+use App\Http\Controllers\Web\SitemapController;
+use App\Http\Controllers\Web\StoreController;
+use App\Http\Controllers\Web\StorePanelController;
+use App\Http\Controllers\Web\WishlistController;
 use Illuminate\Support\Facades\Route;
 
 /*

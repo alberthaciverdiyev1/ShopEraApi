@@ -11,6 +11,10 @@
 |
 */
 
+use Modules\Product\Http\Controllers\HomeController;
+
+Route::get('/home', [HomeController::class, 'index'])->name('api.home');
+
 require 'productRoute.php';
 require 'reviewRoute.php';
 require 'subscribeRoute.php';

@@ -401,6 +401,36 @@ class ProductService
     /**
      * Product details
      */
+    /**
+     * The house catalogue — the products ShopEra sells itself.
+     */
+    public function houseProducts(Request $request, int $limit): array
+    {
+        $products = $this->model->newQuery()
+            ->publiclyAvailable()
+            ->with(['colors', 'sizes', 'images', 'videos', 'category', 'brand'])
+            ->orderByDesc('is_pinned')
+            ->latest('id')
+            ->limit($limit)
+            ->get();
+
+        return ProductResource::collection($products)->resolve($request);
+    }
+
+    /**
+     * Public product slugs, used to build the storefront sitemap.
+     */
+    public function slugs(): JsonResponse
+    {
+        $slugs = $this->model->newQuery()
+            ->publiclyAvailable()
+            ->whereNotNull('slug')
+            ->orderBy('id')
+            ->pluck('slug');
+
+        return responseHelper(__('Products retrieved successfully.'), 200, $slugs);
+    }
+
     public function detailsBySlug(string $slug): JsonResponse
     {
         $id = $this->model->newQuery()->where('slug', $slug)->value('id');

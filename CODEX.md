@@ -28,7 +28,8 @@ Snaker, Laravel 12 tabanli moduler monolit bir e-ticaret ve marketplace uygulama
 ## Web Kurallari
 
 - Magaza sayfalari `resources/views/storefront/` ve `resources/views/components/storefront/` altinda Blade ile yazilir.
-- Sayfa verisi `app/Services/Storefront/` servisleri uzerinden gelir; modul servislerini dogrudan kullan.
+- Uygulama seviyesinde yalnizca `app/Http/Controllers/Admin/` ve `app/Http/Controllers/Web/` vardir; API controller'lari modul icindedir.
+- `Web/` controller'lari DB sorgusu yazmaz ve `app/Services/` kullanmaz. Modul controller'ini `Request::create(...)` + `setUserResolver(...)` ile cagirir ve JSON zarfini view verisine cevirir.
 - Etkilesimler `resources/js/storefront.js` icinde saf JavaScript ile yazilir.
 - Web degisikliginden sonra `npm run build` calistir.
 

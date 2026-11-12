@@ -62,6 +62,16 @@ npm run build
 - `app/Services/` — çekirdek servisler (Starex entegrasyonu, bildirim, sipariş).
 - `app/Models/User.php` — yalnızca User kök modeli; diğer modeller modüllerin içinde.
 
+### `app/Http/Controllers/` — yalnızca `Admin/` ve `Web/`
+- API için uygulama seviyesinde controller yoktur; API controller'ları modüllerin
+  içindedir (`Modules/<Ad>/Http/Controllers/`).
+- `Web/` controller'ları doğrudan veritabanına veya `app/Services/` altındaki
+  servislere gitmez. Modül controller'ını `Request::create(...)` ile çağırır,
+  oturum kullanıcısını `setUserResolver()` ile bağlar ve dönen JSON zarfını
+  view verisine çevirir.
+- Blade view'ları da DB sorgusu yazmaz; ihtiyaç duydukları veri controller'dan
+  veya bir view composer'dan gelir.
+
 ### `Modules/<Ad>/` — her iş alanı bir modül
 Modül içi standart yapı:
 ```

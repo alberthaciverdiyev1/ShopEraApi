@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\ContactMessage;
+use Modules\Setting\Entities\ContactMessage;
 
 class ContactMessageController extends ResourceController
 {

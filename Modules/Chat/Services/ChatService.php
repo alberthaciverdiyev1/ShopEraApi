@@ -4,6 +4,7 @@ namespace Modules\Chat\Services;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -203,6 +204,43 @@ class ChatService
         });
 
         return responseHelper(__('Message deleted successfully.'), 200);
+    }
+
+    /**
+     * Delete a message the signed-in customer owns. Used by the storefront so
+     * the permission-only admin endpoint never decides ownership.
+     */
+    public function deleteOwnMessage(int $messageId, User $user): JsonResponse
+    {
+        $message = $this->message->with('attachments')->findOrFail($messageId);
+        $conversation = $this->conversation->find($message->conversation_id);
+
+        abort_unless($conversation && (int) $conversation->user_id === (int) $user->id, 403);
+
+        DB::transaction(function () use ($message) {
+            foreach ($message->attachments as $attachment) {
+                Storage::disk('public')->delete($attachment->path);
+                $attachment->delete();
+            }
+
+            $message->delete();
+        });
+
+        return responseHelper(__('Message deleted successfully.'), 200);
+    }
+
+    /**
+     * Mark the signed-in customer's conversation as read.
+     */
+    public function markOwnAsRead(User $user): JsonResponse
+    {
+        $conversation = $this->conversation->where('user_id', $user->id)->first();
+
+        if ($conversation) {
+            $this->markAsRead($conversation->id);
+        }
+
+        return responseHelper(__('OK'), 200);
     }
 
     /**

@@ -2,16 +2,17 @@
 
 namespace App\Providers;
 
+use App\Support\TenantContext;
+use App\View\Composers\StorefrontHeaderComposer;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
-use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use League\Flysystem\Filesystem;
-use App\Support\TenantContext;
 use Modules\Setting\Entities\Setting;
 use PlatformCommunity\Flysystem\BunnyCDN\BunnyCDNAdapter;
 use PlatformCommunity\Flysystem\BunnyCDN\BunnyCDNClient;
@@ -38,6 +39,8 @@ class AppServiceProvider extends ServiceProvider
          * Əvvəllər onu hər metod ayrıca ötürürdü — yeni səhifə əlavə edən
          * kimi layout "Undefined variable $settings" verirdi.
          */
+        View::composer('components.storefront.header', StorefrontHeaderComposer::class);
+
         View::composer('storefront.layout', function ($view) {
             $view->with([
                 'settings' => Cache::remember(
@@ -77,6 +80,7 @@ class AppServiceProvider extends ServiceProvider
             );
         });
     }
+
     /** Throttle the abuse-prone public/customer endpoints. */
     private function configureRateLimiting(): void
     {

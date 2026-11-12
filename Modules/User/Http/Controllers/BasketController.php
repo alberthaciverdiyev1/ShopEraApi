@@ -3,7 +3,7 @@
 namespace Modules\User\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request;
 use Modules\User\Http\Requests\Basket\BasketAddRequest;
 use Modules\User\Http\Requests\Basket\BasketUpdateRequest;
 use Modules\User\Services\BasketService;

@@ -96,8 +96,9 @@ return responseHelper('messages.success', 200, $resource);
 - Otomatik çeviri gerektiğinde `App\Helpers\TranslateHelper::translate()` kullanılır.
 
 ### 4.4. Blade Mağaza Katmanı
-- Mağaza sayfaları `app/Http/Controllers/Storefront/` altındaki ince controller'lar ve `app/Services/Storefront/` altındaki servislerle beslenir.
-- Sayfa verisi için modül servisleri doğrudan kullanılır; ayrı bir HTTP katmanı taklit edilmez.
+- Uygulama seviyesinde yalnızca `app/Http/Controllers/Admin/` ve `app/Http/Controllers/Web/` bulunur; API controller'ları modüllerin içindedir.
+- `Web/` controller'ları DB sorgusu yazmaz ve `app/Services/` kullanmaz. İlgili modül controller'ını `Request::create(...)` + `setUserResolver(...)` ile çağırır, `validateResolved()` ile modül FormRequest'ini doğrular ve JSON zarfını view verisine çevirir.
+- Blade view'ları DB sorgusu yazmaz; header gibi ortak veriler view composer üzerinden modül controller'larından gelir.
 - Blade view'ları `resources/views/storefront/` ve `resources/views/components/storefront/` altında yaşar.
 - Etkileşimler `resources/js/storefront.js` içinde saf JavaScript ile yazılır.
 

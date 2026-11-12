@@ -39,6 +39,17 @@ class ChatController extends Controller
         return $this->chatService->deleteMessage($messageId);
     }
 
+    /** Storefront customer endpoints: ownership is checked in the service. */
+    public function deleteOwn(int $messageId)
+    {
+        return $this->chatService->deleteOwnMessage($messageId, auth()->user());
+    }
+
+    public function markOwnAsRead()
+    {
+        return $this->chatService->markOwnAsRead(auth()->user());
+    }
+
     public function deleteConversation(int $conversationId)
     {
         return $this->chatService->deleteConversation($conversationId);
