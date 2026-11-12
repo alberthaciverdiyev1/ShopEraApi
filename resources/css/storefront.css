@@ -1497,8 +1497,9 @@
 
 .sf-shop-sort select,
 .sf-shop-filters select {
-    min-height: 42px;
-    padding: 8px 12px;
+    box-sizing: border-box;
+    min-height: 36px;
+    padding: 4px 10px;
     border: 1px solid var(--sf-border);
     border-radius: 10px;
     background: #fff;
@@ -7243,9 +7244,11 @@ body.sf-lchat-open {
 }
 
 .sf-filter-card select {
+    box-sizing: border-box;
     width: calc(100% - 36px);
-    min-height: 40px;
+    min-height: 34px;
     margin: 0 18px 6px;
+    padding: 3px 8px;
     border-radius: 8px;
     font-size: 13.5px;
 }
