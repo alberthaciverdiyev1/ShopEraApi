@@ -39,6 +39,8 @@
 
     <x-storefront.footer />
 
+    <x-storefront.live-chat />
+
     <x-storefront.popup-modal :popup="$popup" />
 </body>
 </html>
