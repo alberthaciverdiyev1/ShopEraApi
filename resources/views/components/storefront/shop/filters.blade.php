@@ -239,24 +239,23 @@
             </summary>
             <div class="sf-price-range">
                 <label class="sf-price-field">
-                    <span>Ən az</span>
                     <span class="sf-price-field__box">
                         <input type="number" name="price_min" min="0" max="{{ ceil($priceMax) }}" step="1"
-                               value="{{ $selected['price_min'] }}" placeholder="{{ floor($priceMin) }}">
+                               value="{{ $selected['price_min'] }}" placeholder="{{ floor($priceMin) }}"
+                               aria-label="Ən az qiymət" data-sf-auto-submit>
                         <span>₼</span>
                     </span>
                 </label>
                 <span class="sf-price-range__dash" aria-hidden="true">—</span>
                 <label class="sf-price-field">
-                    <span>Ən çox</span>
                     <span class="sf-price-field__box">
                         <input type="number" name="price_max" min="0" max="{{ ceil($priceMax) }}" step="1"
-                               value="{{ $selected['price_max'] }}" placeholder="{{ ceil($priceMax) }}">
+                               value="{{ $selected['price_max'] }}" placeholder="{{ ceil($priceMax) }}"
+                               aria-label="Ən çox qiymət" data-sf-auto-submit>
                         <span>₼</span>
                     </span>
                 </label>
             </div>
-            <button type="submit" class="sf-price-apply">Tətbiq et</button>
             <p class="sf-price-hint">Mövcud aralıq: {{ number_format($priceMin, 0) }} – {{ number_format($priceMax, 0) }} ₼</p>
         </details>
     @endif
