@@ -52,10 +52,11 @@ Description: EcomArts - Multipurpose Ecommerce HTML Template <
 ----------------------------------------------*/
 @import url("https://fonts.googleapis.com/css2?family=Albert+Sans:ital,wght@0,100..900;1,100..900&family=Jost:ital,wght@0,100..900;1,100..900&display=swap");
 :root {
-  --body: #F7FAFC;
+  --body: #F6FBF7;
   --black: #000;
   --white: #fff;
-  --theme: #06B6D4;
+  --theme: #16A34A;
+  --theme-rgb: 22, 163, 74;
   --title: #07111F;
   --title2: #111827;
   --orange: #F97316;
@@ -69,16 +70,16 @@ Description: EcomArts - Multipurpose Ecommerce HTML Template <
   --border-3: #DDE7EF;
   --border-4: #D4E0EA;
   --border-5: #334155;
-  --border-6: #E4EDF5;
-  --bg-1: #ECFEFF;
+  --border-6: #D1FAE5;
+  --bg-1: #ECFDF5;
   --bg-2: #F3F7FA;
-  --bg-3: #F0FDFA;
-  --bg-6: #F8FBFF;
+  --bg-3: #F0FDF4;
+  --bg-6: #F0FDF4;
   --bg-7: rgba(7, 17, 31, 0.72);
-  --bg-8: #EEF6FA;
-  --bg-9: #DFF7FF;
-  --bg-10: #E0F7FA;
-  --green-gray: #06353A;
+  --bg-8: #ECFDF5;
+  --bg-9: #DCFCE7;
+  --bg-10: #DCFCE7;
+  --green-gray: #052E16;
   --box-shadow: 0px 18px 45px 0px rgba(7, 17, 31, 0.08);
 }
 

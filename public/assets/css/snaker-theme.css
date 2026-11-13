@@ -6,7 +6,7 @@
  */
 
 :root {
-	--ui-page-bg: #f5fbff;
+	--ui-page-bg: #f4fbf5;
 	--ui-surface: #ffffff;
 	--ui-text: var(--title, #0f172a);
 	--ui-muted: #607184;

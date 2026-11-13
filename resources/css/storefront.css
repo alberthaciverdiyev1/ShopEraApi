@@ -10,7 +10,7 @@
     --sf-border: #edf0f4;
     --sf-muted: #8b95a5;
     --sf-title: #07111f;
-    --sf-theme: #06b6d4;
+    --sf-theme: #16a34a;
 }
 
 .storefront {
@@ -470,7 +470,7 @@
 }
 
 .storefront .sf-product-card:hover {
-    border-color: rgba(6, 182, 212, 0.4);
+    border-color: rgba(22, 163, 74, 0.4);
     box-shadow: 0 14px 32px rgba(7, 17, 31, 0.08);
 }
 
@@ -610,7 +610,7 @@
 }
 
 .sf-product-card .card-placement.is-promoted {
-    background: #0ea5e9;
+    background: #16a34a;
 }
 
 .sf-product-card .card-placement.is-vip {
@@ -900,7 +900,7 @@
     color: #fff;
     font-size: 24px;
     cursor: pointer;
-    box-shadow: 0 8px 24px -2px rgba(6, 182, 212, 0.45), 0 4px 12px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 24px -2px rgba(22, 163, 74, 0.45), 0 4px 12px rgba(0, 0, 0, 0.12);
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
 }
 
@@ -1089,7 +1089,7 @@
 .sf-chat__btn--primary {
     background: var(--sf-theme);
     color: #fff;
-    box-shadow: 0 4px 14px rgba(6, 182, 212, 0.35);
+    box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
 }
 
 .sf-chat__btn--primary:hover {
@@ -1342,7 +1342,7 @@
 }
 
 .sf-btn--primary:hover {
-    background: #0891b2;
+    background: #15803d;
     color: #fff;
 }
 
@@ -2077,7 +2077,7 @@
 
 .sf-gallery__thumb.is-active {
     border-color: var(--sf-theme);
-    box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.18);
+    box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.18);
 }
 
 .sf-gallery__thumb img {
@@ -2225,7 +2225,7 @@
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: #e0f7fa;
+    background: #ecfdf5;
     color: var(--sf-theme);
 }
 
@@ -2265,7 +2265,7 @@
     padding: 14px;
     border: 1px dashed var(--sf-theme);
     border-radius: 12px;
-    background: #ecfeff;
+    background: #ecfdf5;
     font-size: 14px;
 }
 
@@ -3155,7 +3155,7 @@
     height: 84px;
     flex: 0 0 84px;
     border-radius: 18px;
-    background: #e0f7fa;
+    background: #ecfdf5;
     color: var(--sf-theme);
     font-size: 34px;
     font-weight: 800;
@@ -3351,7 +3351,7 @@
     height: 38px;
     flex: 0 0 38px;
     border-radius: 50%;
-    background: #e0f7fa;
+    background: #ecfdf5;
     color: var(--sf-theme);
 }
 
@@ -3805,12 +3805,12 @@
 }
 
 .header-new-listing {
-    background: #35b969;
+    background: #16a34a;
     color: #ffffff;
 }
 
 .header-new-listing:hover {
-    background: #2fa55e;
+    background: #15803d;
     color: #ffffff;
 }
 
@@ -3827,13 +3827,13 @@
 
 .header-login-btn {
     min-width: 86px;
-    background: #dbeafe;
-    color: #2f6fd6;
+    background: #dcfce7;
+    color: #15803d;
 }
 
 .header-login-btn:hover {
-    background: #cfe0ff;
-    color: #235fbd;
+    background: #bbf7d0;
+    color: #166534;
 }
 
 .header-login-btn .header-avatar {
@@ -4612,8 +4612,8 @@
     width: 30px;
     height: 30px;
     border-radius: 50%;
-    background: #f0f7ff;
-    color: #0ea5e9;
+    background: #ecfdf5;
+    color: #16a34a;
     font-size: 14px;
     flex: 0 0 auto;
 }
@@ -6915,7 +6915,7 @@
 }
 
 .sf-review-form textarea:focus {
-    outline: 2px solid rgba(6, 182, 212, 0.35);
+    outline: 2px solid rgba(22, 163, 74, 0.35);
     outline-offset: 0;
 }
 
@@ -7560,7 +7560,7 @@ body.sf-lchat-open {
 .sf-shop__more-spinner {
     width: 26px;
     height: 26px;
-    border: 3px solid rgba(6, 182, 212, 0.25);
+    border: 3px solid rgba(22, 163, 74, 0.25);
     border-top-color: var(--sf-theme);
     border-radius: 50%;
     animation: sf-shop-spin 0.7s linear infinite;
