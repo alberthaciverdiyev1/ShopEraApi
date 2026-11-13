@@ -46,10 +46,11 @@
                             {{ $user->name ?? 'Hesabım' }}
                         </a>
                         <a href="/magaza/panel">Mağazam</a>
-                        <form action="{{ route('storefront.logout') }}" method="POST" class="d-inline">
-                            @csrf
-                            <button class="user-logout" type="submit">Çıxış</button>
-                        </form>
+                    @else
+                        <a href="{{ route('storefront.login') }}" class="top-account-link">
+                            <i class="fa-solid fa-user"></i>
+                            Giriş
+                        </a>
                     @endauth
                 </div>
             </div>
@@ -130,19 +131,6 @@
                             <i class="fa-regular fa-plus"></i>
                             Yeni elan
                         </a>
-
-                        @auth
-                            <a href="/dashboard" class="header-login-btn">
-                                @if ($user?->avatar)
-                                    <img src="{{ $user->avatar }}" alt="{{ $user->name ?? 'User' }}" class="header-avatar">
-                                @else
-                                    <i class="fa-regular fa-user"></i>
-                                @endif
-                                <span>{{ $user->name ?? 'Hesabım' }}</span>
-                            </a>
-                        @else
-                            <a href="{{ route('storefront.login') }}" class="header-login-btn">Giriş</a>
-                        @endauth
                     </div>
                 </div>
             </div>
