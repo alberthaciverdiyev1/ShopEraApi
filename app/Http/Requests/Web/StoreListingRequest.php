@@ -28,11 +28,18 @@ class StoreListingRequest extends FormRequest
                 : array_merge(['nullable'], $extra);
         };
 
+        // With automatic naming on the title is generated, so it may be empty.
+        $titleRules = $schema['title']['visible'] && $schema['title']['required'] && ! $this->boolean('auto_title')
+            ? ['required', 'string', 'max:255']
+            : ['nullable', 'string', 'max:255'];
+
         return [
             'category_id' => ['required', 'exists:categories,id'],
-            'title' => $text('title', ['string', 'max:255']),
+            'title' => $titleRules,
+            'auto_title' => ['nullable', 'boolean'],
             'description' => $text('description', ['string', 'max:5000']),
             'price' => $text('price', ['numeric', 'min:0']),
+            'discount' => ['nullable', 'numeric', 'min:0', 'lt:price'],
             'city_key' => $text('city', ['string', Rule::exists('cities', 'key')]),
 
             'brand_id' => ['nullable', 'exists:brands,id'],
@@ -53,6 +60,22 @@ class StoreListingRequest extends FormRequest
                 ? ($schema['photos']['required'] ? ['required', 'array', 'min:1', 'max:10'] : ['nullable', 'array', 'max:10'])
                 : ['nullable', 'array', 'max:10'],
             'images.*' => ['file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
+
+            // Variants: the colours and sizes the listing comes in, with an
+            // optional price and discount per size (e.g. bigger shoe sizes
+            // cost more), and the colour/size each uploaded photo shows.
+            'colors' => ['nullable', 'array'],
+            'colors.*' => ['integer', Rule::exists('colors', 'id')],
+            'sizes' => ['nullable', 'array'],
+            'sizes.*' => ['integer', Rule::exists('sizes', 'id')],
+            'size_prices' => ['nullable', 'array'],
+            'size_prices.*' => ['nullable', 'numeric', 'min:0'],
+            'size_discounts' => ['nullable', 'array'],
+            'size_discounts.*' => ['nullable', 'numeric', 'min:0'],
+            'image_colors' => ['nullable', 'array'],
+            'image_colors.*' => ['nullable', 'integer', Rule::exists('colors', 'id')],
+            'image_sizes' => ['nullable', 'array'],
+            'image_sizes.*' => ['nullable', 'integer', Rule::exists('sizes', 'id')],
 
             'filter_values' => ['nullable', 'array'],
             'filter_values.*' => ['integer', Rule::exists('filter_values', 'id')],
@@ -80,6 +103,7 @@ class StoreListingRequest extends FormRequest
             'brand_id.exists' => 'Marka tapılmadı.',
             'images.*.mimes' => 'Yalnız JPG, PNG və WEBP formatları qəbul edilir.',
             'images.*.max' => 'Hər şəkil maksimum 8MB olmalıdır.',
+            'discount.lt' => 'Endirimli qiymət əsas qiymətdən kiçik olmalıdır.',
         ];
     }
 }

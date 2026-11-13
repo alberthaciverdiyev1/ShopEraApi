@@ -46,10 +46,8 @@
     <!-- Mobile Sticky Action Bar -->
     <div class="sf-product-sticky-bottom" data-sf-sticky-bar>
         <div class="sf-product-sticky-bottom__price">
-            <span class="sf-product-sticky-bottom__current">{{ number_format((float) $product['current_price'], 2) }} ₼</span>
-            @if (! empty($product['has_discount']))
-                <span class="sf-product-sticky-bottom__old">{{ number_format((float) $product['original_price'], 2) }} ₼</span>
-            @endif
+            <span class="sf-product-sticky-bottom__current" data-sf-price-current>{{ number_format((float) $product['current_price'], 2) }} ₼</span>
+            <span class="sf-product-sticky-bottom__old" data-sf-price-old @if (empty($product['has_discount'])) hidden @endif>{{ number_format((float) $product['original_price'], 2) }} ₼</span>
         </div>
         <div class="sf-product-sticky-bottom__actions">
             <button type="button" class="sf-btn sf-btn--primary sf-product-sticky-bottom__btn" data-sf-contact-reveal>

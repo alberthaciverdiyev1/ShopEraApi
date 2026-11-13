@@ -10,12 +10,14 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Modules\Brand\Http\Controllers\BrandController;
+use Modules\Color\Http\Controllers\ColorController;
 use Modules\Delivery\Http\Controllers\DeliveryController;
 use Modules\Filter\Http\Controllers\FilterController;
 use Modules\Filter\Http\Requests\ProductFilterValuesRequest;
 use Modules\Marketplace\Http\Controllers\ListingController as ModuleListingController;
 use Modules\Marketplace\Http\Controllers\VendorController;
 use Modules\Marketplace\Http\Requests\StoreListingRequest as ModuleStoreListingRequest;
+use Modules\Size\Http\Controllers\SizeController;
 
 class ListingController extends Controller
 {
@@ -78,6 +80,12 @@ class ListingController extends Controller
                 : [],
             'brands' => $isLeaf && ! empty($selected['needs_brand'])
                 ? (array) $this->payload(app(BrandController::class)->list($this->moduleHttpRequest()))
+                : [],
+            'colors' => $isLeaf
+                ? (array) $this->payload(app(ColorController::class)->list($this->moduleHttpRequest(['per_page' => 200])))
+                : [],
+            'sizes' => $isLeaf
+                ? (array) $this->payload(app(SizeController::class)->list($this->moduleHttpRequest(['per_page' => 200])))
                 : [],
             'published' => session('published'),
         ]);

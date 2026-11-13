@@ -7649,46 +7649,165 @@ a.sf-seller-link {
 .elan-checks {
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 22px;
+    gap: 10px;
 }
 
+/* Checkbox chips: the native box stays in the accessibility tree while the
+   visible control is drawn by the label, so the pill is readable everywhere. */
 .elan-check-pill {
+    position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
+    gap: 10px;
+    padding: 10px 16px 10px 12px;
     border: 1.5px solid #dbe3ef;
-    border-radius: 999px;
+    border-radius: 12px;
     background: #fff;
     color: #1e293b;
     font-weight: 600;
+    line-height: 1.2;
     cursor: pointer;
+    user-select: none;
     transition:
         border-color 0.15s ease,
         background 0.15s ease,
-        color 0.15s ease;
+        box-shadow 0.15s ease;
+}
+
+.elan-check-pill::before {
+    content: "";
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e1;
+    border-radius: 6px;
+    background: #fff;
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.elan-check-pill::after {
+    content: "";
+    position: absolute;
+    left: 17px;
+    top: 50%;
+    width: 11px;
+    height: 6px;
+    border-left: 2.5px solid #fff;
+    border-bottom: 2.5px solid #fff;
+    transform: translateY(-60%) rotate(-45deg) scale(0);
+    transition: transform 0.12s ease;
 }
 
 .elan-check-pill:hover {
-    border-color: var(--sf-theme);
+    border-color: #94a3b8;
 }
 
 .elan-check-pill:has(input:checked) {
     border-color: var(--sf-theme);
     background: color-mix(in srgb, var(--sf-theme) 8%, #fff);
     color: var(--sf-theme);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--sf-theme) 25%, transparent);
 }
 
-/* The legacy theme hides every checkbox; restore ours inside the pill. */
+.elan-check-pill:has(input:checked)::before {
+    background: var(--sf-theme);
+    border-color: var(--sf-theme);
+}
+
+.elan-check-pill:has(input:checked)::after {
+    transform: translateY(-60%) rotate(-45deg) scale(1);
+}
+
+.elan-check-pill:has(input:focus-visible) {
+    outline: 2px solid var(--sf-theme);
+    outline-offset: 2px;
+}
+
 .elan-check-pill input[type="checkbox"] {
-    position: static;
-    display: inline-block;
-    visibility: visible;
-    opacity: 1;
-    width: 18px;
-    height: 18px;
+    position: absolute;
+    width: 1px;
+    height: 1px;
     margin: 0;
-    accent-color: var(--sf-theme);
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    visibility: visible;
+    display: inline-block;
+    pointer-events: none;
+}
+
+.elan-auto-title {
+    align-self: flex-start;
+    margin-top: 2px;
+}
+
+.elan-hint {
+    font-size: 12px;
+    font-weight: 500;
+    color: #64748b;
+    line-height: 1.4;
+}
+
+.elan-field input.is-auto {
+    background: #f8fafc;
+    color: #475569;
+}
+
+/* Colour chip: the swatch sits where the check box would. */
+.elan-color-pill {
+    padding-left: 16px;
+}
+
+.elan-color-pill::before,
+.elan-color-pill::after {
+    display: none;
+}
+
+.elan-color-dot {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    border: 1px solid rgba(15, 23, 42, 0.15);
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 2px #fff;
+}
+
+/* Per-size price rows. */
+.elan-size-list {
+    display: grid;
+    gap: 10px;
+}
+
+.elan-size-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+}
+
+.elan-size-row .elan-check-pill {
+    min-width: 96px;
+}
+
+.elan-size-prices {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.elan-field .elan-size-prices input {
+    width: 140px;
+    padding: 9px 12px;
+    font-size: 14px;
+}
+
+.elan-field .elan-size-prices input:disabled {
+    border-color: #eef1f6;
+    background: #f8fafc;
+    color: #94a3b8;
+    cursor: not-allowed;
 }
 
 .elan-dropzone {
@@ -7731,10 +7850,19 @@ a.sf-seller-link {
 }
 
 .elan-thumbs .thumb {
-    position: relative;
-    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 6px;
     border: 1px solid #e6e9f0;
     border-radius: 12px;
+    background: #fff;
+}
+
+.elan-thumbs .thumb-pic {
+    position: relative;
+    overflow: hidden;
+    border-radius: 9px;
     aspect-ratio: 1;
 }
 
@@ -7743,6 +7871,27 @@ a.sf-seller-link {
     width: 100%;
     height: 100%;
     object-fit: cover;
+}
+
+.elan-thumbs .thumb-meta {
+    display: grid;
+    gap: 4px;
+}
+
+.elan-thumbs .thumb-select {
+    width: 100%;
+    padding: 5px 6px;
+    border: 1px solid #dbe3ef;
+    border-radius: 8px;
+    background: #fff;
+    color: #1e293b;
+    font-family: inherit;
+    font-size: 11px;
+    outline: none;
+}
+
+.elan-thumbs .thumb-select:focus {
+    border-color: var(--sf-theme);
 }
 
 .elan-thumbs .thumb .cover-tag {

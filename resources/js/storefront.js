@@ -688,49 +688,103 @@ if (gallery) {
     const lightbox = gallery.querySelector('[data-sf-lightbox]');
     const lightboxImage = gallery.querySelector('[data-sf-lightbox-image]');
     const lightboxThumbs = Array.from(gallery.querySelectorAll('[data-sf-lightbox-thumb]'));
-    const totalSlides = Math.max(thumbs.length, dots.length, lightboxThumbs.length);
+    const lightboxTotal = lightbox?.querySelector('[data-sf-lightbox-total]');
+
+    // Photos may be tied to a colour and a size; the gallery only shows the
+    // shots that match the variant picked below it.
+    let activeColor = null;
+    let activeSize = null;
+    let visible = thumbs.map((_, index) => index);
     let current = 0;
 
     const counterCurrent = lightbox?.querySelector('[data-sf-lightbox-current]');
 
-    const show = (index) => {
-        if (totalSlides === 0) return;
+    const matches = (element) => {
+        const color = element?.dataset.colorId || '';
+        const size = element?.dataset.sizeId || '';
 
-        current = (index + totalSlides) % totalSlides;
+        if (activeColor && color && color !== activeColor) return false;
+        if (activeSize && size && size !== activeSize) return false;
 
-        const src = thumbs[current]?.dataset.src || lightboxThumbs[current]?.querySelector('img')?.src;
+        return true;
+    };
+
+    const show = (position) => {
+        if (visible.length === 0) return;
+
+        current = (position + visible.length) % visible.length;
+
+        const index = visible[current];
+        const src = thumbs[index]?.dataset.src || lightboxThumbs[index]?.querySelector('img')?.src;
         if (src) {
             if (image) image.src = src;
             if (lightboxImage) lightboxImage.src = src;
         }
 
-        thumbs.forEach((thumb, position) => thumb.classList.toggle('is-active', position === current));
-        lightboxThumbs.forEach((thumb, position) => thumb.classList.toggle('is-active', position === current));
-        dots.forEach((dot, position) => dot.classList.toggle('is-active', position === current));
+        thumbs.forEach((thumb, position) => thumb.classList.toggle('is-active', position === index));
+        lightboxThumbs.forEach((thumb, position) => thumb.classList.toggle('is-active', position === index));
+        dots.forEach((dot, position) => dot.classList.toggle('is-active', position === index));
         if (counterCurrent) counterCurrent.textContent = String(current + 1);
 
-        if (thumbs[current] && typeof thumbs[current].scrollIntoView === 'function') {
-            thumbs[current].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        if (thumbs[index] && typeof thumbs[index].scrollIntoView === 'function') {
+            thumbs[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         }
-        if (lightboxThumbs[current] && typeof lightboxThumbs[current].scrollIntoView === 'function') {
-            lightboxThumbs[current].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        if (lightboxThumbs[index] && typeof lightboxThumbs[index].scrollIntoView === 'function') {
+            lightboxThumbs[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         }
     };
 
+    const applyFilter = () => {
+        if (thumbs.length === 0) return;
+
+        const matched = thumbs.map((_, index) => index).filter((index) => matches(thumbs[index]));
+
+        // Never leave the stage empty: fall back to every photo.
+        visible = matched.length > 0 ? matched : thumbs.map((_, index) => index);
+
+        thumbs.forEach((thumb, index) => {
+            thumb.style.display = visible.includes(index) ? '' : 'none';
+        });
+        dots.forEach((dot, index) => {
+            dot.style.display = visible.includes(index) ? '' : 'none';
+        });
+        lightboxThumbs.forEach((thumb, index) => {
+            thumb.style.display = visible.includes(index) ? '' : 'none';
+        });
+
+        if (lightboxTotal) lightboxTotal.textContent = String(visible.length);
+
+        show(0);
+    };
+
     thumbs.forEach((thumb, index) => {
-        thumb.addEventListener('click', () => show(index));
+        thumb.addEventListener('click', () => show(visible.indexOf(index)));
     });
 
     lightboxThumbs.forEach((thumb, index) => {
         thumb.addEventListener('click', (e) => {
             e.stopPropagation();
-            show(index);
+            show(visible.indexOf(index));
         });
     });
 
-    dots.forEach((dot, index) => {
-        dot.addEventListener('click', () => show(index));
+    dots.forEach((dot) => {
+        dot.addEventListener('click', () => show(visible.indexOf(Number(dot.dataset.index))));
     });
+
+    document.addEventListener('sf:variant-change', (event) => {
+        const detail = event.detail || {};
+
+        if ('colorId' in detail) activeColor = detail.colorId || null;
+        if ('sizeId' in detail) activeSize = detail.sizeId || null;
+
+        applyFilter();
+    });
+
+    // Start on the first colour/size the summary marks as active.
+    activeColor = document.querySelector('[data-sf-color-option].is-active')?.dataset.colorId || null;
+    activeSize = document.querySelector('[data-sf-size-option].is-active')?.dataset.sizeId || null;
+    applyFilter();
 
     gallery.querySelector('[data-sf-gallery-prev]')?.addEventListener('click', () => show(current - 1));
     gallery.querySelector('[data-sf-gallery-next]')?.addEventListener('click', () => show(current + 1));
@@ -919,38 +973,103 @@ document.querySelectorAll('[data-sf-fav-toggle]').forEach((btn) => {
     });
 });
 
-/* Product variants: color and size selection */
-document.querySelectorAll('[data-sf-color-option]').forEach((option) => {
-    option.addEventListener('click', () => {
-        document.querySelectorAll('[data-sf-color-option]').forEach((opt) => {
-            opt.classList.remove('is-active');
-            opt.setAttribute('aria-checked', 'false');
+/* Product variants: colour and size selection drive the gallery and the price. */
+(() => {
+    const colorOptions = document.querySelectorAll('[data-sf-color-option]');
+    const sizeOptions = document.querySelectorAll('[data-sf-size-option]');
+
+    if (colorOptions.length === 0 && sizeOptions.length === 0) return;
+
+    const priceCurrent = document.querySelectorAll('[data-sf-price-current]');
+    const priceOld = document.querySelectorAll('[data-sf-price-old]');
+    const priceBadge = document.querySelector('[data-sf-price-badge]');
+
+    let sizePrices = {};
+
+    try {
+        sizePrices = JSON.parse(document.querySelector('[data-sf-size-prices]')?.dataset.sfSizePrices || '{}');
+    } catch (error) {
+        sizePrices = {};
+    }
+
+    const money = (value) => `${Number(value).toFixed(2)} ₼`;
+
+    const paintPrice = (current, original, percent) => {
+        priceCurrent.forEach((element) => {
+            element.textContent = money(current);
         });
-        option.classList.add('is-active');
-        option.setAttribute('aria-checked', 'true');
 
-        const label = document.querySelector('[data-sf-color-label]');
-        if (label && option.dataset.colorName) {
-            label.textContent = option.dataset.colorName;
-        }
-    });
-});
-
-document.querySelectorAll('[data-sf-size-option]').forEach((option) => {
-    option.addEventListener('click', () => {
-        document.querySelectorAll('[data-sf-size-option]').forEach((opt) => {
-            opt.classList.remove('is-active');
-            opt.setAttribute('aria-checked', 'false');
+        priceOld.forEach((element) => {
+            element.textContent = money(original ?? 0);
+            element.hidden = original === null;
         });
-        option.classList.add('is-active');
-        option.setAttribute('aria-checked', 'true');
 
-        const label = document.querySelector('[data-sf-size-label]');
-        if (label && option.dataset.sizeName) {
-            label.textContent = option.dataset.sizeName;
+        if (priceBadge) {
+            priceBadge.textContent = `-${percent}%`;
+            priceBadge.hidden = !percent;
         }
+    };
+
+    const selectSizePrice = (sizeId) => {
+        const entry = sizePrices[String(sizeId)];
+
+        if (!entry || !(entry.price > 0)) return;
+
+        const price = entry.price;
+        const hasDiscount = entry.discount > 0 && entry.discount < price;
+        const current = hasDiscount ? entry.discount : price;
+        const percent = hasDiscount ? Math.round(((price - current) / price) * 100) : 0;
+
+        paintPrice(current, hasDiscount ? price : null, percent);
+    };
+
+    colorOptions.forEach((option) => {
+        option.addEventListener('click', () => {
+            colorOptions.forEach((opt) => {
+                opt.classList.remove('is-active');
+                opt.setAttribute('aria-checked', 'false');
+            });
+            option.classList.add('is-active');
+            option.setAttribute('aria-checked', 'true');
+
+            const label = document.querySelector('[data-sf-color-label]');
+            if (label && option.dataset.colorName) {
+                label.textContent = option.dataset.colorName;
+            }
+
+            document.dispatchEvent(new CustomEvent('sf:variant-change', {
+                detail: { colorId: option.dataset.colorId || null },
+            }));
+        });
     });
-});
+
+    sizeOptions.forEach((option) => {
+        option.addEventListener('click', () => {
+            sizeOptions.forEach((opt) => {
+                opt.classList.remove('is-active');
+                opt.setAttribute('aria-checked', 'false');
+            });
+            option.classList.add('is-active');
+            option.setAttribute('aria-checked', 'true');
+
+            const label = document.querySelector('[data-sf-size-label]');
+            if (label && option.dataset.sizeName) {
+                label.textContent = option.dataset.sizeName;
+            }
+
+            selectSizePrice(option.dataset.sizeId);
+
+            document.dispatchEvent(new CustomEvent('sf:variant-change', {
+                detail: { sizeId: option.dataset.sizeId || null },
+            }));
+        });
+    });
+
+    // The first size is active on load; show its price.
+    if (sizeOptions.length > 0) {
+        selectSizePrice(sizeOptions[0].dataset.sizeId);
+    }
+})();
 
 /* Modal handler for Size Chart */
 document.querySelectorAll('[data-sf-modal-open]').forEach((btn) => {
@@ -1577,6 +1696,56 @@ document.querySelectorAll('[data-sf-dash-tab]').forEach((trigger) => {
     });
 })();
 
+/* Listing form: Trendyol-style automatic title. */
+(() => {
+    const form = document.querySelector('[data-sf-listing-form]');
+    const input = form?.querySelector('[data-sf-title-input]');
+    const toggle = form?.querySelector('[data-sf-auto-title-toggle]');
+    if (!form || !input || !toggle) return;
+
+    const category = form.dataset.sfCategory || '';
+    const brand = form.querySelector('[name="brand_id"]');
+    const model = form.querySelector('[name="model"]');
+
+    const pickedFilters = () => [...form.querySelectorAll('[name^="filters["]')]
+        .flatMap((field) => {
+            if (field.tagName === 'SELECT') {
+                return field.value ? [field.options[field.selectedIndex]?.textContent?.trim()] : [];
+            }
+
+            return [...field.querySelectorAll('input[type="checkbox"]:checked')]
+                .map((box) => box.value.trim());
+        })
+        .filter(Boolean);
+
+    const generate = () => {
+        const brandText = brand && brand.value ? brand.options[brand.selectedIndex]?.textContent?.trim() : '';
+        const parts = [brandText, model?.value?.trim(), ...pickedFilters().slice(0, 2), category]
+            .filter(Boolean);
+
+        return [...new Set(parts)].join(' ').replace(/\s+/g, ' ').trim();
+    };
+
+    const sync = () => {
+        input.readOnly = toggle.checked;
+        input.classList.toggle('is-auto', toggle.checked);
+        input.required = !toggle.checked && input.dataset.required === '1';
+
+        if (toggle.checked) {
+            input.value = generate();
+        }
+    };
+
+    form.addEventListener('input', () => {
+        if (toggle.checked) input.value = generate();
+    });
+    form.addEventListener('change', () => {
+        if (toggle.checked) input.value = generate();
+    });
+    toggle.addEventListener('change', sync);
+    sync();
+})();
+
 /* Listing form: dependent filter values. */
 (() => {
     const selects = [...document.querySelectorAll('[data-sf-filter]')];
@@ -1623,30 +1792,101 @@ document.querySelectorAll('[data-sf-dash-tab]').forEach((trigger) => {
     });
 })();
 
-/* Listing form: image dropzone with previews. */
+/* Listing form: sizes need a price only once they are selected. */
+(() => {
+    document.querySelectorAll('[data-sf-size-row]').forEach((row) => {
+        const check = row.querySelector('[data-sf-size-check]');
+        const inputs = [...row.querySelectorAll('input[type="number"]')];
+        if (!check || inputs.length === 0) return;
+
+        const sync = () => inputs.forEach((input) => {
+            input.disabled = !check.checked;
+        });
+
+        check.addEventListener('change', sync);
+        sync();
+    });
+})();
+
+/* Listing form: image dropzone with previews and per-photo colour/size. */
 (() => {
     const zone = document.querySelector('[data-sf-dropzone]');
     const input = document.querySelector('[data-sf-dropzone-input]');
     const preview = document.querySelector('[data-sf-dropzone-preview]');
     if (!zone || !input || !preview) return;
 
+    let colors = [];
+    let sizes = [];
+
+    try {
+        colors = JSON.parse(preview.dataset.sfColors || '[]');
+        sizes = JSON.parse(preview.dataset.sfSizes || '[]');
+    } catch (error) {
+        colors = [];
+        sizes = [];
+    }
+
+    // Per-photo choices, kept by file index so removing a photo keeps the rest.
+    let meta = [];
+
+    const checkedValues = (name) => [...document.querySelectorAll(`input[name="${name}"]:checked`)]
+        .map((element) => String(element.value));
+
+    const optionsFor = (all, selected) => (
+        selected.length > 0 ? all.filter((option) => selected.includes(String(option.id))) : all
+    );
+
+    const buildSelect = (index, field, options, placeholder) => {
+        const select = document.createElement('select');
+        select.name = field === 'color' ? 'image_colors[]' : 'image_sizes[]';
+        select.className = 'thumb-select';
+        select.setAttribute('aria-label', placeholder);
+
+        const empty = document.createElement('option');
+        empty.value = '';
+        empty.textContent = placeholder;
+        select.appendChild(empty);
+
+        options.forEach((option) => {
+            const item = document.createElement('option');
+            item.value = String(option.id);
+            item.textContent = option.name;
+            select.appendChild(item);
+        });
+
+        const stored = meta[index]?.[field];
+        select.value = stored != null && options.some((option) => String(option.id) === String(stored))
+            ? String(stored)
+            : '';
+
+        select.addEventListener('change', () => {
+            meta[index] = { ...(meta[index] || {}), [field]: select.value };
+        });
+
+        return select;
+    };
+
     const render = () => {
         preview.innerHTML = '';
+
         [...input.files].forEach((file, index) => {
             const item = document.createElement('div');
             item.className = 'thumb';
+
+            const picture = document.createElement('div');
+            picture.className = 'thumb-pic';
 
             if (index === 0) {
                 const tag = document.createElement('span');
                 tag.className = 'cover-tag';
                 tag.textContent = 'Əsas';
-                item.appendChild(tag);
+                picture.appendChild(tag);
             }
 
             const img = document.createElement('img');
             img.src = URL.createObjectURL(file);
             img.alt = `Şəkil ${index + 1}`;
-            item.appendChild(img);
+            picture.appendChild(img);
 
             const remove = document.createElement('button');
             remove.type = 'button';
@@ -1661,15 +1901,50 @@ document.querySelectorAll('[data-sf-dash-tab]').forEach((trigger) => {
                     if (currentIndex !== index) transfer.items.add(current);
                 });
                 input.files = transfer.files;
+                meta.splice(index, 1);
                 render();
             });
-            item.appendChild(remove);
+            picture.appendChild(remove);
+
+            item.appendChild(picture);
+
+            const metaRow = document.createElement('div');
+            metaRow.className = 'thumb-meta';
+
+            const colorOptions = optionsFor(colors, checkedValues('colors[]'));
+            const sizeOptions = optionsFor(sizes, checkedValues('sizes[]'));
+
+            if (colorOptions.length > 0) {
+                metaRow.appendChild(buildSelect(index, 'color', colorOptions, 'Rəng'));
+            }
+
+            if (sizeOptions.length > 0) {
+                metaRow.appendChild(buildSelect(index, 'size', sizeOptions, 'Ölçü'));
+            }
+
+            if (metaRow.children.length > 0) {
+                item.appendChild(metaRow);
+            }
 
             preview.appendChild(item);
         });
     };
 
-    input.addEventListener('change', render);
+    // Photos no longer in the list no longer need their choices.
+    const prune = () => {
+        const count = input.files.length;
+        meta = meta.slice(0, count);
+    };
+
+    input.addEventListener('change', () => {
+        prune();
+        render();
+    });
+
+    // The variant pickers change which options each photo offers.
+    document.querySelectorAll('[data-sf-color-check], [data-sf-size-check]').forEach((check) => {
+        check.addEventListener('change', render);
+    });
     zone.addEventListener('dragover', (event) => {
         event.preventDefault();
         zone.classList.add('is-drag');
@@ -1680,6 +1955,7 @@ document.querySelectorAll('[data-sf-dash-tab]').forEach((trigger) => {
         zone.classList.remove('is-drag');
         if (event.dataTransfer?.files?.length) {
             input.files = event.dataTransfer.files;
+            meta = [];
             render();
         }
     });

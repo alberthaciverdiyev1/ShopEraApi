@@ -12,6 +12,7 @@ class ProductImageResource extends JsonResource
             'id' => $this->id,
             'image_path' => $this->image_path,
             'color_id' => $this->color_id,
+            'size_id' => $this->size_id,
         ];
     }
 }

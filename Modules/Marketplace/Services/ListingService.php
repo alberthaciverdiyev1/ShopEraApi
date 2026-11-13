@@ -5,6 +5,7 @@ namespace Modules\Marketplace\Services;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Modules\Brand\Entities\Brand;
 use Modules\Category\Entities\Category;
 use Modules\Delivery\Entities\City;
 use Modules\Filter\Entities\Filter;
@@ -39,6 +40,12 @@ class ListingService
             ]);
         }
 
+        // Keep the automatic title in sync with what the form showed; the
+        // storefront also sends it, this covers clients without JavaScript.
+        if (blank($data['title'] ?? null) && ! empty($data['auto_title'])) {
+            $data['title'] = $this->autoTitle($data, $category);
+        }
+
         $listing = Product::create([
             'title' => isset($data['title']) ? $this->translations($data['title']) : null,
             'description' => isset($data['description']) ? $this->translations($data['description']) : null,
@@ -49,6 +56,7 @@ class ListingService
             'condition' => $data['condition'] ?? null,
             'has_delivery' => filter_var($data['has_delivery'] ?? false, FILTER_VALIDATE_BOOLEAN),
             'price' => $data['price'] ?? 0,
+            'discount' => $data['discount'] ?? null,
             'stock_count' => (int) ($data['stock_count'] ?? 1),
             'user_id' => $user?->id,
             'vendor_id' => $vendor?->id,
@@ -71,6 +79,13 @@ class ListingService
             $manageUrl = url('/elan/idaresi/'.$plainToken);
         }
 
+        $this->syncColors($listing, (array) ($data['colors'] ?? []));
+        $this->syncSizes(
+            $listing,
+            (array) ($data['sizes'] ?? []),
+            (array) ($data['size_prices'] ?? []),
+            (array) ($data['size_discounts'] ?? []),
+        );
         $this->storeImages($listing, $request);
         $this->syncFilterValues($listing, $data['filter_values'] ?? []);
 
@@ -79,6 +94,10 @@ class ListingService
 
     public function update(Product $listing, array $data, Request $request): Product
     {
+        if (blank($data['title'] ?? null) && ! empty($data['auto_title'])) {
+            $data['title'] = $this->autoTitle($data, $listing->category);
+        }
+
         if (array_key_exists('title', $data)) {
             $listing->title = $this->translations($data['title']);
         }
@@ -86,9 +105,9 @@ class ListingService
             $listing->description = $this->translations($data['description']);
         }
 
-        foreach (['category_id', 'brand_id', 'model', 'condition', 'price', 'stock_count', 'contact_name', 'contact_phone', 'contact_email'] as $field) {
+        foreach (['category_id', 'brand_id', 'model', 'condition', 'price', 'discount', 'stock_count', 'contact_name', 'contact_phone', 'contact_email'] as $field) {
             if (array_key_exists($field, $data)) {
-                $listing->{$field} = $data[$field];
+                $listing->{$field} = $field === 'discount' ? ($data[$field] ?: null) : $data[$field];
             }
         }
 
@@ -101,6 +120,20 @@ class ListingService
         }
 
         $listing->save();
+
+        if (array_key_exists('colors', $data)) {
+            $this->syncColors($listing, (array) $data['colors']);
+        }
+
+        if (array_key_exists('sizes', $data)) {
+            $this->syncSizes(
+                $listing,
+                (array) $data['sizes'],
+                (array) ($data['size_prices'] ?? []),
+                (array) ($data['size_discounts'] ?? []),
+            );
+        }
+
         $this->storeImages($listing, $request);
 
         if (array_key_exists('filter_values', $data)) {
@@ -175,17 +208,113 @@ class ListingService
             return;
         }
 
-        foreach ((array) $request->file('images') as $file) {
+        // `image_colors` and `image_sizes` are posted in the same order as the
+        // uploaded files, so each photo can be tied to a colour and a size.
+        $files = array_values((array) $request->file('images'));
+        $colors = array_values((array) $request->input('image_colors', []));
+        $sizes = array_values((array) $request->input('image_sizes', []));
+
+        $validColorIds = $listing->colors()->pluck('colors.id')->map(fn ($id) => (int) $id)->all();
+        $validSizeIds = $listing->sizes()->pluck('sizes.id')->map(fn ($id) => (int) $id)->all();
+
+        foreach ($files as $index => $file) {
+            $colorId = (int) ($colors[$index] ?? 0);
+            $sizeId = (int) ($sizes[$index] ?? 0);
+
             $listing->images()->create([
                 'image_path' => $file->store('listings', 'public'),
+                'color_id' => in_array($colorId, $validColorIds, true) ? $colorId : null,
+                'size_id' => in_array($sizeId, $validSizeIds, true) ? $sizeId : null,
             ]);
         }
+    }
+
+    /**
+     * Replace the listing's colours.
+     *
+     * @param  array<int, mixed>  $ids
+     */
+    private function syncColors(Product $listing, array $ids): void
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+
+        $listing->colors()->sync($ids);
+    }
+
+    /**
+     * Replace the listing's sizes, keeping the per-size price and discount.
+     *
+     * @param  array<int, mixed>  $ids
+     * @param  array<int|string, mixed>  $prices
+     * @param  array<int|string, mixed>  $discounts
+     */
+    private function syncSizes(Product $listing, array $ids, array $prices = [], array $discounts = []): void
+    {
+        $existing = $listing->sizes()
+            ->get()
+            ->keyBy('id')
+            ->map(fn ($size) => $size->pivot?->wholesale_price);
+
+        $sync = [];
+
+        foreach ($ids as $id) {
+            $id = (int) $id;
+
+            if ($id <= 0) {
+                continue;
+            }
+
+            $price = $prices[$id] ?? null;
+            $discount = $discounts[$id] ?? null;
+
+            $sync[$id] = [
+                'price' => $price !== null && $price !== '' ? (float) $price : null,
+                'discount' => $discount !== null && $discount !== '' ? (float) $discount : null,
+                'wholesale_price' => $existing->get($id),
+            ];
+        }
+
+        $listing->sizes()->sync($sync);
     }
 
     /** Every listing is stored under each locale; translation comes later. */
     private function translations(string $value): array
     {
         return ['az' => $value, 'en' => $value, 'ru' => $value, 'tr' => $value];
+    }
+
+    /**
+     * Build a Trendyol-style title: brand, model, category and the first
+     * filter options the seller picked (e.g. "Apple iPhone 15 Pro Smartfon").
+     */
+    private function autoTitle(array $data, ?Category $category): string
+    {
+        $brand = empty($data['brand_id'])
+            ? null
+            : Brand::query()->find($data['brand_id'])?->name;
+
+        $filterParts = [];
+
+        foreach ((array) ($data['filters'] ?? []) as $values) {
+            foreach ((array) $values as $value) {
+                $value = trim((string) $value);
+
+                if ($value !== '' && ! in_array($value, $filterParts, true)) {
+                    $filterParts[] = $value;
+                }
+            }
+        }
+
+        $parts = array_filter([
+            $brand,
+            trim((string) ($data['model'] ?? '')),
+            ...array_slice($filterParts, 0, 2),
+            $category?->name,
+        ]);
+
+        $title = trim(preg_replace('/\s+/', ' ', implode(' ', $parts)));
+
+        return $title !== '' ? $title : 'Elan';
     }
 
     /** Stores the chosen filter values, enforcing the dependency chain. */

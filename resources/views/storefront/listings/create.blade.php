@@ -10,6 +10,22 @@
     $visible = fn (string $field) => ($schema[$field]['visible'] ?? true) !== false;
     $required = fn (string $field) => ($schema[$field]['required'] ?? false) === true;
     $isGuest = auth()->guest();
+
+    // Variant pickers and the per-photo selects read these plain arrays.
+    $colorChoices = collect($colors ?? [])->map(fn ($color) => [
+        'id' => (int) ($color['id'] ?? 0),
+        'name' => $localized($color['name'] ?? ''),
+        'hex' => $color['hex'] ?? '#94a3b8',
+    ])->filter(fn ($color) => $color['id'] > 0)->values()->all();
+
+    $sizeChoices = collect($sizes ?? [])->map(fn ($size) => [
+        'id' => (int) ($size['id'] ?? 0),
+        'name' => $localized($size['name'] ?? ''),
+    ])->filter(fn ($size) => $size['id'] > 0)->values()->all();
+
+    $oldInts = fn (string $key): array => array_map('intval', (array) old($key, []));
+    $oldColors = $oldInts('colors');
+    $oldSizes = $oldInts('sizes');
 @endphp
 
 <x-storefront.layouts.app :title="'Elan yerləşdir — ShopEra'">
@@ -115,7 +131,10 @@
                     </div>
                 @endif
 
-                <form action="{{ route('storefront.listings.store') }}" method="POST" enctype="multipart/form-data" class="elan-form">
+                <form action="{{ route('storefront.listings.store') }}" method="POST" enctype="multipart/form-data"
+                      class="elan-form"
+                      data-sf-listing-form
+                      data-sf-category="{{ $localized($selected['name']) }}">
                     @csrf
                     <input type="hidden" name="category_id" value="{{ $selected['id'] }}">
 
@@ -178,12 +197,23 @@
                         <h6 class="elan-section__title">Əsas məlumat</h6>
                         <div class="elan-grid">
                             @if ($visible('title'))
-                                <label class="elan-field elan-field--full">
+                                @php
+                                    $autoTitleChecked = old('_token') === null || old('auto_title') === '1';
+                                @endphp
+                                <div class="elan-field elan-field--full">
                                     <span>Başlıq {{ $required('title') ? '*' : '' }}</span>
                                     <input type="text" name="title" value="{{ old('title') }}" maxlength="255"
-                                           {{ $required('title') ? 'required' : '' }}
-                                           placeholder="Məsələn: iPhone 15 Pro 256GB">
-                                </label>
+                                           data-sf-title-input
+                                           data-required="{{ $required('title') ? '1' : '0' }}"
+                                           placeholder="Məsələn: Apple iPhone 15 Pro 256GB">
+                                    <label class="elan-check-pill elan-auto-title">
+                                        <input type="checkbox" name="auto_title" value="1"
+                                               data-sf-auto-title-toggle
+                                               @checked($autoTitleChecked)>
+                                        <span>Başlıq avtomatik yaradılsın</span>
+                                    </label>
+                                    <span class="elan-hint">Marka, model, kateqoriya və seçilmiş filtrlərdən Trendyol üslubunda avtomatik başlıq yaradılır. Söndürsəniz, başlığı özünüz yaza bilərsiniz.</span>
+                                </div>
                             @endif
 
                             @if ($visible('description'))
@@ -191,6 +221,19 @@
                                     <span>Təsvir {{ $required('description') ? '*' : '' }}</span>
                                     <textarea name="description" rows="5" {{ $required('description') ? 'required' : '' }}
                                               placeholder="Vəziyyəti, xüsusiyyətləri və s. yazın…">{{ old('description') }}</textarea>
+                                </label>
+                            @endif
+
+                            @if ($visible('price'))
+                                <label class="elan-field">
+                                    <span>Qiymət (₼) {{ $required('price') ? '*' : '' }}</span>
+                                    <input type="number" name="price" min="0" step="0.01" value="{{ old('price') }}"
+                                           {{ $required('price') ? 'required' : '' }}>
+                                </label>
+                                <label class="elan-field">
+                                    <span>Endirimli qiymət (₼)</span>
+                                    <input type="number" name="discount" min="0" step="0.01" value="{{ old('discount') }}"
+                                           placeholder="Endirim yoxdursa boş buraxın">
                                 </label>
                             @endif
 
@@ -203,14 +246,6 @@
                                             <option value="{{ $city['key'] }}" @selected(old('city_key') === $city['key'])>{{ $city['name'] }}</option>
                                         @endforeach
                                     </select>
-                                </label>
-                            @endif
-
-                            @if ($visible('price'))
-                                <label class="elan-field">
-                                    <span>Qiymət (₼) {{ $required('price') ? '*' : '' }}</span>
-                                    <input type="number" name="price" min="0" step="0.01" value="{{ old('price') }}"
-                                           {{ $required('price') ? 'required' : '' }}>
                                 </label>
                             @endif
 
@@ -249,6 +284,55 @@
                         </div>
                     </section>
 
+                    @if (count($colorChoices) || count($sizeChoices))
+                        <section class="elan-section">
+                            <h6 class="elan-section__title">Rəng və ölçü variantları</h6>
+                            <div class="elan-grid">
+                                @if (count($colorChoices))
+                                    <div class="elan-field elan-field--full">
+                                        <span>Rənglər <span class="muted small">(bir neçəsini seçə bilərsiniz)</span></span>
+                                        <div class="elan-checks">
+                                            @foreach ($colorChoices as $color)
+                                                <label class="elan-check-pill elan-color-pill">
+                                                    <input type="checkbox" name="colors[]" value="{{ $color['id'] }}" data-sf-color-check
+                                                           @checked(in_array($color['id'], $oldColors, true))>
+                                                    <span class="elan-color-dot" style="background-color: {{ $color['hex'] }}"></span>
+                                                    <span>{{ $color['name'] }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                                @if (count($sizeChoices))
+                                    <div class="elan-field elan-field--full">
+                                        <span>Ölçülər <span class="muted small">(hər ölçü üçün ayrı qiymət yaza bilərsiniz)</span></span>
+                                        <div class="elan-size-list">
+                                            @foreach ($sizeChoices as $size)
+                                                <div class="elan-size-row" data-sf-size-row>
+                                                    <label class="elan-check-pill">
+                                                        <input type="checkbox" name="sizes[]" value="{{ $size['id'] }}" data-sf-size-check
+                                                               @checked(in_array($size['id'], $oldSizes, true))>
+                                                        <span>{{ $size['name'] }}</span>
+                                                    </label>
+                                                    <div class="elan-size-prices">
+                                                        <input type="number" name="size_prices[{{ $size['id'] }}]" min="0" step="0.01"
+                                                               placeholder="Qiymət (₼)"
+                                                               value="{{ old('size_prices.'.$size['id']) }}">
+                                                        <input type="number" name="size_discounts[{{ $size['id'] }}]" min="0" step="0.01"
+                                                               placeholder="Endirimli (₼)"
+                                                               value="{{ old('size_discounts.'.$size['id']) }}">
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                        <span class="elan-hint">Ölçü seçdikdə həmin ölçü üçün xüsusi qiymət və endirim yaza bilərsiniz; boş buraxılsa əsas qiymət tətbiq olunur.</span>
+                                    </div>
+                                @endif
+                            </div>
+                        </section>
+                    @endif
+
                     @if ($visible('photos'))
                         <section class="elan-section">
                             <h6 class="elan-section__title">Şəkillər {{ $required('photos') ? '*' : '' }} <span class="muted">(maks. 10)</span></h6>
@@ -259,7 +343,11 @@
                                 <div><strong>Şəkilləri bura sürükləyin</strong> və ya <span class="link">fayl seçin</span></div>
                                 <div class="muted small">JPG, PNG, WEBP — hər biri maks. 8 MB</div>
                             </label>
-                            <div class="elan-thumbs" data-sf-dropzone-preview></div>
+                            <div class="elan-thumbs"
+                                 data-sf-dropzone-preview
+                                 data-sf-colors="{{ json_encode($colorChoices) }}"
+                                 data-sf-sizes="{{ json_encode($sizeChoices) }}"></div>
+                            <p class="elan-hint">Hər şəkil üçün hansı rəng və ölçünü göstərdiyini seçin — məhsul səhifəsində rəng/ölçü dəyişdikdə uyğun şəkillər göstəriləcək.</p>
                         </section>
                     @endif
 

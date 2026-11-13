@@ -28,6 +28,26 @@
     $hasDiscount = ! empty($product['has_discount']);
     $views = (int) ($product['views'] ?? 0);
 
+    // Per-size prices drive the price block when a size is picked.
+    $sizePrices = [];
+
+    foreach ($product['sizes'] ?? [] as $size) {
+        if (! empty($size['id'])) {
+            $sizePrices[(string) $size['id']] = [
+                'price' => (float) ($size['price'] ?? 0),
+                'discount' => (float) ($size['discount'] ?? 0),
+            ];
+        }
+    }
+
+    $localizedName = function ($name): string {
+        if (is_array($name)) {
+            return (string) ($name['az'] ?? $name['en'] ?? reset($name));
+        }
+
+        return (string) ($name ?? '');
+    };
+
     // Build top 4 highlight chips
     $highlights = [];
     if (! empty($condition)) {
@@ -88,12 +108,14 @@
     </div>
 
     <!-- Prices -->
-    <div class="sf-product-summary__price">
-        <span class="sf-product-summary__price-current">{{ number_format($currentPrice, 2) }} ₼</span>
-        @if ($hasDiscount)
-            <span class="sf-product-summary__price-old">{{ number_format($originalPrice, 2) }} ₼</span>
-            <span class="sf-product-summary__price-badge">-{{ (int) $product['discount_percent'] }}%</span>
-        @endif
+    <div class="sf-product-summary__price" data-sf-price
+         data-price="{{ $currentPrice }}"
+         data-original-price="{{ $originalPrice }}"
+         data-has-discount="{{ $hasDiscount ? '1' : '0' }}"
+         data-discount-percent="{{ (int) ($product['discount_percent'] ?? 0) }}">
+        <span class="sf-product-summary__price-current" data-sf-price-current>{{ number_format($currentPrice, 2) }} ₼</span>
+        <span class="sf-product-summary__price-old" data-sf-price-old @if (! $hasDiscount) hidden @endif>{{ number_format($originalPrice, 2) }} ₼</span>
+        <span class="sf-product-summary__price-badge" data-sf-price-badge @if (! $hasDiscount) hidden @endif>-{{ (int) ($product['discount_percent'] ?? 0) }}%</span>
     </div>
 
 
@@ -113,7 +135,7 @@
     @if (! empty($product['colors']) && count($product['colors']) > 0)
         <div class="sf-product-variant-section sf-color-variants">
             <div class="sf-variant-header">
-                <span class="sf-variant-title">Rəng: <strong data-sf-color-label>{{ $product['colors'][0]['name'] ?? '' }}</strong></span>
+                <span class="sf-variant-title">Rəng: <strong data-sf-color-label>{{ $localizedName($product['colors'][0]['name'] ?? '') }}</strong></span>
                 <span class="sf-variant-info" title="Mövcud rəng variantları"><i class="fa-solid fa-circle-info"></i></span>
             </div>
             <div class="sf-color-swatches" role="radiogroup" aria-label="Rəng seçimi">
@@ -121,11 +143,12 @@
                     <button type="button"
                             class="sf-color-swatch-card @if ($idx === 0) is-active @endif"
                             data-sf-color-option
-                            data-color-name="{{ $color['name'] ?? '' }}"
+                            data-color-id="{{ $color['id'] ?? '' }}"
+                            data-color-name="{{ $localizedName($color['name'] ?? '') }}"
                             role="radio"
                             aria-checked="{{ $idx === 0 ? 'true' : 'false' }}">
-                        <span class="sf-color-circle" style="background-color: {{ $color['code'] ?? '#94a3b8' }};"></span>
-                        <span class="sf-color-name">{{ $color['name'] ?? '' }}</span>
+                        <span class="sf-color-circle" style="background-color: {{ $color['hex'] ?? '#94a3b8' }};"></span>
+                        <span class="sf-color-name">{{ $localizedName($color['name'] ?? '') }}</span>
                     </button>
                 @endforeach
             </div>
@@ -134,19 +157,20 @@
 
     <!-- Size Variant Selector (Trendyol Screenshot 2) -->
     @if (! empty($product['sizes']) && count($product['sizes']) > 0)
-        <div class="sf-product-variant-section sf-size-variants">
+        <div class="sf-product-variant-section sf-size-variants" data-sf-size-prices="{{ json_encode($sizePrices) }}">
             <div class="sf-variant-header">
-                <span class="sf-variant-title">Ölçü: <strong data-sf-size-label>{{ $product['sizes'][0]['name'] ?? '' }}</strong></span>
+                <span class="sf-variant-title">Ölçü: <strong data-sf-size-label>{{ $localizedName($product['sizes'][0]['name'] ?? '') }}</strong></span>
             </div>
             <div class="sf-size-pills" role="radiogroup" aria-label="Ölçü seçimi">
                 @foreach ($product['sizes'] as $idx => $size)
                     <button type="button"
                             class="sf-size-pill @if ($idx === 0) is-active @endif"
                             data-sf-size-option
-                            data-size-name="{{ $size['name'] ?? '' }}"
+                            data-size-id="{{ $size['id'] ?? '' }}"
+                            data-size-name="{{ $localizedName($size['name'] ?? '') }}"
                             role="radio"
                             aria-checked="{{ $idx === 0 ? 'true' : 'false' }}">
-                        {{ $size['name'] ?? '' }}
+                        {{ $localizedName($size['name'] ?? '') }}
                     </button>
                 @endforeach
             </div>

@@ -5,8 +5,28 @@
 ])
 
 @php
+    // Each photo can carry the colour and the size it shows; the gallery
+    // follows the variant the shopper picks below the image.
+    $galleryItems = collect($product['images'] ?? [])
+        ->map(fn ($item) => [
+            'src' => $item['image_path'] ?? null,
+            'color_id' => $item['color_id'] ?? null,
+            'size_id' => $item['size_id'] ?? null,
+        ])
+        ->filter(fn ($item) => ! empty($item['src']))
+        ->values()
+        ->all();
+
     $images = array_values(array_filter((array) $images));
     $images = $images === [] ? ['/assets/images/top-deals-item/topDealsItemThumb1_1.png'] : $images;
+
+    if ($galleryItems === []) {
+        $galleryItems = array_map(
+            fn ($src) => ['src' => $src, 'color_id' => null, 'size_id' => null],
+            $images
+        );
+    }
+
     $hasDelivery = ! empty($product['has_delivery']);
     $hasDiscount = ! empty($product['has_discount']);
     $isPremium = ! empty($product['is_premium']);
@@ -78,7 +98,7 @@
 
         <!-- Main Image -->
         <button type="button" class="sf-gallery__main" data-sf-gallery-open aria-label="Şəkli böyüt">
-            <img src="{{ $images[0] }}" alt="{{ $title }}" data-sf-gallery-image loading="eager">
+            <img src="{{ $galleryItems[0]['src'] }}" alt="{{ $title }}" data-sf-gallery-image loading="eager">
         </button>
 
         <button type="button" class="sf-gallery__arrow sf-gallery__arrow--next" data-sf-gallery-next aria-label="Növbəti şəkil">
@@ -87,25 +107,30 @@
 
 
         <!-- Dot Pagination (Mobile) -->
-        @if (count($images) > 1)
+        @if (count($galleryItems) > 1)
             <div class="sf-gallery__dots" data-sf-gallery-dots>
-                @foreach ($images as $index => $image)
-                    <span class="sf-gallery__dot @if ($index === 0) is-active @endif" data-index="{{ $index }}"></span>
+                @foreach ($galleryItems as $index => $item)
+                    <span class="sf-gallery__dot @if ($index === 0) is-active @endif"
+                          data-index="{{ $index }}"
+                          data-color-id="{{ $item['color_id'] ?? '' }}"
+                          data-size-id="{{ $item['size_id'] ?? '' }}"></span>
                 @endforeach
             </div>
         @endif
     </div>
 
     <!-- Desktop Thumbnails -->
-    @if (count($images) > 1)
+    @if (count($galleryItems) > 1)
         <div class="sf-gallery__thumbs" role="tablist">
-            @foreach ($images as $index => $image)
+            @foreach ($galleryItems as $index => $item)
                 <button type="button"
                         class="sf-gallery__thumb @if ($index === 0) is-active @endif"
                         data-sf-gallery-thumb
-                        data-src="{{ $image }}"
+                        data-src="{{ $item['src'] }}"
+                        data-color-id="{{ $item['color_id'] ?? '' }}"
+                        data-size-id="{{ $item['size_id'] ?? '' }}"
                         aria-label="Şəkil {{ $index + 1 }}">
-                    <img src="{{ $image }}" alt="" loading="lazy">
+                    <img src="{{ $item['src'] }}" alt="" loading="lazy">
                 </button>
             @endforeach
         </div>
@@ -116,34 +141,36 @@
             <i class="fa-regular fa-xmark"></i>
         </button>
 
-        @if (count($images) > 1)
+        @if (count($galleryItems) > 1)
             <button type="button" class="sf-lightbox__arrow sf-lightbox__arrow--prev" data-sf-lightbox-prev aria-label="Əvvəlki şəkil">
                 <i class="fa-solid fa-chevron-left"></i>
             </button>
         @endif
 
         <div class="sf-lightbox__stage" data-sf-lightbox-stage>
-            <img src="{{ $images[0] }}" alt="{{ $title }}" data-sf-lightbox-image>
+            <img src="{{ $galleryItems[0]['src'] }}" alt="{{ $title }}" data-sf-lightbox-image>
         </div>
 
-        @if (count($images) > 1)
+        @if (count($galleryItems) > 1)
             <button type="button" class="sf-lightbox__arrow sf-lightbox__arrow--next" data-sf-lightbox-next aria-label="Növbəti şəkil">
                 <i class="fa-solid fa-chevron-right"></i>
             </button>
 
             <div class="sf-lightbox__footer">
                 <div class="sf-lightbox__counter">
-                    <span data-sf-lightbox-current>1</span> / <span>{{ count($images) }}</span>
+                    <span data-sf-lightbox-current>1</span> / <span data-sf-lightbox-total>{{ count($galleryItems) }}</span>
                 </div>
 
                 <div class="sf-lightbox__thumbs" role="tablist">
-                    @foreach ($images as $index => $image)
+                    @foreach ($galleryItems as $index => $item)
                         <button type="button"
                                 class="sf-lightbox__thumb @if ($index === 0) is-active @endif"
                                 data-sf-lightbox-thumb
                                 data-index="{{ $index }}"
+                                data-color-id="{{ $item['color_id'] ?? '' }}"
+                                data-size-id="{{ $item['size_id'] ?? '' }}"
                                 aria-label="Şəkil {{ $index + 1 }}">
-                            <img src="{{ $image }}" alt="" loading="lazy">
+                            <img src="{{ $item['src'] }}" alt="" loading="lazy">
                         </button>
                     @endforeach
                 </div>
