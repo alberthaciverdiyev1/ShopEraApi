@@ -1809,8 +1809,11 @@ document.querySelectorAll('[data-sf-dash-tab]').forEach((trigger) => {
                 input.disabled = !selected;
             });
 
+            // With the standard price on the per-size price fields are not
+            // used at all, so they are hidden as well as disabled.
             row.querySelectorAll('[data-sf-size-price]').forEach((input) => {
                 input.disabled = !selected || standardOn;
+                input.hidden = standardOn;
             });
         });
     };

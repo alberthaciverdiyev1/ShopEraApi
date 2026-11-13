@@ -7778,31 +7778,40 @@ a.sf-seller-link {
 /* Per-size price rows. */
 .elan-size-list {
     display: grid;
-    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px 14px;
 }
 
+/* Each size is a column: its pill on top, the stock and price fields below,
+   so the sizes sit side by side instead of one per full row. */
 .elan-size-row {
     display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    min-width: 0;
 }
 
 .elan-size-row .elan-check-pill {
-    min-width: 74px;
     justify-content: center;
 }
 
 .elan-size-prices {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
 }
 
 .elan-field .elan-size-prices input {
-    width: 118px;
+    width: 100%;
+    min-width: 0;
     padding: 9px 12px;
     font-size: 14px;
+}
+
+.elan-size-prices [hidden] {
+    display: none;
 }
 
 .elan-standard-price {
