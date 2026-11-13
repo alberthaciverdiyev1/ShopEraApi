@@ -26,6 +26,23 @@
     $oldInts = fn (string $key): array => array_map('intval', (array) old($key, []));
     $oldColors = $oldInts('colors');
     $oldSizes = $oldInts('sizes');
+
+    // The form is split into steps ("next / back"); only the sections that
+    // are actually rendered get a step, and the step index is assigned as the
+    // sections are written below.
+    $wizardLabels = [];
+    if (count($filters)) {
+        $wizardLabels[] = 'Xüsusiyyətlər';
+    }
+    $wizardLabels[] = 'Əsas məlumat';
+    if (count($colorChoices) || count($sizeChoices)) {
+        $wizardLabels[] = 'Variantlar';
+    }
+    if ($visible('photos')) {
+        $wizardLabels[] = 'Şəkillər';
+    }
+    $wizardLabels[] = 'Əlaqə';
+    $stepIndex = 0;
 @endphp
 
 <x-storefront.layouts.app :title="'Elan yerləşdir — ShopEra'">
@@ -131,9 +148,19 @@
                     </div>
                 @endif
 
+                <ol class="elan-wizard" data-sf-wizard-progress>
+                    @foreach ($wizardLabels as $i => $label)
+                        <li class="elan-wizard__step {{ $i === 0 ? 'is-active' : '' }}" data-sf-wizard-dot="{{ $i }}">
+                            <span class="dot">{{ $i + 1 }}</span>
+                            <span class="label">{{ $label }}</span>
+                        </li>
+                    @endforeach
+                </ol>
+
                 <form action="{{ route('storefront.listings.store') }}" method="POST" enctype="multipart/form-data"
                       class="elan-form"
                       data-sf-listing-form
+                      data-sf-has-errors="{{ $errors->any() ? '1' : '0' }}"
                       data-sf-category="{{ $localized($selected['name']) }}">
                     @csrf
                     <input type="hidden" name="category_id" value="{{ $selected['id'] }}">
@@ -150,7 +177,7 @@
                     @endphp
 
                     @if (count($filters))
-                        <section class="elan-section">
+                        <section class="elan-section" data-sf-wizard-step="{{ $stepIndex++ }}">
                             <h6 class="elan-section__title">Filtrlər</h6>
                             <div class="elan-grid">
                                 @foreach ($filters as $filter)
@@ -193,7 +220,7 @@
                         </section>
                     @endif
 
-                    <section class="elan-section">
+                    <section class="elan-section" data-sf-wizard-step="{{ $stepIndex++ }}">
                         <h6 class="elan-section__title">Əsas məlumat</h6>
                         <div class="elan-grid">
                             @if ($visible('title'))
@@ -285,7 +312,7 @@
                     </section>
 
                     @if (count($colorChoices) || count($sizeChoices))
-                        <section class="elan-section">
+                        <section class="elan-section" data-sf-wizard-step="{{ $stepIndex++ }}">
                             <h6 class="elan-section__title">Rəng və ölçü variantları</h6>
                             <div class="elan-grid">
                                 @if (count($colorChoices))
@@ -343,7 +370,7 @@
                     @endif
 
                     @if ($visible('photos'))
-                        <section class="elan-section">
+                        <section class="elan-section" data-sf-wizard-step="{{ $stepIndex++ }}">
                             <h6 class="elan-section__title">Şəkillər {{ $required('photos') ? '*' : '' }} <span class="muted">(maks. 10)</span></h6>
                             <label class="elan-dropzone" data-sf-dropzone>
                                 <input type="file" name="images[]" accept="image/*" multiple class="d-none" data-sf-dropzone-input
@@ -360,7 +387,8 @@
                         </section>
                     @endif
 
-                    <section class="elan-section">
+                    @php $contactStep = $stepIndex++; @endphp
+                    <section class="elan-section" data-sf-wizard-step="{{ $contactStep }}">
                         <h6 class="elan-section__title">Əlaqə</h6>
                         @if ($isGuest)
                             <div class="elan-grid">
@@ -383,7 +411,7 @@
                     </section>
 
                     @if (! $isGuest && ! empty($publishAsStore))
-                        <section class="elan-section">
+                        <section class="elan-section" data-sf-wizard-step="{{ $contactStep }}">
                             <h6 class="elan-section__title">Paylaşım</h6>
                             <div class="elan-grid">
                                 <label class="elan-field">
@@ -402,9 +430,14 @@
                         </section>
                     @endif
 
-                    <div class="elan-actions">
-                        <button type="submit" class="theme-btn elan-submit">Elanı yerləşdir</button>
-                        <a class="sf-btn sf-btn--ghost" href="/elan/ver">Geri</a>
+                    <div class="elan-wizard-actions">
+                        <button type="button" class="sf-btn sf-btn--ghost" data-sf-wizard-prev hidden>
+                            <i class="fas fa-arrow-left"></i> Geri
+                        </button>
+                        <button type="button" class="theme-btn" data-sf-wizard-next>
+                            Növbəti <i class="fas fa-arrow-right"></i>
+                        </button>
+                        <button type="submit" class="theme-btn elan-submit" data-sf-wizard-submit hidden>Elanı yerləşdir</button>
                     </div>
                 </form>
             @endif

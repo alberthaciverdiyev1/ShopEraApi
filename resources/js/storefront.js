@@ -1826,6 +1826,75 @@ document.querySelectorAll('[data-sf-dash-tab]').forEach((trigger) => {
     sync();
 })();
 
+/* Listing form wizard: one section per step with Geri / Növbəti buttons; the
+   submit button only appears on the last step. */
+(() => {
+    const form = document.querySelector('[data-sf-listing-form]');
+    const steps = [...document.querySelectorAll('[data-sf-wizard-step]')];
+    if (!form || steps.length < 2) return;
+
+    const rail = document.querySelector('[data-sf-wizard-progress]');
+    const dots = [...document.querySelectorAll('[data-sf-wizard-dot]')];
+    const prev = form.querySelector('[data-sf-wizard-prev]');
+    const next = form.querySelector('[data-sf-wizard-next]');
+    const submit = form.querySelector('[data-sf-wizard-submit]');
+    let index = 0;
+
+    const invalidField = (step) => [...step.querySelectorAll('input, select, textarea')]
+        .find((field) => !field.disabled && !field.hidden && !field.closest('[hidden]') && !field.checkValidity());
+
+    const show = (target) => {
+        index = Math.min(Math.max(target, 0), steps.length - 1);
+
+        steps.forEach((step, n) => {
+            step.hidden = n !== index;
+        });
+        dots.forEach((dot, n) => {
+            dot.classList.toggle('is-active', n === index);
+            dot.classList.toggle('is-done', n < index);
+        });
+
+        if (prev) prev.hidden = index === 0;
+        if (next) next.hidden = index === steps.length - 1;
+        if (submit) submit.hidden = index !== steps.length - 1;
+
+        // Keep the progress rail and the new step in view; the rail's
+        // scroll-margin clears the sticky site header.
+        (rail || form).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    const advance = () => {
+        const bad = invalidField(steps[index]);
+        if (bad) {
+            bad.reportValidity();
+            bad.focus();
+            return;
+        }
+
+        show(index + 1);
+    };
+
+    next?.addEventListener('click', advance);
+    prev?.addEventListener('click', () => show(index - 1));
+
+    // Enter in a field should move to the next step, not submit early.
+    form.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter' || event.target.tagName === 'TEXTAREA') return;
+        if (index === steps.length - 1) return;
+        event.preventDefault();
+        advance();
+    });
+
+    // After a failed server-side validation, open the first step with an
+    // invalid field so the error is visible; otherwise start at the top.
+    if (form.dataset.sfHasErrors === '1') {
+        const bad = steps.findIndex((step) => invalidField(step) !== undefined);
+        show(bad >= 0 ? bad : steps.length - 1);
+    } else {
+        show(0);
+    }
+})();
+
 /* Listing form: image dropzone with previews and per-photo colour/size. */
 (() => {
     const zone = document.querySelector('[data-sf-dropzone]');
