@@ -5294,6 +5294,9 @@ a.sf-seller-link {
     position: fixed;
     top: 0;
     left: 0;
+    /* Above the mobile filter drawer (z-index 10020); the menu is portaled to
+       <body>, so without this it opens behind the sheet and cannot be used. */
+    z-index: 10060;
     min-width: 0;
     max-width: none;
 }
