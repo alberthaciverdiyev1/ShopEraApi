@@ -66,17 +66,24 @@
     <h1 class="sf-product-summary__title">{{ $product['title'] ?? '' }}</h1>
 
     <!-- Rating & Reviews line -->
-    <div class="sf-product-rating-bar" data-sf-goto-reviews>
-        @if ($rateCount > 0)
-            <span class="sf-product-rating-score">{{ number_format($rate, 1) }}</span>
-            <div class="sf-product-rating-stars" aria-label="{{ number_format($rate, 1) }} ulduz">
-                @for ($i = 1; $i <= 5; $i++)
-                    <i class="fa-solid fa-star @if ($i <= round($rate)) is-filled @endif"></i>
-                @endfor
-            </div>
-            <span class="sf-product-rating-count">• {{ $rateCount }} rəy</span>
-        @else
-            <span class="sf-product-rating-count">Hələ rəy yoxdur — ilk rəyi siz yazın</span>
+    <div class="sf-product-rating-bar">
+        <div class="sf-product-rating-main" data-sf-goto-reviews>
+            @if ($rateCount > 0)
+                <span class="sf-product-rating-score">{{ number_format($rate, 1) }}</span>
+                <div class="sf-product-rating-stars" aria-label="{{ number_format($rate, 1) }} ulduz">
+                    @for ($i = 1; $i <= 5; $i++)
+                        <i class="fa-solid fa-star @if ($i <= round($rate)) is-filled @endif"></i>
+                    @endfor
+                </div>
+                <span class="sf-product-rating-count">• {{ $rateCount }} rəy</span>
+            @else
+                <span class="sf-product-rating-count">Hələ rəy yoxdur — ilk rəyi siz yazın</span>
+            @endif
+        </div>
+        @if ($views >= 2)
+            <span class="sf-product-rating-views" title="{{ number_format($views) }} baxış">
+                <i class="fa-regular fa-eye"></i> {{ number_format($views) }}
+            </span>
         @endif
     </div>
 
@@ -89,14 +96,6 @@
         @endif
     </div>
 
-
-    <!-- Social proof: only when the listing has actually been viewed. -->
-    @if ($views >= 2)
-        <div class="sf-product-social-proof">
-            <span class="sf-social-proof__icon">👀</span>
-            <span class="sf-social-proof__text"><b>{{ number_format($views) }}</b> dəfə baxıldı</span>
-        </div>
-    @endif
 
     <!-- Key Product Highlights (2x2 Grid Chips - Trendyol Screenshot 2) -->
     @if (count($highlights) > 0)
