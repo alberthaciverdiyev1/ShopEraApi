@@ -1,95 +1,193 @@
 @props(['product'])
 
 @php
+    // seller_type comes from the API as guest, user or vendor.
     $sellerType = $product['seller_type'] ?? null;
-    $sellerName = $product['seller']['name']
-        ?? $product['contact_name']
-        ?? $product['user']['name']
+    $sellerSlug = data_get($product, 'seller.slug');
+    $isStore = $sellerType === 'vendor' && ! empty($sellerSlug);
+    $sellerName = data_get($product, 'seller.name')
+        ?? data_get($product, 'contact_name')
+        ?? data_get($product, 'user.name')
         ?? 'ShopEra istifadəçisi';
-    $sellerLabel = $sellerType === 'store'
+    $sellerLabel = $sellerType === 'vendor'
         ? 'Mağaza'
-        : ($sellerType === 'company' ? 'Şirkət' : 'Satıcı');
+        : ($sellerType === 'guest' ? 'Qonaq' : 'İstifadəçi');
+    $sellerUrl = $isStore ? '/magaza/'.$sellerSlug : null;
 
     $listedAt = ! empty($product['created_at'])
         ? \Illuminate\Support\Carbon::parse($product['created_at'])
         : null;
 
     $condition = $product['condition'] ?? null;
+    $brandName = $product['brand']['name'] ?? null;
+    $brandSlug = $product['brand']['slug'] ?? null;
+    $rate = (float) ($product['rate'] ?? 0);
+    $rateCount = (int) ($product['rate_count'] ?? 0);
+    $currentPrice = (float) ($product['current_price'] ?? 0);
+    $originalPrice = (float) ($product['original_price'] ?? 0);
+    $hasDiscount = ! empty($product['has_discount']);
+    $views = (int) ($product['views'] ?? 0);
+
+    // Build top 4 highlight chips
+    $highlights = [];
+    if (! empty($condition)) {
+        $highlights[] = ['label' => 'Vəziyyəti', 'value' => $condition];
+    }
+    if (! empty($product['city'])) {
+        $highlights[] = ['label' => 'Şəhər', 'value' => $product['city']];
+    }
+    if (! empty($product['gender'])) {
+        $highlights[] = ['label' => 'Üslub', 'value' => $product['gender']];
+    }
+    if (! empty($product['product_code'])) {
+        $highlights[] = ['label' => 'Elan kodu', 'value' => $product['product_code']];
+    }
+    if (count($highlights) < 4 && ! empty($product['specs'])) {
+        foreach ($product['specs'] as $spec) {
+            if (count($highlights) >= 4) break;
+            $highlights[] = ['label' => $spec['label'], 'value' => $spec['value']];
+        }
+    }
 @endphp
 
 <div class="sf-product-summary">
+    <!-- Brand (Trendyol Style Bold Header) -->
+    @if ($brandName)
+        <div class="sf-product-brand">
+            @if ($brandSlug)
+                <a href="/shop?brand={{ $brandSlug }}">{{ $brandName }}</a>
+            @else
+                <span>{{ $brandName }}</span>
+            @endif
+        </div>
+    @endif
+
+    <!-- Product Title -->
     <h1 class="sf-product-summary__title">{{ $product['title'] ?? '' }}</h1>
 
-    <div class="sf-product-summary__meta">
-        @if (! empty($product['rate']))
-            <span class="sf-product-summary__rating">
-                <i class="fa-solid fa-star"></i>
-                {{ number_format((float) $product['rate'], 1) }}
-                <small>({{ (int) ($product['rate_count'] ?? 0) }} rəy)</small>
-            </span>
-        @endif
-        @if (! empty($product['city']))
-            <span><i class="fa-regular fa-location-dot"></i> {{ $product['city'] }}</span>
-        @endif
-        @if (! empty($product['views']))
-            <span><i class="fa-regular fa-eye"></i> {{ number_format((int) $product['views']) }} baxış</span>
-        @endif
-        @if ($listedAt)
-            <span><i class="fa-regular fa-clock"></i> {{ $listedAt->format('d.m.Y, H:i') }}</span>
+    <!-- Rating & Reviews line -->
+    <div class="sf-product-rating-bar" data-sf-goto-reviews>
+        @if ($rateCount > 0)
+            <span class="sf-product-rating-score">{{ number_format($rate, 1) }}</span>
+            <div class="sf-product-rating-stars" aria-label="{{ number_format($rate, 1) }} ulduz">
+                @for ($i = 1; $i <= 5; $i++)
+                    <i class="fa-solid fa-star @if ($i <= round($rate)) is-filled @endif"></i>
+                @endfor
+            </div>
+            <span class="sf-product-rating-count">• {{ $rateCount }} rəy</span>
+        @else
+            <span class="sf-product-rating-count">Hələ rəy yoxdur — ilk rəyi siz yazın</span>
         @endif
     </div>
 
+    <!-- Prices -->
     <div class="sf-product-summary__price">
-        <span class="sf-product-summary__price-current">{{ number_format((float) $product['current_price'], 2) }} ₼</span>
-        @if (! empty($product['has_discount']))
-            <span class="sf-product-summary__price-old">{{ number_format((float) $product['original_price'], 2) }} ₼</span>
+        <span class="sf-product-summary__price-current">{{ number_format($currentPrice, 2) }} ₼</span>
+        @if ($hasDiscount)
+            <span class="sf-product-summary__price-old">{{ number_format($originalPrice, 2) }} ₼</span>
             <span class="sf-product-summary__price-badge">-{{ (int) $product['discount_percent'] }}%</span>
         @endif
     </div>
 
-    <div class="sf-product-summary__facts">
-        <div class="sf-product-summary__fact">
-            <span>Elan kodu</span>
-            <b>{{ $product['product_code'] }}</b>
-        </div>
-        @if ($condition)
-            <div class="sf-product-summary__fact">
-                <span>Vəziyyəti</span>
-                <b>{{ $condition }}</b>
-            </div>
-        @endif
-        @if (isset($product['stock_count']))
-            <div class="sf-product-summary__fact">
-                <span>Stok</span>
-                <b>{{ (int) $product['stock_count'] }} ədəd</b>
-            </div>
-        @endif
-        <div class="sf-product-summary__fact">
-            <span>Yerləşdirilib</span>
-            <b>{{ $listedAt?->format('d.m.Y') ?? '—' }}</b>
-        </div>
-    </div>
 
-    <div class="sf-product-seller">
-        <div class="sf-product-seller__avatar">
-            <i class="fa-regular fa-store"></i>
+    <!-- Social proof: only when the listing has actually been viewed. -->
+    @if ($views >= 2)
+        <div class="sf-product-social-proof">
+            <span class="sf-social-proof__icon">👀</span>
+            <span class="sf-social-proof__text"><b>{{ number_format($views) }}</b> dəfə baxıldı</span>
         </div>
-        <div class="sf-product-seller__body">
-            <span class="sf-product-seller__label">{{ $sellerLabel }}</span>
-            <strong>{{ $sellerName }}</strong>
-            @if (! empty($product['seller']['rating_count']))
-                <span class="sf-product-seller__rating">
-                    <i class="fa-solid fa-star"></i>
-                    {{ number_format((float) ($product['seller']['rating_avg'] ?? 0), 1) }}
-                    ({{ (int) $product['seller']['rating_count'] }})
-                </span>
+    @endif
+
+    <!-- Key Product Highlights (2x2 Grid Chips - Trendyol Screenshot 2) -->
+    @if (count($highlights) > 0)
+        <div class="sf-product-highlights">
+            @foreach ($highlights as $hl)
+                <div class="sf-highlight-chip">
+                    <span class="sf-highlight-chip__label">{{ $hl['label'] }}:</span>
+                    <strong class="sf-highlight-chip__val">{{ $hl['value'] }}</strong>
+                </div>
+            @endforeach
+        </div>
+    @endif
+
+    <!-- Color Variant Selector (Trendyol Screenshot 2) -->
+    @if (! empty($product['colors']) && count($product['colors']) > 0)
+        <div class="sf-product-variant-section sf-color-variants">
+            <div class="sf-variant-header">
+                <span class="sf-variant-title">Rəng: <strong data-sf-color-label>{{ $product['colors'][0]['name'] ?? '' }}</strong></span>
+                <span class="sf-variant-info" title="Mövcud rəng variantları"><i class="fa-solid fa-circle-info"></i></span>
+            </div>
+            <div class="sf-color-swatches" role="radiogroup" aria-label="Rəng seçimi">
+                @foreach ($product['colors'] as $idx => $color)
+                    <button type="button"
+                            class="sf-color-swatch-card @if ($idx === 0) is-active @endif"
+                            data-sf-color-option
+                            data-color-name="{{ $color['name'] ?? '' }}"
+                            role="radio"
+                            aria-checked="{{ $idx === 0 ? 'true' : 'false' }}">
+                        <span class="sf-color-circle" style="background-color: {{ $color['code'] ?? '#94a3b8' }};"></span>
+                        <span class="sf-color-name">{{ $color['name'] ?? '' }}</span>
+                    </button>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+    <!-- Size Variant Selector (Trendyol Screenshot 2) -->
+    @if (! empty($product['sizes']) && count($product['sizes']) > 0)
+        <div class="sf-product-variant-section sf-size-variants">
+            <div class="sf-variant-header">
+                <span class="sf-variant-title">Ölçü: <strong data-sf-size-label>{{ $product['sizes'][0]['name'] ?? '' }}</strong></span>
+            </div>
+            <div class="sf-size-pills" role="radiogroup" aria-label="Ölçü seçimi">
+                @foreach ($product['sizes'] as $idx => $size)
+                    <button type="button"
+                            class="sf-size-pill @if ($idx === 0) is-active @endif"
+                            data-sf-size-option
+                            data-size-name="{{ $size['name'] ?? '' }}"
+                            role="radio"
+                            aria-checked="{{ $idx === 0 ? 'true' : 'false' }}">
+                        {{ $size['name'] ?? '' }}
+                    </button>
+                @endforeach
+            </div>
+        </div>
+    @endif
+
+    <!-- Seller Box (Trendyol Marketplace Style) -->
+    <div class="sf-product-seller-box">
+        <div class="sf-seller-box__avatar">
+            <i class="fa-solid {{ $isStore ? 'fa-store' : 'fa-user' }}"></i>
+        </div>
+        <div class="sf-seller-box__info">
+            <div class="sf-seller-box__row">
+                @if ($sellerUrl)
+                    <a href="{{ $sellerUrl }}" class="sf-seller-box__name">{{ $sellerName }}</a>
+                @else
+                    <span class="sf-seller-box__name">{{ $sellerName }}</span>
+                @endif
+                <span class="sf-seller-box__type">{{ $sellerLabel }}</span>
+            </div>
+            @if (! empty($product['seller']['rating_avg']))
+                <div class="sf-seller-box__rating">
+                    <span class="sf-seller-rating-pill">
+                        <i class="fa-solid fa-star"></i> {{ number_format((float) $product['seller']['rating_avg'], 1) }}
+                    </span>
+                    <span class="sf-seller-rating-count">({{ (int) ($product['seller']['rating_count'] ?? 0) }} rəy)</span>
+                </div>
             @endif
         </div>
+        @if ($sellerUrl)
+            <div class="sf-seller-box__cta">
+                <a href="{{ $sellerUrl }}" class="sf-seller-link">Mağazaya keç <i class="fa-solid fa-chevron-right"></i></a>
+            </div>
+        @endif
     </div>
 
+    <!-- Contact & Action Buttons -->
     <div class="sf-product-contact" data-sf-contact data-listing="{{ $product['slug'] }}">
         <button type="button" class="sf-btn sf-btn--primary sf-product-contact__reveal" data-sf-contact-reveal>
-            Nömrəni göstər
+            <i class="fa-solid fa-phone"></i> Nömrəni göstər
         </button>
 
         <div class="sf-product-contact__details" data-sf-contact-details hidden></div>
@@ -108,6 +206,14 @@
     </div>
 
     <div class="sf-product-summary__actions">
-        <a href="/login" class="sf-btn sf-btn--ghost"><i class="fa-regular fa-heart"></i> Sevimlilərə əlavə et</a>
+        <button type="button"
+                class="sf-btn sf-btn--ghost sf-product-summary__fav-btn @if (! empty($product['is_favorite'])) is-favorited @endif"
+                data-sf-fav-toggle
+                data-slug="{{ $product['slug'] ?? '' }}"
+                data-auth="{{ auth()->check() ? '1' : '0' }}">
+            <i class="@if (! empty($product['is_favorite'])) fa-solid @else fa-regular @endif fa-heart"></i>
+            <span>{{ ! empty($product['is_favorite']) ? 'Sevimlilərdən çıxar' : 'Sevimlilərə əlavə et' }}</span>
+        </button>
     </div>
 </div>
+

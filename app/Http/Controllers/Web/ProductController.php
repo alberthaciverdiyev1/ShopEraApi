@@ -151,7 +151,8 @@ class ProductController extends Controller
             'original_price' => $price,
             'has_discount' => $hasDiscount,
             'discount_percent' => $discountPercent,
-            'product_code' => ($product['sku'] ?? null) ?: str_pad((string) $product['id'], 6, '0', STR_PAD_LEFT),
+            // Only a real SKU is shown as the listing code.
+            'product_code' => $product['sku'] ?? null,
             'specs' => $specs,
             'characteristics' => $characteristics,
             'details' => array_merge($specs, $characteristics),

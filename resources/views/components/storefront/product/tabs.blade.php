@@ -66,7 +66,9 @@
                                     <i class="fa-{{ $star <= (int) ($review['rate'] ?? 0) ? 'solid' : 'regular' }} fa-star"></i>
                                 @endfor
                             </span>
-                            <time>{{ $review['created_at'] ?? '' }}</time>
+                            @if (! empty($review['created_at']))
+                                <time>{{ \Illuminate\Support\Carbon::parse($review['created_at'])->translatedFormat('d M, Y') }}</time>
+                            @endif
                         </div>
                         @if (! empty($review['comment']))
                             <p>{{ $review['comment'] }}</p>
@@ -96,13 +98,14 @@
                         <span>Reytinq:</span>
                         @for ($i = 1; $i <= 5; $i++)
                             <button type="button"
-                                    class="sf-rate-picker__star {{ $i <= (int) old('rate', 5) ? 'is-active' : '' }}"
+                                    class="sf-rate-picker__star {{ $i <= (int) old('rate', 0) ? 'is-active' : '' }}"
                                     data-sf-rate-value="{{ $i }}"
                                     aria-label="{{ $i }} ulduz">
                                 <i class="fa-solid fa-star"></i>
                             </button>
                         @endfor
-                        <input type="hidden" name="rate" value="{{ old('rate', 5) }}" data-sf-rate-input>
+                        {{-- Starts empty so the user picks the rating themselves. --}}
+                        <input type="hidden" name="rate" value="{{ old('rate', 0) }}" data-sf-rate-input>
                     </div>
                     @error('rate')
                         <p class="sf-review-form__err">{{ $message }}</p>

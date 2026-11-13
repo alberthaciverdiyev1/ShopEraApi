@@ -69,6 +69,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/settings/avatar', [SettingsController::class, 'removeAvatar'])->name('storefront.settings.avatar.remove');
 
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('storefront.wishlist');
+    Route::post('/wishlist/{slug}', [WishlistController::class, 'store'])
+        ->where('slug', '[A-Za-z0-9\-]+')
+        ->name('storefront.wishlist.store');
     Route::delete('/wishlist/{slug}', [WishlistController::class, 'destroy'])
         ->where('slug', '[A-Za-z0-9\-]+')
         ->name('storefront.wishlist.destroy');

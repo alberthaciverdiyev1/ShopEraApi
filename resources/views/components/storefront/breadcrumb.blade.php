@@ -1,6 +1,8 @@
 @props([
     'title' => null,
     'parent' => null,
+    'parentUrl' => null,
+    'showCategoryAction' => true,
 ])
 
 <div class="sf-breadcrumb">
@@ -12,9 +14,13 @@
             @if ($parent)
                 <li><i class="fa-solid fa-chevron-right sf-breadcrumb__sep"></i></li>
                 <li>
-                    <button type="button" class="sf-breadcrumb-link-btn" data-sf-account-drawer-open title="Kateqoriyaları göstər">
-                        {{ $parent }} <i class="fa-regular fa-chevron-down ms-1 sf-breadcrumb-icon"></i>
-                    </button>
+                    @if ($parentUrl)
+                        <a href="{{ $parentUrl }}" class="sf-breadcrumb-link-btn">{{ $parent }}</a>
+                    @else
+                        <button type="button" class="sf-breadcrumb-link-btn" data-sf-account-drawer-open title="Kateqoriyaları göstər">
+                            {{ $parent }} <i class="fa-regular fa-chevron-down ms-1 sf-breadcrumb-icon"></i>
+                        </button>
+                    @endif
                 </li>
             @endif
             @if ($title)
@@ -23,12 +29,14 @@
                     <span class="sf-breadcrumb-title-text">{{ $title }}</span>
                 </li>
             @endif
-            <li class="sf-breadcrumb-cat-action d-lg-none ms-auto">
-                <button type="button" class="sf-breadcrumb-browse-btn" data-sf-account-drawer-open title="Bütün kateqoriyalar">
-                    <i class="fa-regular fa-grid-2 me-1"></i>
-                    <span>Kateqoriyalar</span>
-                </button>
-            </li>
+            @if ($showCategoryAction)
+                <li class="sf-breadcrumb-cat-action d-lg-none ms-auto">
+                    <button type="button" class="sf-breadcrumb-browse-btn" data-sf-account-drawer-open title="Bütün kateqoriyalar">
+                        <i class="fa-regular fa-grid-2 me-1"></i>
+                        <span>Kateqoriyalar</span>
+                    </button>
+                </li>
+            @endif
         </ul>
     </div>
 </div>

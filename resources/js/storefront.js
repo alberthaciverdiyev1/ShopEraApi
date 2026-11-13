@@ -677,37 +677,120 @@ document.querySelectorAll('[data-sf-show-more]').forEach((button) => {
     });
 });
 
-/* Product gallery: thumbnails, arrows and a lightbox. */
+/* Product gallery: swipeable slider, dots, thumbnails, arrows, share, fav, and lightbox. */
 const gallery = document.querySelector('[data-sf-gallery]');
 
 if (gallery) {
+    const stage = gallery.querySelector('[data-sf-gallery-stage]');
     const image = gallery.querySelector('[data-sf-gallery-image]');
     const thumbs = Array.from(gallery.querySelectorAll('[data-sf-gallery-thumb]'));
+    const dots = Array.from(gallery.querySelectorAll('.sf-gallery__dot'));
     const lightbox = gallery.querySelector('[data-sf-lightbox]');
     const lightboxImage = gallery.querySelector('[data-sf-lightbox-image]');
+    const lightboxThumbs = Array.from(gallery.querySelectorAll('[data-sf-lightbox-thumb]'));
+    const totalSlides = Math.max(thumbs.length, dots.length, lightboxThumbs.length);
     let current = 0;
 
+    const counterCurrent = lightbox?.querySelector('[data-sf-lightbox-current]');
+
     const show = (index) => {
-        if (thumbs.length === 0) return;
+        if (totalSlides === 0) return;
 
-        current = (index + thumbs.length) % thumbs.length;
-        const src = thumbs[current].dataset.src;
+        current = (index + totalSlides) % totalSlides;
 
-        if (image) image.src = src;
+        const src = thumbs[current]?.dataset.src || lightboxThumbs[current]?.querySelector('img')?.src;
+        if (src) {
+            if (image) image.src = src;
+            if (lightboxImage) lightboxImage.src = src;
+        }
 
         thumbs.forEach((thumb, position) => thumb.classList.toggle('is-active', position === current));
+        lightboxThumbs.forEach((thumb, position) => thumb.classList.toggle('is-active', position === current));
+        dots.forEach((dot, position) => dot.classList.toggle('is-active', position === current));
+        if (counterCurrent) counterCurrent.textContent = String(current + 1);
+
+        if (thumbs[current] && typeof thumbs[current].scrollIntoView === 'function') {
+            thumbs[current].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+        if (lightboxThumbs[current] && typeof lightboxThumbs[current].scrollIntoView === 'function') {
+            lightboxThumbs[current].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
     };
 
     thumbs.forEach((thumb, index) => {
         thumb.addEventListener('click', () => show(index));
     });
 
+    lightboxThumbs.forEach((thumb, index) => {
+        thumb.addEventListener('click', (e) => {
+            e.stopPropagation();
+            show(index);
+        });
+    });
+
+    dots.forEach((dot, index) => {
+        dot.addEventListener('click', () => show(index));
+    });
+
     gallery.querySelector('[data-sf-gallery-prev]')?.addEventListener('click', () => show(current - 1));
     gallery.querySelector('[data-sf-gallery-next]')?.addEventListener('click', () => show(current + 1));
 
+    // Touch Swipe Support (Mobile Gallery Slider)
+    if (stage) {
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        stage.addEventListener('touchstart', (event) => {
+            if (event.touches.length === 1) {
+                touchStartX = event.touches[0].clientX;
+                touchStartY = event.touches[0].clientY;
+            }
+        }, { passive: true });
+
+        stage.addEventListener('touchend', (event) => {
+            if (event.changedTouches.length === 1) {
+                const diffX = event.changedTouches[0].clientX - touchStartX;
+                const diffY = event.changedTouches[0].clientY - touchStartY;
+
+                // Only horizontal swipes
+                if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
+                    if (diffX < 0) {
+                        show(current + 1);
+                    } else {
+                        show(current - 1);
+                    }
+                }
+            }
+        }, { passive: true });
+    }
+
+    // Floating Share Button
+    const shareBtn = gallery.querySelector('[data-sf-share-btn]');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', async () => {
+            const title = shareBtn.dataset.title || document.title;
+            const url = window.location.href;
+
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title, url });
+                } catch (err) {
+                    // Ignore share cancellation
+                }
+            } else {
+                try {
+                    await navigator.clipboard.writeText(url);
+                    alert('Məhsul linki kopyalandı!');
+                } catch (err) {
+                    // Fallback
+                }
+            }
+        });
+    }
+
     if (lightbox && lightboxImage) {
         gallery.querySelector('[data-sf-gallery-open]')?.addEventListener('click', () => {
-            lightboxImage.src = image ? image.src : lightboxImage.src;
+            show(current);
             lightbox.hidden = false;
             document.body.classList.add('sf-no-scroll');
         });
@@ -722,21 +805,222 @@ if (gallery) {
             if (event.target === lightbox) closeLightbox();
         });
 
+        lightbox.querySelector('[data-sf-lightbox-prev]')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            show(current - 1);
+        });
+
+        lightbox.querySelector('[data-sf-lightbox-next]')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            show(current + 1);
+        });
+
+        // Touch Swipe Support for Lightbox (Mobile Fullscreen Swipe)
+        let lbTouchStartX = 0;
+        let lbTouchStartY = 0;
+
+        lightbox.addEventListener('touchstart', (event) => {
+            if (event.touches.length === 1) {
+                lbTouchStartX = event.touches[0].clientX;
+                lbTouchStartY = event.touches[0].clientY;
+            }
+        }, { passive: true });
+
+        lightbox.addEventListener('touchend', (event) => {
+            if (event.changedTouches.length === 1) {
+                const diffX = event.changedTouches[0].clientX - lbTouchStartX;
+                const diffY = event.changedTouches[0].clientY - lbTouchStartY;
+
+                if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
+                    if (diffX < 0) {
+                        show(current + 1);
+                    } else {
+                        show(current - 1);
+                    }
+                }
+            }
+        }, { passive: true });
+
         document.addEventListener('keydown', (event) => {
             if (lightbox.hidden) return;
 
             if (event.key === 'Escape') closeLightbox();
-            if (event.key === 'ArrowLeft') {
-                show(current - 1);
-                lightboxImage.src = image ? image.src : lightboxImage.src;
-            }
-            if (event.key === 'ArrowRight') {
-                show(current + 1);
-                lightboxImage.src = image ? image.src : lightboxImage.src;
-            }
+            if (event.key === 'ArrowLeft') show(current - 1);
+            if (event.key === 'ArrowRight') show(current + 1);
         });
     }
 }
+
+/* Favorite buttons: persist through POST /wishlist/{slug}. */
+function applyFavoriteState(favorited, slug) {
+    document.querySelectorAll('[data-sf-fav-toggle]').forEach((item) => {
+        if (slug && item.dataset.slug && item.dataset.slug !== slug) {
+            return;
+        }
+
+        item.classList.toggle('is-favorited', favorited);
+        item.setAttribute('aria-label', favorited ? 'Sevimlilərdən çıxar' : 'Sevimlilərə əlavə et');
+
+        const icon = item.querySelector('i');
+        if (icon) {
+            icon.className = favorited ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+        }
+
+        const span = item.querySelector('span');
+        if (span) {
+            span.textContent = favorited ? 'Sevimlilərdən çıxar' : 'Sevimlilərə əlavə et';
+        }
+    });
+}
+
+document.querySelectorAll('[data-sf-fav-toggle]').forEach((btn) => {
+    btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        if (btn.dataset.auth !== '1') {
+            window.location.href = '/login';
+            return;
+        }
+
+        const slug = btn.dataset.slug;
+        if (!slug || btn.dataset.loading === '1') {
+            return;
+        }
+
+        btn.dataset.loading = '1';
+
+        try {
+            const response = await fetch(`/wishlist/${encodeURIComponent(slug)}`, {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                },
+                credentials: 'same-origin',
+            });
+
+            if (response.redirected) {
+                window.location.href = '/login';
+                return;
+            }
+
+            const payload = await response.json().catch(() => null);
+
+            if (!response.ok || !payload?.success) {
+                throw new Error(payload?.message || 'Request failed');
+            }
+
+            applyFavoriteState(Boolean(payload.favorited), slug);
+        } catch (error) {
+            alert('İstək siyahısı yenilənə bilmədi. Yenidən cəhd edin.');
+        } finally {
+            delete btn.dataset.loading;
+        }
+    });
+});
+
+/* Product variants: color and size selection */
+document.querySelectorAll('[data-sf-color-option]').forEach((option) => {
+    option.addEventListener('click', () => {
+        document.querySelectorAll('[data-sf-color-option]').forEach((opt) => {
+            opt.classList.remove('is-active');
+            opt.setAttribute('aria-checked', 'false');
+        });
+        option.classList.add('is-active');
+        option.setAttribute('aria-checked', 'true');
+
+        const label = document.querySelector('[data-sf-color-label]');
+        if (label && option.dataset.colorName) {
+            label.textContent = option.dataset.colorName;
+        }
+    });
+});
+
+document.querySelectorAll('[data-sf-size-option]').forEach((option) => {
+    option.addEventListener('click', () => {
+        document.querySelectorAll('[data-sf-size-option]').forEach((opt) => {
+            opt.classList.remove('is-active');
+            opt.setAttribute('aria-checked', 'false');
+        });
+        option.classList.add('is-active');
+        option.setAttribute('aria-checked', 'true');
+
+        const label = document.querySelector('[data-sf-size-label]');
+        if (label && option.dataset.sizeName) {
+            label.textContent = option.dataset.sizeName;
+        }
+    });
+});
+
+/* Modal handler for Size Chart */
+document.querySelectorAll('[data-sf-modal-open]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+        const id = btn.dataset.sfModalOpen;
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.hidden = false;
+            document.body.classList.add('sf-no-scroll');
+        }
+    });
+});
+
+document.querySelectorAll('[data-sf-modal-close]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+        const modal = btn.closest('.sf-modal');
+        if (modal) {
+            modal.hidden = true;
+            document.body.classList.remove('sf-no-scroll');
+
+            const video = modal.querySelector('video');
+            if (video) {
+                video.pause();
+                video.currentTime = 0;
+            }
+        }
+    });
+});
+
+/* Listing video modal */
+document.querySelectorAll('[data-sf-video-open]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+        const modal = document.getElementById('sf-video-modal');
+        const player = modal?.querySelector('[data-sf-video-player]');
+
+        if (!modal || !player) {
+            return;
+        }
+
+        if (btn.dataset.videoSrc && player.getAttribute('src') !== btn.dataset.videoSrc) {
+            player.setAttribute('src', btn.dataset.videoSrc);
+        }
+
+        modal.hidden = false;
+        document.body.classList.add('sf-no-scroll');
+        player.play?.().catch(() => {});
+    });
+});
+
+/* Jump to reviews tab on rating bar click */
+document.querySelectorAll('[data-sf-goto-reviews]').forEach((trigger) => {
+    trigger.addEventListener('click', () => {
+        const tabBtn = document.querySelector('[data-sf-tab="reviews"]');
+        if (tabBtn) {
+            tabBtn.click();
+            tabBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+});
+
+/* Sticky mobile button connects to primary reveal */
+document.querySelectorAll('.sf-product-sticky-bottom [data-sf-contact-reveal]').forEach((stickyBtn) => {
+    stickyBtn.addEventListener('click', () => {
+        const mainRevealBtn = document.querySelector('.sf-product-contact [data-sf-contact-reveal]');
+        if (mainRevealBtn && !mainRevealBtn.hidden) {
+            mainRevealBtn.click();
+            mainRevealBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    });
+});
 
 /* Product tabs. */
 document.querySelectorAll('[data-sf-tabs]').forEach((tabs) => {
@@ -793,6 +1077,16 @@ if (contact) {
             details.innerHTML = lines.join('');
             details.hidden = false;
             button.hidden = true;
+
+            if (data.phone) {
+                document.querySelectorAll('.sf-product-sticky-bottom [data-sf-contact-reveal]').forEach((stickyBtn) => {
+                    stickyBtn.innerHTML = `<i class="fa-solid fa-phone"></i> ${escape(data.phone)}`;
+                    stickyBtn.addEventListener('click', (ev) => {
+                        ev.stopPropagation();
+                        window.location.href = `tel:${escape(data.phone)}`;
+                    });
+                });
+            }
         } catch (failure) {
             button.disabled = false;
             if (error) error.hidden = false;
@@ -903,6 +1197,77 @@ if (faq) {
         });
 
         if (parentLinks[0]) activateParent(parentLinks[0].dataset.catalogParent);
+    }
+
+    /* Categories Page: 3-Column Explorer & Mobile 2-Panel Rail */
+    const catExplorer = document.querySelector('[data-sf-page-catalog]');
+    if (catExplorer) {
+        const parentLinks = Array.from(catExplorer.querySelectorAll('[data-cat-parent]'));
+        const childColumns = Array.from(catExplorer.querySelectorAll('[data-cat-children]'));
+        const leafColumns = Array.from(catExplorer.querySelectorAll('[data-cat-leaves]'));
+
+        const activateChild = (id) => {
+            catExplorer.querySelectorAll('[data-cat-child]').forEach((link) => {
+                link.classList.toggle('is-active', link.dataset.catChild === String(id));
+            });
+
+            leafColumns.forEach((col) => {
+                col.hidden = col.dataset.catLeaves !== String(id);
+            });
+        };
+
+        const activateParent = (id) => {
+            parentLinks.forEach((link) => {
+                link.classList.toggle('is-active', link.dataset.catParent === String(id));
+            });
+
+            childColumns.forEach((col) => {
+                col.hidden = col.dataset.catChildren !== String(id);
+            });
+
+            const activeSubgroup = catExplorer.querySelector(`[data-cat-children="${id}"]`);
+            const firstChild = activeSubgroup?.querySelector('[data-cat-child]');
+            if (firstChild) {
+                activateChild(firstChild.dataset.catChild);
+            } else {
+                leafColumns.forEach((col) => { col.hidden = true; });
+            }
+        };
+
+        parentLinks.forEach((link) => {
+            const id = link.dataset.catParent;
+            link.addEventListener('mouseenter', () => activateParent(id));
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                activateParent(id);
+            });
+        });
+
+        catExplorer.querySelectorAll('[data-cat-child]').forEach((link) => {
+            const id = link.dataset.catChild;
+            link.addEventListener('mouseenter', () => activateChild(id));
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                activateChild(id);
+            });
+        });
+    }
+
+    const mobileCatExplorer = document.querySelector('[data-sf-mobile-cat-explorer]');
+    if (mobileCatExplorer) {
+        const railButtons = Array.from(mobileCatExplorer.querySelectorAll('[data-sf-mobile-cat-btn]'));
+        const contentPanes = Array.from(mobileCatExplorer.querySelectorAll('[data-sf-mobile-cat-pane]'));
+
+        railButtons.forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const id = btn.dataset.sfMobileCatBtn;
+
+                railButtons.forEach((b) => b.classList.toggle('is-active', b === btn));
+                contentPanes.forEach((pane) => {
+                    pane.hidden = pane.dataset.sfMobileCatPane !== id;
+                });
+            });
+        });
     }
 
     document.querySelectorAll('[data-sf-search]').forEach((search) => {
@@ -1339,7 +1704,18 @@ document.querySelectorAll('[data-sf-rate]').forEach((picker) => {
         });
     });
 
-    paint(Number(input?.value || 5));
+    paint(Number(input?.value || 0));
+});
+
+/* A review needs an explicit rating. */
+document.querySelectorAll('.sf-review-form').forEach((form) => {
+    form.addEventListener('submit', (e) => {
+        const input = form.querySelector('[data-sf-rate-input]');
+        if (input && Number(input.value) < 1) {
+            e.preventDefault();
+            alert('Zəhmət olmasa reytinq seçin.');
+        }
+    });
 });
 
 /* Buyer <-> seller chat modal on the product page. */
@@ -1348,9 +1724,14 @@ const listingChat = document.querySelector('[data-sf-lchat]');
 if (listingChat) {
     const listEl = listingChat.querySelector('[data-sf-lchat-list]');
     const messagesEl = listingChat.querySelector('[data-sf-lchat-messages]');
-    const headEl = listingChat.querySelector('[data-sf-lchat-thread-head]');
+    const headNameEl = listingChat.querySelector('[data-sf-lchat-thread-name]');
+    const drawerEl = listingChat.querySelector('[data-sf-lchat-drawer]');
+    const productCardEl = listingChat.querySelector('[data-sf-lchat-product]');
+    const prodTitleEl = listingChat.querySelector('[data-sf-lchat-product-title]');
+    const prodSubEl = listingChat.querySelector('[data-sf-lchat-product-sub]');
+    const prodImgEl = listingChat.querySelector('[data-sf-lchat-product-img]');
     const form = listingChat.querySelector('[data-sf-lchat-form]');
-    const textarea = form?.querySelector('textarea');
+    const input = form?.querySelector('input[name="body"]') || form?.querySelector('textarea');
     const csrf = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
 
     let activeId = null;
@@ -1384,20 +1765,26 @@ if (listingChat) {
     const setOpen = (open) => {
         listingChat.hidden = !open;
         document.body.classList.toggle('sf-lchat-open', open);
-        if (open) textarea?.focus();
+        if (open) {
+            if (drawerEl) drawerEl.hidden = true;
+            input?.focus();
+        }
     };
 
     const formatTime = (value) => {
         if (!value) return '';
         const date = new Date(value);
-        return Number.isNaN(date.getTime())
-            ? ''
-            : date.toLocaleString('az-AZ', {
-                  day: '2-digit',
-                  month: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit',
-              });
+        if (Number.isNaN(date.getTime())) return '';
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    };
+
+    const getInitials = (name) => {
+        if (!name) return 'U';
+        const parts = name.trim().split(/\s+/);
+        if (parts.length >= 2) {
+            return (parts[0][0] + parts[1][0]).toUpperCase();
+        }
+        return name.slice(0, 2).toUpperCase();
     };
 
     const empty = (text) => {
@@ -1411,27 +1798,76 @@ if (listingChat) {
         const row = document.createElement('div');
         row.className = `sf-lchat__row${message.mine ? ' is-mine' : ''}`;
 
+        if (!message.mine) {
+            const avatar = document.createElement('div');
+            avatar.className = 'sf-lchat__avatar';
+            const initials = document.createElement('span');
+            initials.textContent = getInitials(headNameEl?.textContent || 'U');
+            avatar.appendChild(initials);
+            row.appendChild(avatar);
+        }
+
         const bubble = document.createElement('div');
         bubble.className = 'sf-lchat__bubble';
-        bubble.textContent = message.body;
+
+        const head = document.createElement('div');
+        head.className = 'sf-lchat__bubble-head';
+
+        const author = document.createElement('span');
+        author.className = 'sf-lchat__bubble-author';
+        author.textContent = message.mine ? 'You' : (headNameEl?.textContent || 'İstifadəçi');
+
+        const meta = document.createElement('div');
+        meta.className = 'sf-lchat__bubble-meta';
+
+        if (message.mine) {
+            const check = document.createElement('i');
+            check.className = `sf-lchat__check fa-solid ${message.is_read ? 'fa-check-double is-read' : 'fa-check'}`;
+            meta.appendChild(check);
+        }
 
         const time = document.createElement('span');
-        time.className = 'sf-lchat__time';
+        time.className = 'sf-lchat__bubble-time';
         time.textContent = formatTime(message.created_at);
+        meta.appendChild(time);
 
-        row.append(bubble, time);
+        head.append(author, meta);
+
+        const body = document.createElement('div');
+        body.className = 'sf-lchat__bubble-text';
+        body.textContent = message.body;
+
+        bubble.append(head, body);
+        row.append(bubble);
+
         messagesEl.append(row);
         messagesEl.scrollTop = messagesEl.scrollHeight;
     };
 
     const renderThread = (thread) => {
         activeId = thread.conversation?.id ?? null;
-        headEl.textContent = thread.conversation?.other?.name ?? 'Söhbət';
+        const otherName = thread.conversation?.other?.name ?? 'Satıcı';
+        if (headNameEl) headNameEl.textContent = otherName;
+
+        const prod = thread.conversation?.product;
+        if (productCardEl) {
+            if (prod && (prod.title || prod.image)) {
+                if (prodTitleEl) prodTitleEl.textContent = prod.title || 'Məhsul';
+                if (prodSubEl) prodSubEl.textContent = 'Elan kodu: #' + prod.id;
+                if (prodImgEl && prod.image) {
+                    prodImgEl.src = prod.image;
+                    prodImgEl.hidden = false;
+                }
+                productCardEl.hidden = false;
+            } else {
+                productCardEl.hidden = true;
+            }
+        }
 
         messagesEl.textContent = '';
 
         if (!thread.messages?.length) {
-            messagesEl.append(empty('Hələ mesaj yoxdur. İlk mesajı siz yazın.'));
+            messagesEl.append(empty('Hələ mesaj yoxdur. Söhbətə ilk siz başlayın! 👋'));
         } else {
             thread.messages.forEach(appendMessage);
         }
@@ -1475,6 +1911,7 @@ if (listingChat) {
 
     const openThread = async (id) => {
         try {
+            if (drawerEl) drawerEl.hidden = true;
             renderThread(await request(threadUrl(id)));
             await loadIndex();
         } catch (error) {
@@ -1507,9 +1944,19 @@ if (listingChat) {
         element.addEventListener('click', () => setOpen(false));
     });
 
+    listingChat.querySelectorAll('[data-sf-lchat-toggle-list]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+            if (drawerEl) drawerEl.hidden = !drawerEl.hidden;
+        });
+    });
+
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape' && !listingChat.hidden) {
-            setOpen(false);
+            if (drawerEl && !drawerEl.hidden) {
+                drawerEl.hidden = true;
+            } else {
+                setOpen(false);
+            }
         }
     });
 
@@ -1523,7 +1970,7 @@ if (listingChat) {
     form?.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        const body = textarea?.value.trim();
+        const body = input?.value.trim();
         if (!body || !activeId) return;
 
         const submit = form.querySelector('button[type="submit"]');
@@ -1537,7 +1984,7 @@ if (listingChat) {
                     body: JSON.stringify({ body }),
                 })
             );
-            textarea.value = '';
+            input.value = '';
             await loadIndex();
         } catch (error) {
             messagesEl.append(empty(error.message));

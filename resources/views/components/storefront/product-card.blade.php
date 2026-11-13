@@ -52,9 +52,14 @@
     <a class="card-link" href="{{ $url }}" aria-label="{{ $title }}"></a>
 
     <div class="icon-box2">
-        <a href="/login" class="fav-btn" aria-label="Sevimlilərə əlavə et">
-            <i class="fa-regular fa-heart"></i>
-        </a>
+        <button type="button"
+                class="fav-btn @if (! empty($product['is_favorite'])) is-favorited @endif"
+                data-sf-fav-toggle
+                data-slug="{{ $product['slug'] ?? '' }}"
+                data-auth="{{ auth()->check() ? '1' : '0' }}"
+                aria-label="{{ ! empty($product['is_favorite']) ? 'Sevimlilərdən çıxar' : 'Sevimlilərə əlavə et' }}">
+            <i class="{{ ! empty($product['is_favorite']) ? 'fa-solid' : 'fa-regular' }} fa-heart"></i>
+        </button>
     </div>
 
     @if ($discountPercent > 0)

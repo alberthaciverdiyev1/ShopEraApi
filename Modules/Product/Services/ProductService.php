@@ -272,7 +272,7 @@ class ProductService
             $product->rate = ($product->reviews_avg_rate !== null) ? round($product->reviews_avg_rate, 2) : 0;
             $product->rate_count = $product->reviews_count;
 
-            $user = auth('sanctum')->user();
+            $user = auth('sanctum')->user() ?? auth()->user();
 
             $product->is_favorite = $user ? $product->favoritedBy()->where('user_id', $user->id)->exists() : false;
 
@@ -540,7 +540,7 @@ class ProductService
 
             $product?->increment('views');
 
-            $averageRate = $product->reviews()->avg('rate') ?? 5;
+            $averageRate = $product->reviews()->avg('rate') ?? 0;
 
             $isFavorite = false;
             if (Auth::check()) {
@@ -674,7 +674,7 @@ class ProductService
                 'colors', 'sizes', 'images', 'videos', 'category', 'brand', 'reviews.user',
             ])->findOrFail($id);
 
-            $averageRate = $product->reviews()->avg('rate') ?? 5;
+            $averageRate = $product->reviews()->avg('rate') ?? 0;
             $data = ProductResource::make($product);
             $data->rate = round($averageRate, 2);
 
