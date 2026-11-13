@@ -13,6 +13,7 @@ use Modules\Brand\Http\Controllers\BrandController;
 use Modules\Delivery\Http\Controllers\DeliveryController;
 use Modules\Filter\Http\Controllers\FilterController;
 use Modules\Marketplace\Http\Controllers\ListingController as ModuleListingController;
+use Modules\Marketplace\Http\Controllers\VendorController;
 use Modules\Marketplace\Http\Requests\StoreListingRequest as ModuleStoreListingRequest;
 
 class ListingController extends Controller
@@ -48,7 +49,17 @@ class ListingController extends Controller
 
         $module = app(ModuleListingController::class);
 
+        // Accounts that own a store (or work in one) pick the seller at
+        // publish time: the store or themselves.
+        $vendor = auth()->check()
+            ? $this->payload(app(VendorController::class)->mine($this->moduleHttpRequest()))
+            : null;
+        $vendorName = is_array($vendor) ? ($vendor['name'] ?? null) : null;
+        $canPublishAsStore = $vendorName !== null
+            && in_array('listings', $vendor['permissions'] ?? [], true);
+
         return view('storefront.listings.create', [
+            'publishAsStore' => $canPublishAsStore ? $vendorName : null,
             'path' => $path,
             'selected' => $selected,
             'children' => $children,

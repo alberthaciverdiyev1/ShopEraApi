@@ -60,6 +60,8 @@ class StoreListingRequest extends FormRequest
 
             'filter_values' => ['nullable', 'array'],
             'filter_values.*' => ['integer', Rule::exists('filter_values', 'id')],
+
+            'publish_as' => ['nullable', Rule::in(['store', 'personal'])],
         ];
     }
 }

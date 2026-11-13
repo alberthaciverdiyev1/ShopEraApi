@@ -5,17 +5,24 @@ namespace Modules\Marketplace\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Marketplace\Services\VendorService;
+use Modules\Marketplace\Services\VendorTeamService;
 
 class VendorController extends Controller
 {
     public function __construct(private readonly VendorService $service) {}
 
-    /** The signed-in user's store, or null. */
+    /** The store the signed-in user owns or helps run, or null. */
     public function mine(Request $request)
     {
-        $vendor = $this->service->store($request->user('sanctum'));
+        $user = $request->user('sanctum');
 
-        return responseHelper('OK', 200, $vendor ? $this->service->payload($vendor) : null);
+        if (! $user) {
+            return responseHelper('OK', 200, null);
+        }
+
+        $vendor = $this->service->vendorFor($user);
+
+        return responseHelper('OK', 200, $vendor ? $this->service->payload($vendor, $user) : null);
     }
 
     /** Open a store for the signed-in user. */
@@ -37,8 +44,14 @@ class VendorController extends Controller
 
     public function update(Request $request)
     {
-        $vendor = $this->service->store($request->user('sanctum'));
+        $user = $request->user('sanctum');
+        $vendor = $this->service->vendorFor($user);
         abort_unless($vendor, 404, 'Mağazanız yoxdur.');
+        abort_unless(
+            app(VendorTeamService::class)->can($user, $vendor, 'settings'),
+            403,
+            'Mağaza məlumatlarını redaktə etmək icazəniz yoxdur.'
+        );
 
         $data = $request->validate([
             'name' => ['sometimes', 'required', 'string', 'max:120'],

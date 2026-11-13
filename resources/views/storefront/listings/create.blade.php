@@ -261,6 +261,26 @@
                         @endif
                     </section>
 
+                    @if (! $isGuest && ! empty($publishAsStore))
+                        <section class="elan-section">
+                            <h6 class="elan-section__title">Paylaşım</h6>
+                            <div class="elan-grid">
+                                <label class="elan-field">
+                                    <span>Elan kimin adından paylaşılır?</span>
+                                    <select name="publish_as" required>
+                                        <option value="store" @selected(old('publish_as', 'store') === 'store')>
+                                            Mağaza adından — {{ $publishAsStore }}
+                                        </option>
+                                        <option value="personal" @selected(old('publish_as') === 'personal')>
+                                            Şəxsi hesabdan — {{ auth()->user()->name }}
+                                        </option>
+                                    </select>
+                                </label>
+                            </div>
+                            <p class="muted small mb-0">Mağaza adından paylaşılan elanlar mağaza səhifəsində görünür.</p>
+                        </section>
+                    @endif
+
                     <div class="elan-actions">
                         <button type="submit" class="theme-btn elan-submit">Elanı yerləşdir</button>
                         <a class="sf-btn sf-btn--ghost" href="/elan/ver">Geri</a>

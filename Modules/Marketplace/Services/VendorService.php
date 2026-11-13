@@ -2,11 +2,13 @@
 
 namespace Modules\Marketplace\Services;
 
+use App\Core\Enums\ReviewStatus;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Storage;
 use Modules\Marketplace\Entities\Vendor;
+use Modules\Product\Entities\Review;
 use Modules\User\Entities\User;
 
 class VendorService
@@ -19,6 +21,12 @@ class VendorService
     public function store(User $user): ?Vendor
     {
         return Vendor::query()->where('user_id', $user->id)->first();
+    }
+
+    /** The store this user works in: their own, or one they are a member of. */
+    public function vendorFor(User $user): ?Vendor
+    {
+        return $this->store($user) ?? app(VendorTeamService::class)->membership($user)?->vendor;
     }
 
     public function create(User $user, array $data, Request $request): Vendor
@@ -81,9 +89,9 @@ class VendorService
 
         $productIds = $vendor->products()->pluck('id');
 
-        $reviews = \Modules\Product\Entities\Review::query()
+        $reviews = Review::query()
             ->whereIn('product_id', $productIds)
-            ->where('status', \App\Core\Enums\ReviewStatus::APPROVED->value);
+            ->where('status', ReviewStatus::APPROVED->value);
 
         $vendor->forceFill([
             'rating_avg' => round((float) ($reviews->clone()->avg('rate') ?? 0), 2),
@@ -96,9 +104,9 @@ class VendorService
         return Vendor::query()->where('slug', $slug)->first();
     }
 
-    public function payload(Vendor $vendor): array
+    public function payload(Vendor $vendor, ?User $user = null): array
     {
-        return [
+        $payload = [
             'id' => $vendor->id,
             'name' => $vendor->name,
             'slug' => $vendor->slug,
@@ -113,6 +121,14 @@ class VendorService
             'rating_count' => (int) $vendor->rating_count,
             'listings_count' => $vendor->products()->count(),
         ];
+
+        if ($user) {
+            $team = app(VendorTeamService::class);
+            $payload['is_owner'] = (int) $vendor->user_id === (int) $user->id;
+            $payload['permissions'] = $team->permissionsFor($user, $vendor);
+        }
+
+        return $payload;
     }
 
     private function translations(string $value): array

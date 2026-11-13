@@ -56,6 +56,10 @@ class StoreListingRequest extends FormRequest
 
             'filter_values' => ['nullable', 'array'],
             'filter_values.*' => ['integer', Rule::exists('filter_values', 'id')],
+
+            // Store owners (and team members with the listings permission)
+            // choose whether the listing belongs to the store or to them.
+            'publish_as' => ['nullable', Rule::in(['store', 'personal'])],
         ];
     }
 

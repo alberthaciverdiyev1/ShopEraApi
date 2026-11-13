@@ -5,14 +5,17 @@ namespace Modules\Marketplace\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Validation\Rule;
+use Modules\Marketplace\Entities\PromotionPackage;
+use Modules\Marketplace\Entities\Vendor;
 use Modules\Marketplace\Http\Requests\StoreListingRequest;
 use Modules\Marketplace\Http\Requests\UpdateListingRequest;
 use Modules\Marketplace\Http\Resources\ListingResource;
-use Modules\Marketplace\Entities\PromotionPackage;
 use Modules\Marketplace\Services\ListingService;
 use Modules\Marketplace\Services\PromotionService;
+use Modules\Marketplace\Services\VendorTeamService;
 use Modules\Marketplace\Support\ListingFields;
 use Modules\Product\Entities\Product;
+use Modules\User\Entities\User;
 
 class ListingController extends Controller
 {
@@ -22,7 +25,7 @@ class ListingController extends Controller
     public function renew(Request $request, int $id)
     {
         $listing = Product::query()->findOrFail($id);
-        $this->authorizeOwner($listing, $request->user('sanctum')->id);
+        $this->authorizeManage($listing, $request->user('sanctum'));
         $this->service->renew($listing);
 
         return responseHelper('Elan yenidən dərc edildi.', 200, new ListingResource($listing->fresh()));
@@ -39,6 +42,7 @@ class ListingController extends Controller
     {
         $data = $request->validate(['package_id' => ['required', 'exists:promotion_packages,id']]);
         $listing = Product::query()->findOrFail($id);
+        $this->authorizeManage($listing, $request->user('sanctum'), 'promotions');
         $package = PromotionPackage::query()->findOrFail($data['package_id']);
 
         $order = $this->promotions->createOrder($listing, $request->user('sanctum'), $package);
@@ -101,12 +105,23 @@ class ListingController extends Controller
         ]);
     }
 
-    /** The signed-in seller's own listings. */
+    /** The signed-in seller's own listings, plus the store's when allowed. */
     public function myListings(Request $request)
     {
+        $user = $request->user('sanctum');
+        $team = app(VendorTeamService::class);
+        $vendor = $team->vendorFor($user);
+        $vendorId = ($vendor && $team->can($user, $vendor, 'listings')) ? $vendor->id : null;
+
         $listings = Product::query()
             ->with(['images', 'city', 'vendor'])
-            ->where('user_id', $request->user('sanctum')->id)
+            ->where(function ($query) use ($user, $vendorId) {
+                $query->where('user_id', $user->id);
+
+                if ($vendorId) {
+                    $query->orWhere('vendor_id', $vendorId);
+                }
+            })
             ->orderByDesc('id')
             ->paginate(20);
 
@@ -120,7 +135,7 @@ class ListingController extends Controller
     public function update(UpdateListingRequest $request, int $id)
     {
         $listing = Product::query()->findOrFail($id);
-        $this->authorizeOwner($listing, $request->user('sanctum')->id);
+        $this->authorizeManage($listing, $request->user('sanctum'));
 
         $this->service->update($listing, $request->validated(), $request);
 
@@ -130,7 +145,7 @@ class ListingController extends Controller
     public function destroy(Request $request, int $id)
     {
         $listing = Product::query()->findOrFail($id);
-        $this->authorizeOwner($listing, $request->user('sanctum')->id);
+        $this->authorizeManage($listing, $request->user('sanctum'));
 
         $listing->delete();
 
@@ -163,8 +178,19 @@ class ListingController extends Controller
             ?? abort(404, __('İdarə linki etibarsızdır.'));
     }
 
-    private function authorizeOwner(Product $listing, int $userId): void
+    /** The listing's own creator or a team member allowed to manage it. */
+    private function authorizeManage(Product $listing, User $user, string $permission = 'listings'): void
     {
-        abort_unless((int) $listing->user_id === $userId, 403, __('Bu elan sizə aid deyil.'));
+        if ((int) $listing->user_id === (int) $user->id) {
+            return;
+        }
+
+        $vendor = $listing->vendor_id ? Vendor::query()->find($listing->vendor_id) : null;
+
+        abort_unless(
+            $vendor && app(VendorTeamService::class)->can($user, $vendor, $permission),
+            403,
+            __('Bu elan sizə aid deyil.')
+        );
     }
 }

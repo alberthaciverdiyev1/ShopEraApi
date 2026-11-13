@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Modules\Marketplace\Http\Controllers\ListingChatController;
 use Modules\Marketplace\Http\Controllers\ListingController;
 use Modules\Marketplace\Http\Controllers\VendorController;
+use Modules\Marketplace\Http\Controllers\VendorTeamController;
 
 /*
 | Marketplace listing writing/management.
@@ -57,3 +58,16 @@ Route::prefix('vendor')->controller(VendorController::class)->middleware('auth:s
     Route::post('/', 'create')->name('vendor.create');
     Route::put('/', 'update')->name('vendor.update');
 });
+
+// Store team: the owner manages members by invitation link.
+Route::prefix('vendor/team')->controller(VendorTeamController::class)->middleware('auth:sanctum')->group(function () {
+    Route::get('/', 'index')->name('vendor.team');
+    Route::post('/invitations', 'invite')->name('vendor.team.invite');
+    Route::put('/members/{user}', 'updateMember')->whereNumber('user')->name('vendor.team.member.update');
+    Route::delete('/members/{user}', 'destroyMember')->whereNumber('user')->name('vendor.team.member.destroy');
+    Route::post('/invitations/{token}/accept', 'accept')->name('vendor.team.accept');
+});
+
+// Opening an invitation link: the token itself is the credential.
+Route::get('/vendor/invitations/{token}', [VendorTeamController::class, 'invitation'])
+    ->name('vendor.invitation');

@@ -1087,3 +1087,32 @@ if (listingChat) {
         }
     });
 }
+
+/* Store team: copy invitation links. */
+(() => {
+    const buttons = document.querySelectorAll('[data-sf-copy]');
+    if (!buttons.length) return;
+
+    buttons.forEach((button) => {
+        button.addEventListener('click', async () => {
+            const text = button.dataset.sfCopy || '';
+
+            try {
+                await navigator.clipboard.writeText(text);
+                const original = button.textContent;
+                button.classList.add('is-copied');
+                button.textContent = 'Kopyalandı';
+                setTimeout(() => {
+                    button.textContent = original;
+                    button.classList.remove('is-copied');
+                }, 1600);
+            } catch {
+                const source = button.parentElement?.querySelector('[data-sf-copy-source]');
+                if (source) {
+                    source.select();
+                    document.execCommand('copy');
+                }
+            }
+        });
+    });
+})();

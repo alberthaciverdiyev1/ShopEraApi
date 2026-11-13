@@ -26,6 +26,7 @@
                     <span class="text-muted fs-6">— Mağaza paneli</span>
                 </h2>
                 <div class="d-flex gap-2">
+                    <a class="sf-btn sf-btn--ghost" href="/magaza/komanda">Komanda</a>
                     <a class="sf-btn sf-btn--ghost" href="/magaza/{{ $payload['slug'] ?? '' }}" target="_blank">Mağaza səhifəsi</a>
                     <a class="theme-btn" href="/elan/ver">Yeni elan</a>
                 </div>
@@ -51,6 +52,7 @@
             </div>
 
             <div class="row g-4">
+                @if (in_array('settings', $payload['permissions'] ?? ['settings'], true))
                 <div class="col-lg-5">
                     <form action="{{ route('storefront.store.panel.update') }}" method="POST" enctype="multipart/form-data" class="sf-panel">
                         @csrf
@@ -86,6 +88,7 @@
                         </div>
                     </form>
                 </div>
+                @endif
 
                 <div class="col-lg-7">
                     <div class="sf-panel">

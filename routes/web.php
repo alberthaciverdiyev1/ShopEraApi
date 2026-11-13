@@ -20,6 +20,7 @@ use App\Http\Controllers\Web\ShopController;
 use App\Http\Controllers\Web\SitemapController;
 use App\Http\Controllers\Web\StoreController;
 use App\Http\Controllers\Web\StorePanelController;
+use App\Http\Controllers\Web\StoreTeamController;
 use App\Http\Controllers\Web\WishlistController;
 use Illuminate\Support\Facades\Route;
 
@@ -93,6 +94,18 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/elan/{slug}/rey', [ProductController::class, 'review'])
         ->name('storefront.product.review');
+
+    // Store team: owner invites members by link and picks their permissions.
+    Route::get('/magaza/komanda', [StoreTeamController::class, 'index'])->name('storefront.store.team');
+    Route::post('/magaza/komanda/devet', [StoreTeamController::class, 'invite'])->name('storefront.store.team.invite');
+    Route::put('/magaza/komanda/uyeler/{user}', [StoreTeamController::class, 'updateMember'])
+        ->whereNumber('user')
+        ->name('storefront.store.team.member.update');
+    Route::delete('/magaza/komanda/uyeler/{user}', [StoreTeamController::class, 'destroyMember'])
+        ->whereNumber('user')
+        ->name('storefront.store.team.member.destroy');
+    Route::get('/magaza/devet/{token}', [StoreTeamController::class, 'invitation'])->name('storefront.store.team.invitation');
+    Route::post('/magaza/devet/{token}', [StoreTeamController::class, 'accept'])->name('storefront.store.team.accept');
 
     Route::get('/magaza/panel', [StorePanelController::class, 'panel'])->name('storefront.store.panel');
     Route::put('/magaza/panel', [StorePanelController::class, 'update'])->name('storefront.store.panel.update');

@@ -13,6 +13,7 @@ use Modules\Filter\Entities\ProductFilterValue;
 use Modules\Marketplace\Entities\ListingReport;
 use Modules\Marketplace\Entities\Vendor;
 use Modules\Product\Entities\Product;
+use Modules\Setting\Services\SettingService;
 use Modules\User\Entities\User;
 
 class ListingService
@@ -20,12 +21,14 @@ class ListingService
     /**
      * Create a marketplace listing. The seller is a vendor when the account
      * owns a store, otherwise a plain user; a null account means a guest.
+     * Accounts that own a store (or belong to one) choose at publish time
+     * whether the listing is published for the store or personally.
      *
      * @return array{listing: Product, manage_url: ?string, manage_token: ?string}
      */
     public function create(array $data, ?User $user, Request $request): array
     {
-        $vendor = $user ? Vendor::query()->where('user_id', $user->id)->first() : null;
+        $vendor = $user ? $this->listingVendor($user, $data['publish_as'] ?? null) : null;
         $sellerType = ! $user ? 'guest' : ($vendor ? 'vendor' : 'user');
 
         // Hybrid taxonomy: some leaf categories require a brand.
@@ -139,7 +142,7 @@ class ListingService
     private function listingDays(): int
     {
         try {
-            $days = (int) app(\Modules\Setting\Services\SettingService::class)->current()?->listing_active_days;
+            $days = (int) app(SettingService::class)->current()?->listing_active_days;
         } catch (\Throwable) {
             $days = 0;
         }
@@ -234,6 +237,37 @@ class ListingService
                 'filter_value_id' => $value->id,
             ]);
         }
+    }
+
+    /**
+     * The store the listing should belong to, or null for a personal listing.
+     * Store owners may publish personally; team members need the listings
+     * permission to publish for the store.
+     */
+    private function listingVendor(User $user, ?string $publishAs): ?Vendor
+    {
+        if ($publishAs === 'personal') {
+            return null;
+        }
+
+        $team = app(VendorTeamService::class);
+        $vendor = $team->vendorFor($user);
+
+        if (! $vendor) {
+            return null;
+        }
+
+        if (! $team->can($user, $vendor, 'listings')) {
+            if ($publishAs !== null) {
+                throw ValidationException::withMessages([
+                    'publish_as' => 'Bu mağaza adından elan yaratmaq icazəniz yoxdur.',
+                ]);
+            }
+
+            return null;
+        }
+
+        return $vendor;
     }
 
     /** The storefront sends a city key (the /city endpoint has no ids). */

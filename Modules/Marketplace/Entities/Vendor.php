@@ -41,6 +41,16 @@ class Vendor extends Model
         return $this->hasMany(Product::class, 'vendor_id');
     }
 
+    public function members(): HasMany
+    {
+        return $this->hasMany(VendorMember::class, 'vendor_id');
+    }
+
+    public function invitations(): HasMany
+    {
+        return $this->hasMany(VendorInvitation::class, 'vendor_id');
+    }
+
     public function isActive(): bool
     {
         return $this->status === self::STATUS_ACTIVE;
