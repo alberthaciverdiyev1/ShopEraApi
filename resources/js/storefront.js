@@ -775,6 +775,10 @@ if (faq) {
             window.setTimeout(() => input?.focus(), 60);
         };
 
+        // On phones the field is always visible; closing only hides the results
+        // dropdown and never clears what the user typed.
+        const isCollapsedHeader = () => window.matchMedia('(min-width: 768px)').matches;
+
         toggle?.addEventListener('click', () => {
             if (search.classList.contains('is-open')) collapse();
             else expand();
@@ -783,13 +787,17 @@ if (faq) {
         closeButton?.addEventListener('click', collapse);
 
         document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape' && search.classList.contains('is-open')) collapse();
+            if (event.key !== 'Escape') return;
+
+            if (isCollapsedHeader() && search.classList.contains('is-open')) collapse();
+            else close();
         });
 
         document.addEventListener('click', (event) => {
             if (search.contains(event.target)) return;
 
-            collapse();
+            if (isCollapsedHeader()) collapse();
+            else close();
         });
     }
 

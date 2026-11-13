@@ -1,3 +1,4 @@
 - [x] mobile filterlerde horizontal scroll olmasin
 - [x] filterlerde daha cox goster dedikde indi sadece front tarafda hidden olan aciliyor. bunu backende bagla. simdi cok az filter var. gelecekde cok oldugu zaman performans sorunu yasayacagiz. pagination ile olsun
 - [x] search yeri svelte ile birebirde yazilacak. hep acik kalmasin
+- [x] mobilde yukaridaki navbar bu sekilde olsun. search kismi logo ile justify between yapilacak. search icin buton olmasin. yazdikca arasin

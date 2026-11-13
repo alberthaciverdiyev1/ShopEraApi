@@ -3999,19 +3999,58 @@
         max-width: 58vw;
     }
 
+    /*
+     * Mobile header: a single row with the logo on the left and an always
+     * visible search field taking the remaining space. Secondary actions live
+     * in the bottom navigation and the account drawer, so the row stays calm.
+     */
     .header-1 .header-main {
-        flex-wrap: wrap;
-        padding-block: 12px;
+        flex-wrap: nowrap;
+        gap: 10px !important;
+        padding-block: 10px;
     }
 
-    .header-1 .header-main .header-left,
-    .header-1 .header-main .header-right,
-    .header-search-shell {
-        width: 100%;
+    .header-1 .header-main .header-left {
+        flex: 0 0 auto;
+        width: auto;
+        gap: 0;
+    }
+
+    .header-1 .header-main .header-cataegory-item {
+        display: none !important;
+    }
+
+    .header-logo-img {
+        height: 34px;
     }
 
     .header-1 .header-main .header-right {
-        justify-content: flex-start !important;
+        flex: 1 1 auto;
+        flex-wrap: nowrap;
+        justify-content: space-between !important;
+        gap: 10px !important;
+        width: auto;
+        min-width: 0;
+    }
+
+    .header-search-shell {
+        flex: 1 1 auto;
+        width: auto;
+        min-width: 0;
+    }
+
+    .header-1 .header-main .header-chat-icon,
+    .header-1 .header-main .menu-wishlist {
+        display: none !important;
+    }
+
+    /* No trigger and no submit: the field is always visible and searches live.
+       The search-specific overrides live after the base search styles. */
+    .navbar-search-wrapper {
+        display: flex;
+        flex: 1 1 auto;
+        width: 100%;
+        min-width: 0;
     }
 }
 
@@ -4472,6 +4511,57 @@
 
     .search-dropdown-menu {
         width: min(290px, calc(100vw - 24px));
+    }
+}
+
+/* Phones: the field is permanent, so the trigger and submit button go away
+   and the results dropdown spans the header. */
+@media (max-width: 767.98px) {
+    .navbar-search-wrapper .search-trigger-btn,
+    .navbar-search-wrapper .search-close-btn,
+    .navbar-search-wrapper .search-submit-btn {
+        display: none !important;
+    }
+
+    .navbar-search-wrapper:not(.is-open) .search-bar-inline,
+    .navbar-search-wrapper .search-bar-inline {
+        display: block !important;
+        width: 100%;
+    }
+
+    .search-form {
+        height: 42px;
+        padding: 0 12px;
+        border-radius: 12px;
+        gap: 8px;
+    }
+
+    /* Let the results panel span the header instead of the narrow field. */
+    .header-1 .header-main {
+        position: relative;
+    }
+
+    .navbar-search-wrapper,
+    .search-bar-inline {
+        position: static;
+    }
+
+    .search-dropdown-menu {
+        top: calc(100% + 8px);
+        right: 0;
+        left: 0;
+        width: auto;
+    }
+}
+
+/* Very narrow phones: drop the leading icon so the placeholder keeps room. */
+@media (max-width: 359.98px) {
+    .search-form-icon {
+        display: none;
+    }
+
+    .search-form {
+        padding-left: 10px;
     }
 }
 
@@ -4975,16 +5065,38 @@
 
 @media (max-width: 767.98px) {
     .header-1 .header-main .header-right {
-        flex-wrap: wrap;
-        row-gap: 10px;
+        flex-wrap: nowrap;
+        row-gap: 0;
     }
 
-    .header-search-shell {
-        flex: 1 1 100%;
+    /* The field stays open on phones, so the shell keeps the free space. */
+    .header-search-shell,
+    .header-search-shell:has(.navbar-search-wrapper:not(.is-open)) {
+        flex: 1 1 auto;
+        width: auto;
         min-width: 0;
     }
 
-    .header-new-listing,
+    /* Compact primary action: a round "+" next to the search field. */
+    .header-new-listing {
+        flex: 0 0 auto;
+        width: 42px;
+        height: 42px;
+        min-height: 0;
+        padding: 0;
+        border-radius: 50%;
+    }
+
+    .header-new-listing span {
+        display: none;
+    }
+
+    .header-new-listing i {
+        width: 18px;
+        height: 18px;
+        font-size: 12px;
+    }
+
     .header-login-btn {
         min-height: 40px;
         padding: 0 14px;

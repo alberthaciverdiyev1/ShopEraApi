@@ -82,9 +82,17 @@
                     <i class="fa-solid fa-receipt"></i>
                     <span>Sifarişlər</span>
                 </a>
+                <a href="/dashboard?tab=messages">
+                    <i class="fa-regular fa-comment-dots"></i>
+                    <span>Mesajlar</span>
+                </a>
                 <a href="/settings">
                     <i class="fa-solid fa-gear"></i>
                     <span>Parametrlər</span>
+                </a>
+                <a href="/elan/ver">
+                    <i class="fa-regular fa-plus"></i>
+                    <span>Yeni elan</span>
                 </a>
             @else
                 <a href="{{ route('storefront.login') }}" class="primary-action">

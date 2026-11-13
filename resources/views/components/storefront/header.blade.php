@@ -127,9 +127,9 @@
                             </a>
                         </div>
 
-                        <a href="/elan/ver" class="header-new-listing">
+                        <a href="/elan/ver" class="header-new-listing" aria-label="Yeni elan">
                             <i class="fa-regular fa-plus"></i>
-                            Yeni elan
+                            <span>Yeni elan</span>
                         </a>
                     </div>
                 </div>
