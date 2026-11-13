@@ -3676,6 +3676,22 @@
     color: var(--theme);
 }
 
+.header-top-one .lang .user a.top-account-link {
+    min-width: 0;
+}
+
+.top-account-name {
+    display: block;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.header-top-one .lang .user a.top-store-link {
+    flex: none;
+}
+
 .top-nav-links {
     min-width: 0;
     justify-self: center;
@@ -3952,9 +3968,35 @@
         padding-block: 6px !important;
     }
 
-    .header-top-one .phone-icon,
-    .header-top-one .lang {
+    .header-top-one .phone-icon {
         display: none !important;
+    }
+
+    /* Keep the account and store shortcuts visible on phones. */
+    .header-top-one .lang {
+        display: flex !important;
+        justify-self: stretch;
+        justify-content: space-between;
+        gap: 8px;
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .header-top-one .lang .user {
+        justify-content: space-between;
+        gap: 8px;
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .header-top-one .lang .user a {
+        padding: 0 10px;
+        font-size: 12.5px !important;
+    }
+
+    .header-top-one .lang .user a.top-account-link {
+        max-width: 58vw;
     }
 
     .header-1 .header-main {

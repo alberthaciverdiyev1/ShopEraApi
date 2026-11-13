@@ -43,9 +43,9 @@
                             @else
                                 <i class="fa-solid fa-user"></i>
                             @endif
-                            {{ $user->name ?? 'Hesabım' }}
+                            <span class="top-account-name">{{ $user->name ?? 'Hesabım' }}</span>
                         </a>
-                        <a href="/magaza/panel">Mağazam</a>
+                        <a href="/magaza/panel" class="top-store-link">Mağazam</a>
                     @else
                         <a href="{{ route('storefront.login') }}" class="top-account-link">
                             <i class="fa-solid fa-user"></i>
