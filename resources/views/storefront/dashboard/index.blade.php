@@ -85,9 +85,11 @@
                                                                onchange="document.getElementById('sf-avatar-input').files = this.files; document.getElementById('sf-avatar-form').submit();">
                                                     </label>
                                                 </div>
-                                                <h3>{{ $user?->name ?? 'Hesabım' }}</h3>
-                                                <p>{{ $user?->email ?? $user?->phone ?? 'Müştəri' }}</p>
-                                                <button type="button" class="sf-link-button" data-sf-dash-tab="settings">Profili redaktə et</button>
+                                                <div class="dashboard-profile__meta">
+                                                    <h3>{{ $user?->name ?? 'Hesabım' }}</h3>
+                                                    <p>{{ $user?->email ?? $user?->phone ?? 'Müştəri' }}</p>
+                                                    <button type="button" class="sf-link-button" data-sf-dash-tab="settings">Profili redaktə et</button>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -131,10 +133,10 @@
                                                 <tbody>
                                                     @foreach ($recentOrders as $order)
                                                         <tr>
-                                                            <td>#{{ $order['id'] }}</td>
-                                                            <td>{{ \Illuminate\Support\Carbon::parse($order['created_at'])->translatedFormat('d M, Y') }}</td>
-                                                            <td>{{ number_format((float) $order['total_price'], 2) }} ₼</td>
-                                                            <td>
+                                                            <td data-label="Sifariş">#{{ $order['id'] }}</td>
+                                                            <td data-label="Tarix">{{ \Illuminate\Support\Carbon::parse($order['created_at'])->translatedFormat('d M, Y') }}</td>
+                                                            <td data-label="Məbləğ">{{ number_format((float) $order['total_price'], 2) }} ₼</td>
+                                                            <td data-label="Status">
                                                                 <span class="status">{{ $order['latest_status']['status'] ?? 'Yeni' }}</span>
                                                             </td>
                                                         </tr>
