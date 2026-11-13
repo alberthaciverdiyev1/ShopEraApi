@@ -24,7 +24,7 @@ class UpdateListingRequest extends FormRequest
             'city_key' => ['sometimes', 'required', 'string', Rule::exists('cities', 'key')],
             'condition' => ['sometimes', 'required', Rule::in(['new', 'used'])],
             'has_delivery' => ['nullable', 'boolean'],
-            'stock_count' => ['sometimes', 'integer', 'min:1'],
+            'stock_count' => ['sometimes', 'integer', 'min:0'],
 
             'contact_name' => ['nullable', 'string', 'max:255'],
             'contact_phone' => ['nullable', 'string', 'max:32'],

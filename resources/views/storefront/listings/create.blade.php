@@ -30,13 +30,14 @@
     // The form is split into steps ("next / back"); only the sections that
     // are actually rendered get a step, and the step index is assigned as the
     // sections are written below.
+    $hasVariants = count($colorChoices) || count($sizeChoices);
     $wizardLabels = [];
     if (count($filters)) {
         $wizardLabels[] = 'Xüsusiyyətlər';
     }
     $wizardLabels[] = 'Əsas məlumat';
-    if (count($colorChoices) || count($sizeChoices)) {
-        $wizardLabels[] = 'Variantlar';
+    if ($hasVariants) {
+        $wizardLabels[] = 'Qiymət və variantlar';
     }
     if ($visible('photos')) {
         $wizardLabels[] = 'Şəkillər';
@@ -257,17 +258,10 @@
                                 </label>
                             @endif
 
-                            @if ($visible('price'))
-                                <label class="elan-field">
-                                    <span>Qiymət (₼) {{ $required('price') ? '*' : '' }}</span>
-                                    <input type="number" name="price" min="0" step="0.01" value="{{ old('price') }}"
-                                           {{ $required('price') ? 'required' : '' }}>
-                                </label>
-                                <label class="elan-field">
-                                    <span>Endirimli qiymət (₼)</span>
-                                    <input type="number" name="discount" min="0" step="0.01" value="{{ old('discount') }}"
-                                           placeholder="Endirim yoxdursa boş buraxın">
-                                </label>
+                            {{-- Without variants the price stays in this step; with
+                                 variants it moves next to the colour/size pickers. --}}
+                            @if (! $hasVariants)
+                                @include('storefront.listings._price-block', ['hasVariants' => false])
                             @endif
 
                             @if ($visible('city'))
@@ -317,12 +311,15 @@
                         </div>
                     </section>
 
-                    @if (count($colorChoices) || count($sizeChoices))
+                    @if ($hasVariants)
                         <section class="elan-section" data-sf-wizard-step="{{ $stepIndex++ }}">
-                            <h6 class="elan-section__title">Rəng və ölçü variantları</h6>
+                            <h6 class="elan-section__title">Qiymət, stok və variantlar</h6>
+
+                            @include('storefront.listings._price-block')
+
                             <div class="elan-grid">
                                 @if (count($colorChoices))
-                                    <div class="elan-field elan-field--full">
+                                    <div class="elan-field elan-field--full elan-variant-group">
                                         <span>Rənglər <span class="muted small">(bir neçəsini seçə bilərsiniz)</span></span>
                                         <div class="elan-checks">
                                             @foreach ($colorChoices as $color)
@@ -338,14 +335,8 @@
                                 @endif
 
                                 @if (count($sizeChoices))
-                                    <div class="elan-field elan-field--full">
-                                        <span>Ölçülər <span class="muted small">(hər ölçü üçün ayrı stok və qiymət yaza bilərsiniz)</span></span>
-                                        <label class="elan-check-pill elan-standard-price">
-                                            <input type="hidden" name="standard_price" value="0">
-                                            <input type="checkbox" name="standard_price" value="1" data-sf-standard-price
-                                                   @checked(old('standard_price', '1') === '1')>
-                                            <span>Bütün rəng və ölçülər üçün standart qiymət</span>
-                                        </label>
+                                    <div class="elan-field elan-field--full elan-variant-group">
+                                        <span>Ölçülər <span class="muted small">(hər ölçü üçün ayrıca stok və qiymət)</span></span>
                                         <div class="elan-size-list">
                                             @foreach ($sizeChoices as $size)
                                                 <div class="elan-size-row" data-sf-size-row>
@@ -368,7 +359,6 @@
                                                 </div>
                                             @endforeach
                                         </div>
-                                        <span class="elan-hint">Aktiv olduqda əsas qiymət bütün rəng və ölçülərə tətbiq olunur. Söndürsəniz, seçdiyiniz ölçülər üçün stok, ayrı qiymət və endirim yaza bilərsiniz.</span>
                                     </div>
                                 @endif
                             </div>

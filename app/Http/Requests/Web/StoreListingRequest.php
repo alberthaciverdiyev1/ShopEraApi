@@ -50,7 +50,7 @@ class StoreListingRequest extends FormRequest
                 : ['nullable', Rule::in(['new', 'used'])],
 
             'has_delivery' => ['nullable', 'boolean'],
-            'stock_count' => ['nullable', 'integer', 'min:1'],
+            'stock_count' => ['nullable', 'integer', 'min:0'],
 
             'contact_name' => [Rule::requiredIf($guest), 'nullable', 'string', 'max:255'],
             'contact_phone' => [Rule::requiredIf($guest), 'nullable', 'string', 'max:32'],

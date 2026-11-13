@@ -7814,9 +7814,47 @@ a.sf-seller-link {
     display: none;
 }
 
+/* Price, discount, general stock and the standard-price switch, kept
+   together as one card next to the colour/size pickers. */
+.elan-price-block {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding: 16px;
+    border: 1.5px solid #e6e9f0;
+    border-radius: 14px;
+    background: #f8fafc;
+}
+
+.elan-price-block .elan-grid {
+    gap: 12px;
+}
+
+.elan-grid > .elan-price-block {
+    grid-column: 1 / -1;
+}
+
+.elan-price-block .elan-field > span:first-child {
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+}
+
 .elan-standard-price {
     align-self: flex-start;
-    margin-bottom: 10px;
+    margin: 0;
+    background: #fff;
+}
+
+.elan-variant-group {
+    gap: 10px;
+}
+
+.elan-variant-group > span:first-child {
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
 }
 
 .elan-field .elan-size-prices input:disabled {
