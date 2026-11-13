@@ -759,45 +759,14 @@ if (faq) {
             close();
         });
 
-        const toggle = search.querySelector('[data-sf-search-toggle]');
-        const closeButton = search.querySelector('[data-sf-search-close]');
-
-        const collapse = () => {
-            if (input) input.value = '';
-            close();
-            search.classList.remove('is-open');
-            toggle?.setAttribute('aria-expanded', 'false');
-        };
-
-        const expand = () => {
-            search.classList.add('is-open');
-            toggle?.setAttribute('aria-expanded', 'true');
-            window.setTimeout(() => input?.focus(), 60);
-        };
-
-        // On phones the field is always visible; closing only hides the results
-        // dropdown and never clears what the user typed.
-        const isCollapsedHeader = () => window.matchMedia('(min-width: 768px)').matches;
-
-        toggle?.addEventListener('click', () => {
-            if (search.classList.contains('is-open')) collapse();
-            else expand();
-        });
-
-        closeButton?.addEventListener('click', collapse);
-
+        // The field is always visible: closing only hides the results dropdown
+        // and never clears what the user typed.
         document.addEventListener('keydown', (event) => {
-            if (event.key !== 'Escape') return;
-
-            if (isCollapsedHeader() && search.classList.contains('is-open')) collapse();
-            else close();
+            if (event.key === 'Escape') close();
         });
 
         document.addEventListener('click', (event) => {
-            if (search.contains(event.target)) return;
-
-            if (isCollapsedHeader()) collapse();
-            else close();
+            if (!search.contains(event.target)) close();
         });
     }
 
