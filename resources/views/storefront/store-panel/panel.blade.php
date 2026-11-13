@@ -18,16 +18,16 @@
     ];
 @endphp
 
-<x-storefront.layouts.app :title="$localized($payload['name'] ?? $vendor->name).' — Mağaza paneli'">
+<x-storefront.layouts.app :title="$localized($payload['name'] ?? '').' — Mağaza paneli'">
     <div class="section-padding fix elan-page">
         <div class="container elan-page__narrow">
             <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
                 <h2 class="mb-0">
-                    {{ $localized($payload['name'] ?? $vendor->name) }}
+                    {{ $localized($payload['name'] ?? '') }}
                     <span class="text-muted fs-6">— Mağaza paneli</span>
                 </h2>
                 <div class="d-flex gap-2">
-                    <a class="sf-btn sf-btn--ghost" href="/magaza/{{ $vendor->slug }}" target="_blank">Mağaza səhifəsi</a>
+                    <a class="sf-btn sf-btn--ghost" href="/magaza/{{ $payload['slug'] ?? '' }}" target="_blank">Mağaza səhifəsi</a>
                     <a class="theme-btn" href="/elan/ver">Yeni elan</a>
                 </div>
             </div>
@@ -66,19 +66,19 @@
                         <div class="sf-account__form">
                             <label>
                                 <span>Ad</span>
-                                <input type="text" name="name" value="{{ old('name', $localized($payload['name'] ?? $vendor->name)) }}" required maxlength="120">
+                                <input type="text" name="name" value="{{ old('name', $localized($payload['name'] ?? '')) }}" required maxlength="120">
                             </label>
                             <label>
                                 <span>Təsvir</span>
-                                <textarea name="description" rows="3">{{ old('description', $localized($payload['description'] ?? $vendor->description)) }}</textarea>
+                                <textarea name="description" rows="3">{{ old('description', $localized($payload['description'] ?? '')) }}</textarea>
                             </label>
                             <label>
                                 <span>Telefon</span>
-                                <input type="text" name="phone" value="{{ old('phone', $payload['phone'] ?? $vendor->phone) }}">
+                                <input type="text" name="phone" value="{{ old('phone', $payload['phone'] ?? '') }}">
                             </label>
                             <label>
                                 <span>Ünvan</span>
-                                <input type="text" name="address" value="{{ old('address', $payload['address'] ?? $vendor->address) }}">
+                                <input type="text" name="address" value="{{ old('address', $payload['address'] ?? '') }}">
                             </label>
                             <label>
                                 <span>Loqo</span>
