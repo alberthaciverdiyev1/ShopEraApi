@@ -384,47 +384,50 @@
                     @endif
 
                     @php $contactStep = $stepIndex++; @endphp
-                    <section class="elan-section" data-sf-wizard-step="{{ $contactStep }}">
-                        <h6 class="elan-section__title">Əlaqə</h6>
-                        @if ($isGuest)
-                            <div class="elan-grid">
-                                <label class="elan-field">
-                                    <span>Adınız *</span>
-                                    <input type="text" name="contact_name" value="{{ old('contact_name') }}" required>
-                                </label>
-                                <label class="elan-field">
-                                    <span>Telefon *</span>
-                                    <input type="text" name="contact_phone" value="{{ old('contact_phone') }}" required placeholder="+994...">
-                                </label>
-                                <label class="elan-field">
-                                    <span>E-poçt</span>
-                                    <input type="email" name="contact_email" value="{{ old('contact_email') }}">
-                                </label>
-                            </div>
-                        @else
-                            <p class="text-muted mb-0">Əlaqə məlumatları hesabınızdan götürüləcək ({{ auth()->user()->name }}).</p>
-                        @endif
-                    </section>
-
-                    @if (! $isGuest && ! empty($publishAsStore))
-                        <section class="elan-section" data-sf-wizard-step="{{ $contactStep }}">
-                            <h6 class="elan-section__title">Paylaşım</h6>
-                            <div class="elan-grid">
-                                <label class="elan-field">
-                                    <span>Elan kimin adından paylaşılır?</span>
-                                    <select name="publish_as" required>
-                                        <option value="store" @selected(old('publish_as', 'store') === 'store')>
-                                            Mağaza adından — {{ $publishAsStore }}
-                                        </option>
-                                        <option value="personal" @selected(old('publish_as') === 'personal')>
-                                            Şəxsi hesabdan — {{ auth()->user()->name }}
-                                        </option>
-                                    </select>
-                                </label>
-                            </div>
-                            <p class="muted small mb-0">Mağaza adından paylaşılan elanlar mağaza səhifəsində görünür.</p>
+                    {{-- Contact and sharing are one wizard step, shown together. --}}
+                    <div class="elan-wizard-group" data-sf-wizard-step="{{ $contactStep }}">
+                        <section class="elan-section">
+                            <h6 class="elan-section__title">Əlaqə</h6>
+                            @if ($isGuest)
+                                <div class="elan-grid">
+                                    <label class="elan-field">
+                                        <span>Adınız *</span>
+                                        <input type="text" name="contact_name" value="{{ old('contact_name') }}" required>
+                                    </label>
+                                    <label class="elan-field">
+                                        <span>Telefon *</span>
+                                        <input type="text" name="contact_phone" value="{{ old('contact_phone') }}" required placeholder="+994...">
+                                    </label>
+                                    <label class="elan-field">
+                                        <span>E-poçt</span>
+                                        <input type="email" name="contact_email" value="{{ old('contact_email') }}">
+                                    </label>
+                                </div>
+                            @else
+                                <p class="text-muted mb-0">Əlaqə məlumatları hesabınızdan götürüləcək ({{ auth()->user()->name }}).</p>
+                            @endif
                         </section>
-                    @endif
+
+                        @if (! $isGuest && ! empty($publishAsStore))
+                            <section class="elan-section">
+                                <h6 class="elan-section__title">Paylaşım</h6>
+                                <div class="elan-grid">
+                                    <label class="elan-field">
+                                        <span>Elan kimin adından paylaşılır?</span>
+                                        <select name="publish_as" required>
+                                            <option value="store" @selected(old('publish_as', 'store') === 'store')>
+                                                Mağaza adından — {{ $publishAsStore }}
+                                            </option>
+                                            <option value="personal" @selected(old('publish_as') === 'personal')>
+                                                Şəxsi hesabdan — {{ auth()->user()->name }}
+                                            </option>
+                                        </select>
+                                    </label>
+                                </div>
+                                <p class="muted small mb-0">Mağaza adından paylaşılan elanlar mağaza səhifəsində görünür.</p>
+                            </section>
+                        @endif
+                    </div>
 
                     <div class="elan-wizard-actions">
                         <button type="button" class="sf-btn sf-btn--ghost" data-sf-wizard-prev hidden>

@@ -7882,8 +7882,15 @@ a.sf-seller-link {
     font-size: 13.5px;
 }
 
+/* Sections that belong to the same step (contact + sharing). */
+.elan-wizard-group {
+    display: grid;
+    gap: 16px;
+}
+
 /* `.theme-btn` sets its own display, which would defeat the hidden attribute. */
 .elan-section[hidden],
+.elan-wizard-group[hidden],
 .elan-wizard-actions [hidden] {
     display: none !important;
 }
