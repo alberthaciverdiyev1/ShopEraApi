@@ -5,6 +5,7 @@
     'categoryId' => null,
     'sorts' => [],
     'query' => [],
+    'activeChips' => null,
 ])
 
 @php
@@ -114,7 +115,11 @@
         return $qs === '' ? '/shop' : '/shop?'.$qs;
     };
 
-    $chips = [];
+    // The page may hand its chips in (shared with the mobile header); otherwise
+    // build them here for views that render the sidebar on its own.
+    $chips = $activeChips ?? [];
+
+    if ($activeChips === null) {
     if ($selected['search'] !== '') {
         $chips[] = ['label' => '“'.$selected['search'].'”', 'url' => $buildUrl(['search'])];
     }
@@ -158,10 +163,11 @@
         }
     }
 
+    }
     $activeCount = count($chips);
 @endphp
 
-<form class="sf-shop-filters" action="/shop" method="GET" data-sf-filter-form>
+<form id="sf-filter-form" class="sf-shop-filters" action="/shop" method="GET" data-sf-filter-form>
     <input type="hidden" name="page" value="1">
     {{-- Sorting lives in the page toolbar; keep the chosen value when filters are applied. --}}
     <input type="hidden" name="sort" value="{{ $selected['sort'] }}">
