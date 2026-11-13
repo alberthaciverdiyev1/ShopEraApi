@@ -58,6 +58,10 @@
                 <i class="fa-solid fa-store"></i>
                 <span>Elanlar</span>
             </a>
+            <a href="/categories" class="{{ str_starts_with($path, '/categories') ? 'active' : '' }}">
+                <i class="fa-solid fa-grid-2"></i>
+                <span>Kateqoriyalar</span>
+            </a>
             <a href="/magazalar" class="{{ str_starts_with($path, '/magazalar') || str_starts_with($path, '/magaza/') && ! str_starts_with($path, '/magaza/panel') ? 'active' : '' }}">
                 <i class="fa-solid fa-shop"></i>
                 <span>Mağazalar</span>
@@ -101,6 +105,10 @@
                 </a>
             @endauth
 
+            <a href="{{ route('storefront.cart') }}">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span>Səbət</span>
+            </a>
             <a href="/wishlist">
                 <i class="fa-solid fa-heart"></i>
                 <span>İstək siyahısı</span>

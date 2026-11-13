@@ -3954,105 +3954,195 @@
     }
 }
 
-@media (max-width: 991.98px) {
-    .header-top-one {
-        grid-template-columns: 1fr auto;
+/* ------------------------------------------------------------------ */
+/* Trendyol-style Mobile Navbar (< 992px)                             */
+/* ------------------------------------------------------------------ */
+
+.sf-mobile-navbar {
+    display: none;
+    background: #ffffff;
+    border-bottom: 1px solid #f1f3f7;
+    position: relative;
+    width: 100%;
+}
+
+.sf-mobile-navbar__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 52px;
+    padding: 0 14px;
+    gap: 10px;
+    background: #ffffff;
+}
+
+.sf-mobile-navbar__left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.sf-mobile-navbar__right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+}
+
+.sf-mobile-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    margin: 0;
+    border: none;
+    background: transparent;
+    color: #1e293b;
+    font-size: 20px;
+    line-height: 1;
+    position: relative;
+    text-decoration: none !important;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.sf-mobile-nav-btn:hover,
+.sf-mobile-nav-btn:active,
+.sf-mobile-nav-btn.is-active {
+    color: var(--theme, #ff5722);
+}
+
+.sf-mobile-nav-btn--menu {
+    font-size: 21px;
+}
+
+.sf-mobile-nav-btn--search {
+    font-size: 19px;
+}
+
+.sf-mobile-logo {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none !important;
+    line-height: 1;
+}
+
+.sf-mobile-logo-img {
+    height: 26px;
+    width: auto;
+    max-width: 130px;
+    object-fit: contain;
+    display: block;
+}
+
+.sf-mobile-nav-badge {
+    position: absolute;
+    top: -2px;
+    right: -4px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 8px;
+    background: var(--theme, #ff5722);
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Collapsible search bar dropdown */
+.sf-mobile-search-pane {
+    padding: 8px 14px 12px;
+    background: #ffffff;
+    border-top: 1px solid #f1f3f7;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    animation: sfSlideDown 0.18s ease-out;
+}
+
+.sf-mobile-search-pane[hidden] {
+    display: none !important;
+}
+
+.sf-mobile-search-pane .navbar-search-wrapper {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+}
+
+.sf-mobile-search-pane .search-form {
+    height: 40px;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 0 12px;
+    width: 100%;
+}
+
+.sf-mobile-search-pane .search-input {
+    font-size: 13.5px;
+}
+
+.sf-mobile-search-pane .search-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+@keyframes sfSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
-@media (max-width: 767.98px) {
+@media (max-width: 991.98px) {
     .header-top-one {
-        display: grid !important;
-        grid-template-columns: 1fr !important;
-        min-height: 42px;
-        padding-block: 6px !important;
-    }
-
-    .header-top-one .phone-icon {
         display: none !important;
     }
 
-    /* Keep the account and store shortcuts visible on phones. */
-    .header-top-one .lang {
-        display: flex !important;
-        justify-self: stretch;
-        justify-content: space-between;
-        gap: 8px;
-        width: 100%;
-        margin-left: 0;
-    }
-
-    .header-top-one .lang .user {
-        justify-content: space-between;
-        gap: 8px;
-        width: 100%;
-        min-width: 0;
-        max-width: 100%;
-    }
-
-    .header-top-one .lang .user a {
-        padding: 0 10px;
-        font-size: 12.5px !important;
-    }
-
-    .header-top-one .lang .user a.top-account-link {
-        max-width: 58vw;
-    }
-
-    /*
-     * Mobile header: the logo shares the first row with the primary action,
-     * and the search field spans the full width on its own row, directly
-     * above the category strip. Secondary actions live in the bottom
-     * navigation and the account drawer, so the header stays calm.
-     */
-    .header-1 .header-main {
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr) auto;
-        grid-template-areas:
-            "logo . plus"
-            "search search search";
-        align-items: center;
-        gap: 10px !important;
-        padding-block: 10px;
-    }
-
-    .header-1 .header-main .header-left {
-        grid-area: logo;
-        width: auto;
-        gap: 0;
-    }
-
-    .header-1 .header-main .header-cataegory-item {
+    .header-main-container,
+    .header-1 .container-fluid {
         display: none !important;
     }
 
-    .header-logo-img {
-        height: 34px;
+    .sf-mobile-navbar {
+        display: block !important;
     }
+}
 
-    /* Let the search field and the action join the main grid directly.
-       Bootstrap's .d-flex carries !important, hence the override. */
-    .header-1 .header-main .header-right {
-        display: contents !important;
-    }
-
-    .header-search-shell {
-        grid-area: search;
-        width: 100%;
-        min-width: 0;
-    }
-
-    .header-1 .header-main .header-chat-icon,
-    .header-1 .header-main .menu-wishlist {
+@media (min-width: 992px) {
+    .sf-mobile-navbar {
         display: none !important;
     }
+}
 
-    /* No trigger and no submit: the field is always visible and searches live.
-       The search-specific overrides live after the base search styles. */
-    .navbar-search-wrapper {
-        display: flex;
-        width: 100%;
-        min-width: 0;
+@media (min-width: 380px) and (max-width: 991.98px) {
+    .sf-mobile-navbar__right {
+        gap: 18px;
+    }
+
+    .sf-mobile-navbar__inner {
+        padding: 0 16px;
+    }
+
+    .sf-mobile-logo-img {
+        height: 28px;
     }
 }
 
@@ -4282,11 +4372,13 @@
     color: #1e2532;
 }
 
+/* The results panel matches the width of the search field. */
 .search-dropdown-menu {
     position: absolute;
     top: calc(100% + 10px);
     right: 0;
-    width: 360px;
+    left: 0;
+    width: auto;
     background: #ffffff;
     border: 1px solid #edf0f5;
     border-radius: 14px;
@@ -4431,10 +4523,6 @@
     .search-input::placeholder {
         font-size: 12px;
     }
-
-    .search-dropdown-menu {
-        width: min(290px, calc(100vw - 24px));
-    }
 }
 
 /* Phones: the results panel spans the header instead of the narrow field. */
@@ -4451,8 +4539,10 @@
         position: relative;
     }
 
-    .navbar-search-wrapper,
-    .search-bar-inline {
+    /* Anchor the results to .header-main (see the search base styles), but
+       leave the mobile search pane with its own positioning context. */
+    .header-1 .header-main .navbar-search-wrapper,
+    .header-1 .header-main .search-bar-inline {
         position: static;
     }
 

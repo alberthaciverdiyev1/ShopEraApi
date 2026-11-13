@@ -659,9 +659,7 @@ if (faq) {
         if (parentLinks[0]) activateParent(parentLinks[0].dataset.catalogParent);
     }
 
-    const search = document.querySelector('[data-sf-search]');
-
-    if (search) {
+    document.querySelectorAll('[data-sf-search]').forEach((search) => {
         const input = search.querySelector('[data-sf-search-input]');
         const results = search.querySelector('[data-sf-search-results]');
         const spinner = search.querySelector('[data-sf-search-spinner]');
@@ -759,14 +757,28 @@ if (faq) {
             close();
         });
 
-        // The field is always visible: closing only hides the results dropdown
-        // and never clears what the user typed.
         document.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') close();
         });
 
         document.addEventListener('click', (event) => {
             if (!search.contains(event.target)) close();
+        });
+    });
+
+    /* Mobile search dropdown toggle */
+    const mobileSearchToggle = document.querySelector('[data-sf-mobile-search-toggle]');
+    const mobileSearchPanel = document.querySelector('[data-sf-mobile-search-panel]');
+    if (mobileSearchToggle && mobileSearchPanel) {
+        mobileSearchToggle.addEventListener('click', () => {
+            const willOpen = mobileSearchPanel.hidden;
+            mobileSearchPanel.hidden = !willOpen;
+            mobileSearchToggle.setAttribute('aria-expanded', String(willOpen));
+            mobileSearchToggle.classList.toggle('is-active', willOpen);
+            if (willOpen) {
+                const input = mobileSearchPanel.querySelector('[data-sf-search-input]');
+                window.setTimeout(() => input?.focus(), 60);
+            }
         });
     }
 
@@ -813,23 +825,23 @@ if (faq) {
         }, { passive: true });
     }
 
-    if (bottomNav && drawer) {
-        const openButton = bottomNav.querySelector('[data-sf-account-drawer-open]');
+    if (drawer) {
+        const openButtons = document.querySelectorAll('[data-sf-account-drawer-open]');
         const closeButtons = drawer.querySelectorAll('[data-sf-account-drawer-close]');
 
         const openDrawer = () => {
             drawer.hidden = false;
             document.body.style.overflow = 'hidden';
-            openButton?.setAttribute('aria-expanded', 'true');
+            openButtons.forEach((btn) => btn.setAttribute('aria-expanded', 'true'));
         };
 
         const closeDrawer = () => {
             drawer.hidden = true;
             document.body.style.overflow = '';
-            openButton?.setAttribute('aria-expanded', 'false');
+            openButtons.forEach((btn) => btn.setAttribute('aria-expanded', 'false'));
         };
 
-        openButton?.addEventListener('click', openDrawer);
+        openButtons.forEach((button) => button.addEventListener('click', openDrawer));
         closeButtons.forEach((button) => button.addEventListener('click', closeDrawer));
 
         window.addEventListener('keydown', (event) => {

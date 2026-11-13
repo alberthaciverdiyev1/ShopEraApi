@@ -16,6 +16,60 @@
 
 <header class="header-section-1">
     <div id="header-sticky" class="header-1">
+        {{-- Mobile Navbar (Trendyol style: Hamburger + Logo on left, Search + User + Heart + Cart on right) --}}
+        <div class="sf-mobile-navbar">
+            <div class="sf-mobile-navbar__inner">
+                <div class="sf-mobile-navbar__left">
+                    <button type="button" class="sf-mobile-nav-btn sf-mobile-nav-btn--menu"
+                            data-sf-account-drawer-open
+                            aria-label="Menyu"
+                            aria-expanded="false">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+
+                    <a href="/" class="sf-mobile-logo" aria-label="ShopEra">
+                        <img src="/assets/images/logo/logo.svg?v=20261002" alt="ShopEra" class="sf-mobile-logo-img">
+                    </a>
+                </div>
+
+                <div class="sf-mobile-navbar__right">
+                    <button type="button" class="sf-mobile-nav-btn sf-mobile-nav-btn--search"
+                            data-sf-mobile-search-toggle
+                            aria-label="Axtarış"
+                            aria-expanded="false">
+                        <i class="fa-regular fa-magnifying-glass"></i>
+                    </button>
+
+                    @auth
+                        <a href="/dashboard" class="sf-mobile-nav-btn" aria-label="Hesabım">
+                            <i class="fa-regular fa-user"></i>
+                        </a>
+                    @else
+                        <a href="{{ route('storefront.login') }}" class="sf-mobile-nav-btn" aria-label="Giriş">
+                            <i class="fa-regular fa-user"></i>
+                        </a>
+                    @endauth
+
+                    <a href="/wishlist" class="sf-mobile-nav-btn" aria-label="İstək siyahısı">
+                        <i class="fa-regular fa-heart"></i>
+                        @if (count($wishlist))
+                            <span class="sf-mobile-nav-badge">{{ count($wishlist) }}</span>
+                        @endif
+                    </a>
+
+                    <a href="{{ route('storefront.cart') }}" class="sf-mobile-nav-btn" aria-label="Səbət">
+                        <i class="fa-regular fa-cart-shopping"></i>
+                    </a>
+                </div>
+            </div>
+
+            {{-- Collapsible mobile search bar --}}
+            <div class="sf-mobile-search-pane" data-sf-mobile-search-panel hidden>
+                <x-storefront.navbar-search />
+            </div>
+        </div>
+
+        {{-- Desktop Top Bar --}}
         <div class="header-top-one">
             <div class="phone-icon">
                 <i class="icon-telephone"></i>
@@ -56,7 +110,8 @@
             </div>
         </div>
 
-        <div class="container-fluid">
+        {{-- Desktop Main Header --}}
+        <div class="container-fluid header-main-container">
             <div class="mega-menu-wrapper">
                 <div class="header-main">
                     <div class="header-left">
