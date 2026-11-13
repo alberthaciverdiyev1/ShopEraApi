@@ -4000,18 +4000,24 @@
     }
 
     /*
-     * Mobile header: a single row with the logo on the left and an always
-     * visible search field taking the remaining space. Secondary actions live
-     * in the bottom navigation and the account drawer, so the row stays calm.
+     * Mobile header: the logo shares the first row with the primary action,
+     * and the search field spans the full width on its own row, directly
+     * above the category strip. Secondary actions live in the bottom
+     * navigation and the account drawer, so the header stays calm.
      */
     .header-1 .header-main {
-        flex-wrap: nowrap;
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas:
+            "logo . plus"
+            "search search search";
+        align-items: center;
         gap: 10px !important;
         padding-block: 10px;
     }
 
     .header-1 .header-main .header-left {
-        flex: 0 0 auto;
+        grid-area: logo;
         width: auto;
         gap: 0;
     }
@@ -4024,18 +4030,15 @@
         height: 34px;
     }
 
+    /* Let the search field and the action join the main grid directly.
+       Bootstrap's .d-flex carries !important, hence the override. */
     .header-1 .header-main .header-right {
-        flex: 1 1 auto;
-        flex-wrap: nowrap;
-        justify-content: space-between !important;
-        gap: 10px !important;
-        width: auto;
-        min-width: 0;
+        display: contents !important;
     }
 
     .header-search-shell {
-        flex: 1 1 auto;
-        width: auto;
+        grid-area: search;
+        width: 100%;
         min-width: 0;
     }
 
@@ -4048,7 +4051,6 @@
        The search-specific overrides live after the base search styles. */
     .navbar-search-wrapper {
         display: flex;
-        flex: 1 1 auto;
         width: 100%;
         min-width: 0;
     }
@@ -4554,17 +4556,6 @@
     }
 }
 
-/* Very narrow phones: drop the leading icon so the placeholder keeps room. */
-@media (max-width: 359.98px) {
-    .search-form-icon {
-        display: none;
-    }
-
-    .search-form {
-        padding-left: 10px;
-    }
-}
-
 /* ------------------------------------------------------------------ */
 /* Mobile bottom navigation and account drawer                         */
 /* ------------------------------------------------------------------ */
@@ -5064,22 +5055,17 @@
 }
 
 @media (max-width: 767.98px) {
-    .header-1 .header-main .header-right {
-        flex-wrap: nowrap;
-        row-gap: 0;
-    }
-
     /* The field stays open on phones, so the shell keeps the free space. */
     .header-search-shell,
     .header-search-shell:has(.navbar-search-wrapper:not(.is-open)) {
-        flex: 1 1 auto;
-        width: auto;
+        width: 100%;
         min-width: 0;
     }
 
-    /* Compact primary action: a round "+" next to the search field. */
+    /* Compact primary action: a round "+" on the logo row. */
     .header-new-listing {
-        flex: 0 0 auto;
+        grid-area: plus;
+        justify-self: end;
         width: 42px;
         height: 42px;
         min-height: 0;
