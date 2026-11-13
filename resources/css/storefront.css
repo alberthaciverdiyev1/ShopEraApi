@@ -7140,8 +7140,10 @@ body.sf-lchat-open {
 /* ------------------------------------------------------------------ */
 .sf-shop-filters {
     display: flex;
+    flex: 0 0 auto;
     flex-direction: column;
     gap: 0;
+    min-height: 0;
     background: #fff;
     border: 1px solid var(--sf-border);
     border-radius: 12px;
@@ -7518,6 +7520,7 @@ body.sf-lchat-open {
         max-height: calc(100vh - 120px);
         padding-right: 4px;
         overflow-y: auto;
+        overscroll-behavior: contain;
         scrollbar-width: thin;
     }
 }
