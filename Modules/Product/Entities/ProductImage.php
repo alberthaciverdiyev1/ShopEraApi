@@ -4,7 +4,6 @@ namespace Modules\Product\Entities;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Facades\Storage;
 
 class ProductImage extends Model
 {
@@ -29,6 +28,9 @@ class ProductImage extends Model
             return $value;
         }
 
-        return Storage::disk('public')->url($value);
+        // Build the URL from the host that served the request instead of the
+        // configured APP_URL, so files uploaded in one environment (for
+        // example the local dev server) are served by that same environment.
+        return url('/storage/'.ltrim($value, '/'));
     }
 }

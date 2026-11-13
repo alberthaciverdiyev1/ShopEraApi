@@ -2,6 +2,18 @@
 
 @php
     $fallbackImage = '/assets/images/top-deals-item/topDealsItemThumb1_1.png';
+
+    // Some listing payloads carry translatable values as arrays while product
+    // payloads carry plain strings; the card accepts both.
+    $localize = function ($value): string {
+        if (is_array($value)) {
+            return (string) ($value['az'] ?? $value['en'] ?? reset($value) ?: '');
+        }
+
+        return (string) ($value ?? '');
+    };
+    $title = $localize($product['title'] ?? '');
+
     $image = collect($product['images'] ?? [])
         ->pluck('image_path')
         ->filter()
@@ -27,7 +39,7 @@
         : null;
 
     $listingMeta = collect([
-        $product['city'] ?? 'Bakı',
+        $localize($product['city'] ?? '') ?: 'Bakı',
         $listedAt?->isToday()
             ? 'Bu gün, '.$listedAt->format('H:i')
             : ($listedAt?->isYesterday()
@@ -37,7 +49,7 @@
 @endphp
 
 <article class="sf-product-card best-seller-product-items-two item-border">
-    <a class="card-link" href="{{ $url }}" aria-label="{{ $product['title'] ?? '' }}"></a>
+    <a class="card-link" href="{{ $url }}" aria-label="{{ $title }}"></a>
 
     <div class="icon-box2">
         <a href="/login" class="fav-btn" aria-label="Sevimlilərə əlavə et">
@@ -50,7 +62,7 @@
     @endif
 
     <div class="best-seller-product-items-two__thumb">
-        <img src="{{ $image }}" alt="{{ $product['title'] ?? '' }}" loading="lazy"
+        <img src="{{ $image }}" alt="{{ $title }}" loading="lazy"
              onerror="this.onerror=null;this.src='{{ $fallbackImage }}';">
 
         @if (! empty($product['rate']))
@@ -76,7 +88,7 @@
             </div>
 
             <h6 class="best-seller-product-items-two__details--title">
-                <a href="{{ $url }}">{{ $product['title'] ?? '' }}</a>
+                <a href="{{ $url }}">{{ $title }}</a>
             </h6>
 
             @if ($listingMeta)

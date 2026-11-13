@@ -91,8 +91,12 @@ class ListingController extends Controller
             $request->allFiles()
         );
 
+        $module = app(ModuleListingController::class);
+
+        // Guests get the secret management link; signed-in owners keep the
+        // regular listing that lives in their account.
         $result = (array) $this->payload(
-            app(ModuleListingController::class)->store($form)
+            auth()->check() ? $module->store($form) : $module->storeGuest($form)
         );
 
         if (! empty($result['manage_url'])) {
