@@ -15,6 +15,8 @@ class ListingResource extends JsonResource
             'title' => $this->title,
             'description' => $this->description,
             'price' => $this->price,
+            'discount' => $this->discount !== null ? (float) $this->discount : null,
+            'stock_count' => (int) $this->stock_count,
             'seller_type' => $this->seller_type,
             'condition' => $this->condition,
             'has_delivery' => (bool) $this->has_delivery,
@@ -24,6 +26,18 @@ class ListingResource extends JsonResource
             'model' => $this->model,
             'city_id' => $this->city_id,
             'city' => $this->whenLoaded('city', fn () => $this->city?->name),
+            'colors' => $this->whenLoaded('colors', fn () => $this->colors->map(fn ($color) => [
+                'id' => $color->id,
+                'name' => $color->name,
+                'hex' => $color->hex,
+            ])),
+            'sizes' => $this->whenLoaded('sizes', fn () => $this->sizes->map(fn ($size) => [
+                'id' => $size->id,
+                'name' => $size->name,
+                'price' => $size->pivot?->price !== null ? (float) $size->pivot->price : null,
+                'discount' => $size->pivot?->discount !== null ? (float) $size->pivot->discount : null,
+                'stock' => $size->pivot?->stock !== null ? (int) $size->pivot->stock : null,
+            ])),
             'vendor' => $this->whenLoaded('vendor', fn () => $this->vendor ? [
                 'id' => $this->vendor->id,
                 'name' => $this->vendor->name,

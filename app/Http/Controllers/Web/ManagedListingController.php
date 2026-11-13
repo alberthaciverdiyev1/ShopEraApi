@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Core\Concerns\InteractsWithModuleControllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\UpdateManagedListingRequest;
-use App\Core\Concerns\InteractsWithModuleControllers;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
+use Modules\Color\Http\Controllers\ColorController;
 use Modules\Marketplace\Http\Controllers\ListingController as ModuleListingController;
 use Modules\Marketplace\Http\Requests\UpdateListingRequest;
+use Modules\Size\Http\Controllers\SizeController;
 
 /**
  * Secret-link management for guest listings: no account required, the token
@@ -30,9 +32,20 @@ class ManagedListingController extends Controller
 
         abort_if(! is_array($listing) || $listing === [], 404);
 
+        $categoryId = (int) ($listing['category_id'] ?? 0);
+
         return view('storefront.listings.manage', [
             'token' => $token,
             'listing' => $listing,
+            // The edit form reuses the create form's colour and size pickers.
+            'colors' => (array) $this->payload(
+                app(ColorController::class)->list($this->moduleHttpRequest(['per_page' => 200]))
+            ),
+            'sizes' => $categoryId > 0
+                ? (array) $this->payload(app(SizeController::class)->list(
+                    $this->moduleHttpRequest(['per_page' => 200, 'category_id' => $categoryId])
+                ))
+                : [],
         ]);
     }
 

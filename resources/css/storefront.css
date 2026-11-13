@@ -2519,6 +2519,30 @@
     font-weight: 700;
 }
 
+.sf-product-stock {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: -2px;
+}
+
+.sf-product-stock__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #ecfdf5;
+    color: #047857;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.sf-product-stock__badge.is-out {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
 .sf-product-highlights {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -7239,6 +7263,14 @@ a.sf-seller-link {
     justify-self: flex-start;
 }
 
+/* Colour and size pills inside the account form keep their inline layout. */
+.sf-account__form label.elan-check-pill {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+}
+
 .sf-checkbox {
     flex-direction: row !important;
     align-items: center;
@@ -8039,15 +8071,6 @@ a.sf-seller-link {
     color: #fff;
     font-size: 11px;
     font-weight: 700;
-}
-
-.elan-actions {
-    display: flex;
-    gap: 10px;
-}
-
-.elan-actions .elan-submit {
-    min-width: 200px;
 }
 
 .elan-success {

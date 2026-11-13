@@ -30,12 +30,14 @@
 
     // Per-size prices drive the price block when a size is picked.
     $sizePrices = [];
+    $generalStock = (int) ($product['stock_count'] ?? 0);
 
     foreach ($product['sizes'] ?? [] as $size) {
         if (! empty($size['id'])) {
             $sizePrices[(string) $size['id']] = [
                 'price' => (float) ($size['price'] ?? 0),
                 'discount' => (float) ($size['discount'] ?? 0),
+                'stock' => isset($size['stock']) ? (int) $size['stock'] : null,
             ];
         }
     }
@@ -118,6 +120,12 @@
         <span class="sf-product-summary__price-badge" data-sf-price-badge @if (! $hasDiscount) hidden @endif>-{{ (int) ($product['discount_percent'] ?? 0) }}%</span>
     </div>
 
+    <div class="sf-product-stock" data-sf-stock-line>
+        <span class="sf-product-stock__badge @if ($generalStock <= 0) is-out @endif" data-sf-stock-badge>
+            {{ $generalStock > 0 ? 'Stokda: '.$generalStock.' ədəd' : 'Stokda yoxdur' }}
+        </span>
+    </div>
+
 
     <!-- Key Product Highlights (2x2 Grid Chips - Trendyol Screenshot 2) -->
     @if (count($highlights) > 0)
@@ -157,7 +165,8 @@
 
     <!-- Size Variant Selector (Trendyol Screenshot 2) -->
     @if (! empty($product['sizes']) && count($product['sizes']) > 0)
-        <div class="sf-product-variant-section sf-size-variants" data-sf-size-prices="{{ json_encode($sizePrices) }}">
+        <div class="sf-product-variant-section sf-size-variants" data-sf-size-prices="{{ json_encode($sizePrices) }}"
+             data-sf-general-stock="{{ $generalStock }}">
             <div class="sf-variant-header">
                 <span class="sf-variant-title">Ölçü: <strong data-sf-size-label>{{ $localizedName($product['sizes'][0]['name'] ?? '') }}</strong></span>
             </div>

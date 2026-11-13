@@ -983,16 +983,35 @@ document.querySelectorAll('[data-sf-fav-toggle]').forEach((btn) => {
     const priceCurrent = document.querySelectorAll('[data-sf-price-current]');
     const priceOld = document.querySelectorAll('[data-sf-price-old]');
     const priceBadge = document.querySelector('[data-sf-price-badge]');
+    const stockBadge = document.querySelector('[data-sf-stock-badge]');
+    const stockLine = document.querySelector('[data-sf-stock-line]');
 
     let sizePrices = {};
+    let generalStock = null;
 
     try {
-        sizePrices = JSON.parse(document.querySelector('[data-sf-size-prices]')?.dataset.sfSizePrices || '{}');
+        const sizePricesNode = document.querySelector('[data-sf-size-prices]');
+        sizePrices = JSON.parse(sizePricesNode?.dataset.sfSizePrices || '{}');
+        generalStock = sizePricesNode?.dataset.sfGeneralStock ?? null;
+        generalStock = generalStock === null ? null : Number(generalStock);
     } catch (error) {
         sizePrices = {};
     }
 
     const money = (value) => `${Number(value).toFixed(2)} ₼`;
+
+    const paintStock = (stock) => {
+        if (!stockBadge) return;
+
+        if (stock === null || Number.isNaN(stock)) {
+            stockLine?.setAttribute('hidden', '');
+            return;
+        }
+
+        stockLine?.removeAttribute('hidden');
+        stockBadge.textContent = stock > 0 ? `Stokda: ${stock} ədəd` : 'Stokda yoxdur';
+        stockBadge.classList.toggle('is-out', stock <= 0);
+    };
 
     const paintPrice = (current, original, percent) => {
         priceCurrent.forEach((element) => {
@@ -1013,7 +1032,12 @@ document.querySelectorAll('[data-sf-fav-toggle]').forEach((btn) => {
     const selectSizePrice = (sizeId) => {
         const entry = sizePrices[String(sizeId)];
 
-        if (!entry || !(entry.price > 0)) return;
+        if (!entry) return;
+
+        // A size without its own stock falls back to the listing's total.
+        paintStock(entry.stock !== null && entry.stock !== undefined ? entry.stock : generalStock);
+
+        if (!(entry.price > 0)) return;
 
         const price = entry.price;
         const hasDiscount = entry.discount > 0 && entry.discount < price;

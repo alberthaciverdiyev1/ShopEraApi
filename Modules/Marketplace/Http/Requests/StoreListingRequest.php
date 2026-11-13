@@ -94,4 +94,37 @@ class StoreListingRequest extends FormRequest
             'publish_as' => ['nullable', Rule::in(['store', 'personal'])],
         ];
     }
+
+    /**
+     * A size's sale price has to stay below its regular price; the field-level
+     * `lt` rule cannot compare two array entries.
+     */
+    public function after(): array
+    {
+        return [
+            function ($validator) {
+                if (filter_var($this->input('standard_price'), FILTER_VALIDATE_BOOLEAN)) {
+                    return;
+                }
+
+                $prices = (array) $this->input('size_prices', []);
+                $discounts = (array) $this->input('size_discounts', []);
+
+                foreach ($discounts as $sizeId => $discount) {
+                    $price = $prices[$sizeId] ?? null;
+
+                    if (blank($discount) || blank($price)) {
+                        continue;
+                    }
+
+                    if ((float) $discount >= (float) $price) {
+                        $validator->errors()->add(
+                            'size_discounts.'.$sizeId,
+                            'Ölçü üzrə endirimli qiymət adi qiymətdən aşağı olmalıdır.'
+                        );
+                    }
+                }
+            },
+        ];
+    }
 }
