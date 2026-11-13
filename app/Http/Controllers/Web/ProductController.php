@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Web;
 
-use App\Http\Controllers\Controller;
 use App\Core\Concerns\InteractsWithModuleControllers;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Modules\Marketplace\Http\Controllers\ListingController;
 use Modules\Product\Http\Controllers\ProductController as ModuleProductController;
@@ -24,7 +24,15 @@ class ProductController extends Controller
             abort(404);
         }
 
-        return $this->render($this->productById($id));
+        $product = $this->productById($id);
+        abort_if($product === null, 404);
+
+        // Public URLs carry slugs only: old id links redirect to the slug page.
+        if (! empty($product['slug'])) {
+            return redirect('/elan/'.$product['slug'], 301);
+        }
+
+        return $this->render($product);
     }
 
     public function showBySlug(string $slug)
@@ -36,10 +44,14 @@ class ProductController extends Controller
      * Seller contact is public in the API too; the Blade page reveals it with
      * a same-origin request so the number is never written into the HTML.
      */
-    public function contact(int $id)
+    public function contact(string $slug)
     {
+        $product = $this->productBySlug($slug);
+
+        abort_if($product === null, 404);
+
         return response()->json(
-            $this->payload(app(ListingController::class)->contact($id))
+            $this->payload(app(ListingController::class)->contact($product['id']))
         );
     }
 
@@ -47,10 +59,14 @@ class ProductController extends Controller
      * Store a review written on the product page through the module controller
      * and its ReviewAddRequest, so validation rules stay identical to the API.
      */
-    public function review(int $id, Request $request)
+    public function review(string $slug, Request $request)
     {
+        $product = $this->productBySlug($slug);
+
+        abort_if($product === null, 404);
+
         $form = $this->moduleRequest(ReviewAddRequest::class, [
-            'product_id' => $id,
+            'product_id' => $product['id'],
             'rate' => $request->input('rate'),
             'comment' => $request->input('comment'),
         ], 'POST', $request->allFiles());
@@ -184,7 +200,7 @@ class ProductController extends Controller
             $list[] = [
                 'label' => 'Brend',
                 'value' => $product['brand']['name'],
-                'link' => ! empty($product['brand']['id']) ? '/shop?brand='.$product['brand']['id'] : null,
+                'link' => ! empty($product['brand']['slug']) ? '/shop?brand='.$product['brand']['slug'] : null,
             ];
         }
 
@@ -197,24 +213,24 @@ class ProductController extends Controller
             $list[] = [
                 'label' => 'Kateqoriya',
                 'value' => $parent['name'],
-                'link' => '/shop?category='.$parent['id'],
+                'link' => '/shop?category='.($parent['slug'] ?? $parent['id']),
             ];
             $list[] = [
                 'label' => 'Alt kateqoriya',
                 'value' => $leaf['name'],
-                'link' => '/shop?category='.$leaf['id'],
+                'link' => '/shop?category='.($leaf['slug'] ?? $leaf['id']),
             ];
         } elseif ($path->count() === 1) {
             $list[] = [
                 'label' => 'Kateqoriya',
                 'value' => $path[0]['name'],
-                'link' => '/shop?category='.$path[0]['id'],
+                'link' => '/shop?category='.($path[0]['slug'] ?? $path[0]['id']),
             ];
         } elseif (! empty($product['category']['name'])) {
             $list[] = [
                 'label' => 'Kateqoriya',
                 'value' => $product['category']['name'],
-                'link' => ! empty($product['category']['id']) ? '/shop?category='.$product['category']['id'] : null,
+                'link' => ! empty($product['category']['id']) ? '/shop?category='.($product['category']['slug'] ?? $product['category']['id']) : null,
             ];
         }
 

@@ -16,7 +16,7 @@
         'sort' => $query['sort'] ?? 'created_at:desc',
     ];
 
-    $ids = function (string $plural, string $singular) use ($query): array {
+    $values = function (string $plural, string $singular) use ($query): array {
         $values = $query[$plural] ?? [];
         $values = is_array($values) ? $values : [$values];
 
@@ -24,22 +24,32 @@
             $values[] = $query[$singular];
         }
 
-        return array_values(array_unique(array_filter(array_map('intval', $values), fn (int $id) => $id > 0)));
+        return array_values(array_unique(array_filter(
+            array_map(fn ($value) => (string) $value, $values),
+            fn (string $value) => $value !== ''
+        )));
     };
 
-    $selectedBrands = $ids('brands', 'brand');
-    $selectedColors = $ids('colors', 'color');
-    $selectedSizes = $ids('sizes', 'size');
+    $selectedBrands = $values('brands', 'brand');
+    $selectedColors = $values('colors', 'color');
+    $selectedSizes = $values('sizes', 'size');
     $selectedDynamic = $query['filters'] ?? [];
+
+    // Selected values are slugs; ids are still accepted for old links.
+    $selectedDynamicFor = function (array $filter) use ($selectedDynamic): array {
+        $key = $filter['slug'] ?? $filter['id'];
+
+        return (array) ($selectedDynamic[$key] ?? $selectedDynamic[$filter['id']] ?? []);
+    };
 
     $priceMin = (float) ($facets['price']['min'] ?? 0);
     $priceMax = (float) ($facets['price']['max'] ?? 0);
 
     $sorts = $sorts ?: ['created_at:desc'];
 
-    $findName = function (array $list, int $id) {
+    $findName = function (array $list, string $value) {
         foreach ($list as $item) {
-            if ((int) ($item['id'] ?? 0) === $id) {
+            if ((string) ($item['slug'] ?? '') === $value || (string) ($item['id'] ?? '') === $value) {
                 return $item['name'] ?? null;
             }
         }
@@ -128,24 +138,24 @@
         $chips[] = ['label' => $activeCategoryName, 'url' => $buildUrl(['category'])];
     }
 
-    foreach ($selectedBrands as $brandId) {
+    foreach ($selectedBrands as $brandSlug) {
         $chips[] = [
-            'label' => $findName($facets['brands'] ?? [], $brandId) ?? 'Brend',
-            'url' => $buildUrl([], [], [['brands', $brandId], ['brand', $brandId]]),
+            'label' => $findName($facets['brands'] ?? [], $brandSlug) ?? 'Brend',
+            'url' => $buildUrl([], [], [['brands', $brandSlug], ['brand', $brandSlug]]),
         ];
     }
 
-    foreach ($selectedColors as $colorId) {
+    foreach ($selectedColors as $colorSlug) {
         $chips[] = [
-            'label' => $findName($facets['colors'] ?? [], $colorId) ?? 'Rəng',
-            'url' => $buildUrl([], [], [['colors', $colorId], ['color', $colorId]]),
+            'label' => $findName($facets['colors'] ?? [], $colorSlug) ?? 'Rəng',
+            'url' => $buildUrl([], [], [['colors', $colorSlug], ['color', $colorSlug]]),
         ];
     }
 
-    foreach ($selectedSizes as $sizeId) {
+    foreach ($selectedSizes as $sizeSlug) {
         $chips[] = [
-            'label' => $findName($facets['sizes'] ?? [], $sizeId) ?? 'Ölçü',
-            'url' => $buildUrl([], [], [['sizes', $sizeId], ['size', $sizeId]]),
+            'label' => $findName($facets['sizes'] ?? [], $sizeSlug) ?? 'Ölçü',
+            'url' => $buildUrl([], [], [['sizes', $sizeSlug], ['size', $sizeSlug]]),
         ];
     }
 
@@ -158,8 +168,8 @@
     }
 
     foreach ($dynamicFilters as $filter) {
-        foreach ((array) ($selectedDynamic[$filter['id']] ?? []) as $value) {
-            $chips[] = ['label' => (string) $value, 'url' => $buildUrl([], [[$filter['id'], $value]])];
+        foreach ($selectedDynamicFor($filter) as $value) {
+            $chips[] = ['label' => (string) $value, 'url' => $buildUrl([], [[$filter['slug'] ?? $filter['id'], $value]])];
         }
     }
 
@@ -209,11 +219,11 @@
         <select name="category" data-sf-auto-submit>
             <option value="">Bütün kateqoriyalar</option>
             @foreach ($categories as $category)
-                <option value="{{ $category['id'] }}" @selected((int) $categoryId === (int) $category['id'])>
+                <option value="{{ $category['slug'] ?? $category['id'] }}" @selected((int) $categoryId === (int) $category['id'])>
                     {{ $category['name'] }}
                 </option>
                 @foreach ($category['children'] ?? [] as $child)
-                    <option value="{{ $child['id'] }}" @selected((int) $categoryId === (int) $child['id'])>
+                    <option value="{{ $child['slug'] ?? $child['id'] }}" @selected((int) $categoryId === (int) $child['id'])>
                         — {{ $child['name'] }}
                     </option>
                 @endforeach
@@ -258,7 +268,7 @@
                 : ($filter['title'] ?? 'Parametr');
             $values = ! empty($filter['options']) ? $filter['options'] : ($filter['values'] ?? []);
             $values = array_values(array_unique(array_filter($values)));
-            $picked = array_map('strval', (array) ($selectedDynamic[$filter['id']] ?? []));
+            $picked = array_map('strval', $selectedDynamicFor($filter));
             $extraValues = collect($values)->skip(10)
                 ->reject(fn ($value) => in_array((string) $value, $picked, true))->count();
         @endphp
@@ -271,7 +281,7 @@
                 <div class="sf-filter-options sf-filter-options--check">
                     @foreach ($values as $index => $value)
                         <label class="sf-filter-option" @if ($index >= 10 && ! in_array((string) $value, $picked, true)) data-sf-extra hidden @endif>
-                            <input type="checkbox" name="filters[{{ $filter['id'] }}][]" value="{{ $value }}"
+                            <input type="checkbox" name="filters[{{ $filter['slug'] ?? $filter['id'] }}][]" value="{{ $value }}"
                                    @checked(in_array((string) $value, $picked, true)) data-sf-auto-submit>
                             <span class="sf-filter-option__text">{{ $value }}</span>
                         </label>
@@ -289,7 +299,7 @@
     @if (! empty($facets['brands']))
         @php
             $extraBrands = collect($facets['brands'])->skip(10)
-                ->reject(fn ($brand) => in_array((int) $brand['id'], $selectedBrands, true))->count();
+                ->reject(fn ($brand) => in_array((string) ($brand['slug'] ?? $brand['id']), $selectedBrands, true))->count();
         @endphp
         <details class="sf-filter-card" open>
             <summary class="sf-filter-head">
@@ -298,9 +308,10 @@
             </summary>
             <div class="sf-filter-options">
                 @foreach ($facets['brands'] as $index => $brand)
-                    <label class="sf-filter-option" @if ($index >= 10 && ! in_array((int) $brand['id'], $selectedBrands, true)) data-sf-extra hidden @endif>
-                        <input type="checkbox" name="brands[]" value="{{ $brand['id'] }}"
-                               @checked(in_array((int) $brand['id'], $selectedBrands, true)) data-sf-auto-submit>
+                    @php $brandValue = (string) ($brand['slug'] ?? $brand['id']); @endphp
+                    <label class="sf-filter-option" @if ($index >= 10 && ! in_array($brandValue, $selectedBrands, true)) data-sf-extra hidden @endif>
+                        <input type="checkbox" name="brands[]" value="{{ $brandValue }}"
+                               @checked(in_array($brandValue, $selectedBrands, true)) data-sf-auto-submit>
                         <span class="sf-filter-option__text">
                             @if (! empty($brand['image']))
                                 <img src="{{ $brand['image'] }}" alt="" loading="lazy" onerror="this.remove()">
@@ -322,7 +333,7 @@
     @if (! empty($facets['colors']))
         @php
             $extraColors = collect($facets['colors'])->skip(10)
-                ->reject(fn ($color) => in_array((int) $color['id'], $selectedColors, true))->count();
+                ->reject(fn ($color) => in_array((string) ($color['slug'] ?? $color['id']), $selectedColors, true))->count();
         @endphp
         <details class="sf-filter-card" open>
             <summary class="sf-filter-head">
@@ -331,9 +342,10 @@
             </summary>
             <div class="sf-filter-options">
                 @foreach ($facets['colors'] as $index => $color)
-                    <label class="sf-filter-option" @if ($index >= 10 && ! in_array((int) $color['id'], $selectedColors, true)) data-sf-extra hidden @endif>
-                        <input type="checkbox" name="colors[]" value="{{ $color['id'] }}"
-                               @checked(in_array((int) $color['id'], $selectedColors, true)) data-sf-auto-submit>
+                    @php $colorValue = (string) ($color['slug'] ?? $color['id']); @endphp
+                    <label class="sf-filter-option" @if ($index >= 10 && ! in_array($colorValue, $selectedColors, true)) data-sf-extra hidden @endif>
+                        <input type="checkbox" name="colors[]" value="{{ $colorValue }}"
+                               @checked(in_array($colorValue, $selectedColors, true)) data-sf-auto-submit>
                         <span class="sf-filter-option__text">
                             <span class="sf-swatch" style="background-color: {{ $color['hex'] ?? '#cccccc' }}"></span>
                             {{ $color['name'] ?? '—' }}
@@ -353,7 +365,7 @@
     @if (! empty($facets['sizes']))
         @php
             $extraSizes = collect($facets['sizes'])->skip(12)
-                ->reject(fn ($size) => in_array((int) $size['id'], $selectedSizes, true))->count();
+                ->reject(fn ($size) => in_array((string) ($size['slug'] ?? $size['id']), $selectedSizes, true))->count();
         @endphp
         <details class="sf-filter-card" open>
             <summary class="sf-filter-head">
@@ -362,9 +374,10 @@
             </summary>
             <div class="sf-size-grid">
                 @foreach ($facets['sizes'] as $index => $size)
-                    <label class="sf-size-option" @if ($index >= 12 && ! in_array((int) $size['id'], $selectedSizes, true)) data-sf-extra hidden @endif>
-                        <input type="checkbox" name="sizes[]" value="{{ $size['id'] }}"
-                               @checked(in_array((int) $size['id'], $selectedSizes, true)) data-sf-auto-submit>
+                    @php $sizeValue = (string) ($size['slug'] ?? $size['id']); @endphp
+                    <label class="sf-size-option" @if ($index >= 12 && ! in_array($sizeValue, $selectedSizes, true)) data-sf-extra hidden @endif>
+                        <input type="checkbox" name="sizes[]" value="{{ $sizeValue }}"
+                               @checked(in_array($sizeValue, $selectedSizes, true)) data-sf-auto-submit>
                         <span>{{ $size['name'] ?? '—' }}</span>
                         <span class="sf-size-option__count">{{ $size['products_count'] ?? 0 }}</span>
                     </label>

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Core\Concerns\InteractsWithModuleControllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\StoreListingRequest;
-use App\Core\Concerns\InteractsWithModuleControllers;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -32,7 +32,14 @@ class ListingController extends Controller
     public function create(): View
     {
         $tree = $this->storefrontCategories();
-        $categoryId = (int) request()->query('category', 0);
+        $category = (string) request()->query('category', '');
+
+        // The picker links carry category slugs; ids stay supported.
+        if ($category !== '' && ! is_numeric($category)) {
+            $categoryId = $this->categoryIdBySlug($category) ?? 0;
+        } else {
+            $categoryId = (int) $category;
+        }
 
         $path = $categoryId ? $this->categoryPath($tree, $categoryId) : [];
         $selected = $path ? end($path) : null;
@@ -94,22 +101,28 @@ class ListingController extends Controller
             ->with('status', 'Elan uğurla yerləşdirildi.');
     }
 
-    public function destroy(int $id): RedirectResponse
+    public function destroy(string $slug): RedirectResponse
     {
+        $id = $this->listingIdBySlug($slug);
+
         app(ModuleListingController::class)->destroy($this->moduleHttpRequest([], 'DELETE'), $id);
 
         return back()->with('status', 'Elan silindi.');
     }
 
-    public function renew(int $id): RedirectResponse
+    public function renew(string $slug): RedirectResponse
     {
+        $id = $this->listingIdBySlug($slug);
+
         app(ModuleListingController::class)->renew($this->moduleHttpRequest([], 'POST'), $id);
 
         return back()->with('status', 'Elan yenidən dərc edildi.');
     }
 
-    public function promote(Request $request, int $id): RedirectResponse
+    public function promote(Request $request, string $slug): RedirectResponse
     {
+        $id = $this->listingIdBySlug($slug);
+
         $data = $request->validate([
             'package_id' => ['required', 'exists:promotion_packages,id'],
         ]);
@@ -120,6 +133,18 @@ class ListingController extends Controller
         );
 
         return back()->with('status', 'Promosiya sifarişi yaradıldı. Ödəniş təsdiqləndikdən sonra irəli çəkiləcək.');
+    }
+
+    /**
+     * Listings are addressed by slug in the storefront; resolve it to the id
+     * the marketplace module works with.
+     */
+    private function listingIdBySlug(string $slug): int
+    {
+        $id = $this->productIdBySlug($slug);
+        abort_if($id === null, 404);
+
+        return $id;
     }
 
     /**

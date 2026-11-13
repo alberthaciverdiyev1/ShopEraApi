@@ -9,6 +9,7 @@ class BrandResource extends JsonResource
 public function toArray($request){
     return [
         'id'=>$this->id,
+        'slug'=>$this->slug,
         'name'=>$this->name,
         'image'=>$this->image,
         'is_active'=>$this->is_active,

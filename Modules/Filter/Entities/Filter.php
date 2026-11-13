@@ -2,6 +2,7 @@
 
 namespace Modules\Filter\Entities;
 
+use App\Core\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -12,7 +13,7 @@ use Spatie\Translatable\HasTranslations;
 
 class Filter extends Model
 {
-    use HasTranslations;
+    use HasSlug, HasTranslations;
 
     protected $table = 'filters';
 
@@ -24,6 +25,12 @@ class Filter extends Model
         'title' => 'array',
         'options' => 'array',
     ];
+
+    /** Slugs are built from the filter title, not a "name" column. */
+    protected function slugSourceColumn(): string
+    {
+        return 'title';
+    }
 
     /** The subcategory this filter belongs to. */
     public function category(): BelongsTo

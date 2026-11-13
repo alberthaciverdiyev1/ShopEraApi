@@ -20,7 +20,7 @@
     <div class="catalog-column catalog-column-primary" aria-label="Kateqoriyalar">
         @foreach ($roots as $root)
             <a class="catalog-row @if ($loop->first) active @endif"
-               href="/shop?category={{ $root['id'] }}"
+               href="/shop?category={{ $root['slug'] ?? $root['id'] }}"
                data-catalog-parent="{{ $root['id'] }}">
                 <span class="catalog-thumb">
                     @if (! empty($root['image']))
@@ -42,14 +42,14 @@
 
         @if (count($children) > 0)
             <div class="catalog-column" data-catalog-children="{{ $root['id'] }}" hidden aria-label="Alt kateqoriya">
-                <a class="catalog-row catalog-row-text catalog-view-all" href="/shop?category={{ $root['id'] }}">
+                <a class="catalog-row catalog-row-text catalog-view-all" href="/shop?category={{ $root['slug'] ?? $root['id'] }}">
                     <span>{{ $root['name'] }}</span>
                     <i class="fa-solid fa-chevron-right catalog-chevron"></i>
                 </a>
 
                 @foreach ($children as $child)
                     <a class="catalog-row catalog-row-text"
-                       href="/shop?category={{ $child['id'] }}"
+                       href="/shop?category={{ $child['slug'] ?? $child['id'] }}"
                        data-catalog-child="{{ $child['id'] }}">
                         <span>{{ $child['name'] }}</span>
                         @if (count($childrenOf($child)) > 0)
@@ -65,12 +65,12 @@
 
             @if (count($leaves) > 0)
                 <div class="catalog-column catalog-column-leaf" data-catalog-leaves="{{ $child['id'] }}" hidden aria-label="Alt kateqoriya">
-                    <a class="catalog-leaf-link catalog-leaf-link-featured" href="/shop?category={{ $child['id'] }}">
+                    <a class="catalog-leaf-link catalog-leaf-link-featured" href="/shop?category={{ $child['slug'] ?? $child['id'] }}">
                         {{ $child['name'] }}
                     </a>
 
                     @foreach ($leaves as $leaf)
-                        <a class="catalog-leaf-link" href="/shop?category={{ $leaf['id'] }}">
+                        <a class="catalog-leaf-link" href="/shop?category={{ $leaf['slug'] ?? $leaf['id'] }}">
                             {{ $leaf['name'] }}
                         </a>
                     @endforeach

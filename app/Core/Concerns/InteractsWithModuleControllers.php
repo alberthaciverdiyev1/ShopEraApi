@@ -5,6 +5,7 @@ namespace App\Core\Concerns;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 use Illuminate\Http\Response;
 use Modules\Category\Http\Controllers\CategoryController;
 use Modules\Filter\Http\Controllers\FilterController;
@@ -25,6 +26,13 @@ trait InteractsWithModuleControllers
         'price:desc',
         'sales_count:desc',
     ];
+
+    /** Per-request caches for the module calls the catalog pages share. */
+    private ?array $storefrontCategoriesCache = null;
+
+    private array $storefrontFacetsCache = [];
+
+    private array $storefrontFilterCache = [];
 
     /**
      * Build and validate a module FormRequest for a direct controller call.
@@ -74,6 +82,10 @@ trait InteractsWithModuleControllers
      */
     protected function storefrontCategories(): array
     {
+        if ($this->storefrontCategoriesCache !== null) {
+            return $this->storefrontCategoriesCache;
+        }
+
         $flat = (array) $this->payload(
             app(CategoryController::class)->list($this->moduleHttpRequest(['all' => 1]))
         );
@@ -92,7 +104,7 @@ trait InteractsWithModuleControllers
             }, $byParent[$parentId] ?? []);
         };
 
-        return $build(0);
+        return $this->storefrontCategoriesCache = $build(0);
     }
 
     /**
@@ -119,23 +131,35 @@ trait InteractsWithModuleControllers
 
     protected function storefrontFacets(?int $categoryId): array
     {
+        $cacheKey = (string) ($categoryId ?? 0);
+
+        if (isset($this->storefrontFacetsCache[$cacheKey])) {
+            return $this->storefrontFacetsCache[$cacheKey];
+        }
+
         $payload = app(ProductController::class)
             ->filters($this->moduleHttpRequest([
                 'category_ids' => $categoryId ? [$categoryId] : [],
             ]))
             ->getData(true);
 
-        return $payload['data'] ?? [
+        return $this->storefrontFacetsCache[$cacheKey] = ($payload['data'] ?? [
             'brands' => [],
             'colors' => [],
             'sizes' => [],
             'price' => ['min' => 0, 'max' => 0],
             'total' => 0,
-        ];
+        ]);
     }
 
     protected function storefrontCategoryFilters(?int $categoryId): array
     {
+        $cacheKey = (string) ($categoryId ?? 0);
+
+        if (isset($this->storefrontFilterCache[$cacheKey])) {
+            return $this->storefrontFilterCache[$cacheKey];
+        }
+
         // A zero id asks the filter module for the filters that apply to the
         // whole catalog, so the unfiltered shop page is not bare.
         $payload = $this->payload(
@@ -144,7 +168,7 @@ trait InteractsWithModuleControllers
             )
         );
 
-        return is_array($payload) ? $payload : [];
+        return $this->storefrontFilterCache[$cacheKey] = is_array($payload) ? $payload : [];
     }
 
     protected function storefrontSorts(): array
@@ -157,6 +181,8 @@ trait InteractsWithModuleControllers
      */
     protected function normaliseCatalogQuery(array $query): array
     {
+        $query = $this->resolveCatalogSlugs($query);
+
         $params = [
             'marketplace' => true,
             'per_page' => 24,
@@ -239,5 +265,135 @@ trait InteractsWithModuleControllers
         }
 
         return $params;
+    }
+
+    /**
+     * Translate slug-based catalog filters (category, brand, colour, size and
+     * dynamic filter titles) into the ids the module expects. Numeric values
+     * keep working so old links do not break.
+     */
+    protected function resolveCatalogSlugs(array $query): array
+    {
+        if (isset($query['category']) && ! is_numeric($query['category'])) {
+            $id = $this->categoryIdBySlug((string) $query['category']);
+
+            if ($id !== null) {
+                $query['category'] = $id;
+            } else {
+                unset($query['category']);
+            }
+        }
+
+        $categoryId = (int) ($query['category'] ?? 0) ?: null;
+
+        foreach ([
+            'brand' => 'brands', 'brands' => 'brands',
+            'color' => 'colors', 'colors' => 'colors',
+            'size' => 'sizes', 'sizes' => 'sizes',
+        ] as $input => $facet) {
+            if (! isset($query[$input])) {
+                continue;
+            }
+
+            $ids = [];
+
+            foreach ((array) $query[$input] as $value) {
+                if (is_numeric($value)) {
+                    $ids[] = (int) $value;
+
+                    continue;
+                }
+
+                $id = $this->facetIdBySlug($facet, (string) $value, $categoryId);
+
+                if ($id !== null) {
+                    $ids[] = $id;
+                }
+            }
+
+            $query[$input] = array_values(array_unique(array_filter($ids, fn (int $id) => $id > 0)));
+        }
+
+        if (! empty($query['filters']) && is_array($query['filters'])) {
+            $filters = [];
+
+            foreach ($query['filters'] as $key => $values) {
+                $filterKey = $key;
+
+                if (! is_numeric($key)) {
+                    $filterKey = $this->filterIdBySlug((string) $key, $categoryId);
+
+                    if ($filterKey === null) {
+                        continue;
+                    }
+                }
+
+                $filters[$filterKey] = $values;
+            }
+
+            $query['filters'] = $filters;
+        }
+
+        return $query;
+    }
+
+    private function categoryIdBySlug(string $slug): ?int
+    {
+        $stack = $this->storefrontCategories();
+
+        while ($stack !== []) {
+            $category = array_shift($stack);
+            $children = $category['children'] ?? [];
+
+            if ($children instanceof ResourceCollection) {
+                $children = $children->resolve();
+            }
+
+            $stack = array_merge($stack, array_values((array) $children));
+
+            if ((string) ($category['slug'] ?? '') === $slug) {
+                return (int) $category['id'];
+            }
+        }
+
+        return null;
+    }
+
+    private function facetIdBySlug(string $facet, string $slug, ?int $categoryId): ?int
+    {
+        foreach ((array) ($this->storefrontFacets($categoryId)[$facet] ?? []) as $item) {
+            if ((string) ($item['slug'] ?? '') === $slug) {
+                return (int) $item['id'];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Translate a product slug into the id the module controllers expect.
+     * Numeric input keeps working so old links do not break.
+     */
+    protected function productIdBySlug(string $slug): ?int
+    {
+        if (is_numeric($slug)) {
+            return (int) $slug;
+        }
+
+        $payload = app(ProductController::class)->detailsBySlug($slug)->getData(true);
+        $id = (int) ($payload['data']['id'] ?? 0);
+
+        return $id > 0 ? $id : null;
+    }
+
+    private function filterIdBySlug(string $slug, ?int $categoryId): ?int
+    {
+        foreach ($this->storefrontCategoryFilters($categoryId) as $filter) {
+            if ((string) ($filter['slug'] ?? '') === $slug) {
+                return (int) $filter['id'];
+            }
+        }
+
+        return null;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Modules\Brand\Entities;
 
+use App\Core\Concerns\HasSlug;
 use App\Core\Concerns\ImagePath;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +13,7 @@ use Modules\Product\Entities\Product;
 
 class Brand extends Model
 {
-    use HasFactory, ImagePath, SoftDeletes;
+    use HasFactory, HasSlug, ImagePath, SoftDeletes;
 
     /**
      * The table associated with the model.

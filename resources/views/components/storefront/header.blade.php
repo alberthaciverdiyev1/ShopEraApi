@@ -103,7 +103,7 @@
                                                 $image = collect($item['images'] ?? [])->pluck('image_path')->filter()->first()
                                                     ?? '/assets/images/top-deals-item/topDealsItemThumb1_1.png';
                                             @endphp
-                                            <a class="sf-wishlist-mini__item" href="/elan/{{ $item['slug'] ?? $item['id'] }}">
+                                            <a class="sf-wishlist-mini__item" href="{{ ! empty($item['slug']) ? '/elan/'.$item['slug'] : '/shop' }}">
                                                 <img src="{{ $image }}" alt="" loading="lazy">
                                                 <span>
                                                     <strong>{{ $item['title']['az'] ?? '' }}</strong>

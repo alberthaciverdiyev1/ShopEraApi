@@ -60,7 +60,7 @@
                                             $image = $product['images'][0]['image_path'] ?? $fallback;
                                             $title = $product['title'] ?? 'Məhsul';
                                         @endphp
-                                        <a href="{{ $product ? '/elan/'.($product['slug'] ?? $product['id']) : '/shop' }}" class="sf-order-card__item">
+                                        <a href="{{ $product ? (! empty($product['slug']) ? '/elan/'.$product['slug'] : '/shop') : '/shop' }}" class="sf-order-card__item">
                                             <img src="{{ $image }}" alt="{{ $title }}" loading="lazy">
                                             <span class="sf-order-card__item-text">
                                                 <strong>{{ $title }}</strong>

@@ -50,7 +50,7 @@
 
                 <div class="elan-cat-grid">
                     @foreach ($children as $category)
-                        <a class="elan-cat-card" href="/elan/ver?category={{ $category['id'] }}">
+                        <a class="elan-cat-card" href="/elan/ver?category={{ $category['slug'] ?? $category['id'] }}">
                             @if (! empty($category['image']))
                                 <span class="cat-thumb" style="background-image:url('{{ $category['image'] }}')"></span>
                             @else
@@ -70,7 +70,7 @@
                     <a class="crumb" href="/elan/ver">Bütün kateqoriyalar</a>
                     @foreach ($path as $crumb)
                         <span class="sep">/</span>
-                        <a class="crumb {{ $loop->last ? 'current' : '' }}" href="/elan/ver?category={{ $crumb['id'] }}">
+                        <a class="crumb {{ $loop->last ? 'current' : '' }}" href="/elan/ver?category={{ $crumb['slug'] ?? $crumb['id'] }}">
                             {{ $localized($crumb['name']) }}
                         </a>
                     @endforeach
@@ -80,7 +80,7 @@
 
                 <div class="elan-cat-grid">
                     @foreach ($children as $category)
-                        <a class="elan-cat-card" href="/elan/ver?category={{ $category['id'] }}">
+                        <a class="elan-cat-card" href="/elan/ver?category={{ $category['slug'] ?? $category['id'] }}">
                             @if (! empty($category['image']))
                                 <span class="cat-thumb" style="background-image:url('{{ $category['image'] }}')"></span>
                             @else
@@ -97,7 +97,7 @@
                 </div>
 
                 <div class="elan-extra">
-                    <a class="sf-btn sf-btn--ghost" href="{{ count($path) > 1 ? '/elan/ver?category='.$path[count($path) - 2]['id'] : '/elan/ver' }}">
+                    <a class="sf-btn sf-btn--ghost" href="{{ count($path) > 1 ? '/elan/ver?category='.($path[count($path) - 2]['slug'] ?? $path[count($path) - 2]['id']) : '/elan/ver' }}">
                         <i class="fas fa-arrow-left"></i> Geri
                     </a>
                 </div>

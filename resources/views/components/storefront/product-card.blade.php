@@ -13,9 +13,8 @@
     $displayPrice = $hasDiscount ? $discountPrice : $price;
     $discountPercent = $hasDiscount ? (int) round((($price - $displayPrice) / max($price, 0.01)) * 100) : 0;
 
-    $url = ! empty($product['slug'])
-        ? '/elan/'.$product['slug']
-        : '/shop/details?id='.($product['id'] ?? '');
+    // Public listings are always addressed by slug.
+    $url = ! empty($product['slug']) ? '/elan/'.$product['slug'] : '/shop';
 
     $placement = ! empty($product['is_premium'])
         ? ['label' => 'Premium', 'class' => 'is-premium']

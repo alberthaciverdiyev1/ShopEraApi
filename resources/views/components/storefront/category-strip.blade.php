@@ -26,7 +26,7 @@
                 @foreach ($shown as $index => $category)
                     <a
                         class="sf-category-card"
-                        href="/shop?category={{ $category['id'] }}"
+                        href="/shop?category={{ $category['slug'] ?? $category['id'] }}"
                         style="--card-bg: {{ ! empty($category['background_color']) ? $category['background_color'] : $palette[$index % count($palette)] }}"
                     >
                         <span class="sf-category-card__name">{{ $category['name'] }}</span>

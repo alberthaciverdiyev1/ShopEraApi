@@ -87,7 +87,7 @@
         </div>
     </div>
 
-    <div class="sf-product-contact" data-sf-contact data-listing="{{ $product['id'] }}">
+    <div class="sf-product-contact" data-sf-contact data-listing="{{ $product['slug'] }}">
         <button type="button" class="sf-btn sf-btn--primary sf-product-contact__reveal" data-sf-contact-reveal>
             Nömrəni göstər
         </button>

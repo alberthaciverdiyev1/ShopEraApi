@@ -2,6 +2,7 @@
 
 namespace Modules\Color\Entities;
 
+use App\Core\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -11,7 +12,7 @@ use Spatie\Translatable\HasTranslations;
 
 class Color extends Model
 {
-    use HasFactory, HasTranslations,SoftDeletes;
+    use HasFactory, HasSlug, HasTranslations, SoftDeletes;
 
     public array $translatable = ['name'];
 

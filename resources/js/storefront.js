@@ -389,7 +389,7 @@ if (contact) {
         if (error) error.hidden = true;
 
         try {
-            const response = await fetch(`/shop/listings/${contact.dataset.listing}/contact`, {
+            const response = await fetch(`/shop/listings/${encodeURIComponent(contact.dataset.listing)}/contact`, {
                 headers: { Accept: 'application/json' },
             });
 
@@ -560,7 +560,7 @@ if (faq) {
                 const title = escape(item.title ?? '');
                 const category = item.category?.name ? escape(item.category.name) : '';
                 const price = Number(item.discount || item.price || 0).toFixed(2);
-                const url = item.slug ? `/elan/${encodeURIComponent(item.slug)}` : `/shop/details?id=${item.id}`;
+                const url = item.slug ? `/elan/${encodeURIComponent(item.slug)}` : '/shop';
 
                 return `<a href="${url}" class="result-item">
                     <img src="${escape(image)}" alt="${title}" class="result-thumb" loading="lazy" onerror="this.onerror=null;this.src='${fallback}'">
@@ -728,8 +728,8 @@ document.querySelectorAll('[data-sf-dash-tab]').forEach((trigger) => {
     const form = modal.querySelector('[data-sf-promote-form]');
     const close = modal.querySelector('[data-sf-promote-close]');
 
-    const open = (id, title) => {
-        if (form) form.action = `/elanlarim/${id}/promote`;
+    const open = (slug, title) => {
+        if (form) form.action = `/elanlarim/${encodeURIComponent(slug)}/promote`;
         if (heading) heading.textContent = `İrəli çək: ${title}`;
         modal.hidden = false;
     };

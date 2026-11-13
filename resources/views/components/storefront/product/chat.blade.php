@@ -10,7 +10,7 @@
         class="sf-lchat"
         data-sf-lchat
         hidden
-        data-start-url="{{ route('storefront.chat.start', $product['id']) }}"
+        data-start-url="{{ route('storefront.chat.start', $product['slug']) }}"
         data-index-url="{{ route('storefront.chat.index') }}"
         data-thread-url="{{ route('storefront.chat.show', ['id' => '__ID__']) }}"
         data-send-url="{{ route('storefront.chat.send', ['id' => '__ID__']) }}"

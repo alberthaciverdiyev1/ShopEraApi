@@ -33,6 +33,7 @@
                             $expired = ($listing['is_active'] ?? true) === false
                                 || (! empty($listing['expires_at']) && \Illuminate\Support\Carbon::parse($listing['expires_at'])->isPast());
                             $image = $listing['images'][0] ?? $fallback;
+                            $listingSlug = $listing['slug'] ?? $listing['id'];
                         @endphp
                         <div class="col-sm-6 col-lg-3">
                             <div class="card h-100 border-0 shadow-sm sf-listing-card">
@@ -53,16 +54,16 @@
 
                                     <div class="d-flex gap-2 mt-auto">
                                         @if ($expired)
-                                            <form action="{{ route('storefront.listings.renew', $listing['id']) }}" method="POST" class="flex-grow-1">
+                                            <form action="{{ route('storefront.listings.renew', $listingSlug) }}" method="POST" class="flex-grow-1">
                                                 @csrf
                                                 <button type="submit" class="sf-btn sf-btn--ghost sf-btn--sm w-100">Yenidən dərc</button>
                                             </form>
                                         @else
                                             <button type="button" class="sf-btn sf-btn--ghost sf-btn--sm flex-grow-1"
-                                                    data-sf-promote-open="{{ $listing['id'] }}"
+                                                    data-sf-promote-open="{{ $listingSlug }}"
                                                     data-sf-promote-title="{{ $localeTitle($listing) }}">İrəli çək</button>
                                         @endif
-                                        <form action="{{ route('storefront.listings.destroy', $listing['id']) }}" method="POST"
+                                        <form action="{{ route('storefront.listings.destroy', $listingSlug) }}" method="POST"
                                               onsubmit="return confirm('Elan silinsin?');">
                                             @csrf
                                             @method('DELETE')

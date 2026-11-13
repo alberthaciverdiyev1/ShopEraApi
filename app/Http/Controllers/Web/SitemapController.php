@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Web;
 
-use App\Http\Controllers\Controller;
 use App\Core\Concerns\InteractsWithModuleControllers;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Response;
 use Modules\Product\Http\Controllers\ProductController;
 
@@ -30,8 +30,8 @@ class SitemapController extends Controller
         $locs = array_map(fn (string $path) => $origin.$path, self::STATIC_PAGES);
 
         foreach ($this->flatten($this->storefrontCategories()) as $category) {
-            if (! empty($category['id'])) {
-                $locs[] = $origin.'/shop?category='.$category['id'];
+            if (! empty($category['slug'])) {
+                $locs[] = $origin.'/shop?category='.$category['slug'];
             }
         }
 

@@ -13,7 +13,7 @@
 
         <div class="sf-catalog-grid">
             @foreach ($categories as $category)
-                <a class="sf-catalog-card" href="/shop?category={{ $category['id'] }}">
+                <a class="sf-catalog-card" href="/shop?category={{ $category['slug'] ?? $category['id'] }}">
                     <div class="sf-catalog-card__image">
                         @if (! empty($category['image']))
                             <img src="{{ $category['image'] }}" alt="{{ $category['name'] }}" loading="lazy">

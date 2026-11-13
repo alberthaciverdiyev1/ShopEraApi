@@ -10,6 +10,7 @@ class SizeResource extends JsonResource
     {
         return [
             'id'=>$this->id,
+            'slug'=>$this->slug,
             'name' => $this->name,
             'icon' => $this->icon,
             'is_active' => $this->is_active,

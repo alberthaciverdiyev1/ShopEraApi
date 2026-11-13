@@ -54,8 +54,7 @@ Route::middleware('auth')->group(function () {
 
     // Buyer <-> seller chat shown on the product page.
     Route::get('/mesajlar', [ListingChatController::class, 'index'])->name('storefront.chat.index');
-    Route::post('/elan/{id}/chat', [ListingChatController::class, 'start'])
-        ->whereNumber('id')
+    Route::post('/elan/{slug}/chat', [ListingChatController::class, 'start'])
         ->name('storefront.chat.start');
     Route::get('/mesajlar/{id}', [ListingChatController::class, 'show'])
         ->whereNumber('id')
@@ -69,8 +68,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/settings/avatar', [SettingsController::class, 'removeAvatar'])->name('storefront.settings.avatar.remove');
 
     Route::get('/wishlist', [WishlistController::class, 'index'])->name('storefront.wishlist');
-    Route::delete('/wishlist/{id}', [WishlistController::class, 'destroy'])
-        ->whereNumber('id')
+    Route::delete('/wishlist/{slug}', [WishlistController::class, 'destroy'])
+        ->where('slug', '[A-Za-z0-9\-]+')
         ->name('storefront.wishlist.destroy');
 
     Route::post('/addresses', [AddressController::class, 'store'])->name('storefront.addresses.store');
@@ -82,18 +81,17 @@ Route::middleware('auth')->group(function () {
         ->name('storefront.addresses.destroy');
 
     Route::get('/elanlarim', [ListingController::class, 'index'])->name('storefront.listings.index');
-    Route::delete('/elanlarim/{id}', [ListingController::class, 'destroy'])
-        ->whereNumber('id')
+    Route::delete('/elanlarim/{slug}', [ListingController::class, 'destroy'])
+        ->where('slug', '[A-Za-z0-9\-]+')
         ->name('storefront.listings.destroy');
-    Route::post('/elanlarim/{id}/renew', [ListingController::class, 'renew'])
-        ->whereNumber('id')
+    Route::post('/elanlarim/{slug}/renew', [ListingController::class, 'renew'])
+        ->where('slug', '[A-Za-z0-9\-]+')
         ->name('storefront.listings.renew');
-    Route::post('/elanlarim/{id}/promote', [ListingController::class, 'promote'])
-        ->whereNumber('id')
+    Route::post('/elanlarim/{slug}/promote', [ListingController::class, 'promote'])
+        ->where('slug', '[A-Za-z0-9\-]+')
         ->name('storefront.listings.promote');
 
-    Route::post('/elan/{id}/rey', [ProductController::class, 'review'])
-        ->whereNumber('id')
+    Route::post('/elan/{slug}/rey', [ProductController::class, 'review'])
         ->name('storefront.product.review');
 
     Route::get('/magaza/panel', [StorePanelController::class, 'panel'])->name('storefront.store.panel');
@@ -153,6 +151,5 @@ Route::get('/shop/details', [ProductController::class, 'show'])->name('storefron
 Route::get('/elan/{slug}', [ProductController::class, 'showBySlug'])->name('storefront.product.slug');
 // Public contact reveal for a listing: the number is fetched after a click so
 // it never sits in the HTML.
-Route::get('/shop/listings/{id}/contact', [ProductController::class, 'contact'])
-    ->whereNumber('id')
+Route::get('/shop/listings/{slug}/contact', [ProductController::class, 'contact'])
     ->name('storefront.listing.contact');

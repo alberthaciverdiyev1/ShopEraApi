@@ -2,6 +2,7 @@
 
 namespace Modules\Category\Entities;
 
+use App\Core\Concerns\HasSlug;
 use App\Core\Concerns\ImagePath;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +14,7 @@ use Spatie\Translatable\HasTranslations;
 
 class Category extends Model
 {
-    use HasFactory, HasTranslations, ImagePath, SoftDeletes;
+    use HasFactory, HasSlug, HasTranslations, ImagePath, SoftDeletes;
 
     /**
      * The table associated with the model.

@@ -2,6 +2,7 @@
 
 namespace Modules\Size\Entities;
 
+use App\Core\Concerns\HasSlug;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -12,7 +13,7 @@ use Spatie\Translatable\HasTranslations;
 
 class Size extends Model
 {
-    use HasFactory, HasTranslations, SoftDeletes;
+    use HasFactory, HasSlug, HasTranslations, SoftDeletes;
 
     protected $table = 'sizes';
 

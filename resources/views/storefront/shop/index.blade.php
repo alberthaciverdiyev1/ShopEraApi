@@ -28,7 +28,7 @@
         'price_max' => $query['price_max'] ?? '',
     ];
 
-    $ids = function (string $plural, string $singular) use ($query): array {
+    $values = function (string $plural, string $singular) use ($query): array {
         $values = $query[$plural] ?? [];
         $values = is_array($values) ? $values : [$values];
 
@@ -36,17 +36,27 @@
             $values[] = $query[$singular];
         }
 
-        return array_values(array_unique(array_filter(array_map('intval', $values), fn (int $id) => $id > 0)));
+        return array_values(array_unique(array_filter(
+            array_map(fn ($value) => (string) $value, $values),
+            fn (string $value) => $value !== ''
+        )));
     };
 
-    $selectedBrands = $ids('brands', 'brand');
-    $selectedColors = $ids('colors', 'color');
-    $selectedSizes = $ids('sizes', 'size');
+    $selectedBrands = $values('brands', 'brand');
+    $selectedColors = $values('colors', 'color');
+    $selectedSizes = $values('sizes', 'size');
     $selectedDynamic = $query['filters'] ?? [];
 
-    $findName = function (array $list, int $id) {
+    // Selected values are slugs; ids are still accepted for old links.
+    $selectedDynamicFor = function (array $filter) use ($selectedDynamic): array {
+        $key = $filter['slug'] ?? $filter['id'];
+
+        return (array) ($selectedDynamic[$key] ?? $selectedDynamic[$filter['id']] ?? []);
+    };
+
+    $findName = function (array $list, string $value) {
         foreach ($list as $item) {
-            if ((int) ($item['id'] ?? 0) === $id) {
+            if ((string) ($item['slug'] ?? '') === $value || (string) ($item['id'] ?? '') === $value) {
                 return $item['name'] ?? null;
             }
         }
@@ -57,11 +67,13 @@
     // The root category whose own id or one of its children is selected.
     $selectedRoot = null;
     $selectedRootId = null;
+    $selectedRootSlug = null;
 
     foreach ($categories as $category) {
         if ((int) $category['id'] === (int) $categoryId) {
             $selectedRoot = $category;
             $selectedRootId = (int) $category['id'];
+            $selectedRootSlug = $category['slug'] ?? $category['id'];
             break;
         }
 
@@ -69,6 +81,7 @@
             if ((int) $child['id'] === (int) $categoryId) {
                 $selectedRoot = $category;
                 $selectedRootId = (int) $category['id'];
+                $selectedRootSlug = $category['slug'] ?? $category['id'];
                 break 2;
             }
         }
@@ -136,24 +149,24 @@
         $chips[] = ['label' => $activeCategory['name'], 'url' => $buildUrl(['category'])];
     }
 
-    foreach ($selectedBrands as $brandId) {
+    foreach ($selectedBrands as $brandSlug) {
         $chips[] = [
-            'label' => $findName($facets['brands'] ?? [], $brandId) ?? 'Brend',
-            'url' => $buildUrl([], [], [['brands', $brandId], ['brand', $brandId]]),
+            'label' => $findName($facets['brands'] ?? [], $brandSlug) ?? 'Brend',
+            'url' => $buildUrl([], [], [['brands', $brandSlug], ['brand', $brandSlug]]),
         ];
     }
 
-    foreach ($selectedColors as $colorId) {
+    foreach ($selectedColors as $colorSlug) {
         $chips[] = [
-            'label' => $findName($facets['colors'] ?? [], $colorId) ?? 'Rəng',
-            'url' => $buildUrl([], [], [['colors', $colorId], ['color', $colorId]]),
+            'label' => $findName($facets['colors'] ?? [], $colorSlug) ?? 'Rəng',
+            'url' => $buildUrl([], [], [['colors', $colorSlug], ['color', $colorSlug]]),
         ];
     }
 
-    foreach ($selectedSizes as $sizeId) {
+    foreach ($selectedSizes as $sizeSlug) {
         $chips[] = [
-            'label' => $findName($facets['sizes'] ?? [], $sizeId) ?? 'Ölçü',
-            'url' => $buildUrl([], [], [['sizes', $sizeId], ['size', $sizeId]]),
+            'label' => $findName($facets['sizes'] ?? [], $sizeSlug) ?? 'Ölçü',
+            'url' => $buildUrl([], [], [['sizes', $sizeSlug], ['size', $sizeSlug]]),
         ];
     }
 
@@ -166,8 +179,8 @@
     }
 
     foreach ($dynamicFilters as $filter) {
-        foreach ((array) ($selectedDynamic[$filter['id']] ?? []) as $value) {
-            $chips[] = ['label' => (string) $value, 'url' => $buildUrl([], [[$filter['id'], $value]])];
+        foreach ($selectedDynamicFor($filter) as $value) {
+            $chips[] = ['label' => (string) $value, 'url' => $buildUrl([], [[$filter['slug'] ?? $filter['id'], $value]])];
         }
     }
 
@@ -198,7 +211,7 @@
                         <small>Hamısı</small>
                     </a>
                     @foreach ($categories as $category)
-                        <a href="/shop?category={{ $category['id'] }}"
+                        <a href="/shop?category={{ $category['slug'] ?? $category['id'] }}"
                            class="sf-mobile-cat-card {{ (int) $selectedRootId === (int) $category['id'] ? 'is-active' : '' }}">
                             <span class="sf-mobile-cat-thumb">
                                 @if (! empty($category['image']))
@@ -214,12 +227,12 @@
 
                 @if ($subcategories !== [])
                     <div class="sf-mobile-subcat-strip" aria-label="Alt kateqoriyalar">
-                        <a href="/shop?category={{ $selectedRootId }}"
+                        <a href="/shop?category={{ $selectedRootSlug }}"
                            class="sf-mobile-subcat-chip {{ (int) $categoryId === (int) $selectedRootId ? 'is-active' : '' }}">
                             Hamısı
                         </a>
                         @foreach ($subcategories as $child)
-                            <a href="/shop?category={{ $child['id'] }}"
+                            <a href="/shop?category={{ $child['slug'] ?? $child['id'] }}"
                                class="sf-mobile-subcat-chip {{ (int) $categoryId === (int) $child['id'] ? 'is-active' : '' }}">
                                 {{ $child['name'] }}
                             </a>
@@ -260,7 +273,8 @@
                                 <select data-sf-quick="{{ $facet['key'] }}">
                                     <option value="">Hamısı</option>
                                     @foreach ($facet['items'] as $item)
-                                        <option value="{{ $item['id'] }}" @selected(in_array((int) $item['id'], $facet['selected'], true))>
+                                        @php $facetValue = (string) ($item['slug'] ?? $item['id']); @endphp
+                                        <option value="{{ $facetValue }}" @selected(in_array($facetValue, $facet['selected'], true))>
                                             {{ $item['name'] ?? $facet['label'] }}
                                         </option>
                                     @endforeach
@@ -275,12 +289,12 @@
                                 ? ($filter['title']['az'] ?? reset($filter['title']))
                                 : ($filter['title'] ?? 'Parametr');
                             $filterValues = array_values(array_unique(array_filter(! empty($filter['options']) ? $filter['options'] : ($filter['values'] ?? []))));
-                            $filterPicked = (array) ($selectedDynamic[$filter['id']] ?? []);
+                            $filterPicked = (array) ($selectedDynamic[$filter['slug'] ?? $filter['id']] ?? $selectedDynamic[$filter['id']] ?? []);
                         @endphp
                         @if ($filterValues !== [])
                             <label class="sf-mobile-select">
                                 <span>{{ $filterTitle }}</span>
-                                <select data-sf-quick="filters" data-sf-filter="{{ $filter['id'] }}">
+                                <select data-sf-quick="filters" data-sf-filter="{{ $filter['slug'] ?? $filter['id'] }}">
                                     <option value="">Hamısı</option>
                                     @foreach ($filterValues as $value)
                                         <option value="{{ $value }}" @selected(in_array((string) $value, array_map('strval', $filterPicked), true))>{{ $value }}</option>

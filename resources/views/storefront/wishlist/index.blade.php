@@ -33,7 +33,7 @@
                     @foreach ($products as $product)
                         <div class="col-6 col-sm-6 col-md-4 col-lg-3">
                             <div class="sf-wishlist-item">
-                                <form action="{{ route('storefront.wishlist.destroy', $product['id']) }}" method="POST"
+                                <form action="{{ route('storefront.wishlist.destroy', $product['slug'] ?? $product['id']) }}" method="POST"
                                       class="sf-wishlist-item__remove"
                                       onsubmit="return confirm('Məhsul istək siyahısından çıxarılsın?');">
                                     @csrf

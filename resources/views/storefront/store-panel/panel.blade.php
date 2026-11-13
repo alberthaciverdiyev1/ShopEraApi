@@ -105,7 +105,7 @@
                                                 <i class="fa-regular fa-eye"></i> {{ $listing['views'] ?? 0 }} · <i class="fa-solid fa-phone"></i> {{ $listing['contact_reveals'] ?? 0 }}
                                             </p>
                                         </div>
-                                        <form action="{{ route('storefront.listings.destroy', $listing['id']) }}" method="POST"
+                                        <form action="{{ route('storefront.listings.destroy', $listing['slug'] ?? $listing['id']) }}" method="POST"
                                               onsubmit="return confirm('Elan silinsin?');">
                                             @csrf
                                             @method('DELETE')

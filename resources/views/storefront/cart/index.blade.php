@@ -54,11 +54,11 @@
                                     @endphp
                                     <div class="sf-cart-row">
                                         <div class="sf-cart-product">
-                                            <a href="{{ $product ? '/elan/'.($product['slug'] ?? $product['id']) : '/shop' }}" class="sf-cart-thumb">
+                                            <a href="{{ $product ? (! empty($product['slug']) ? '/elan/'.$product['slug'] : '/shop') : '/shop' }}" class="sf-cart-thumb">
                                                 <img src="{{ $image }}" alt="{{ $title }}" loading="lazy">
                                             </a>
                                             <div class="sf-cart-info">
-                                                <a class="sf-cart-name" href="{{ $product ? '/elan/'.($product['slug'] ?? $product['id']) : '/shop' }}">{{ $title }}</a>
+                                                <a class="sf-cart-name" href="{{ $product ? (! empty($product['slug']) ? '/elan/'.$product['slug'] : '/shop') : '/shop' }}">{{ $title }}</a>
                                                 @if (! empty($item['color_id']) || ! empty($item['size_id']))
                                                     <div class="sf-cart-variants">
                                                         @if (! empty($item['color_id']))

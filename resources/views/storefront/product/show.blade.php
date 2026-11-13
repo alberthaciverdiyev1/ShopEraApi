@@ -29,7 +29,7 @@
                 <div class="sf-section-head">
                     <h2>Bənzər elanlar</h2>
                     @if (! empty($product['category']['id']))
-                        <a href="/shop?category={{ $product['category']['id'] }}">Hamısına bax <i class="fa-solid fa-arrow-right"></i></a>
+                        <a href="/shop?category={{ $product['category']['slug'] ?? $product['category']['id'] }}">Hamısına bax <i class="fa-solid fa-arrow-right"></i></a>
                     @endif
                 </div>
 

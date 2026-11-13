@@ -89,7 +89,7 @@
             @auth
                 <p>Bu elanla bağlı rəyinizi paylaşın.</p>
 
-                <form action="{{ route('storefront.product.review', $product['id']) }}" method="POST" class="sf-review-form">
+                <form action="{{ route('storefront.product.review', $product['slug']) }}" method="POST" class="sf-review-form">
                     @csrf
 
                     <div class="sf-rate-picker" data-sf-rate>
