@@ -59,7 +59,32 @@
             </button>
         </div>
 
-        {{-- 2. Root Categories Horizontal Tabs --}}
+        {{-- 2. Account summary --}}
+        <div class="trendyol-account">
+            @auth
+                <a href="/dashboard" class="trendyol-account__profile">
+                    <span class="trendyol-account__avatar">{{ mb_strtoupper(mb_substr(auth()->user()->name ?: 'İ', 0, 1)) }}</span>
+                    <span class="trendyol-account__meta">
+                        <small>Salam,</small>
+                        <strong>{{ auth()->user()->name ?? 'İstifadəçi' }}</strong>
+                    </span>
+                    <i class="fa-regular fa-chevron-right"></i>
+                </a>
+            @else
+                <div class="trendyol-account__guest">
+                    <span class="trendyol-account__avatar trendyol-account__avatar--guest">
+                        <i class="fa-regular fa-user"></i>
+                    </span>
+                    <span class="trendyol-account__meta">
+                        <strong>Hesabınıza giriş edin</strong>
+                        <small>Sifarişlər, favoritlər və daha çox</small>
+                    </span>
+                    <a href="{{ route('storefront.login') }}" class="trendyol-account__login">Giriş</a>
+                </div>
+            @endauth
+        </div>
+
+        {{-- 3. Root Categories Horizontal Tabs --}}
         @if ($roots->isNotEmpty())
             <div class="trendyol-drawer-tabs" role="tablist" aria-label="Əsas kateqoriyalar">
                 @foreach ($roots as $root)
@@ -155,73 +180,67 @@
             </div>
         @endif
 
-        {{-- 4. Bottom Utility & Account Links (Trendyol style with chevron right) --}}
+        {{-- 4. Bottom actions and utility links --}}
         <div class="trendyol-drawer-footer">
-            <div class="trendyol-footer-links">
-                @auth
-                    <a href="/dashboard" class="trendyol-footer-link">
-                        <span class="icon-wrap"><i class="fa-regular fa-user"></i></span>
-                        <span class="link-label">Hesabım ({{ auth()->user()->name ?? 'İstifadəçi' }})</span>
+            <a href="/elan/ver" class="trendyol-cta">
+                <i class="fa-solid fa-circle-plus"></i>
+                <span>Yeni elan yerləşdir</span>
+            </a>
+
+            @if (auth()->check())
+                <div class="trendyol-footer-group">
+                    <span class="trendyol-footer-title">Hesab</span>
+                    <div class="trendyol-footer-row">
+                        <a href="/dashboard" class="trendyol-footer-chip">
+                            <i class="fa-regular fa-receipt"></i>
+                            <span>Sifarişlərim</span>
+                        </a>
+                        <a href="/dashboard?tab=messages" class="trendyol-footer-chip">
+                            <i class="fa-regular fa-comment-dots"></i>
+                            <span>Mesajlar</span>
+                        </a>
+                        <a href="/elanlarim" class="trendyol-footer-chip">
+                            <i class="fa-regular fa-rectangle-list"></i>
+                            <span>Elanlarım</span>
+                        </a>
+                    </div>
+                </div>
+            @endif
+
+            <div class="trendyol-footer-group">
+                <span class="trendyol-footer-title">Kəşf et</span>
+                <div class="trendyol-footer-links">
+                    <a href="/shop" class="trendyol-footer-link">
+                        <span class="icon-wrap"><i class="fa-regular fa-bag-shopping"></i></span>
+                        <span class="link-label">Bütün elanlar</span>
                         <i class="fa-regular fa-chevron-right link-arrow"></i>
                     </a>
-                    <a href="/dashboard" class="trendyol-footer-link">
-                        <span class="icon-wrap"><i class="fa-regular fa-receipt"></i></span>
-                        <span class="link-label">Sifarişlərim</span>
+                    <a href="/magazalar" class="trendyol-footer-link">
+                        <span class="icon-wrap"><i class="fa-regular fa-store"></i></span>
+                        <span class="link-label">Mağazalar</span>
                         <i class="fa-regular fa-chevron-right link-arrow"></i>
                     </a>
-                    <a href="/dashboard?tab=messages" class="trendyol-footer-link">
-                        <span class="icon-wrap"><i class="fa-regular fa-comment-dots"></i></span>
-                        <span class="link-label">Mesajlar</span>
+                    <a href="/about" class="trendyol-footer-link">
+                        <span class="icon-wrap"><i class="fa-regular fa-circle-info"></i></span>
+                        <span class="link-label">Haqqımızda</span>
                         <i class="fa-regular fa-chevron-right link-arrow"></i>
                     </a>
-                @else
-                    <a href="{{ route('storefront.login') }}" class="trendyol-footer-link">
-                        <span class="icon-wrap"><i class="fa-regular fa-user"></i></span>
-                        <span class="link-label">Hesabım / Giriş</span>
+                    <a href="/contact" class="trendyol-footer-link">
+                        <span class="icon-wrap"><i class="fa-regular fa-comments"></i></span>
+                        <span class="link-label">Bizimlə əlaqə</span>
                         <i class="fa-regular fa-chevron-right link-arrow"></i>
                     </a>
-                @endauth
-
-                <a href="/contact" class="trendyol-footer-link">
-                    <span class="icon-wrap"><i class="fa-regular fa-comments"></i></span>
-                    <span class="link-label">Bizimlə əlaqə</span>
-                    <i class="fa-regular fa-chevron-right link-arrow"></i>
-                </a>
-
-                <a href="/about" class="trendyol-footer-link">
-                    <span class="icon-wrap"><i class="fa-regular fa-circle-info"></i></span>
-                    <span class="link-label">Haqqımızda</span>
-                    <i class="fa-regular fa-chevron-right link-arrow"></i>
-                </a>
-
-                <a href="/magazalar" class="trendyol-footer-link">
-                    <span class="icon-wrap"><i class="fa-regular fa-store"></i></span>
-                    <span class="link-label">Mağazalar</span>
-                    <i class="fa-regular fa-chevron-right link-arrow"></i>
-                </a>
-
-                <a href="/shop" class="trendyol-footer-link">
-                    <span class="icon-wrap"><i class="fa-regular fa-bag-shopping"></i></span>
-                    <span class="link-label">Bütün elanlar</span>
-                    <i class="fa-regular fa-chevron-right link-arrow"></i>
-                </a>
-
-                <a href="/elan/ver" class="trendyol-footer-link trendyol-footer-link--highlight">
-                    <span class="icon-wrap"><i class="fa-regular fa-plus"></i></span>
-                    <span class="link-label">Yeni elan yerləşdir</span>
-                    <i class="fa-regular fa-chevron-right link-arrow"></i>
-                </a>
-
-                @auth
-                    <form action="{{ route('storefront.logout') }}" method="POST" class="trendyol-logout-form">
-                        @csrf
-                        <button type="submit" class="trendyol-footer-link text-danger">
-                            <span class="icon-wrap"><i class="fa-solid fa-arrow-right-from-bracket"></i></span>
-                            <span class="link-label">Çıxış</span>
-                            <i class="fa-regular fa-chevron-right link-arrow"></i>
-                        </button>
-                    </form>
-                @endauth
+                    @auth
+                        <form action="{{ route('storefront.logout') }}" method="POST" class="trendyol-logout-form">
+                            @csrf
+                            <button type="submit" class="trendyol-footer-link trendyol-footer-link--logout">
+                                <span class="icon-wrap"><i class="fa-solid fa-arrow-right-from-bracket"></i></span>
+                                <span class="link-label">Çıxış</span>
+                                <i class="fa-regular fa-chevron-right link-arrow"></i>
+                            </button>
+                        </form>
+                    @endauth
+                </div>
             </div>
         </div>
     </div>
