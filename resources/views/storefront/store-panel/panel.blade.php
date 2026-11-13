@@ -11,7 +11,6 @@
     $stats = [
         'total' => count($listings),
         'promoted' => collect($listings)->where('is_promoted', true)->count(),
-        'vip' => collect($listings)->where('is_vip', true)->count(),
         'premium' => collect($listings)->where('is_premium', true)->count(),
         'views' => collect($listings)->sum('views'),
         'contacts' => collect($listings)->sum('contact_reveals'),
@@ -40,7 +39,6 @@
                 @foreach ([
                     'Elanlar' => $stats['total'],
                     'İrəli çəkilmiş' => $stats['promoted'],
-                    'VIP' => $stats['vip'],
                     'Premium' => $stats['premium'],
                     'Baxış' => $stats['views'],
                     'Əlaqə' => $stats['contacts'],

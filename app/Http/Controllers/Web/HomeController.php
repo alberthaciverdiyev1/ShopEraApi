@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Web;
 
-use App\Http\Controllers\Controller;
 use App\Core\Concerns\InteractsWithModuleControllers;
+use App\Http\Controllers\Controller;
 use Modules\Popup\Http\Controllers\PopupController;
 use Modules\Product\Http\Controllers\ProductController;
 
@@ -29,7 +29,7 @@ class HomeController extends Controller
             'premiumListings' => $this->payload(
                 app(ProductController::class)->list(
                     $this->moduleHttpRequest([
-                        'placement' => 'premium,vip',
+                        'placement' => 'premium',
                         'order_by' => 'created_at',
                         'order_type' => 'desc',
                         'per_page' => 10,

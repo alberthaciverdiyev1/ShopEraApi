@@ -19,11 +19,9 @@
 
     $placement = ! empty($product['is_premium'])
         ? ['label' => 'Premium', 'class' => 'is-premium']
-        : (! empty($product['is_vip'])
-            ? ['label' => 'VIP', 'class' => 'is-vip']
-            : (! empty($product['is_promoted'])
-                ? ['label' => 'İrəli çəkildi', 'class' => 'is-promoted']
-                : null));
+        : (! empty($product['is_promoted'])
+            ? ['label' => 'İrəli çəkildi', 'class' => 'is-promoted']
+            : null);
 
     $listedAt = ! empty($product['created_at'])
         ? \Illuminate\Support\Carbon::parse($product['created_at'])

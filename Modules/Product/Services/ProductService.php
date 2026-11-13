@@ -132,21 +132,18 @@ class ProductService
             $query->where('has_delivery', true);
         }
 
-        // Paid placements: ?placement=premium,vip (or a single kind) keeps only
-        // listings carrying at least one of the requested placements.
+        // Paid placements: ?placement=premium,promoted (or a single kind) keeps
+        // only listings carrying at least one of the requested placements.
         if (! empty($params['placement'])) {
             $kinds = array_values(array_intersect(
                 array_map('strval', is_array($params['placement']) ? $params['placement'] : explode(',', (string) $params['placement'])),
-                ['promoted', 'vip', 'premium']
+                ['promoted', 'premium']
             ));
 
             if ($kinds !== []) {
                 $query->where(function ($q) use ($kinds) {
                     if (in_array('promoted', $kinds, true)) {
                         $q->orWhere('is_promoted', true);
-                    }
-                    if (in_array('vip', $kinds, true)) {
-                        $q->orWhere('is_vip', true);
                     }
                     if (in_array('premium', $kinds, true)) {
                         $q->orWhere('is_premium', true);

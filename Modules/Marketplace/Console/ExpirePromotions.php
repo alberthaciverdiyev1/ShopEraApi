@@ -9,7 +9,7 @@ class ExpirePromotions extends Command
 {
     protected $signature = 'listings:expire-promotions';
 
-    protected $description = 'Clear expired listing promotions (promoted/vip/premium flags)';
+    protected $description = 'Clear expired listing promotions (promoted/premium flags)';
 
     public function handle(PromotionService $service): int
     {

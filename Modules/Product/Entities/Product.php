@@ -4,15 +4,18 @@ namespace Modules\Product\Entities;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 use Modules\Brand\Entities\Brand;
 use Modules\Category\Entities\Category;
 use Modules\Color\Entities\Color;
+use Modules\Delivery\Entities\City;
 use Modules\Filter\Entities\ProductFilter;
+use Modules\Filter\Entities\ProductFilterValue;
+use Modules\Marketplace\Entities\Vendor;
 use Modules\Product\Database\Factories\ProductFactory;
 use Modules\Size\Entities\Size;
 use Modules\User\Entities\User;
@@ -56,7 +59,7 @@ class Product extends Model
      * ones can be ordered with `orderByRaw(... desc)`. Higher = further up:
      * Premium outranks VIP, which outranks a plain İrəli çək bump.
      */
-    public const PLACEMENT_PRIORITY_SQL = '(case when is_premium then 3 when is_vip then 2 when is_promoted then 1 else 0 end)';
+    public const PLACEMENT_PRIORITY_SQL = '(case when is_premium then 2 when is_promoted then 1 else 0 end)';
 
     /** Home-page expression: only Premium stays on the front page. */
     public const HOME_PRIORITY_SQL = '(case when is_premium then 1 else 0 end)';
@@ -130,13 +133,13 @@ class Product extends Model
     /** The store that sells this listing, when it was posted by a vendor. */
     public function vendor(): BelongsTo
     {
-        return $this->belongsTo(\Modules\Marketplace\Entities\Vendor::class, 'vendor_id');
+        return $this->belongsTo(Vendor::class, 'vendor_id');
     }
 
     /** Where the listing is, for marketplace listings. */
     public function city(): BelongsTo
     {
-        return $this->belongsTo(\Modules\Delivery\Entities\City::class, 'city_id');
+        return $this->belongsTo(City::class, 'city_id');
     }
 
     public function productFilters(): HasMany
@@ -147,7 +150,7 @@ class Product extends Model
     /** Values chosen from the dependent filter tree (brand/model/storage/…). */
     public function filterValues(): HasMany
     {
-        return $this->hasMany(\Modules\Filter\Entities\ProductFilterValue::class, 'product_id');
+        return $this->hasMany(ProductFilterValue::class, 'product_id');
     }
 
     public function brand(): BelongsTo
