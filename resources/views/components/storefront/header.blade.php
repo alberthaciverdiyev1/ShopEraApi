@@ -2,6 +2,7 @@
     $navLinks = [
         ['href' => '/', 'label' => 'Ana səhifə'],
         ['href' => '/shop', 'label' => 'Elanlar'],
+        ['href' => '/magazalar', 'label' => 'Mağazalar'],
         ['href' => '/about', 'label' => 'Haqqımızda'],
         ['href' => '/blog', 'label' => 'Bloq'],
         ['href' => '/contact', 'label' => 'Əlaqə'],

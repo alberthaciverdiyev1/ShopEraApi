@@ -153,6 +153,7 @@ Route::get('/shop', [ShopController::class, 'index'])->name('storefront.shop');
 Route::get('/categories', [CategoryController::class, 'index'])->name('storefront.categories');
 Route::get('/blog', [BlogController::class, 'index'])->name('storefront.blog');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('storefront.blog.show');
+Route::get('/magazalar', [StoreController::class, 'index'])->name('storefront.stores');
 Route::get('/magaza/{slug}', [StoreController::class, 'show'])->name('storefront.store');
 Route::get('/about', [ContentController::class, 'about'])->name('storefront.about');
 Route::get('/faq', [ContentController::class, 'faq'])->name('storefront.faq');

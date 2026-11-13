@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Web;
 
-use App\Http\Controllers\Controller;
 use App\Core\Concerns\InteractsWithModuleControllers;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Marketplace\Http\Controllers\VendorController;
@@ -11,6 +11,23 @@ use Modules\Marketplace\Http\Controllers\VendorController;
 class StoreController extends Controller
 {
     use InteractsWithModuleControllers;
+
+    public function index(Request $request): View
+    {
+        app()->setLocale('az');
+
+        $data = (array) $this->payload(
+            app(VendorController::class)->index($this->moduleHttpRequest([
+                'page' => $request->query('page', 1),
+            ]))
+        );
+
+        return view('storefront.store.index', [
+            'vendors' => $data['vendors'] ?? [],
+            'meta' => $data['meta'] ?? [],
+            'categories' => $this->storefrontCategories(),
+        ]);
+    }
 
     public function show(Request $request, string $slug): View
     {

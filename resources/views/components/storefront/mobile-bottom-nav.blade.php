@@ -58,6 +58,10 @@
                 <i class="fa-solid fa-store"></i>
                 <span>Elanlar</span>
             </a>
+            <a href="/magazalar" class="{{ str_starts_with($path, '/magazalar') || str_starts_with($path, '/magaza/') && ! str_starts_with($path, '/magaza/panel') ? 'active' : '' }}">
+                <i class="fa-solid fa-shop"></i>
+                <span>Mağazalar</span>
+            </a>
             <a href="/about" class="{{ str_starts_with($path, '/about') ? 'active' : '' }}">
                 <i class="fa-solid fa-circle-info"></i>
                 <span>Haqqımızda</span>

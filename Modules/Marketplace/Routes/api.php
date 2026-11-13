@@ -50,6 +50,7 @@ Route::prefix('listings')->controller(ListingChatController::class)->middleware(
 
 // Stores (vendors): public profile + signed-in management.
 Route::prefix('vendors')->controller(VendorController::class)->group(function () {
+    Route::get('/', 'index')->name('vendor.list');
     Route::get('/{slug}', 'show')->name('vendor.show');
 });
 

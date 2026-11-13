@@ -67,6 +67,24 @@ class VendorController extends Controller
         return responseHelper('Mağaza yeniləndi.', 200, $this->service->payload($vendor));
     }
 
+    /** Public store directory. */
+    public function index()
+    {
+        $vendors = $this->service->listPage();
+
+        return responseHelper('OK', 200, [
+            'vendors' => $vendors->getCollection()
+                ->map(fn ($vendor) => $this->service->payload($vendor))
+                ->all(),
+            'meta' => [
+                'current_page' => $vendors->currentPage(),
+                'last_page' => $vendors->lastPage(),
+                'per_page' => $vendors->perPage(),
+                'total' => $vendors->total(),
+            ],
+        ]);
+    }
+
     /** Public store page data. */
     public function show(string $slug)
     {

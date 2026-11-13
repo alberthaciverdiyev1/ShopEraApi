@@ -3,6 +3,7 @@
 namespace Modules\Marketplace\Services;
 
 use App\Core\Enums\ReviewStatus;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -102,6 +103,16 @@ class VendorService
     public function findBySlug(string $slug): ?Vendor
     {
         return Vendor::query()->where('slug', $slug)->first();
+    }
+
+    /** Public store directory, best-rated stores first. */
+    public function listPage(): LengthAwarePaginator
+    {
+        return Vendor::query()
+            ->where('status', Vendor::STATUS_ACTIVE)
+            ->orderByDesc('rating_avg')
+            ->orderByDesc('id')
+            ->paginate(24);
     }
 
     public function payload(Vendor $vendor, ?User $user = null): array
