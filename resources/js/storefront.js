@@ -1792,8 +1792,8 @@ document.querySelectorAll('[data-sf-dash-tab]').forEach((trigger) => {
     });
 })();
 
-/* Listing form: a size is editable once selected; its price fields only when
-   the standard price switch is off. */
+/* Listing form: a size is editable once selected. While the standard price
+   switch is on, the per-size stock and price fields are hidden and disabled. */
 (() => {
     const rows = [...document.querySelectorAll('[data-sf-size-row]')];
     const standard = document.querySelector('[data-sf-standard-price]');
@@ -1806,7 +1806,8 @@ document.querySelectorAll('[data-sf-dash-tab]').forEach((trigger) => {
             const selected = Boolean(row.querySelector('[data-sf-size-check]')?.checked);
 
             row.querySelectorAll('[data-sf-size-stock]').forEach((input) => {
-                input.disabled = !selected;
+                input.disabled = !selected || standardOn;
+                input.hidden = standardOn;
             });
 
             // With the standard price on the per-size price fields are not

@@ -335,7 +335,7 @@
                                                 </div>
                                             @endforeach
                                         </div>
-                                        <span class="elan-hint">Aktiv olduqda əsas qiymət bütün rəng və ölçülərə tətbiq olunur. Söndürsəniz, yalnız seçdiyiniz ölçülər üçün ayrı qiymət və endirim yaza bilərsiniz; stok həmişə ölçü üzrə verilir.</span>
+                                        <span class="elan-hint">Aktiv olduqda əsas qiymət bütün rəng və ölçülərə tətbiq olunur. Söndürsəniz, seçdiyiniz ölçülər üçün stok, ayrı qiymət və endirim yaza bilərsiniz.</span>
                                     </div>
                                 @endif
                             </div>
