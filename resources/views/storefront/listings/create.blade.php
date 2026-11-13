@@ -437,6 +437,11 @@
                             Növbəti <i class="fas fa-arrow-right"></i>
                         </button>
                         <button type="submit" class="theme-btn elan-submit" data-sf-wizard-submit hidden>Elanı yerləşdir</button>
+                        {{-- Without JavaScript every step is shown at once, so the
+                             form needs its own submit button. --}}
+                        <noscript>
+                            <button type="submit" class="theme-btn elan-submit">Elanı yerləşdir</button>
+                        </noscript>
                     </div>
                 </form>
             @endif
