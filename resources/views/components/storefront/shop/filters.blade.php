@@ -73,6 +73,39 @@
         }
     }
 
+    $childrenOf = function ($category): array {
+        $children = $category['children'] ?? [];
+
+        if ($children instanceof \Illuminate\Http\Resources\Json\ResourceCollection) {
+            $children = $children->resolve();
+        }
+
+        return array_values((array) $children);
+    };
+
+    // The category picker shows roots only; the subcategory picker appears once
+    // a root is chosen and holds that root's children.
+    $selectedRoot = null;
+    $selectedChildId = null;
+
+    foreach ($categories as $category) {
+        if ((int) ($category['id'] ?? 0) === (int) $categoryId) {
+            $selectedRoot = $category;
+            break;
+        }
+
+        foreach ($childrenOf($category) as $child) {
+            if ((int) ($child['id'] ?? 0) === (int) $categoryId) {
+                $selectedRoot = $category;
+                $selectedChildId = (int) $child['id'];
+                break 2;
+            }
+        }
+    }
+
+    $selectedRootId = (int) ($selectedRoot['id'] ?? 0) ?: null;
+    $subcategories = $selectedRoot ? $childrenOf($selectedRoot) : [];
+
     $buildUrl = function (array $dropKeys = [], array $dropFilterValues = [], array $removeValues = []) use ($query) {
         $params = collect($query)->except('page')->all();
 
@@ -216,19 +249,31 @@
             <span>Kateqoriya</span>
             <i class="fa-solid fa-chevron-down sf-filter-head__chevron"></i>
         </summary>
-        <select name="category" data-sf-auto-submit>
-            <option value="">Bütün kateqoriyalar</option>
-            @foreach ($categories as $category)
-                <option value="{{ $category['slug'] ?? $category['id'] }}" @selected((int) $categoryId === (int) $category['id'])>
-                    {{ $category['name'] }}
-                </option>
-                @foreach ($category['children'] ?? [] as $child)
-                    <option value="{{ $child['slug'] ?? $child['id'] }}" @selected((int) $categoryId === (int) $child['id'])>
-                        — {{ $child['name'] }}
+        <div class="sf-filter-selects">
+            {{-- Only one of the two pickers submits "category" so the URL never
+                 carries the parameter twice. --}}
+            <select @if (! $selectedChildId) name="category" @endif data-sf-category-root aria-label="Kateqoriya">
+                <option value="">Bütün kateqoriyalar</option>
+                @foreach ($categories as $category)
+                    <option value="{{ $category['slug'] ?? $category['id'] }}" @selected($selectedRootId === (int) $category['id'])>
+                        {{ $category['name'] }}
                     </option>
                 @endforeach
-            @endforeach
-        </select>
+            </select>
+
+            @if ($selectedRoot && $subcategories)
+                {{-- The subcategory submits as "category" only while one is chosen;
+                     otherwise the root picker above supplies the value. --}}
+                <select @if ($selectedChildId) name="category" @endif data-sf-category-child aria-label="Alt kateqoriya">
+                    <option value="">Bütün alt kateqoriyalar</option>
+                    @foreach ($subcategories as $child)
+                        <option value="{{ $child['slug'] ?? $child['id'] }}" @selected($selectedChildId === (int) $child['id'])>
+                            {{ $child['name'] }}
+                        </option>
+                    @endforeach
+                </select>
+            @endif
+        </div>
     </details>
 
     @if ($priceMax > 0)

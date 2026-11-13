@@ -158,6 +158,61 @@ if (siteHeader) {
     }
 }
 
+/* Shop categories: the root picker always navigates, and the subcategory
+   picker only exists once a root is chosen. Both rebuild the URL from the
+   filter form so the other selected filters survive, and they navigate in the
+   mobile drawer too instead of waiting for the apply button. */
+document.querySelectorAll('[data-sf-category-root]').forEach((rootSelect) => {
+    const form = rootSelect.closest('form');
+
+    if (!form) return;
+
+    const childSelect = form.querySelector('[data-sf-category-child]');
+
+    const navigate = (category) => {
+        const params = new URLSearchParams(new FormData(form));
+        params.delete('category');
+        params.delete('page');
+
+        if (category) params.set('category', category);
+
+        const query = params.toString();
+        window.location.href = (form.getAttribute('action') || '/shop') + (query ? `?${query}` : '');
+    };
+
+    rootSelect.addEventListener('change', () => {
+        // On phones the filter drawer closes on navigation; reopen it on the
+        // reloaded page so the subcategory picker is one tap away.
+        try {
+            if (rootSelect.value && window.matchMedia(MOBILE_SHOP_QUERY).matches) {
+                sessionStorage.setItem('sf-pick-subcategory', '1');
+            }
+        } catch (error) {
+            // Storage can be unavailable; the picker is still reachable.
+        }
+
+        navigate(rootSelect.value);
+    });
+
+    if (childSelect) {
+        // A chosen subcategory wins over its root; an empty one falls back to it.
+        childSelect.addEventListener('change', () => navigate(childSelect.value || rootSelect.value));
+    }
+});
+
+// Reopen the mobile filter drawer when the last root pick sent us here.
+try {
+    if (sessionStorage.getItem('sf-pick-subcategory') === '1') {
+        sessionStorage.removeItem('sf-pick-subcategory');
+
+        if (window.matchMedia(MOBILE_SHOP_QUERY).matches && document.querySelector('[data-sf-category-child]')) {
+            window.setTimeout(() => document.querySelector('[data-sf-mobile-filters]')?.click(), 0);
+        }
+    }
+} catch (error) {
+    // Storage can be unavailable; nothing to reopen.
+}
+
 /* Shop filters: selects and radios submit the GET form immediately, except in
    the mobile drawer, where the footer button applies all choices at once.
    Delegated so options loaded later (see "show more") work too. */

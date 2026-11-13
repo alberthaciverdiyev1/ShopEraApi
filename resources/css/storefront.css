@@ -1810,6 +1810,14 @@
     font-size: 13px;
 }
 
+/* Category and subcategory pickers stack with a little air between them. */
+.sf-filter-selects {
+    display: grid;
+    gap: 8px;
+    padding-bottom: 8px;
+}
+
+
 .sf-price-quick {
     display: flex;
     flex-wrap: wrap;
