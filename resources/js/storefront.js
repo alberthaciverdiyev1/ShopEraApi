@@ -212,6 +212,41 @@ document.querySelectorAll('[data-sf-quick]').forEach((select) => {
     });
 });
 
+/* Mobile shop: Sort modal bottom sheet */
+const sortModal = document.querySelector('[data-sf-sort-modal]');
+const sortModalOpens = document.querySelectorAll('[data-sf-sort-modal-open]');
+const sortModalCloses = document.querySelectorAll('[data-sf-sort-close]');
+
+if (sortModal) {
+    const openSortModal = () => {
+        sortModal.hidden = false;
+        document.body.style.overflow = 'hidden';
+    };
+
+    const closeSortModal = () => {
+        sortModal.hidden = true;
+        document.body.style.overflow = '';
+    };
+
+    sortModalOpens.forEach((btn) => btn.addEventListener('click', openSortModal));
+    sortModalCloses.forEach((btn) => btn.addEventListener('click', closeSortModal));
+
+    sortModal.querySelectorAll('[data-sf-sort-choose]').forEach((item) => {
+        item.addEventListener('click', () => {
+            const sortVal = item.dataset.sfSortChoose;
+            const params = new URLSearchParams(window.location.search);
+            params.delete('page');
+            params.set('sort', sortVal);
+            closeSortModal();
+            window.location.href = '/shop?' + params.toString();
+        });
+    });
+
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !sortModal.hidden) closeSortModal();
+    });
+}
+
 /* Mobile shop: an infinite-scroll sentinel replaces page links. */
 const infiniteSentinel = document.querySelector('[data-sf-infinite]');
 const shopGrid = document.querySelector('.sf-shop__content .sf-product-grid');
@@ -846,6 +881,65 @@ if (faq) {
 
         window.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') closeDrawer();
+        });
+
+        /* Trendyol category drawer interactions */
+        const rootTabs = drawer.querySelectorAll('[data-sf-drawer-root-tab]');
+        const rootPanels = drawer.querySelectorAll('[data-sf-drawer-root-panel]');
+
+        const activateSub = (panel, subId) => {
+            const subTabs = panel.querySelectorAll('[data-sf-drawer-sub-tab]');
+            const subPanels = panel.querySelectorAll('[data-sf-drawer-sub-panel]');
+
+            subTabs.forEach((tab) => {
+                tab.classList.toggle('is-active', tab.dataset.sfDrawerSubTab === String(subId));
+            });
+
+            subPanels.forEach((subPanel) => {
+                const isCurrent = subPanel.dataset.sfDrawerSubPanel === String(subId);
+                subPanel.hidden = !isCurrent;
+                subPanel.classList.toggle('is-active', isCurrent);
+            });
+        };
+
+        const activateRoot = (rootId) => {
+            rootTabs.forEach((tab) => {
+                const isCurrent = tab.dataset.sfDrawerRootTab === String(rootId);
+                tab.classList.toggle('is-active', isCurrent);
+                tab.setAttribute('aria-selected', String(isCurrent));
+                if (isCurrent) {
+                    tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                }
+            });
+
+            rootPanels.forEach((panel) => {
+                const isCurrent = panel.dataset.sfDrawerRootPanel === String(rootId);
+                panel.hidden = !isCurrent;
+                panel.classList.toggle('is-active', isCurrent);
+
+                if (isCurrent) {
+                    const activeSubTab = panel.querySelector('[data-sf-drawer-sub-tab].is-active')
+                        || panel.querySelector('[data-sf-drawer-sub-tab]');
+                    if (activeSubTab) {
+                        activateSub(panel, activeSubTab.dataset.sfDrawerSubTab);
+                    }
+                }
+            });
+        };
+
+        rootTabs.forEach((tab) => {
+            tab.addEventListener('click', () => {
+                activateRoot(tab.dataset.sfDrawerRootTab);
+            });
+        });
+
+        drawer.querySelectorAll('[data-sf-drawer-sub-tab]').forEach((subTab) => {
+            subTab.addEventListener('click', () => {
+                const panel = subTab.closest('[data-sf-drawer-root-panel]');
+                if (panel) {
+                    activateSub(panel, subTab.dataset.sfDrawerSubTab);
+                }
+            });
         });
     }
 })();

@@ -444,6 +444,21 @@
     text-decoration: underline;
 }
 
+.sf-section-head__link i {
+    margin-left: 4px;
+    font-size: 12px;
+}
+
+.sf-section-head__count {
+    color: #8b95a5;
+    font-size: 0.72em;
+    font-weight: 600;
+}
+
+.sf-home-category + .sf-home-category {
+    padding-top: 8px;
+}
+
 .sf-product-grid {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -4629,7 +4644,7 @@
 .sf-account-drawer {
     position: fixed;
     inset: 0;
-    z-index: 1001;
+    z-index: 2000;
     display: none;
 }
 
@@ -4637,195 +4652,389 @@
     position: absolute;
     inset: 0;
     border: 0;
-    background: rgba(15, 23, 42, 0.36);
+    background: rgba(15, 23, 42, 0.45);
     backdrop-filter: blur(4px);
+    z-index: 1;
 }
 
-.sf-account-drawer .account-drawer {
+/* Trendyol-Style Full-Screen Mobile Drawer */
+.sf-account-drawer.sf-trendyol-drawer .trendyol-drawer-body {
     position: absolute;
-    right: 0;
+    top: 0;
     bottom: 0;
     left: 0;
-    padding: 10px 16px calc(18px + env(safe-area-inset-bottom));
-    border-radius: 24px 24px 0 0;
+    width: 100%;
+    max-width: 480px;
+    height: 100%;
+    max-height: 100vh;
+    padding: 0;
+    border-radius: 0;
     background: #ffffff;
-    box-shadow: 0 -18px 42px rgba(15, 23, 42, 0.18);
-    max-height: 88vh;
-    overflow-y: auto;
+    box-shadow: 10px 0 40px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 2;
+    animation: sfDrawerSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.sf-account-drawer .drawer-handle {
-    width: 44px;
-    height: 4px;
-    margin: 0 auto 14px;
-    border-radius: 999px;
-    background: #d7dce6;
+@keyframes sfDrawerSlideIn {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
 }
 
-.sf-account-drawer .drawer-header {
+/* Drawer Header */
+.trendyol-drawer-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 14px;
-    margin-bottom: 14px;
+    height: 52px;
+    padding: 0 16px;
+    border-bottom: 1px solid #f1f3f7;
+    flex-shrink: 0;
+    background: #ffffff;
 }
 
-.sf-account-drawer .drawer-header span {
-    display: block;
-    color: #8b94a6;
-    font-size: 12px;
-    font-weight: 700;
-    line-height: 1;
+.trendyol-drawer-header .drawer-logo-img {
+    height: 26px;
+    width: auto;
+    object-fit: contain;
 }
 
-.sf-account-drawer .drawer-header strong {
-    display: block;
-    margin-top: 5px;
-    color: #111827;
-    font-size: 18px;
-    font-weight: 800;
-    line-height: 1.2;
-}
-
-.sf-account-drawer .drawer-header button {
+.trendyol-drawer-header .drawer-close-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 38px;
-    height: 38px;
-    border: 1px solid #e8edf5;
-    border-radius: 50%;
-    background: #f8fafc;
-    color: #17213b;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: #1e293b;
+    font-size: 20px;
     cursor: pointer;
+    border-radius: 50%;
+    transition: background-color 0.15s ease;
 }
 
-.sf-account-drawer .drawer-pages {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 8px;
-    margin-bottom: 12px;
-    padding: 4px;
-    border: 1px solid #edf1f7;
-    border-radius: 18px;
+.trendyol-drawer-header .drawer-close-btn:hover {
+    background: #f1f5f9;
+}
+
+/* Root Tabs */
+.trendyol-drawer-tabs {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 16px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    border-bottom: 1px solid #f1f3f7;
+    background: #ffffff;
+    flex-shrink: 0;
+}
+
+.trendyol-drawer-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.trendyol-root-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 2px;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-size: 13.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    border-bottom: 2.5px solid transparent;
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.trendyol-root-tab.is-active {
+    color: var(--theme, #f27a1a);
+    border-bottom-color: var(--theme, #f27a1a);
+    font-weight: 700;
+}
+
+/* Split Area */
+.trendyol-category-split {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    overflow: hidden;
+}
+
+.trendyol-root-panel {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+.trendyol-root-panel[hidden] {
+    display: none !important;
+}
+
+/* Left Sidebar */
+.trendyol-sidebar {
+    width: 38%;
+    min-width: 120px;
+    max-width: 150px;
     background: #f8fafc;
+    border-right: 1px solid #f1f3f7;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
 }
 
-.sf-account-drawer .drawer-pages a {
+.trendyol-sidebar::-webkit-scrollbar {
+    display: none;
+}
+
+.trendyol-sidebar-item {
+    display: block;
+    width: 100%;
+    padding: 13px 12px;
+    border: none;
+    border-left: 3px solid transparent;
+    background: transparent;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.3;
+    text-align: left;
+    text-decoration: none !important;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.trendyol-sidebar-item:hover {
+    color: #0f172a;
+    background: #f1f5f9;
+}
+
+.trendyol-sidebar-item.is-active {
+    background: #ffffff;
+    color: var(--theme, #f27a1a);
+    font-weight: 700;
+    border-left-color: var(--theme, #f27a1a);
+}
+
+.trendyol-sidebar-all {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #edf1f7;
+    font-weight: 600;
+    color: var(--theme, #f27a1a);
+}
+
+.trendyol-sidebar-all i {
+    font-size: 11px;
+}
+
+/* Right Content Area: Cards Grid */
+.trendyol-cards-content {
+    flex: 1 1 auto;
+    background: #ffffff;
+    overflow-y: auto;
+    padding: 14px 12px;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+    -webkit-overflow-scrolling: touch;
+}
+
+.trendyol-sub-panel[hidden] {
+    display: none !important;
+}
+
+.trendyol-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px 8px;
+}
+
+.trendyol-card-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 7px;
-    min-height: 74px;
-    padding: 10px 6px;
-    border: 1px solid transparent;
+    text-decoration: none !important;
+    transition: transform 0.15s ease;
+}
+
+.trendyol-card-item:hover,
+.trendyol-card-item:active {
+    transform: translateY(-2px);
+}
+
+.trendyol-card-thumb {
+    width: 100%;
+    aspect-ratio: 1 / 1;
     border-radius: 14px;
-    background: transparent;
-    color: #334155;
-    text-align: center;
-    text-decoration: none;
-    font-size: 11px;
-    font-weight: 800;
-    line-height: 1.15;
-    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
-}
-
-.sf-account-drawer .drawer-pages a i {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 12px;
-    background: #ffffff;
-    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
-    color: #94a3b8;
-    font-size: 14px;
-    transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.sf-account-drawer .drawer-pages a:hover,
-.sf-account-drawer .drawer-pages a.active {
-    border-color: color-mix(in srgb, var(--theme) 22%, #ffffff);
-    background: #ffffff;
-    color: #0f172a;
-    transform: translateY(-1px);
-}
-
-.sf-account-drawer .drawer-pages a:hover i,
-.sf-account-drawer .drawer-pages a.active i {
-    background: var(--theme);
-    color: #ffffff;
-    box-shadow: 0 10px 20px color-mix(in srgb, var(--theme) 24%, transparent);
-}
-
-.sf-account-drawer .drawer-actions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    margin-bottom: 8px;
-}
-
-.sf-account-drawer .drawer-actions > a,
-.sf-account-drawer .drawer-actions > button,
-.sf-account-drawer .drawer-actions form button {
-    position: relative;
+    background: #f8fafc;
+    border: 1px solid #f1f5f9;
     display: flex;
     align-items: center;
-    gap: 9px;
-    min-height: 48px;
-    padding: 0 12px;
-    border: 1px solid #edf1f7;
-    border-radius: 16px;
-    background: #ffffff;
-    color: #17213b;
-    font-size: 13px;
-    font-weight: 800;
-    text-align: start;
-    text-decoration: none;
-    cursor: pointer;
-    width: 100%;
+    justify-content: center;
+    padding: 6px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
 }
 
-.sf-account-drawer .drawer-actions i {
+.trendyol-card-thumb img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.trendyol-card-thumb i {
+    font-size: 24px;
+    color: #94a3b8;
+}
+
+.trendyol-card-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 6px;
+    font-size: 11.5px;
+    font-weight: 500;
+    line-height: 1.25;
+    color: #1e293b;
+    text-align: center;
+}
+
+.trendyol-cards-empty {
+    padding: 30px 10px;
+    text-align: center;
+}
+
+/* Footer Links */
+.trendyol-drawer-footer {
+    border-top: 1px solid #f1f3f7;
+    background: #ffffff;
+    flex-shrink: 0;
+    max-height: 230px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.trendyol-footer-links {
+    display: flex;
+    flex-direction: column;
+}
+
+.trendyol-footer-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 16px;
+    border-bottom: 1px solid #f8fafc;
+    color: #334155;
+    text-decoration: none !important;
+    font-size: 13.5px;
+    font-weight: 600;
+    background: transparent;
+    border-left: 0;
+    border-right: 0;
+    border-top: 0;
+    width: 100%;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.trendyol-footer-link:hover {
+    background: #f8fafc;
+    color: #0f172a;
+}
+
+.trendyol-footer-link .icon-wrap {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: #ecfdf5;
+    width: 22px;
+    font-size: 15px;
+    color: #64748b;
+    flex-shrink: 0;
+}
+
+.trendyol-footer-link .link-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.trendyol-footer-link .link-arrow {
+    font-size: 12px;
+    color: #94a3b8;
+    flex-shrink: 0;
+}
+
+.trendyol-footer-link--highlight {
     color: #16a34a;
-    font-size: 14px;
-    flex: 0 0 auto;
 }
 
-.sf-account-drawer .drawer-actions .primary-action {
-    grid-column: 1 / -1;
-    border-color: rgba(22, 163, 74, 0.2);
-    background: #ecfdf5;
-    color: #15803d;
+.trendyol-footer-link--highlight .icon-wrap {
+    color: #16a34a;
 }
 
-.sf-account-drawer .drawer-actions .primary-action i {
-    background: #16a34a;
-    color: #fff;
-}
-
-.sf-account-drawer .drawer-danger {
-    display: block;
-    margin-top: 8px;
-    border-top: 1px solid #e5e7eb;
-    padding-top: 8px;
-}
-
-.sf-account-drawer .drawer-danger form {
+.trendyol-logout-form {
     margin: 0;
 }
 
-.sf-account-drawer .drawer-danger button {
-    color: #dc2626;
+/* Breadcrumb button styles */
+.sf-breadcrumb-link-btn {
+    border: none;
+    background: transparent;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+}
+
+.sf-breadcrumb-link-btn:hover {
+    color: var(--theme);
+}
+
+.sf-breadcrumb-browse-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #334155;
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.sf-breadcrumb-browse-btn:hover {
+    background: #f1f5f9;
+    color: var(--theme);
+    border-color: var(--theme);
 }
 
 @media (max-width: 1199.98px) {
@@ -7760,16 +7969,16 @@ body.sf-lchat-open {
 }
 
 @media (max-width: 991.98px) {
-    .sf-mobile-shop {
+    .sf-mobile-shop.trendyol-shop-container {
         position: sticky;
-        top: var(--sf-site-header-height, 0px);
-        z-index: 20;
+        top: 0;
+        z-index: 30;
         display: block;
-        margin: 0 -12px 12px;
-        padding-bottom: 2px;
-        background: rgba(247, 248, 251, 0.98);
-        backdrop-filter: blur(16px);
-        border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+        margin: 0 -12px 10px;
+        padding: 0;
+        background: #ffffff;
+        border-bottom: 1px solid #f1f3f7;
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
     }
 
     .sf-shop__more:not([hidden]) {
@@ -7778,244 +7987,337 @@ body.sf-lchat-open {
         padding: 18px 0;
     }
 
-    .sf-mobile-shop__sticky {
-        padding: 8px 12px 0;
-    }
-
-    .sf-mobile-shop__heading {
+    /* 1. Top Bar: Back (<) + Centered Title & Subtitle */
+    .trendyol-shop-topbar {
+        position: relative;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 12px;
-        margin-bottom: 8px;
-        padding: 0 4px;
-        color: var(--sf-title);
+        justify-content: center;
+        min-height: 48px;
+        padding: 6px 44px;
+        background: #ffffff;
     }
 
-    .sf-mobile-shop__heading strong {
-        font-size: 14px;
-        font-weight: 800;
-        line-height: 1.1;
+    .trendyol-shop-back {
+        position: absolute;
+        left: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border: none;
+        background: transparent;
+        color: #1e293b;
+        font-size: 18px;
+        cursor: pointer;
+        border-radius: 50%;
+        text-decoration: none !important;
+        transition: background-color 0.15s ease;
     }
 
-    .sf-mobile-shop__heading span {
-        color: var(--sf-muted);
+    .trendyol-shop-back:hover {
+        background: #f1f5f9;
+    }
+
+    .trendyol-shop-heading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        min-width: 0;
+    }
+
+    .trendyol-shop-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 65vw;
+    }
+
+    .trendyol-shop-subtitle {
         font-size: 11px;
+        font-weight: 500;
+        color: #94a3b8;
+        line-height: 1;
+        margin-top: 2px;
+    }
+
+    /* 2. Split Action Bar (50% / 50%) */
+    .trendyol-action-bar {
+        display: flex;
+        align-items: stretch;
+        height: 44px;
+        border-top: 1px solid #f1f3f7;
+        border-bottom: 1px solid #f1f3f7;
+        background: #ffffff;
+    }
+
+    .trendyol-action-btn {
+        flex: 1 1 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 100%;
+        padding: 0 8px;
+        border: none;
+        background: transparent;
+        color: #1e293b;
+        font-size: 13.5px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none !important;
+        transition: background-color 0.15s ease;
+    }
+
+    .trendyol-action-btn:first-child {
+        border-right: 1px solid #f1f3f7;
+    }
+
+    .trendyol-action-btn:hover,
+    .trendyol-action-btn:active {
+        background: #f8fafc;
+    }
+
+    .trendyol-action-icon {
+        color: var(--theme, #f27a1a);
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .trendyol-action-text {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .trendyol-filter-badge {
+        color: var(--theme, #f27a1a);
+        font-weight: 700;
+        font-size: 13px;
+        margin-left: 2px;
+    }
+
+    /* 3. Horizontal Scrolling Quick Filter Pills */
+    .trendyol-pills-scroll {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+        background: #ffffff;
+    }
+
+    .trendyol-pills-scroll::-webkit-scrollbar {
+        display: none;
+    }
+
+    .trendyol-pill-chip,
+    .trendyol-pill-select {
+        flex: 0 0 auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 32px;
+        padding: 0 14px;
+        border-radius: 999px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+        font-size: 12.5px;
+        font-weight: 500;
+        line-height: 1;
+        white-space: nowrap;
+        text-decoration: none !important;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.15s ease;
+    }
+
+    .trendyol-pill-chip:hover,
+    .trendyol-pill-select:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+    }
+
+    .trendyol-pill-chip.is-active,
+    .trendyol-pill-select.is-active {
+        border-color: var(--theme, #f27a1a);
+        color: var(--theme, #f27a1a);
+        font-weight: 600;
+        background: #fff8f5;
+    }
+
+    .trendyol-pill-select .pill-chevron {
+        font-size: 10px;
+        color: #94a3b8;
+        margin-left: 2px;
+    }
+
+    .trendyol-pill-select.is-active .pill-chevron {
+        color: var(--theme, #f27a1a);
+    }
+
+    .trendyol-pill-select select {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+        cursor: pointer;
+        -webkit-appearance: none;
+    }
+
+    /* 4. Active Chips */
+    .sf-mobile-active-chips {
+        display: flex;
+        gap: 6px;
+        padding: 4px 12px 8px;
+        overflow-x: auto;
+        scrollbar-width: none;
         white-space: nowrap;
     }
 
-    .sf-mobile-cat-strip,
-    .sf-mobile-subcat-strip,
-    .sf-mobile-quick,
-    .sf-mobile-active-chips {
-        display: flex;
-        flex-wrap: nowrap;
-        gap: 8px;
-        overflow-x: auto;
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
-        touch-action: pan-x;
-        overscroll-behavior-x: contain;
-        scrollbar-width: none;
-    }
-
-    .sf-mobile-cat-strip::-webkit-scrollbar,
-    .sf-mobile-subcat-strip::-webkit-scrollbar,
-    .sf-mobile-quick::-webkit-scrollbar,
     .sf-mobile-active-chips::-webkit-scrollbar {
         display: none;
     }
 
-    .sf-mobile-cat-strip {
-        margin-bottom: 9px;
-        padding: 0 4px 4px;
-    }
-
-    .sf-mobile-cat-card {
-        flex: 0 0 auto;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 5px;
-        width: 64px;
-        color: var(--sf-title);
-        text-decoration: none;
-    }
-
-    .sf-mobile-cat-thumb {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 54px;
-        height: 54px;
-        overflow: hidden;
-        border: 1px solid var(--sf-border);
-        border-radius: 50%;
-        background: #fff;
-        color: var(--sf-muted);
-        font-size: 18px;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .sf-mobile-cat-thumb img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .sf-mobile-cat-card small {
-        display: -webkit-box;
-        overflow: hidden;
-        font-size: 11px;
-        line-height: 1.15;
-        text-align: center;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
-        line-clamp: 2;
-    }
-
-    .sf-mobile-cat-card.is-active {
-        color: var(--sf-theme);
-        font-weight: 700;
-    }
-
-    .sf-mobile-cat-card.is-active .sf-mobile-cat-thumb {
-        border-color: var(--sf-theme);
-        box-shadow: 0 0 0 2px color-mix(in srgb, var(--sf-theme) 20%, transparent);
-    }
-
-    .sf-mobile-subcat-strip {
-        margin: -2px 0 9px;
-        padding: 0 4px 4px;
-    }
-
-    .sf-mobile-subcat-chip {
-        flex: 0 0 auto;
-        display: inline-flex;
-        align-items: center;
-        height: 30px;
-        padding: 0 12px;
-        border: 1px solid var(--sf-border);
-        border-radius: 999px;
-        background: #fff;
-        color: var(--sf-title);
-        font-size: 12px;
-        font-weight: 600;
-        text-decoration: none;
-        white-space: nowrap;
-    }
-
-    .sf-mobile-subcat-chip.is-active {
-        border-color: var(--sf-theme);
-        background: var(--sf-theme);
-        color: #fff;
-    }
-
-    .sf-mobile-quick {
-        align-items: center;
-        min-height: 42px;
-        padding: 0 4px 6px;
-    }
-
-    .sf-mobile-chip,
-    .sf-mobile-select {
-        flex: 0 0 auto;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 7px;
-        box-sizing: border-box;
-        height: 40px;
-        margin: 0;
-        border: 1px solid transparent;
-        border-radius: 999px;
-        background: #e9ebf1;
-        color: var(--sf-title);
-        font-size: 13px;
-        font-weight: 700;
-        line-height: 1;
-        white-space: nowrap;
-    }
-
-    .sf-mobile-chip {
-        padding: 0 14px;
-        cursor: pointer;
-    }
-
-    .sf-mobile-chip i {
-        color: #4c5870;
-        font-size: 14px;
-    }
-
-    .sf-mobile-chip__badge {
-        min-width: 20px;
-        height: 20px;
-        padding: 0 6px;
-        border-radius: 999px;
-        background: var(--sf-theme);
-        color: #fff;
-        font-size: 11px;
-        font-weight: 700;
-        line-height: 20px;
-        text-align: center;
-    }
-
-    .sf-mobile-select {
-        position: relative;
-        max-width: 200px;
-        padding: 0 12px 0 14px;
-    }
-
-    .sf-mobile-select span {
-        color: #4b5563;
-        font-size: 12px;
-        font-weight: 700;
-    }
-
-    .sf-mobile-select select {
-        max-width: 113px;
-        min-width: 70px;
-        border: 0;
-        outline: 0;
-        background: transparent;
-        color: var(--sf-title);
-        font-size: 13px;
-        font-weight: 700;
-        line-height: 1;
-        text-overflow: ellipsis;
-    }
-
-    .sf-mobile-select--sort {
-        width: 40px;
-        max-width: 40px;
-        min-width: 40px;
-        padding: 0;
-    }
-
-    .sf-mobile-select--sort select {
-        position: absolute;
-        inset: 0;
-        width: 100%;
-        max-width: none;
-        min-width: 0;
-        height: 100%;
-        opacity: 0;
-        cursor: pointer;
-    }
-
-    .sf-mobile-select--sort i {
-        color: #4c5870;
-        font-size: 14px;
-    }
-
-    .sf-mobile-active-chips {
-        align-items: center;
-        padding: 6px 16px 4px;
-        white-space: nowrap;
-    }
-
     .sf-mobile-active-chips .sf-filter-chip {
         flex: 0 0 auto;
+    }
+
+    /* 5. Sort Bottom Sheet Modal */
+    .sf-sort-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 2500;
+        display: block;
+    }
+
+    .sf-sort-modal[hidden] {
+        display: none !important;
+    }
+
+    .sf-sort-backdrop {
+        position: absolute;
+        inset: 0;
+        border: none;
+        background: rgba(15, 23, 42, 0.45);
+        backdrop-filter: blur(4px);
+    }
+
+    .sf-sort-sheet {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #ffffff;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.15);
+        padding: 0 0 calc(16px + env(safe-area-inset-bottom));
+        z-index: 2;
+        animation: sfSortSlideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes sfSortSlideUp {
+        from {
+            transform: translateY(100%);
+        }
+        to {
+            transform: translateY(0);
+        }
+    }
+
+    .sf-sort-sheet-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-bottom: 1px solid #f1f3f7;
+    }
+
+    .sf-sort-sheet-head strong {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .sf-sort-sheet-close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 50%;
+    }
+
+    .sf-sort-sheet-body {
+        display: flex;
+        flex-direction: column;
+        padding: 8px 0;
+    }
+
+    .sf-sort-sheet-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 20px;
+        border: none;
+        background: transparent;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 500;
+        text-align: left;
+        cursor: pointer;
+        width: 100%;
+        transition: background-color 0.15s ease;
+    }
+
+    .sf-sort-sheet-item:hover,
+    .sf-sort-sheet-item.is-active {
+        background: #f8fafc;
+        color: var(--theme, #f27a1a);
+        font-weight: 600;
+    }
+
+    .sf-sort-radio-circle {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid #cbd5e1;
+        position: relative;
+        display: inline-block;
+        flex-shrink: 0;
+        transition: all 0.15s ease;
+    }
+
+    .sf-sort-sheet-item.is-active .sf-sort-radio-circle {
+        border-color: var(--theme, #f27a1a);
+    }
+
+    .sf-sort-sheet-item.is-active .sf-sort-radio-circle::after {
+        content: '';
+        position: absolute;
+        inset: 3px;
+        border-radius: 50%;
+        background: var(--theme, #f27a1a);
     }
 
     .sf-mobile-active-chips__clear {

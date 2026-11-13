@@ -1,3 +1,9 @@
+@props([
+    'categories' => [],
+    'wishlist' => [],
+    'user' => null,
+])
+
 @php
     $path = '/'.ltrim(request()->path(), '/');
     $items = [
@@ -6,6 +12,18 @@
         ['href' => '/wishlist', 'label' => 'İstək siyahısı', 'icon' => 'fa-solid fa-heart', 'active' => str_starts_with($path, '/wishlist')],
     ];
     $accountActive = str_starts_with($path, '/settings') || str_starts_with($path, '/login') || str_starts_with($path, '/register') || str_starts_with($path, '/dashboard');
+
+    $childrenOf = function ($category) {
+        $children = $category['children'] ?? [];
+        if ($children instanceof \Illuminate\Http\Resources\Json\ResourceCollection) {
+            $children = $children->resolve();
+        } elseif ($children instanceof \Illuminate\Support\Collection) {
+            $children = $children->all();
+        }
+        return is_array($children) ? $children : [];
+    };
+
+    $roots = collect($categories)->values();
 @endphp
 
 <nav class="mobile-bottom-nav" data-sf-bottom-nav aria-label="Mobil menyu">
@@ -18,113 +36,193 @@
         </a>
     @endforeach
 
-    <button type="button" class="{{ $accountActive ? 'active' : '' }}" aria-label="Hesab"
+    <button type="button" class="{{ $accountActive ? 'active' : '' }}" aria-label="Menyu və Hesab"
             aria-expanded="false" aria-controls="mobile-account-drawer" data-sf-account-drawer-open>
         <span class="icon-wrap">
             <i class="fa-solid fa-bars"></i>
         </span>
-        <span>Hesab</span>
+        <span>Menyu</span>
     </button>
 </nav>
 
-<div id="mobile-account-drawer" class="sf-account-drawer" role="dialog" aria-modal="true" aria-label="Hesab" hidden>
+<div id="mobile-account-drawer" class="sf-account-drawer sf-trendyol-drawer" role="dialog" aria-modal="true" aria-label="Menyu və Kataloq" hidden>
     <button type="button" class="drawer-backdrop" aria-label="Bağla" data-sf-account-drawer-close></button>
 
-    <div class="account-drawer">
-        <div class="drawer-handle"></div>
-
-        <div class="drawer-header">
-            <div>
-                <span>Hesab</span>
-                <strong>
-                    @auth
-                        {{ auth()->user()->name ?? 'Hesabım' }}
-                    @else
-                        Qonaq hesab
-                    @endauth
-                </strong>
-            </div>
-            <button type="button" aria-label="Bağla" data-sf-account-drawer-close>
+    <div class="account-drawer trendyol-drawer-body" data-sf-drawer-container>
+        {{-- 1. Drawer Header --}}
+        <div class="trendyol-drawer-header">
+            <a href="/" class="drawer-logo" aria-label="ShopEra">
+                <img src="/assets/images/logo/logo.svg?v=20261002" alt="ShopEra" class="drawer-logo-img">
+            </a>
+            <button type="button" class="drawer-close-btn" aria-label="Bağla" data-sf-account-drawer-close>
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
 
-        <nav class="drawer-pages" aria-label="Menyu">
-            <a href="/" class="{{ $path === '/' ? 'active' : '' }}">
-                <i class="fa-solid fa-house"></i>
-                <span>Ana səhifə</span>
-            </a>
-            <a href="/shop" class="{{ str_starts_with($path, '/shop') ? 'active' : '' }}">
-                <i class="fa-solid fa-store"></i>
-                <span>Elanlar</span>
-            </a>
-            <a href="/categories" class="{{ str_starts_with($path, '/categories') ? 'active' : '' }}">
-                <i class="fa-solid fa-grid-2"></i>
-                <span>Kateqoriyalar</span>
-            </a>
-            <a href="/magazalar" class="{{ str_starts_with($path, '/magazalar') || str_starts_with($path, '/magaza/') && ! str_starts_with($path, '/magaza/panel') ? 'active' : '' }}">
-                <i class="fa-solid fa-shop"></i>
-                <span>Mağazalar</span>
-            </a>
-            <a href="/about" class="{{ str_starts_with($path, '/about') ? 'active' : '' }}">
-                <i class="fa-solid fa-circle-info"></i>
-                <span>Haqqımızda</span>
-            </a>
-            <a href="/contact" class="{{ str_starts_with($path, '/contact') ? 'active' : '' }}">
-                <i class="fa-solid fa-headset"></i>
-                <span>Əlaqə</span>
-            </a>
-        </nav>
-
-        <div class="drawer-actions">
-            @auth
-                <a href="/dashboard">
-                    <i class="fa-solid fa-user"></i>
-                    <span>Hesabım</span>
-                </a>
-                <a href="/dashboard">
-                    <i class="fa-solid fa-receipt"></i>
-                    <span>Sifarişlər</span>
-                </a>
-                <a href="/dashboard?tab=messages">
-                    <i class="fa-regular fa-comment-dots"></i>
-                    <span>Mesajlar</span>
-                </a>
-                <a href="/settings">
-                    <i class="fa-solid fa-gear"></i>
-                    <span>Parametrlər</span>
-                </a>
-                <a href="/elan/ver">
-                    <i class="fa-regular fa-plus"></i>
-                    <span>Yeni elan</span>
-                </a>
-            @else
-                <a href="{{ route('storefront.login') }}" class="primary-action">
-                    <i class="fa-solid fa-user"></i>
-                    <span>Giriş</span>
-                </a>
-            @endauth
-
-            <a href="{{ route('storefront.cart') }}">
-                <i class="fa-solid fa-cart-shopping"></i>
-                <span>Səbət</span>
-            </a>
-            <a href="/wishlist">
-                <i class="fa-solid fa-heart"></i>
-                <span>İstək siyahısı</span>
-            </a>
-        </div>
-
-        @auth
-            <div class="drawer-actions drawer-danger">
-                <form action="{{ route('storefront.logout') }}" method="POST">
-                    @csrf
-                    <button type="submit">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                        <span>Çıxış</span>
+        {{-- 2. Root Categories Horizontal Tabs --}}
+        @if ($roots->isNotEmpty())
+            <div class="trendyol-drawer-tabs" role="tablist" aria-label="Əsas kateqoriyalar">
+                @foreach ($roots as $root)
+                    <button type="button"
+                            class="trendyol-root-tab @if ($loop->first) is-active @endif"
+                            role="tab"
+                            aria-selected="{{ $loop->first ? 'true' : 'false' }}"
+                            data-sf-drawer-root-tab="{{ $root['id'] }}">
+                        <span>{{ $root['name'] }}</span>
                     </button>
-                </form>
+                @endforeach
             </div>
-        @endauth
+
+            {{-- 3. Split Category Content (Left sidebar + Right visual cards grid) --}}
+            <div class="trendyol-category-split">
+                @foreach ($roots as $root)
+                    @php $subCategories = $childrenOf($root); @endphp
+                    <div class="trendyol-root-panel @if ($loop->first) is-active @endif"
+                         data-sf-drawer-root-panel="{{ $root['id'] }}"
+                         @if (! $loop->first) hidden @endif>
+
+                        {{-- Left Column: Sub-categories list --}}
+                        <div class="trendyol-sidebar">
+                            <a href="/shop?category={{ $root['slug'] ?? $root['id'] }}" class="trendyol-sidebar-item trendyol-sidebar-all">
+                                <span>Hamısına bax</span>
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </a>
+
+                            @if (count($subCategories) > 0)
+                                @foreach ($subCategories as $sub)
+                                    <button type="button"
+                                            class="trendyol-sidebar-item @if ($loop->first) is-active @endif"
+                                            data-sf-drawer-sub-tab="{{ $sub['id'] }}"
+                                            data-parent-root="{{ $root['id'] }}">
+                                        <span>{{ $sub['name'] }}</span>
+                                    </button>
+                                @endforeach
+                            @endif
+                        </div>
+
+                        {{-- Right Column: 3-column Visual Category Cards Grid --}}
+                        <div class="trendyol-cards-content">
+                            @if (count($subCategories) > 0)
+                                @foreach ($subCategories as $sub)
+                                    @php $leaves = $childrenOf($sub); @endphp
+                                    <div class="trendyol-sub-panel @if ($loop->first) is-active @endif"
+                                         data-sf-drawer-sub-panel="{{ $sub['id'] }}"
+                                         @if (! $loop->first) hidden @endif>
+
+                                        <div class="trendyol-cards-grid">
+                                            @if (count($leaves) > 0)
+                                                @foreach ($leaves as $leaf)
+                                                    @php
+                                                        $leafImage = $leaf['image'] ?? $sub['image'] ?? $root['image'] ?? null;
+                                                    @endphp
+                                                    <a href="/shop?category={{ $leaf['slug'] ?? $leaf['id'] }}" class="trendyol-card-item">
+                                                        <div class="trendyol-card-thumb">
+                                                            @if (! empty($leafImage))
+                                                                <img src="{{ $leafImage }}" alt="{{ $leaf['name'] }}" loading="lazy" onerror="this.style.display='none'">
+                                                            @else
+                                                                <i class="fa-regular fa-grid-2"></i>
+                                                            @endif
+                                                        </div>
+                                                        <span class="trendyol-card-title">{{ $leaf['name'] }}</span>
+                                                    </a>
+                                                @endforeach
+                                            @else
+                                                <a href="/shop?category={{ $sub['slug'] ?? $sub['id'] }}" class="trendyol-card-item">
+                                                    <div class="trendyol-card-thumb">
+                                                        @if (! empty($sub['image']))
+                                                            <img src="{{ $sub['image'] }}" alt="{{ $sub['name'] }}" loading="lazy" onerror="this.style.display='none'">
+                                                        @else
+                                                            <i class="fa-regular fa-grid-2"></i>
+                                                        @endif
+                                                    </div>
+                                                    <span class="trendyol-card-title">{{ $sub['name'] }}</span>
+                                                </a>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @else
+                                <div class="trendyol-cards-empty">
+                                    <p class="text-muted mb-2" style="font-size: 13px;">Bu kateqoriyada alt kateqoriya yoxdur.</p>
+                                    <a href="/shop?category={{ $root['slug'] ?? $root['id'] }}" class="theme-btn" style="padding: 8px 16px; font-size: 12.5px;">
+                                        Məhsullara bax
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+
+        {{-- 4. Bottom Utility & Account Links (Trendyol style with chevron right) --}}
+        <div class="trendyol-drawer-footer">
+            <div class="trendyol-footer-links">
+                @auth
+                    <a href="/dashboard" class="trendyol-footer-link">
+                        <span class="icon-wrap"><i class="fa-regular fa-user"></i></span>
+                        <span class="link-label">Hesabım ({{ auth()->user()->name ?? 'İstifadəçi' }})</span>
+                        <i class="fa-regular fa-chevron-right link-arrow"></i>
+                    </a>
+                    <a href="/dashboard" class="trendyol-footer-link">
+                        <span class="icon-wrap"><i class="fa-regular fa-receipt"></i></span>
+                        <span class="link-label">Sifarişlərim</span>
+                        <i class="fa-regular fa-chevron-right link-arrow"></i>
+                    </a>
+                    <a href="/dashboard?tab=messages" class="trendyol-footer-link">
+                        <span class="icon-wrap"><i class="fa-regular fa-comment-dots"></i></span>
+                        <span class="link-label">Mesajlar</span>
+                        <i class="fa-regular fa-chevron-right link-arrow"></i>
+                    </a>
+                @else
+                    <a href="{{ route('storefront.login') }}" class="trendyol-footer-link">
+                        <span class="icon-wrap"><i class="fa-regular fa-user"></i></span>
+                        <span class="link-label">Hesabım / Giriş</span>
+                        <i class="fa-regular fa-chevron-right link-arrow"></i>
+                    </a>
+                @endauth
+
+                <a href="/contact" class="trendyol-footer-link">
+                    <span class="icon-wrap"><i class="fa-regular fa-comments"></i></span>
+                    <span class="link-label">Bizimlə əlaqə</span>
+                    <i class="fa-regular fa-chevron-right link-arrow"></i>
+                </a>
+
+                <a href="/about" class="trendyol-footer-link">
+                    <span class="icon-wrap"><i class="fa-regular fa-circle-info"></i></span>
+                    <span class="link-label">Haqqımızda</span>
+                    <i class="fa-regular fa-chevron-right link-arrow"></i>
+                </a>
+
+                <a href="/magazalar" class="trendyol-footer-link">
+                    <span class="icon-wrap"><i class="fa-regular fa-store"></i></span>
+                    <span class="link-label">Mağazalar</span>
+                    <i class="fa-regular fa-chevron-right link-arrow"></i>
+                </a>
+
+                <a href="/shop" class="trendyol-footer-link">
+                    <span class="icon-wrap"><i class="fa-regular fa-bag-shopping"></i></span>
+                    <span class="link-label">Bütün elanlar</span>
+                    <i class="fa-regular fa-chevron-right link-arrow"></i>
+                </a>
+
+                <a href="/elan/ver" class="trendyol-footer-link trendyol-footer-link--highlight">
+                    <span class="icon-wrap"><i class="fa-regular fa-plus"></i></span>
+                    <span class="link-label">Yeni elan yerləşdir</span>
+                    <i class="fa-regular fa-chevron-right link-arrow"></i>
+                </a>
+
+                @auth
+                    <form action="{{ route('storefront.logout') }}" method="POST" class="trendyol-logout-form">
+                        @csrf
+                        <button type="submit" class="trendyol-footer-link text-danger">
+                            <span class="icon-wrap"><i class="fa-solid fa-arrow-right-from-bracket"></i></span>
+                            <span class="link-label">Çıxış</span>
+                            <i class="fa-regular fa-chevron-right link-arrow"></i>
+                        </button>
+                    </form>
+                @endauth
+            </div>
+        </div>
     </div>
 </div>

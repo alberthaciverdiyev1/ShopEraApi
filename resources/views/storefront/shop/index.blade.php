@@ -197,115 +197,126 @@
     @endif
 
     <div class="container sf-shop">
-        {{-- Mobile shop header: category strips and quick filters, as in the former Svelte storefront. --}}
-        <div class="sf-mobile-shop">
-            <div class="sf-mobile-shop__sticky">
-                <div class="sf-mobile-shop__heading">
-                    <strong>{{ $pageTitle }}</strong>
-                    <span>{{ number_format($total) }} elan</span>
-                </div>
-
-                <div class="sf-mobile-cat-strip" aria-label="Kateqoriyalar">
-                    <a href="/shop" class="sf-mobile-cat-card {{ ! $categoryId ? 'is-active' : '' }}">
-                        <span class="sf-mobile-cat-thumb"><i class="fa-regular fa-grid-2"></i></span>
-                        <small>Hamısı</small>
-                    </a>
-                    @foreach ($categories as $category)
-                        <a href="/shop?category={{ $category['slug'] ?? $category['id'] }}"
-                           class="sf-mobile-cat-card {{ (int) $selectedRootId === (int) $category['id'] ? 'is-active' : '' }}">
-                            <span class="sf-mobile-cat-thumb">
-                                @if (! empty($category['image']))
-                                    <img src="{{ $category['image'] }}" alt="{{ $category['name'] }}" loading="lazy">
-                                @else
-                                    <i class="fa-regular fa-grid-2"></i>
-                                @endif
-                            </span>
-                            <small>{{ $category['name'] }}</small>
-                        </a>
-                    @endforeach
-                </div>
-
-                @if ($subcategories !== [])
-                    <div class="sf-mobile-subcat-strip" aria-label="Alt kateqoriyalar">
-                        <a href="/shop?category={{ $selectedRootSlug }}"
-                           class="sf-mobile-subcat-chip {{ (int) $categoryId === (int) $selectedRootId ? 'is-active' : '' }}">
-                            Hamısı
-                        </a>
-                        @foreach ($subcategories as $child)
-                            <a href="/shop?category={{ $child['slug'] ?? $child['id'] }}"
-                               class="sf-mobile-subcat-chip {{ (int) $categoryId === (int) $child['id'] ? 'is-active' : '' }}">
-                                {{ $child['name'] }}
-                            </a>
-                        @endforeach
-                    </div>
-                @endif
-
-                <div class="sf-mobile-quick" aria-label="Sürətli filtrlər">
-                    <button type="button" class="sf-mobile-chip" data-sf-mobile-filters>
-                        <i class="fa-solid fa-sliders"></i>
-                        <span>Filtrlər</span>
-                        @if ($activeFilterCount)
-                            <span class="sf-mobile-chip__badge">{{ $activeFilterCount }}</span>
-                        @endif
-                    </button>
-
-                    <label class="sf-mobile-select sf-mobile-select--sort" aria-label="Sıralama">
-                        <i class="fa-solid fa-arrow-down-wide-short" aria-hidden="true"></i>
-                        <select data-sf-quick="sort">
-                            @foreach ($sorts as $sort)
-                                <option value="{{ $sort }}" @selected($currentSort === $sort)>{{ $sortLabels[$sort] ?? $sort }}</option>
-                            @endforeach
-                        </select>
-                    </label>
-
-                    @php
-                        $quickFacets = [
-                            ['key' => 'brands', 'label' => 'Brend', 'items' => $facets['brands'] ?? [], 'selected' => $selectedBrands],
-                            ['key' => 'colors', 'label' => 'Rəng', 'items' => $facets['colors'] ?? [], 'selected' => $selectedColors],
-                            ['key' => 'sizes', 'label' => 'Ölçü', 'items' => $facets['sizes'] ?? [], 'selected' => $selectedSizes],
-                        ];
-                    @endphp
-
-                    @foreach ($quickFacets as $facet)
-                        @if (! empty($facet['items']))
-                            <label class="sf-mobile-select">
-                                <span>{{ $facet['label'] }}</span>
-                                <select data-sf-quick="{{ $facet['key'] }}">
-                                    <option value="">Hamısı</option>
-                                    @foreach ($facet['items'] as $item)
-                                        @php $facetValue = (string) ($item['slug'] ?? $item['id']); @endphp
-                                        <option value="{{ $facetValue }}" @selected(in_array($facetValue, $facet['selected'], true))>
-                                            {{ $item['name'] ?? $facet['label'] }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </label>
-                        @endif
-                    @endforeach
-
-                    @foreach (array_slice($dynamicFilters, 0, 5) as $filter)
-                        @php
-                            $filterTitle = is_array($filter['title'] ?? null)
-                                ? ($filter['title']['az'] ?? reset($filter['title']))
-                                : ($filter['title'] ?? 'Parametr');
-                            $filterValues = array_values(array_unique(array_filter(! empty($filter['options']) ? $filter['options'] : ($filter['values'] ?? []))));
-                            $filterPicked = (array) ($selectedDynamic[$filter['slug'] ?? $filter['id']] ?? $selectedDynamic[$filter['id']] ?? []);
-                        @endphp
-                        @if ($filterValues !== [])
-                            <label class="sf-mobile-select">
-                                <span>{{ $filterTitle }}</span>
-                                <select data-sf-quick="filters" data-sf-filter="{{ $filter['slug'] ?? $filter['id'] }}">
-                                    <option value="">Hamısı</option>
-                                    @foreach ($filterValues as $value)
-                                        <option value="{{ $value }}" @selected(in_array((string) $value, array_map('strval', $filterPicked), true))>{{ $value }}</option>
-                                    @endforeach
-                                </select>
-                            </label>
-                        @endif
-                    @endforeach
+        {{-- Mobile shop header: Trendyol-style top bar, split sort/filter bar, and quick filter pills --}}
+        <div class="sf-mobile-shop trendyol-shop-container">
+            {{-- 1. Top Bar: Back button (<) + Centered Title & Subtitle --}}
+            <div class="trendyol-shop-topbar">
+                <button type="button" class="trendyol-shop-back" onclick="if(history.length > 1){ history.back(); } else { window.location.href='/'; }" aria-label="Geri">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <div class="trendyol-shop-heading">
+                    <h1 class="trendyol-shop-title">{{ $pageTitle }}</h1>
+                    <span class="trendyol-shop-subtitle">{{ number_format($total) }}+ Məhsul</span>
                 </div>
             </div>
 
+            {{-- 2. 50/50 Split Action Bar: Sort (⇅) and Filter (🎚) --}}
+            <div class="trendyol-action-bar">
+                <button type="button" class="trendyol-action-btn trendyol-action-btn--sort" data-sf-sort-modal-open>
+                    <i class="fa-solid fa-arrow-up-arrow-down trendyol-action-icon"></i>
+                    <span class="trendyol-action-text">{{ $sortLabels[$currentSort] ?? 'Sıralama' }}</span>
+                </button>
+
+                <button type="button" class="trendyol-action-btn trendyol-action-btn--filter" data-sf-mobile-filters>
+                    <i class="fa-regular fa-sliders trendyol-action-icon"></i>
+                    <span class="trendyol-action-text">Filtirlə</span>
+                    @if ($activeFilterCount)
+                        <span class="trendyol-filter-badge">({{ $activeFilterCount }})</span>
+                    @endif
+                </button>
+            </div>
+
+            {{-- 3. Horizontal Scrolling Quick Filter Pills --}}
+            <div class="trendyol-pills-scroll" aria-label="Sürətli filtrlər">
+                {{-- Discount Quick Pill --}}
+                @php
+                    $hasDiscount = ! empty($query['has_discount']);
+                    $discountToggleUrl = $hasDiscount
+                        ? $buildUrl(['has_discount'])
+                        : '/shop?'.http_build_query(array_merge($query, ['has_discount' => 1, 'page' => 1]));
+                @endphp
+                <a href="{{ $discountToggleUrl }}" class="trendyol-pill-chip {{ $hasDiscount ? 'is-active' : '' }}">
+                    <span>Endirimli məhsullar</span>
+                </a>
+
+                {{-- Brands Quick Pill --}}
+                @if (! empty($facets['brands']))
+                    <label class="trendyol-pill-select {{ ! empty($selectedBrands) ? 'is-active' : '' }}">
+                        <span>Brend</span>
+                        <i class="fa-regular fa-chevron-down pill-chevron"></i>
+                        <select data-sf-quick="brands">
+                            <option value="">Brend: Hamısı</option>
+                            @foreach ($facets['brands'] as $item)
+                                @php $facetValue = (string) ($item['slug'] ?? $item['id']); @endphp
+                                <option value="{{ $facetValue }}" @selected(in_array($facetValue, $selectedBrands, true))>
+                                    {{ $item['name'] }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
+                @endif
+
+                {{-- Dynamic Attributes (e.g. Yaxa tipi, Material, etc.) --}}
+                @foreach (array_slice($dynamicFilters, 0, 6) as $filter)
+                    @php
+                        $filterTitle = is_array($filter['title'] ?? null)
+                            ? ($filter['title']['az'] ?? reset($filter['title']))
+                            : ($filter['title'] ?? 'Parametr');
+                        $filterValues = array_values(array_unique(array_filter(! empty($filter['options']) ? $filter['options'] : ($filter['values'] ?? []))));
+                        $filterPicked = (array) ($selectedDynamic[$filter['slug'] ?? $filter['id']] ?? $selectedDynamic[$filter['id']] ?? []);
+                    @endphp
+                    @if ($filterValues !== [])
+                        <label class="trendyol-pill-select {{ ! empty($filterPicked) ? 'is-active' : '' }}">
+                            <span>{{ $filterTitle }}</span>
+                            <i class="fa-regular fa-chevron-down pill-chevron"></i>
+                            <select data-sf-quick="filters" data-sf-filter="{{ $filter['slug'] ?? $filter['id'] }}">
+                                <option value="">{{ $filterTitle }}: Hamısı</option>
+                                @foreach ($filterValues as $value)
+                                    <option value="{{ $value }}" @selected(in_array((string) $value, array_map('strval', $filterPicked), true))>
+                                        {{ $value }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </label>
+                    @endif
+                @endforeach
+
+                {{-- Colors Quick Pill --}}
+                @if (! empty($facets['colors']))
+                    <label class="trendyol-pill-select {{ ! empty($selectedColors) ? 'is-active' : '' }}">
+                        <span>Rəng</span>
+                        <i class="fa-regular fa-chevron-down pill-chevron"></i>
+                        <select data-sf-quick="colors">
+                            <option value="">Rəng: Hamısı</option>
+                            @foreach ($facets['colors'] as $item)
+                                @php $facetValue = (string) ($item['slug'] ?? $item['id']); @endphp
+                                <option value="{{ $facetValue }}" @selected(in_array($facetValue, $selectedColors, true))>
+                                    {{ $item['name'] }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
+                @endif
+
+                {{-- Sizes Quick Pill --}}
+                @if (! empty($facets['sizes']))
+                    <label class="trendyol-pill-select {{ ! empty($selectedSizes) ? 'is-active' : '' }}">
+                        <span>Ölçü</span>
+                        <i class="fa-regular fa-chevron-down pill-chevron"></i>
+                        <select data-sf-quick="sizes">
+                            <option value="">Ölçü: Hamısı</option>
+                            @foreach ($facets['sizes'] as $item)
+                                @php $facetValue = (string) ($item['slug'] ?? $item['id']); @endphp
+                                <option value="{{ $facetValue }}" @selected(in_array($facetValue, $selectedSizes, true))>
+                                    {{ $item['name'] }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
+                @endif
+            </div>
+
+            {{-- 4. Active Chips --}}
             @if ($chips)
                 <div class="sf-mobile-active-chips" aria-label="Aktiv filtrlər">
                     @foreach ($chips as $chip)
@@ -317,6 +328,29 @@
                     <a href="/shop" class="sf-mobile-active-chips__clear">Hamısını təmizlə</a>
                 </div>
             @endif
+
+            {{-- 5. Sort Bottom Sheet Modal --}}
+            <div class="sf-sort-modal" id="sf-sort-modal" data-sf-sort-modal hidden>
+                <button type="button" class="sf-sort-backdrop" data-sf-sort-close aria-label="Bağla"></button>
+                <div class="sf-sort-sheet">
+                    <div class="sf-sort-sheet-head">
+                        <strong>Sıralama</strong>
+                        <button type="button" class="sf-sort-sheet-close" data-sf-sort-close aria-label="Bağla">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <div class="sf-sort-sheet-body">
+                        @foreach ($sorts as $sort)
+                            <button type="button"
+                                    class="sf-sort-sheet-item @if ($currentSort === $sort) is-active @endif"
+                                    data-sf-sort-choose="{{ $sort }}">
+                                <span>{{ $sortLabels[$sort] ?? $sort }}</span>
+                                <span class="sf-sort-radio-circle"></span>
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
         </div>
 
         <header class="sf-shop__head">

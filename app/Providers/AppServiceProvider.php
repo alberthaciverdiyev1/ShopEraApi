@@ -39,7 +39,10 @@ class AppServiceProvider extends ServiceProvider
          * Əvvəllər onu hər metod ayrıca ötürürdü — yeni səhifə əlavə edən
          * kimi layout "Undefined variable $settings" verirdi.
          */
-        View::composer('components.storefront.header', StorefrontHeaderComposer::class);
+        View::composer([
+            'components.storefront.header',
+            'components.storefront.mobile-bottom-nav',
+        ], StorefrontHeaderComposer::class);
 
         View::composer('storefront.layout', function ($view) {
             $view->with([
