@@ -87,6 +87,61 @@ class FilterService
     }
 
     /**
+     * One page of the values products carry for a dynamic filter.
+     */
+    public function values($request): JsonResponse
+    {
+        $key = (string) $request->query('filter', '');
+        $page = max(1, (int) $request->query('page', 1));
+        $perPage = min(50, max(1, (int) $request->query('per_page', 10)));
+        $categoryId = (int) $request->query('category_id', 0);
+
+        $filter = is_numeric($key)
+            ? $this->model->newQuery()->find((int) $key)
+            : $this->model->newQuery()->where('slug', $key)->first();
+
+        if (! $filter) {
+            return responseHelper(__('Filter not found.'), 404, []);
+        }
+
+        $base = ProductFilter::query()
+            ->join('products', 'products.id', '=', 'product_filters.product_id')
+            ->where('product_filters.filter_id', $filter->id)
+            ->whereNull('products.deleted_at')
+            ->whereNotNull('product_filters.value')
+            ->where('product_filters.value', '<>', '');
+
+        if ($categoryId > 0) {
+            $base->where('products.category_id', $categoryId);
+        }
+
+        $total = (clone $base)->distinct()->count('product_filters.value');
+
+        $values = (clone $base)
+            ->distinct()
+            ->orderBy('product_filters.value')
+            ->forPage($page, $perPage)
+            ->pluck('product_filters.value')
+            ->values();
+
+        return responseHelper(__('Filter values retrieved successfully.'), 200, [
+            'filter' => [
+                'id' => $filter->id,
+                'slug' => $filter->slug,
+                'title' => $filter->title,
+            ],
+            'items' => $values->map(fn ($value) => [
+                'value' => (string) $value,
+                'name' => (string) $value,
+            ])->all(),
+            'page' => $page,
+            'per_page' => $perPage,
+            'total' => $total,
+            'has_more' => $page * $perPage < $total,
+        ]);
+    }
+
+    /**
      * Filters shared by most of the catalog (material, season, fit, …), shown
      * on the shop page before a category is picked.
      */

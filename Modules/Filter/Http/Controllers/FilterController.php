@@ -16,7 +16,7 @@ class FilterController extends Controller
 
     public function __construct(FilterService $service)
     {
-        $this->middleware('auth:sanctum')->except(['list', 'categoryFilters', 'tree', 'productValues']);
+        $this->middleware('auth:sanctum')->except(['list', 'categoryFilters', 'values', 'tree', 'productValues']);
         $this->middleware('permission:add filter')->only('add');
         $this->middleware('permission:update filter')->only(['update', 'setCategories']);
         $this->middleware('permission:delete filter')->only('delete');
@@ -42,6 +42,14 @@ class FilterController extends Controller
         $categoryId = (int) $request->query('category_id', 0);
 
         return $this->service->categoryFilters($categoryId);
+    }
+
+    /**
+     * One page of the values a dynamic filter takes among the products.
+     */
+    public function values(Request $request)
+    {
+        return $this->service->values($request);
     }
 
     /**

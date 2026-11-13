@@ -42,6 +42,14 @@ class ProductController extends Controller
         return $this->service->filters($request);
     }
 
+    /**
+     * One page of a single filter facet (brands, colours or sizes).
+     */
+    public function facetValues(Request $request)
+    {
+        return $this->service->facetValues($request);
+    }
+
     public function add(ProductAddRequest $request)
     {
         return $this->service->add($request);

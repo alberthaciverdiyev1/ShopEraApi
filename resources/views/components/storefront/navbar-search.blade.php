@@ -1,4 +1,9 @@
-<div class="navbar-search-wrapper expanded" data-sf-search>
+<div class="navbar-search-wrapper" data-sf-search>
+    <button type="button" class="search-trigger-btn" data-sf-search-toggle
+            aria-label="Məhsul axtar" title="Axtar" aria-expanded="false">
+        <i class="fal fa-search"></i>
+    </button>
+
     <div class="search-bar-inline">
         <form class="search-form" action="/shop" method="GET" role="search" data-sf-search-form>
             <i class="fal fa-search search-form-icon"></i>
@@ -17,6 +22,11 @@
             <button type="button" class="search-clear-btn" aria-label="Təmizlə" title="Təmizlə"
                     data-sf-search-clear hidden>
                 <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <button type="button" class="search-close-btn" aria-label="Bağla" title="Bağla"
+                    data-sf-search-close>
+                <i class="fa-regular fa-times"></i>
             </button>
 
             <button type="submit" class="search-submit-btn">Axtar</button>

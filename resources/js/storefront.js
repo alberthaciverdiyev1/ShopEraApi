@@ -159,23 +159,26 @@ if (siteHeader) {
 }
 
 /* Shop filters: selects and radios submit the GET form immediately, except in
-   the mobile drawer, where the footer button applies all choices at once. */
-document.querySelectorAll('[data-sf-auto-submit]').forEach((input) => {
-    input.addEventListener('change', () => {
-        const form = input.closest('form');
+   the mobile drawer, where the footer button applies all choices at once.
+   Delegated so options loaded later (see "show more") work too. */
+document.addEventListener('change', (event) => {
+    const input = event.target.closest('[data-sf-auto-submit]');
 
-        if (!form) return;
+    if (!input) return;
 
-        if (window.matchMedia(MOBILE_SHOP_QUERY).matches && input.closest('.sf-shop__sidebar')) {
-            return;
-        }
+    const form = input.closest('form');
 
-        const page = form.querySelector('input[name="page"]');
+    if (!form) return;
 
-        if (page) page.value = '1';
+    if (window.matchMedia(MOBILE_SHOP_QUERY).matches && input.closest('.sf-shop__sidebar')) {
+        return;
+    }
 
-        form.submit();
-    });
+    const page = form.querySelector('input[name="page"]');
+
+    if (page) page.value = '1';
+
+    form.submit();
 });
 
 /* Mobile quick filters: one select per facet, navigation keeps the other params. */
@@ -277,21 +280,154 @@ document.querySelectorAll('[data-sf-sidebar-close]').forEach((element) => {
     element.addEventListener('click', () => setSidebarOpen(false));
 });
 
-/* Filter sections: reveal the options hidden behind "show more". */
+/* Filter sections: long facets fetch their next page from the server; fixed
+   option lists only reveal their hidden entries. */
+const facetOptionInputName = (facet, filterSlug) => {
+    if (facet === 'brands') return 'brands[]';
+    if (facet === 'colors') return 'colors[]';
+    if (facet === 'sizes') return 'sizes[]';
+
+    return `filters[${filterSlug}][]`;
+};
+
+const facetLocalized = (value) => {
+    if (value && typeof value === 'object' && !Array.isArray(value)) {
+        return value.az ?? value.en ?? Object.values(value)[0] ?? '';
+    }
+
+    return value ?? '';
+};
+
+const buildFacetOption = (facet, item, filterSlug) => {
+    const rawValue = item.slug ?? item.value ?? item.id ?? '';
+    const value = String(rawValue);
+    const name = String(facetLocalized(item.name ?? rawValue));
+    const count = Number(item.products_count ?? 0);
+    const label = document.createElement('label');
+    const input = document.createElement('input');
+
+    input.type = 'checkbox';
+    input.name = facetOptionInputName(facet, filterSlug);
+    input.value = value;
+    input.setAttribute('data-sf-auto-submit', '');
+    label.appendChild(input);
+
+    if (facet === 'sizes') {
+        label.className = 'sf-size-option';
+
+        const text = document.createElement('span');
+        text.textContent = name;
+        label.appendChild(text);
+
+        const badge = document.createElement('span');
+        badge.className = 'sf-size-option__count';
+        badge.textContent = String(count);
+        label.appendChild(badge);
+    } else {
+        label.className = 'sf-filter-option';
+
+        const text = document.createElement('span');
+        text.className = 'sf-filter-option__text';
+
+        if (facet === 'colors') {
+            const swatch = document.createElement('span');
+            swatch.className = 'sf-swatch';
+            swatch.style.backgroundColor = item.hex ?? '#cccccc';
+            text.appendChild(swatch);
+        }
+
+        text.appendChild(document.createTextNode(name));
+        label.appendChild(text);
+
+        const badge = document.createElement('span');
+        badge.className = 'sf-filter-option__count';
+        badge.textContent = String(count);
+        label.appendChild(badge);
+    }
+
+    return label;
+};
+
 document.querySelectorAll('[data-sf-show-more]').forEach((button) => {
     const card = button.closest('.sf-filter-card');
     if (!card) return;
 
-    button.addEventListener('click', () => {
-        const extras = [...card.querySelectorAll('[data-sf-extra]')];
-        const expanded = button.getAttribute('aria-expanded') === 'true';
-        extras.forEach((option) => {
-            option.hidden = expanded;
+    const facet = button.dataset.sfFacet;
+
+    if (!facet) {
+        button.addEventListener('click', () => {
+            const extras = [...card.querySelectorAll('[data-sf-extra]')];
+            const expanded = button.getAttribute('aria-expanded') === 'true';
+            extras.forEach((option) => {
+                option.hidden = expanded;
+            });
+            button.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+            button.textContent = expanded
+                ? (button.dataset.moreLabel ?? 'Daha çox göstər')
+                : (button.dataset.lessLabel ?? 'Daha az göstər');
         });
-        button.setAttribute('aria-expanded', expanded ? 'false' : 'true');
-        button.textContent = expanded
-            ? (button.dataset.moreLabel ?? 'Daha çox göstər')
-            : (button.dataset.lessLabel ?? 'Daha az göstər');
+
+        return;
+    }
+
+    button.addEventListener('click', async () => {
+        const container = card.querySelector('.sf-filter-options, .sf-size-grid');
+        if (!container) return;
+
+        const slug = button.dataset.sfSlug ?? '';
+        const page = Number(button.dataset.sfPage ?? '2');
+        const perPage = Number(button.dataset.sfPerPage ?? '10');
+        const params = new URLSearchParams({
+            facet,
+            page: String(page),
+            per_page: String(perPage),
+        });
+
+        if (button.dataset.sfCategory) params.set('category', button.dataset.sfCategory);
+        if (facet === 'filter') params.set('slug', slug);
+
+        button.disabled = true;
+
+        try {
+            const response = await fetch(`/shop/filters/values?${params.toString()}`, {
+                headers: { Accept: 'application/json' },
+            });
+
+            if (!response.ok) throw new Error('facet fetch failed');
+
+            const payload = await response.json();
+            const data = payload.data ?? payload;
+            const items = Array.isArray(data.items) ? data.items : [];
+            const inputName = facetOptionInputName(facet, slug);
+
+            items.forEach((item) => {
+                const value = String(item.slug ?? item.value ?? item.id ?? '');
+                if (!value) return;
+
+                const exists = [...container.querySelectorAll('input')]
+                    .some((input) => input.name === inputName && input.value === value);
+                if (exists) return;
+
+                container.appendChild(buildFacetOption(facet, item, slug));
+            });
+
+            const nextPage = page + 1;
+            button.dataset.sfPage = String(nextPage);
+
+            if (data.has_more) {
+                const remaining = Math.max(0, Number(data.total ?? 0) - page * perPage);
+                button.textContent = `Daha çox göstər${remaining ? ` (+${remaining})` : ''}`;
+            } else {
+                button.remove();
+            }
+        } catch (error) {
+            button.hidden = true;
+            card.querySelectorAll('[data-sf-extra]').forEach((option) => {
+                option.hidden = false;
+            });
+        } finally {
+            if (button.isConnected) button.disabled = false;
+        }
     });
 });
 
@@ -623,8 +759,37 @@ if (faq) {
             close();
         });
 
+        const toggle = search.querySelector('[data-sf-search-toggle]');
+        const closeButton = search.querySelector('[data-sf-search-close]');
+
+        const collapse = () => {
+            if (input) input.value = '';
+            close();
+            search.classList.remove('is-open');
+            toggle?.setAttribute('aria-expanded', 'false');
+        };
+
+        const expand = () => {
+            search.classList.add('is-open');
+            toggle?.setAttribute('aria-expanded', 'true');
+            window.setTimeout(() => input?.focus(), 60);
+        };
+
+        toggle?.addEventListener('click', () => {
+            if (search.classList.contains('is-open')) collapse();
+            else expand();
+        });
+
+        closeButton?.addEventListener('click', collapse);
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && search.classList.contains('is-open')) collapse();
+        });
+
         document.addEventListener('click', (event) => {
-            if (!search.contains(event.target)) close();
+            if (search.contains(event.target)) return;
+
+            collapse();
         });
     }
 

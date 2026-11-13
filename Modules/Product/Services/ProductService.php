@@ -376,6 +376,97 @@ class ProductService
     }
 
     /**
+     * One page of a single facet's values so the storefront can load long
+     * filter lists in chunks instead of rendering every option up front.
+     */
+    public function facetValues(Request $request): JsonResponse
+    {
+        $type = (string) $request->query('type', '');
+        $page = max(1, (int) $request->query('page', 1));
+        $perPage = min(50, max(1, (int) $request->query('per_page', 10)));
+        $categoryIds = $request->query('category_ids');
+
+        if (! is_array($categoryIds)) {
+            $categoryIds = [(int) $request->query('category_id', 0)];
+        }
+
+        $categoryIds = array_values(array_filter(array_map('intval', $categoryIds)));
+        $scope = $this->facetScope($categoryIds);
+
+        if ($type === 'brands') {
+            $counts = $scope()
+                ->whereNotNull('brand_id')
+                ->selectRaw('brand_id as id, COUNT(*) as total')
+                ->groupBy('brand_id');
+
+            $query = Brand::query()
+                ->joinSub($counts, 'facet_counts', 'facet_counts.id', '=', 'brands.id')
+                ->select('brands.*', 'facet_counts.total as facet_total');
+
+            $total = (clone $query)->count();
+            $rows = $query->orderBy('brands.name')->forPage($page, $perPage)->get();
+
+            $items = $rows->map(fn ($brand) => array_merge(
+                (new BrandResource($brand))->resolve(),
+                ['products_count' => (int) $brand->facet_total]
+            ))->values();
+        } elseif ($type === 'colors' || $type === 'sizes') {
+            $pivot = $type === 'colors' ? 'color_product' : 'product_size';
+            $column = $type === 'colors' ? 'color_id' : 'size_id';
+            $table = $type === 'colors' ? 'colors' : 'sizes';
+            $model = $type === 'colors' ? Color::query() : Size::query();
+            $resource = $type === 'colors' ? ColorResource::class : SizeResource::class;
+
+            $counts = $scope()
+                ->join($pivot, $pivot.'.product_id', '=', 'products.id')
+                ->selectRaw($pivot.'.'.$column.' as id, COUNT(DISTINCT products.id) as total')
+                ->groupBy($pivot.'.'.$column);
+
+            $query = $model
+                ->joinSub($counts, 'facet_counts', 'facet_counts.id', '=', $table.'.id')
+                ->select($table.'.*', 'facet_counts.total as facet_total');
+
+            $total = (clone $query)->count();
+            $rows = $query
+                ->orderBy($table.'.sort_order')
+                ->orderBy($table.'.id')
+                ->forPage($page, $perPage)
+                ->get();
+
+            $items = $rows->map(fn ($row) => array_merge(
+                (new $resource($row))->resolve(),
+                ['products_count' => (int) $row->facet_total]
+            ))->values();
+        } else {
+            return responseHelper(__('Unknown filter facet.'), 422, []);
+        }
+
+        return responseHelper(__('Filter values retrieved successfully.'), 200, [
+            'items' => $items,
+            'page' => $page,
+            'per_page' => $perPage,
+            'total' => $total,
+            'has_more' => $page * $perPage < $total,
+        ]);
+    }
+
+    /**
+     * Public products restricted to the requested categories and their children.
+     */
+    private function facetScope(array $categoryIds): callable
+    {
+        return function () use ($categoryIds) {
+            $query = Product::query()->publiclyAvailable();
+
+            if ($categoryIds !== []) {
+                $query->whereIn('category_id', $this->categoryWithDescendants($categoryIds));
+            }
+
+            return $query;
+        };
+    }
+
+    /**
      * A category plus every descendant category id.
      */
     private function categoryWithDescendants(array $ids): array

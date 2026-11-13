@@ -268,8 +268,18 @@
             $values = ! empty($filter['options']) ? $filter['options'] : ($filter['values'] ?? []);
             $values = array_values(array_unique(array_filter($values)));
             $picked = array_map('strval', $selectedDynamicFor($filter));
-            $extraValues = collect($values)->skip(10)
-                ->reject(fn ($value) => in_array((string) $value, $picked, true))->count();
+            // Options are a fixed list; product-driven values can grow, so those
+            // are loaded page by page from the server.
+            $serverValues = empty($filter['options']);
+            $pickedExtras = collect($values)->skip(10)
+                ->filter(fn ($value) => in_array((string) $value, $picked, true))->values();
+            $visibleValues = $serverValues
+                ? collect($values)->take(10)->concat($pickedExtras)->values()
+                : collect($values);
+            $extraValues = $serverValues
+                ? count($values) - $visibleValues->count()
+                : collect($values)->skip(10)
+                    ->reject(fn ($value) => in_array((string) $value, $picked, true))->count();
         @endphp
         @if ($values !== [])
             <details class="sf-filter-card" open>
@@ -278,8 +288,9 @@
                     <i class="fa-solid fa-chevron-down sf-filter-head__chevron"></i>
                 </summary>
                 <div class="sf-filter-options sf-filter-options--check">
-                    @foreach ($values as $index => $value)
-                        <label class="sf-filter-option" @if ($index >= 10 && ! in_array((string) $value, $picked, true)) data-sf-extra hidden @endif>
+                    @foreach ($visibleValues as $index => $value)
+                        <label class="sf-filter-option"
+                               @if (! $serverValues && $index >= 10 && ! in_array((string) $value, $picked, true)) data-sf-extra hidden @endif>
                             <input type="checkbox" name="filters[{{ $filter['slug'] ?? $filter['id'] }}][]" value="{{ $value }}"
                                    @checked(in_array((string) $value, $picked, true)) data-sf-auto-submit>
                             <span class="sf-filter-option__text">{{ $value }}</span>
@@ -288,6 +299,13 @@
                 </div>
                 @if ($extraValues > 0)
                     <button type="button" class="sf-filter-more" data-sf-show-more
+                            @if ($serverValues)
+                                data-sf-facet="filter"
+                                data-sf-slug="{{ $filter['slug'] ?? $filter['id'] }}"
+                                data-sf-page="2"
+                                data-sf-per-page="10"
+                                data-sf-category="{{ $categoryId ?? '' }}"
+                            @endif
                             data-more-label="Daha çox göstər (+{{ $extraValues }})"
                             data-less-label="Daha az göstər">Daha çox göstər (+{{ $extraValues }})</button>
                 @endif
@@ -297,8 +315,12 @@
 
     @if (! empty($facets['brands']))
         @php
-            $extraBrands = collect($facets['brands'])->skip(10)
-                ->reject(fn ($brand) => in_array((string) ($brand['slug'] ?? $brand['id']), $selectedBrands, true))->count();
+            $brandTotal = count($facets['brands']);
+            $visibleBrands = collect($facets['brands'])->take(10)
+                ->concat(collect($facets['brands'])->skip(10)
+                    ->filter(fn ($brand) => in_array((string) ($brand['slug'] ?? $brand['id']), $selectedBrands, true)))
+                ->values();
+            $extraBrands = $brandTotal - $visibleBrands->count();
         @endphp
         <details class="sf-filter-card" open>
             <summary class="sf-filter-head">
@@ -306,9 +328,9 @@
                 <i class="fa-solid fa-chevron-down sf-filter-head__chevron"></i>
             </summary>
             <div class="sf-filter-options">
-                @foreach ($facets['brands'] as $index => $brand)
+                @foreach ($visibleBrands as $brand)
                     @php $brandValue = (string) ($brand['slug'] ?? $brand['id']); @endphp
-                    <label class="sf-filter-option" @if ($index >= 10 && ! in_array($brandValue, $selectedBrands, true)) data-sf-extra hidden @endif>
+                    <label class="sf-filter-option">
                         <input type="checkbox" name="brands[]" value="{{ $brandValue }}"
                                @checked(in_array($brandValue, $selectedBrands, true)) data-sf-auto-submit>
                         <span class="sf-filter-option__text">
@@ -323,16 +345,23 @@
             </div>
             @if ($extraBrands > 0)
                 <button type="button" class="sf-filter-more" data-sf-show-more
-                        data-more-label="Daha çox göstər (+{{ $extraBrands }})"
-                        data-less-label="Daha az göstər">Daha çox göstər (+{{ $extraBrands }})</button>
+                        data-sf-facet="brands"
+                        data-sf-page="2"
+                        data-sf-per-page="10"
+                        data-sf-category="{{ $categoryId ?? '' }}"
+                        data-more-label="Daha çox göstər (+{{ $extraBrands }})">Daha çox göstər (+{{ $extraBrands }})</button>
             @endif
         </details>
     @endif
 
     @if (! empty($facets['colors']))
         @php
-            $extraColors = collect($facets['colors'])->skip(10)
-                ->reject(fn ($color) => in_array((string) ($color['slug'] ?? $color['id']), $selectedColors, true))->count();
+            $colorTotal = count($facets['colors']);
+            $visibleColors = collect($facets['colors'])->take(10)
+                ->concat(collect($facets['colors'])->skip(10)
+                    ->filter(fn ($color) => in_array((string) ($color['slug'] ?? $color['id']), $selectedColors, true)))
+                ->values();
+            $extraColors = $colorTotal - $visibleColors->count();
         @endphp
         <details class="sf-filter-card" open>
             <summary class="sf-filter-head">
@@ -340,9 +369,9 @@
                 <i class="fa-solid fa-chevron-down sf-filter-head__chevron"></i>
             </summary>
             <div class="sf-filter-options">
-                @foreach ($facets['colors'] as $index => $color)
+                @foreach ($visibleColors as $color)
                     @php $colorValue = (string) ($color['slug'] ?? $color['id']); @endphp
-                    <label class="sf-filter-option" @if ($index >= 10 && ! in_array($colorValue, $selectedColors, true)) data-sf-extra hidden @endif>
+                    <label class="sf-filter-option">
                         <input type="checkbox" name="colors[]" value="{{ $colorValue }}"
                                @checked(in_array($colorValue, $selectedColors, true)) data-sf-auto-submit>
                         <span class="sf-filter-option__text">
@@ -355,16 +384,23 @@
             </div>
             @if ($extraColors > 0)
                 <button type="button" class="sf-filter-more" data-sf-show-more
-                        data-more-label="Daha çox göstər (+{{ $extraColors }})"
-                        data-less-label="Daha az göstər">Daha çox göstər (+{{ $extraColors }})</button>
+                        data-sf-facet="colors"
+                        data-sf-page="2"
+                        data-sf-per-page="10"
+                        data-sf-category="{{ $categoryId ?? '' }}"
+                        data-more-label="Daha çox göstər (+{{ $extraColors }})">Daha çox göstər (+{{ $extraColors }})</button>
             @endif
         </details>
     @endif
 
     @if (! empty($facets['sizes']))
         @php
-            $extraSizes = collect($facets['sizes'])->skip(12)
-                ->reject(fn ($size) => in_array((string) ($size['slug'] ?? $size['id']), $selectedSizes, true))->count();
+            $sizeTotal = count($facets['sizes']);
+            $visibleSizes = collect($facets['sizes'])->take(12)
+                ->concat(collect($facets['sizes'])->skip(12)
+                    ->filter(fn ($size) => in_array((string) ($size['slug'] ?? $size['id']), $selectedSizes, true)))
+                ->values();
+            $extraSizes = $sizeTotal - $visibleSizes->count();
         @endphp
         <details class="sf-filter-card" open>
             <summary class="sf-filter-head">
@@ -372,9 +408,9 @@
                 <i class="fa-solid fa-chevron-down sf-filter-head__chevron"></i>
             </summary>
             <div class="sf-size-grid">
-                @foreach ($facets['sizes'] as $index => $size)
+                @foreach ($visibleSizes as $size)
                     @php $sizeValue = (string) ($size['slug'] ?? $size['id']); @endphp
-                    <label class="sf-size-option" @if ($index >= 12 && ! in_array($sizeValue, $selectedSizes, true)) data-sf-extra hidden @endif>
+                    <label class="sf-size-option">
                         <input type="checkbox" name="sizes[]" value="{{ $sizeValue }}"
                                @checked(in_array($sizeValue, $selectedSizes, true)) data-sf-auto-submit>
                         <span>{{ $size['name'] ?? '—' }}</span>
@@ -384,8 +420,11 @@
             </div>
             @if ($extraSizes > 0)
                 <button type="button" class="sf-filter-more" data-sf-show-more
-                        data-more-label="Daha çox göstər (+{{ $extraSizes }})"
-                        data-less-label="Daha az göstər">Daha çox göstər (+{{ $extraSizes }})</button>
+                        data-sf-facet="sizes"
+                        data-sf-page="2"
+                        data-sf-per-page="12"
+                        data-sf-category="{{ $categoryId ?? '' }}"
+                        data-more-label="Daha çox göstər (+{{ $extraSizes }})">Daha çox göstər (+{{ $extraSizes }})</button>
             @endif
         </details>
     @endif
