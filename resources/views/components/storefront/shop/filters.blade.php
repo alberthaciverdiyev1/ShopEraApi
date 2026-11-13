@@ -245,6 +245,41 @@
         </details>
     @endif
 
+    @foreach ($dynamicFilters as $filter)
+        @php
+            $title = is_array($filter['title'] ?? null)
+                ? ($filter['title']['az'] ?? reset($filter['title']))
+                : ($filter['title'] ?? 'Parametr');
+            $values = ! empty($filter['options']) ? $filter['options'] : ($filter['values'] ?? []);
+            $values = array_values(array_unique(array_filter($values)));
+            $picked = array_map('strval', (array) ($selectedDynamic[$filter['id']] ?? []));
+            $extraValues = collect($values)->skip(10)
+                ->reject(fn ($value) => in_array((string) $value, $picked, true))->count();
+        @endphp
+        @if ($values !== [])
+            <details class="sf-filter-card" open>
+                <summary class="sf-filter-head">
+                    <span>{{ $title }}</span>
+                    <i class="fa-solid fa-chevron-down sf-filter-head__chevron"></i>
+                </summary>
+                <div class="sf-filter-options sf-filter-options--check">
+                    @foreach ($values as $index => $value)
+                        <label class="sf-filter-option" @if ($index >= 10 && ! in_array((string) $value, $picked, true)) data-sf-extra hidden @endif>
+                            <input type="checkbox" name="filters[{{ $filter['id'] }}][]" value="{{ $value }}"
+                                   @checked(in_array((string) $value, $picked, true)) data-sf-auto-submit>
+                            <span class="sf-filter-option__text">{{ $value }}</span>
+                        </label>
+                    @endforeach
+                </div>
+                @if ($extraValues > 0)
+                    <button type="button" class="sf-filter-more" data-sf-show-more
+                            data-more-label="Daha çox göstər (+{{ $extraValues }})"
+                            data-less-label="Daha az göstər">Daha çox göstər (+{{ $extraValues }})</button>
+                @endif
+            </details>
+        @endif
+    @endforeach
+
     @if (! empty($facets['brands']))
         @php
             $extraBrands = collect($facets['brands'])->skip(10)
@@ -336,41 +371,6 @@
             @endif
         </details>
     @endif
-
-    @foreach ($dynamicFilters as $filter)
-        @php
-            $title = is_array($filter['title'] ?? null)
-                ? ($filter['title']['az'] ?? reset($filter['title']))
-                : ($filter['title'] ?? 'Parametr');
-            $values = ! empty($filter['options']) ? $filter['options'] : ($filter['values'] ?? []);
-            $values = array_values(array_unique(array_filter($values)));
-            $picked = array_map('strval', (array) ($selectedDynamic[$filter['id']] ?? []));
-            $extraValues = collect($values)->skip(10)
-                ->reject(fn ($value) => in_array((string) $value, $picked, true))->count();
-        @endphp
-        @if ($values !== [])
-            <details class="sf-filter-card" open>
-                <summary class="sf-filter-head">
-                    <span>{{ $title }}</span>
-                    <i class="fa-solid fa-chevron-down sf-filter-head__chevron"></i>
-                </summary>
-                <div class="sf-filter-options sf-filter-options--check">
-                    @foreach ($values as $index => $value)
-                        <label class="sf-filter-option" @if ($index >= 10 && ! in_array((string) $value, $picked, true)) data-sf-extra hidden @endif>
-                            <input type="checkbox" name="filters[{{ $filter['id'] }}][]" value="{{ $value }}"
-                                   @checked(in_array((string) $value, $picked, true)) data-sf-auto-submit>
-                            <span class="sf-filter-option__text">{{ $value }}</span>
-                        </label>
-                    @endforeach
-                </div>
-                @if ($extraValues > 0)
-                    <button type="button" class="sf-filter-more" data-sf-show-more
-                            data-more-label="Daha çox göstər (+{{ $extraValues }})"
-                            data-less-label="Daha az göstər">Daha çox göstər (+{{ $extraValues }})</button>
-                @endif
-            </details>
-        @endif
-    @endforeach
 
     <div class="sf-filter-actions">
         <button type="submit" class="sf-btn sf-btn--primary">Nəticələri göstər</button>

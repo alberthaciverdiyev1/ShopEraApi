@@ -38,11 +38,8 @@ class FilterController extends Controller
      */
     public function categoryFilters(Request $request)
     {
+        // A zero id returns the filters shared across the catalog.
         $categoryId = (int) $request->query('category_id', 0);
-
-        if ($categoryId <= 0) {
-            return responseHelper(__('The category_id field is required.'), 422, []);
-        }
 
         return $this->service->categoryFilters($categoryId);
     }

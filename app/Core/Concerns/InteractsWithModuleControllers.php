@@ -136,13 +136,11 @@ trait InteractsWithModuleControllers
 
     protected function storefrontCategoryFilters(?int $categoryId): array
     {
-        if (! $categoryId) {
-            return [];
-        }
-
+        // A zero id asks the filter module for the filters that apply to the
+        // whole catalog, so the unfiltered shop page is not bare.
         $payload = $this->payload(
             app(FilterController::class)->categoryFilters(
-                $this->moduleHttpRequest(['category_id' => $categoryId])
+                $this->moduleHttpRequest(['category_id' => $categoryId ?? 0])
             )
         );
 

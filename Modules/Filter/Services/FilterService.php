@@ -39,6 +39,10 @@ class FilterService
      */
     public function categoryFilters(int $categoryId): JsonResponse
     {
+        if ($categoryId <= 0) {
+            return $this->commonFilters();
+        }
+
         $category = Category::query()->find($categoryId);
 
         $categoryIds = $category
@@ -78,6 +82,30 @@ class FilterService
         $filters->each(function (Filter $filter) use ($values) {
             $filter->values = $values->get($filter->id, []);
         });
+
+        return responseHelper(__('Filters retrieved successfully.'), 200, FilterResource::collection($filters));
+    }
+
+    /**
+     * Filters shared by most of the catalog (material, season, fit, …), shown
+     * on the shop page before a category is picked.
+     */
+    private function commonFilters(): JsonResponse
+    {
+        $commonIds = CategoryFilter::query()
+            ->select('filter_id')
+            ->groupBy('filter_id')
+            ->havingRaw('count(*) >= 4')
+            ->pluck('filter_id')
+            ->all();
+
+        $filters = $this->model->query()
+            ->whereIn('id', $commonIds)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
+
+        $filters->each(fn (Filter $filter) => $filter->values = []);
 
         return responseHelper(__('Filters retrieved successfully.'), 200, FilterResource::collection($filters));
     }
