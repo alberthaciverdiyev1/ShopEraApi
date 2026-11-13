@@ -7828,56 +7828,20 @@ a.sf-seller-link {
 
 /* The listing form is a wizard: one section at a time, with a compact
    progress rail and Geri / Növbəti buttons pinned to the bottom. */
-.elan-wizard {
-    display: flex;
+.elan-steps--wizard {
+    max-width: 980px;
     flex-wrap: wrap;
-    align-items: center;
-    gap: 8px 18px;
-    margin: 0 0 18px;
-    padding: 0;
-    list-style: none;
+    justify-content: center;
+    row-gap: 10px;
     scroll-margin-top: 84px;
 }
 
-.elan-wizard__step {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #94a3b8;
+.elan-steps--wizard .elan-bar {
+    min-width: 18px;
+}
+
+.elan-steps--wizard .elan-step {
     font-size: 13.5px;
-    font-weight: 700;
-}
-
-.elan-wizard__step .dot {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    background: #e2e8f0;
-    color: #64748b;
-    font-size: 12.5px;
-    font-weight: 700;
-}
-
-.elan-wizard__step.is-active {
-    color: #0f172a;
-}
-
-.elan-wizard__step.is-active .dot {
-    background: var(--sf-theme);
-    color: #fff;
-    box-shadow: 0 0 0 4px color-mix(in srgb, var(--sf-theme) 18%, transparent);
-}
-
-.elan-wizard__step.is-done {
-    color: #16a34a;
-}
-
-.elan-wizard__step.is-done .dot {
-    background: #16a34a;
-    color: #fff;
 }
 
 /* `.theme-btn` sets its own display, which would defeat the hidden attribute. */
@@ -7908,13 +7872,24 @@ a.sf-seller-link {
     min-width: 170px;
 }
 
-@media (max-width: 640px) {
-    .elan-wizard {
-        gap: 6px 10px;
+@media (max-width: 760px) {
+    .elan-steps--wizard {
+        gap: 6px;
+        flex-wrap: nowrap;
     }
 
-    .elan-wizard__step .label {
+    .elan-steps--wizard .elan-step .label {
         display: none;
+    }
+
+    .elan-steps--wizard .elan-step .dot {
+        width: 24px;
+        height: 24px;
+        font-size: 12px;
+    }
+
+    .elan-steps--wizard .elan-bar {
+        min-width: 6px;
     }
 
     .elan-wizard-actions [data-sf-wizard-next],

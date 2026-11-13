@@ -1835,6 +1835,7 @@ document.querySelectorAll('[data-sf-dash-tab]').forEach((trigger) => {
 
     const rail = document.querySelector('[data-sf-wizard-progress]');
     const dots = [...document.querySelectorAll('[data-sf-wizard-dot]')];
+    const bars = [...document.querySelectorAll('[data-sf-wizard-bar]')];
     const prev = form.querySelector('[data-sf-wizard-prev]');
     const next = form.querySelector('[data-sf-wizard-next]');
     const submit = form.querySelector('[data-sf-wizard-submit]');
@@ -1850,8 +1851,12 @@ document.querySelectorAll('[data-sf-dash-tab]').forEach((trigger) => {
             step.hidden = n !== index;
         });
         dots.forEach((dot, n) => {
-            dot.classList.toggle('is-active', n === index);
-            dot.classList.toggle('is-done', n < index);
+            dot.classList.toggle('active', n === index);
+            dot.classList.toggle('done', n < index);
+        });
+        // The bar before each step fills once that step has been reached.
+        bars.forEach((bar, n) => {
+            bar.classList.toggle('filled', n <= index);
         });
 
         if (prev) prev.hidden = index === 0;

@@ -52,15 +52,30 @@
                 <h1>Elan yerləşdir</h1>
             </header>
 
-            <div class="elan-steps">
-                <div class="elan-step {{ $selected ? 'done' : 'active' }}">
-                    <span class="dot">{{ $selected ? '✓' : '1' }}</span><span>Kateqoriya</span>
+            @if ($isLeaf && ! $published)
+                {{-- The form wizard's steps live in the page header rail. --}}
+                <div class="elan-steps elan-steps--wizard" data-sf-wizard-progress>
+                    <div class="elan-step done">
+                        <span class="dot">✓</span><span class="label">Kateqoriya</span>
+                    </div>
+                    @foreach ($wizardLabels as $i => $label)
+                        <div class="elan-bar" data-sf-wizard-bar="{{ $i }}"></div>
+                        <div class="elan-step {{ $i === 0 ? 'active' : '' }}" data-sf-wizard-dot="{{ $i }}">
+                            <span class="dot">{{ $i + 1 }}</span><span class="label">{{ $label }}</span>
+                        </div>
+                    @endforeach
                 </div>
-                <div class="elan-bar {{ $selected ? 'filled' : '' }}"></div>
-                <div class="elan-step {{ $selected ? 'active' : '' }}">
-                    <span class="dot">2</span><span>Elan məlumatları</span>
+            @else
+                <div class="elan-steps">
+                    <div class="elan-step {{ $selected ? 'done' : 'active' }}">
+                        <span class="dot">{{ $selected ? '✓' : '1' }}</span><span>Kateqoriya</span>
+                    </div>
+                    <div class="elan-bar {{ $selected ? 'filled' : '' }}"></div>
+                    <div class="elan-step {{ $selected ? 'active' : '' }}">
+                        <span class="dot">2</span><span>Elan məlumatları</span>
+                    </div>
                 </div>
-            </div>
+            @endif
 
             @if ($published)
                 <div class="elan-success">
@@ -147,15 +162,6 @@
                         </ul>
                     </div>
                 @endif
-
-                <ol class="elan-wizard" data-sf-wizard-progress>
-                    @foreach ($wizardLabels as $i => $label)
-                        <li class="elan-wizard__step {{ $i === 0 ? 'is-active' : '' }}" data-sf-wizard-dot="{{ $i }}">
-                            <span class="dot">{{ $i + 1 }}</span>
-                            <span class="label">{{ $label }}</span>
-                        </li>
-                    @endforeach
-                </ol>
 
                 <form action="{{ route('storefront.listings.store') }}" method="POST" enctype="multipart/form-data"
                       class="elan-form"
