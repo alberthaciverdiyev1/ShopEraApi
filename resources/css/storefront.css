@@ -327,11 +327,9 @@
 
 .sf-category-card {
     position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    display: block;
     height: 124px;
-    padding: 12px 10px 8px;
+    padding: 0;
     overflow: hidden;
     border-radius: var(--sf-radius);
     background-color: var(--card-bg, #f1f5f9);
@@ -340,55 +338,72 @@
     transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1), box-shadow 0.2s ease;
 }
 
+/* Top shade so the category name stays readable over any photo. */
+.sf-category-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.62) 0%, rgba(15, 23, 42, 0.28) 34%, rgba(15, 23, 42, 0) 66%);
+    pointer-events: none;
+}
+
 .sf-category-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
 }
 
 .sf-category-card__name {
-    position: relative;
+    position: absolute;
+    top: 12px;
+    right: 10px;
+    left: 10px;
     z-index: 2;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
     line-clamp: 2;
     overflow: hidden;
-    color: #1e2530;
+    color: #ffffff;
     font-size: 13px;
     font-weight: 600;
     line-height: 1.25;
+    text-shadow: 0 1px 3px rgba(15, 23, 42, 0.45);
     word-break: break-word;
 }
 
+/* The photo fills the whole card behind the label. */
 .sf-category-card__thumb {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: flex-end;
-    justify-content: flex-end;
-    align-self: flex-end;
-    width: 64px;
-    height: 64px;
-    margin-top: auto;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
 }
 
 .sf-category-card__thumb img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    object-fit: cover;
     display: block;
-    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.08));
-    transition: transform 0.25s ease;
+    transition: transform 0.3s ease;
 }
 
 .sf-category-card__thumb i {
-    margin: 0 4px 4px 0;
-    font-size: 32px;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 42px;
     color: rgba(30, 41, 59, 0.25);
 }
 
 .sf-category-card:hover .sf-category-card__thumb img {
-    transform: scale(1.08);
+    transform: scale(1.06);
 }
 
 /* ------------------------------------------------------------------ */
@@ -1203,12 +1218,13 @@
 
     .sf-category-card {
         height: 118px;
-        padding: 10px 8px 6px;
+        padding: 0;
     }
 
-    .sf-category-card__thumb {
-        width: 58px;
-        height: 58px;
+    .sf-category-card__name {
+        top: 10px;
+        right: 8px;
+        left: 8px;
     }
 }
 
@@ -1303,18 +1319,16 @@
     }
 
     .sf-category-card {
-        height: 98px;
-        padding: 8px 6px 4px;
+        height: 104px;
+        padding: 0;
         border-radius: 12px;
     }
 
     .sf-category-card__name {
-        font-size: 12px;
-    }
-
-    .sf-category-card__thumb {
-        width: 46px;
-        height: 46px;
+        top: 8px;
+        right: 7px;
+        left: 7px;
+        font-size: 11.5px;
     }
 
     .sf-product-grid {
@@ -3967,6 +3981,197 @@
     .header-main .header-right {
         gap: 12px;
     }
+}
+
+/* ------------------------------------------------------------------ */
+/* Custom selects                                                      */
+/* The native <select> keeps the value; this listbox is the visible UI. */
+/* ------------------------------------------------------------------ */
+
+.sf-select {
+    position: relative;
+    display: block;
+    width: 100%;
+}
+
+.sf-select__native {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.sf-select__trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #1e2532;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sf-select__trigger:hover {
+    border-color: #cbd5e1;
+}
+
+.sf-select.is-open .sf-select__trigger {
+    border-color: var(--theme);
+    box-shadow: 0 0 0 3px rgba(var(--theme-rgb), 0.08);
+}
+
+.sf-select__value {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sf-select__chevron {
+    flex: none;
+    font-size: 11px;
+    color: #8b95a5;
+    transition: transform 0.15s ease;
+}
+
+.sf-select.is-open .sf-select__chevron {
+    transform: rotate(180deg);
+}
+
+.sf-select__menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 1200;
+    min-width: max(100%, 220px);
+    max-width: min(320px, calc(100vw - 32px));
+    max-height: 300px;
+    margin: 0;
+    padding: 6px;
+    overflow-y: auto;
+    border: 1px solid #edf0f5;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16);
+    list-style: none;
+}
+
+.sf-select__menu[hidden] {
+    display: none !important;
+}
+
+/* Menus are portaled to <body> and positioned with inline styles so that
+   scroll containers (e.g. the mobile quick-filter pills) cannot clip them. */
+.sf-select__menu--portal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    min-width: 0;
+    max-width: none;
+}
+
+.sf-select__option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 12px;
+    border-radius: 9px;
+    color: #334155;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+}
+
+.sf-select__option > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sf-select__option:hover,
+.sf-select__option:focus-visible {
+    background: #f6f8fb;
+    color: #0f172a;
+}
+
+.sf-select__option.is-selected {
+    background: #fff7f3;
+    color: var(--theme);
+    font-weight: 600;
+}
+
+.sf-select__check {
+    flex: none;
+    font-size: 11px;
+    opacity: 0;
+}
+
+.sf-select__option.is-selected .sf-select__check {
+    opacity: 1;
+}
+
+.sf-select__option.is-disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* Inline variant inside the mobile quick-filter pills. */
+.trendyol-pill-select.is-enhanced {
+    padding: 0 12px;
+}
+
+.trendyol-pill-select.is-enhanced > span:first-child,
+.trendyol-pill-select.is-enhanced > .pill-chevron {
+    display: none;
+}
+
+.sf-select--inline {
+    display: inline-flex;
+    width: auto;
+}
+
+.sf-select--inline .sf-select__trigger {
+    gap: 6px;
+    width: auto;
+    min-height: 0;
+    height: 30px;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    font-size: 12.5px;
+    font-weight: 500;
+    box-shadow: none;
+}
+
+.sf-select--inline.is-open .sf-select__trigger {
+    box-shadow: none;
+}
+
+.sf-select--inline .sf-select__chevron {
+    font-size: 10px;
+    color: inherit;
+}
+
+.sf-select--inline .sf-select__menu:not(.sf-select__menu--portal) {
+    top: calc(100% + 12px);
+    min-width: 220px;
 }
 
 /* ------------------------------------------------------------------ */

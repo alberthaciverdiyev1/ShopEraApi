@@ -2,5 +2,7 @@
 - [x] filterlerde daha cox goster dedikde indi sadece front tarafda hidden olan aciliyor. bunu backende bagla. simdi cok az filter var. gelecekde cok oldugu zaman performans sorunu yasayacagiz. pagination ile olsun
 - [x] search yeri svelte ile birebirde yazilacak. hep acik kalmasin
 - [x] mobilde yukaridaki navbar bu sekilde olsun. search kismi logo ile justify between yapilacak. search icin buton olmasin. yazdikca arasin
-- [] selectler guzel ama optionlari hic guzel degil. sen oyle yap ki optionlar da sitenin tasarimina uygun olsun
+- [x] selectler guzel ama optionlari hic guzel degil. sen oyle yap ki optionlar da sitenin tasarimina uygun olsun
+- [x] ana sayfada olan category cardlarinin icinde olan fotograflar full icini doldursun ve yazilari okumak icin yukaridan biraz shadow ver
+- [x] ana sayfada her categoryden icinde olan productlardan 10 tane goster
 - 

@@ -212,6 +212,162 @@ document.querySelectorAll('[data-sf-quick]').forEach((select) => {
     });
 });
 
+/* Custom selects: the native element still holds the value and submits with
+   the form, while a listbox matching the storefront design is rendered on
+   top. Multi-selects and opt-outs stay native. */
+document.querySelectorAll('select').forEach((select) => {
+    if (select.multiple || select.dataset.sfNative !== undefined || select.closest('.sf-select')) return;
+
+    const options = Array.from(select.options);
+
+    if (!options.length) return;
+
+    const inline = select.closest('.trendyol-pill-select');
+    const root = document.createElement('div');
+    root.className = 'sf-select' + (inline ? ' sf-select--inline' : '');
+
+    select.parentNode.insertBefore(root, select);
+    root.appendChild(select);
+    select.classList.add('sf-select__native');
+    select.tabIndex = -1;
+    select.setAttribute('aria-hidden', 'true');
+
+    const trigger = document.createElement('button');
+    trigger.type = 'button';
+    trigger.className = 'sf-select__trigger';
+    trigger.setAttribute('aria-haspopup', 'listbox');
+    trigger.setAttribute('aria-expanded', 'false');
+
+    const valueEl = document.createElement('span');
+    valueEl.className = 'sf-select__value';
+    trigger.appendChild(valueEl);
+
+    const chevron = document.createElement('i');
+    chevron.className = 'fa-regular fa-chevron-down sf-select__chevron';
+    chevron.setAttribute('aria-hidden', 'true');
+    trigger.appendChild(chevron);
+    root.appendChild(trigger);
+
+    // The menu lives on <body> in a fixed layer so scroll containers (the
+    // filter sidebar, the quick-filter strip) cannot clip it.
+    const menu = document.createElement('ul');
+    menu.className = 'sf-select__menu sf-select__menu--portal';
+    menu.setAttribute('role', 'listbox');
+    menu.hidden = true;
+    document.body.appendChild(menu);
+
+    const items = options.map((option, index) => {
+        const item = document.createElement('li');
+        item.className = 'sf-select__option';
+        item.setAttribute('role', 'option');
+        item.tabIndex = -1;
+
+        const text = document.createElement('span');
+        text.textContent = option.textContent.trim();
+        item.appendChild(text);
+
+        const check = document.createElement('i');
+        check.className = 'fa-solid fa-check sf-select__check';
+        check.setAttribute('aria-hidden', 'true');
+        item.appendChild(check);
+
+        if (option.disabled) item.classList.add('is-disabled');
+
+        item.addEventListener('click', () => {
+            if (option.disabled) return;
+
+            select.selectedIndex = index;
+            sync();
+            toggle(false);
+            trigger.focus();
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+
+        menu.appendChild(item);
+
+        return item;
+    });
+
+    function sync() {
+        const selected = select.options[select.selectedIndex];
+        valueEl.textContent = selected ? selected.textContent.trim() : '';
+        trigger.disabled = select.disabled;
+
+        items.forEach((item, index) => {
+            const isSelected = index === select.selectedIndex;
+            item.classList.toggle('is-selected', isSelected);
+            item.setAttribute('aria-selected', String(isSelected));
+        });
+    }
+
+    function positionMenu() {
+        const rect = trigger.getBoundingClientRect();
+        const width = Math.min(Math.max(rect.width, 220), window.innerWidth - 16);
+        const left = Math.max(8, Math.min(rect.left, window.innerWidth - 8 - width));
+
+        menu.style.width = `${width}px`;
+        menu.style.left = `${left}px`;
+
+        const height = menu.offsetHeight;
+        const below = window.innerHeight - rect.bottom - 8;
+
+        menu.style.top = height + 6 > below && rect.top - height - 6 > 8
+            ? `${rect.top - height - 6}px`
+            : `${rect.bottom + 6}px`;
+    }
+
+    function toggle(open) {
+        menu.hidden = !open;
+        root.classList.toggle('is-open', open);
+        trigger.setAttribute('aria-expanded', String(open));
+
+        if (open) positionMenu();
+    }
+
+    const reposition = () => {
+        if (!menu.hidden) positionMenu();
+    };
+
+    window.addEventListener('scroll', reposition, true);
+    window.addEventListener('resize', reposition);
+
+    trigger.addEventListener('click', () => toggle(menu.hidden));
+    trigger.addEventListener('keydown', (event) => {
+        if (!['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(event.key)) return;
+
+        event.preventDefault();
+        toggle(true);
+        (items[select.selectedIndex] ?? items[0])?.focus();
+    });
+
+    menu.addEventListener('keydown', (event) => {
+        const active = document.activeElement;
+        const current = items.indexOf(active);
+
+        if (event.key === 'Escape') {
+            toggle(false);
+            trigger.focus();
+        } else if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            items[(current + 1) % items.length]?.focus();
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            items[(current - 1 + items.length) % items.length]?.focus();
+        } else if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            active?.click();
+        }
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!root.contains(event.target) && !menu.contains(event.target)) toggle(false);
+    });
+
+    if (inline) inline.classList.add('is-enhanced');
+
+    sync();
+});
+
 /* Mobile shop: Sort modal bottom sheet */
 const sortModal = document.querySelector('[data-sf-sort-modal]');
 const sortModalOpens = document.querySelectorAll('[data-sf-sort-modal-open]');
