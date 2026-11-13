@@ -15,6 +15,7 @@ class SizeAddRequest extends FormRequest
     {
         return [
             'name' => 'required|string|unique:sizes,name|max:255',
+            'size_group' => ['nullable', 'string', 'max:50'],
             'image' => 'nullable|string',
             'is_active' => ['nullable', 'boolean'],
             'sort_order' => ['nullable', 'integer', 'min:1'],

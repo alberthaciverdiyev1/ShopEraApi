@@ -306,7 +306,13 @@
 
                                 @if (count($sizeChoices))
                                     <div class="elan-field elan-field--full">
-                                        <span>Ölçülər <span class="muted small">(hər ölçü üçün ayrı qiymət yaza bilərsiniz)</span></span>
+                                        <span>Ölçülər <span class="muted small">(hər ölçü üçün ayrı stok və qiymət yaza bilərsiniz)</span></span>
+                                        <label class="elan-check-pill elan-standard-price">
+                                            <input type="hidden" name="standard_price" value="0">
+                                            <input type="checkbox" name="standard_price" value="1" data-sf-standard-price
+                                                   @checked(old('standard_price', '1') === '1')>
+                                            <span>Bütün rəng və ölçülər üçün standart qiymət</span>
+                                        </label>
                                         <div class="elan-size-list">
                                             @foreach ($sizeChoices as $size)
                                                 <div class="elan-size-row" data-sf-size-row>
@@ -316,17 +322,20 @@
                                                         <span>{{ $size['name'] }}</span>
                                                     </label>
                                                     <div class="elan-size-prices">
+                                                        <input type="number" name="size_stocks[{{ $size['id'] }}]" min="0" step="1"
+                                                               placeholder="Stok" data-sf-size-stock
+                                                               value="{{ old('size_stocks.'.$size['id']) }}">
                                                         <input type="number" name="size_prices[{{ $size['id'] }}]" min="0" step="0.01"
-                                                               placeholder="Qiymət (₼)"
+                                                               placeholder="Qiymət (₼)" data-sf-size-price
                                                                value="{{ old('size_prices.'.$size['id']) }}">
                                                         <input type="number" name="size_discounts[{{ $size['id'] }}]" min="0" step="0.01"
-                                                               placeholder="Endirimli (₼)"
+                                                               placeholder="Endirimli (₼)" data-sf-size-price
                                                                value="{{ old('size_discounts.'.$size['id']) }}">
                                                     </div>
                                                 </div>
                                             @endforeach
                                         </div>
-                                        <span class="elan-hint">Ölçü seçdikdə həmin ölçü üçün xüsusi qiymət və endirim yaza bilərsiniz; boş buraxılsa əsas qiymət tətbiq olunur.</span>
+                                        <span class="elan-hint">Aktiv olduqda əsas qiymət bütün rəng və ölçülərə tətbiq olunur. Söndürsəniz, yalnız seçdiyiniz ölçülər üçün ayrı qiymət və endirim yaza bilərsiniz; stok həmişə ölçü üzrə verilir.</span>
                                     </div>
                                 @endif
                             </div>

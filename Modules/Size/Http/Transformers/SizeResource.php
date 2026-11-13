@@ -9,9 +9,10 @@ class SizeResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'id'=>$this->id,
-            'slug'=>$this->slug,
+            'id' => $this->id,
+            'slug' => $this->slug,
             'name' => $this->name,
+            'size_group' => $this->size_group,
             'icon' => $this->icon,
             'is_active' => $this->is_active,
             'sort_order' => $this->sort_order,

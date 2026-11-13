@@ -1792,20 +1792,34 @@ document.querySelectorAll('[data-sf-dash-tab]').forEach((trigger) => {
     });
 })();
 
-/* Listing form: sizes need a price only once they are selected. */
+/* Listing form: a size is editable once selected; its price fields only when
+   the standard price switch is off. */
 (() => {
-    document.querySelectorAll('[data-sf-size-row]').forEach((row) => {
-        const check = row.querySelector('[data-sf-size-check]');
-        const inputs = [...row.querySelectorAll('input[type="number"]')];
-        if (!check || inputs.length === 0) return;
+    const rows = [...document.querySelectorAll('[data-sf-size-row]')];
+    const standard = document.querySelector('[data-sf-standard-price]');
+    if (rows.length === 0) return;
 
-        const sync = () => inputs.forEach((input) => {
-            input.disabled = !check.checked;
+    const sync = () => {
+        const standardOn = Boolean(standard?.checked);
+
+        rows.forEach((row) => {
+            const selected = Boolean(row.querySelector('[data-sf-size-check]')?.checked);
+
+            row.querySelectorAll('[data-sf-size-stock]').forEach((input) => {
+                input.disabled = !selected;
+            });
+
+            row.querySelectorAll('[data-sf-size-price]').forEach((input) => {
+                input.disabled = !selected || standardOn;
+            });
         });
+    };
 
-        check.addEventListener('change', sync);
-        sync();
+    rows.forEach((row) => {
+        row.querySelector('[data-sf-size-check]')?.addEventListener('change', sync);
     });
+    standard?.addEventListener('change', sync);
+    sync();
 })();
 
 /* Listing form: image dropzone with previews and per-photo colour/size. */

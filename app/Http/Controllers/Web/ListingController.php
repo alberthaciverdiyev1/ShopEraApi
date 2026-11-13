@@ -85,7 +85,9 @@ class ListingController extends Controller
                 ? (array) $this->payload(app(ColorController::class)->list($this->moduleHttpRequest(['per_page' => 200])))
                 : [],
             'sizes' => $isLeaf
-                ? (array) $this->payload(app(SizeController::class)->list($this->moduleHttpRequest(['per_page' => 200])))
+                ? (array) $this->payload(app(SizeController::class)->list(
+                    $this->moduleHttpRequest(['per_page' => 200, 'category_id' => $selected['id']])
+                ))
                 : [],
             'published' => session('published'),
         ]);

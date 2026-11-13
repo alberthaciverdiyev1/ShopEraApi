@@ -15,6 +15,7 @@ use Modules\Marketplace\Entities\ListingReport;
 use Modules\Marketplace\Entities\Vendor;
 use Modules\Product\Entities\Product;
 use Modules\Setting\Services\SettingService;
+use Modules\Size\Entities\Size;
 use Modules\User\Entities\User;
 
 class ListingService
@@ -85,6 +86,8 @@ class ListingService
             (array) ($data['sizes'] ?? []),
             (array) ($data['size_prices'] ?? []),
             (array) ($data['size_discounts'] ?? []),
+            (array) ($data['size_stocks'] ?? []),
+            $this->standardPriceFlag($data),
         );
         $this->storeImages($listing, $request);
         $this->syncFilterValues($listing, $data['filter_values'] ?? []);
@@ -131,6 +134,8 @@ class ListingService
                 (array) $data['sizes'],
                 (array) ($data['size_prices'] ?? []),
                 (array) ($data['size_discounts'] ?? []),
+                (array) ($data['size_stocks'] ?? []),
+                $this->standardPriceFlag($data),
             );
         }
 
@@ -242,14 +247,27 @@ class ListingService
     }
 
     /**
-     * Replace the listing's sizes, keeping the per-size price and discount.
+     * Replace the listing's sizes, keeping the per-size price, discount and
+     * stock. When the standard price applies to every variant (the default),
+     * the per-size price and discount are cleared so the listing price wins.
      *
      * @param  array<int, mixed>  $ids
      * @param  array<int|string, mixed>  $prices
      * @param  array<int|string, mixed>  $discounts
+     * @param  array<int|string, mixed>  $stocks
      */
-    private function syncSizes(Product $listing, array $ids, array $prices = [], array $discounts = []): void
-    {
+    private function syncSizes(
+        Product $listing,
+        array $ids,
+        array $prices = [],
+        array $discounts = [],
+        array $stocks = [],
+        ?bool $standardPrice = null,
+    ): void {
+        // Only sizes that belong to the listing's category family are kept;
+        // universal sizes (no family) apply everywhere.
+        $ids = $this->allowedSizeIds($ids, $listing->category);
+
         $existing = $listing->sizes()
             ->get()
             ->keyBy('id')
@@ -264,17 +282,74 @@ class ListingService
                 continue;
             }
 
-            $price = $prices[$id] ?? null;
-            $discount = $discounts[$id] ?? null;
+            $price = $standardPrice === true ? null : ($prices[$id] ?? null);
+            $discount = $standardPrice === true ? null : ($discounts[$id] ?? null);
+            $stock = $stocks[$id] ?? null;
 
             $sync[$id] = [
                 'price' => $price !== null && $price !== '' ? (float) $price : null,
                 'discount' => $discount !== null && $discount !== '' ? (float) $discount : null,
+                'stock' => $stock !== null && $stock !== '' ? max(0, (int) $stock) : null,
                 'wholesale_price' => $existing->get($id),
             ];
         }
 
         $listing->sizes()->sync($sync);
+    }
+
+    /**
+     * The form's "standard price for every colour and size" switch. Null when
+     * the client did not send it, so older API clients keep their behaviour.
+     */
+    private function standardPriceFlag(array $data): ?bool
+    {
+        if (! array_key_exists('standard_price', $data) || $data['standard_price'] === null) {
+            return null;
+        }
+
+        return filter_var($data['standard_price'], FILTER_VALIDATE_BOOLEAN);
+    }
+
+    /**
+     * The category's size family, inherited from its ancestors, and the ids of
+     * the sizes that belong to it.
+     *
+     * @param  array<int, mixed>  $ids
+     * @return array<int, int>
+     */
+    private function allowedSizeIds(array $ids, ?Category $category): array
+    {
+        $group = null;
+
+        while ($category !== null) {
+            if (! empty($category->size_group)) {
+                $group = (string) $category->size_group;
+                break;
+            }
+
+            $category = $category->parent_id
+                ? Category::query()->find($category->parent_id)
+                : null;
+        }
+
+        $ids = array_values(array_filter(array_map('intval', $ids)));
+
+        if ($ids === []) {
+            return [];
+        }
+
+        return Size::query()
+            ->whereIn('id', $ids)
+            ->where(function ($query) use ($group) {
+                $query->whereNull('size_group');
+
+                if ($group !== null) {
+                    $query->orWhere('size_group', $group);
+                }
+            })
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
     }
 
     /** Every listing is stored under each locale; translation comes later. */

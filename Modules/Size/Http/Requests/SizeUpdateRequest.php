@@ -15,14 +15,16 @@ class SizeUpdateRequest extends FormRequest
     public function rules(): array
     {
         $sizeId = (int) $this->route('id');
+
         return [
             'name' => [
-                "sometimes",
+                'sometimes',
                 'required',
                 'string',
                 'max:255',
                 Rule::unique('sizes', 'name')->ignore($sizeId, 'id'),
             ],
+            'size_group' => ['nullable', 'string', 'max:50'],
             'image' => ['nullable', 'string'],
             'is_active' => ['nullable', 'boolean'],
             'sort_order' => ['nullable', 'integer', 'min:1'],

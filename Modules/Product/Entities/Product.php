@@ -112,7 +112,7 @@ class Product extends Model
 
     public function sizes(): BelongsToMany
     {
-        return $this->belongsToMany(Size::class, 'product_size')->withPivot('price', 'wholesale_price', 'discount');
+        return $this->belongsToMany(Size::class, 'product_size')->withPivot('price', 'wholesale_price', 'discount', 'stock');
     }
 
     public function images(): HasMany

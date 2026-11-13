@@ -6,6 +6,7 @@ use App\Core\Support\TenantContext;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
+use Modules\Category\Entities\Category;
 use Modules\Size\Entities\Size;
 use Modules\Size\Http\Transformers\SizeResource;
 
@@ -22,8 +23,22 @@ class SizeService
     {
         $params = $request->all();
         $perPage = max(1, min((int) ($params['per_page'] ?? $params['limit'] ?? 20), 500));
-        $query = $this->model->query()->select(['id', 'name', 'icon', 'is_active', 'sort_order']);
+        $query = $this->model->query()->select(['id', 'name', 'size_group', 'icon', 'is_active', 'sort_order']);
         $query = filterLike($query, ['name'], $params);
+
+        // A category only offers its own size family plus the universal sizes
+        // (those without a group), so a dress never lists shoe sizes.
+        if ($categoryId = (int) ($params['category_id'] ?? 0)) {
+            $group = $this->categorySizeGroup($categoryId);
+
+            $query->where(function ($query) use ($group) {
+                $query->whereNull('size_group');
+
+                if ($group !== null) {
+                    $query->orWhere('size_group', $group);
+                }
+            });
+        }
 
         if (isset($params['is_active'])) {
             $query->where('is_active', $params['is_active']);
@@ -152,5 +167,26 @@ class SizeService
         );
 
         return $response;
+    }
+
+    /**
+     * The size family of a category, inherited from its ancestors when the
+     * category itself has none. Null means only universal sizes apply.
+     */
+    public function categorySizeGroup(int $categoryId): ?string
+    {
+        $category = Category::query()->find($categoryId);
+
+        while ($category !== null) {
+            if (! empty($category->size_group)) {
+                return (string) $category->size_group;
+            }
+
+            $category = $category->parent_id
+                ? Category::query()->find($category->parent_id)
+                : null;
+        }
+
+        return null;
     }
 }

@@ -116,6 +116,7 @@ class ProductResource extends JsonResource
                         'effective_wholesale_price' => (float) $wholesalePrices['final_price'],
                         'has_wholesale_price' => (bool) $wholesalePrices['has_wholesale_price'],
                         'discount' => $prices['discounted_price'],
+                        'stock' => $size->pivot?->stock !== null ? (int) $size->pivot->stock : null,
                     ];
                 });
             }),

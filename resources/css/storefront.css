@@ -7800,9 +7800,14 @@ a.sf-seller-link {
 }
 
 .elan-field .elan-size-prices input {
-    width: 140px;
+    width: 118px;
     padding: 9px 12px;
     font-size: 14px;
+}
+
+.elan-standard-price {
+    align-self: flex-start;
+    margin-bottom: 10px;
 }
 
 .elan-field .elan-size-prices input:disabled {
