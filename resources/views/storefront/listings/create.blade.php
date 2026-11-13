@@ -17,7 +17,6 @@
         <div class="container elan-page__inner">
             <header class="elan-hero">
                 <h1>Elan yerləşdir</h1>
-                <p>Bir neçə addımda elanınızı dərc edin — qeydiyyat tələb olunmur.</p>
             </header>
 
             <div class="elan-steps">
@@ -43,10 +42,8 @@
                 </div>
             @elseif (! $selected)
                 <nav class="elan-crumbs" aria-label="Kateqoriya yolu">
-                    <span class="crumb current">Bütün kateqoriyalar</span>
+                    <span class="crumb current">Bir kateqoriya seçin</span>
                 </nav>
-
-                <p class="elan-hint">Bir kateqoriya seçin</p>
 
                 <div class="elan-cat-grid">
                     @foreach ($children as $category)
@@ -75,8 +72,6 @@
                         </a>
                     @endforeach
                 </nav>
-
-                <p class="elan-hint">Alt kateqoriya seçin</p>
 
                 <div class="elan-cat-grid">
                     @foreach ($children as $category)
@@ -124,27 +119,56 @@
                     @csrf
                     <input type="hidden" name="category_id" value="{{ $selected['id'] }}">
 
+                    @php
+                        $filterOptions = fn (array $filter): array => array_values(array_filter(
+                            array_map('strval', (array) ($filter['options'] ?? [])),
+                            fn (string $option) => $option !== ''
+                        ));
+                        $oldFilterValues = fn (int $filterId): array => array_map(
+                            'strval',
+                            array_filter((array) old('filters.'.$filterId, []), fn ($value) => $value !== null && $value !== '')
+                        );
+                    @endphp
+
                     @if (count($filters))
                         <section class="elan-section">
                             <h6 class="elan-section__title">Filtrlər</h6>
                             <div class="elan-grid">
                                 @foreach ($filters as $filter)
-                                    <label class="elan-field">
-                                        <span>{{ $localized($filter['title']) }}{{ ! empty($filter['required']) ? ' *' : '' }}</span>
-                                        <select name="filter_values[]"
-                                                data-sf-filter="{{ $filter['id'] }}"
-                                                data-sf-filter-depends="{{ $filter['depends_on_filter_id'] ?? '' }}"
-                                                {{ ! empty($filter['depends_on_filter_id']) ? 'disabled' : '' }}>
-                                            <option value="">Seçin…</option>
-                                            @foreach ($filter['values'] as $value)
-                                                <option value="{{ $value['id'] }}"
-                                                        data-sf-parent-value="{{ $value['parent_value_id'] ?? '' }}"
-                                                        @selected(in_array($value['id'], old('filter_values', []), true))>
-                                                    {{ $localized($value['title']) }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </label>
+                                    @php
+                                        $filterId = (int) $filter['id'];
+                                        $options = $filterOptions($filter);
+                                        $selectedValues = $oldFilterValues($filterId);
+                                        $isMulti = ($filter['type'] ?? 'select') === 'checkbox';
+                                    @endphp
+                                    @if ($options !== [])
+                                        @if ($isMulti)
+                                            <div class="elan-field elan-field--full">
+                                                <span>{{ $localized($filter['title']) }}{{ ! empty($filter['required']) ? ' *' : '' }}</span>
+                                                <div class="elan-checks">
+                                                    @foreach ($options as $option)
+                                                        <label class="elan-check-pill">
+                                                            <input type="checkbox"
+                                                                   name="filters[{{ $filterId }}][]"
+                                                                   value="{{ $option }}"
+                                                                   @checked(in_array($option, $selectedValues, true))>
+                                                            <span>{{ $option }}</span>
+                                                        </label>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @else
+                                            <label class="elan-field">
+                                                <span>{{ $localized($filter['title']) }}{{ ! empty($filter['required']) ? ' *' : '' }}</span>
+                                                <select name="filters[{{ $filterId }}]" {{ ! empty($filter['required']) ? 'required' : '' }}>
+                                                    <option value="">Seçin…</option>
+                                                    @foreach ($options as $option)
+                                                        <option value="{{ $option }}" @selected(in_array($option, $selectedValues, true))>{{ $option }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </label>
+                                        @endif
+                                    @endif
                                 @endforeach
                             </div>
                         </section>

@@ -12,6 +12,7 @@ use Illuminate\Http\Resources\Json\ResourceCollection;
 use Modules\Brand\Http\Controllers\BrandController;
 use Modules\Delivery\Http\Controllers\DeliveryController;
 use Modules\Filter\Http\Controllers\FilterController;
+use Modules\Filter\Http\Requests\ProductFilterValuesRequest;
 use Modules\Marketplace\Http\Controllers\ListingController as ModuleListingController;
 use Modules\Marketplace\Http\Controllers\VendorController;
 use Modules\Marketplace\Http\Requests\StoreListingRequest as ModuleStoreListingRequest;
@@ -99,6 +100,8 @@ class ListingController extends Controller
             auth()->check() ? $module->store($form) : $module->storeGuest($form)
         );
 
+        $this->storeFilters($request, (int) data_get($result, 'listing.id'));
+
         if (! empty($result['manage_url'])) {
             $title = data_get($result, 'listing.title');
             $title = is_array($title) ? ($title['az'] ?? reset($title)) : $title;
@@ -114,6 +117,57 @@ class ListingController extends Controller
         return redirect()
             ->route('storefront.listings.index')
             ->with('status', 'Elan uğurla yerləşdirildi.');
+    }
+
+    /**
+     * Persist the filter choices of a freshly created listing. Choices are
+     * stored in product_filters (filter_id + option label), the table the shop
+     * sidebar reads; only options the category actually offers are kept.
+     */
+    private function storeFilters(Request $request, int $listingId): void
+    {
+        $selected = (array) $request->input('filters', []);
+
+        if ($listingId <= 0 || $selected === []) {
+            return;
+        }
+
+        $allowed = [];
+
+        foreach ((array) $this->payload(app(FilterController::class)->tree(
+            $this->moduleHttpRequest(['category_id' => $request->integer('category_id')])
+        )) as $filter) {
+            $allowed[(int) $filter['id']] = array_map('strval', (array) ($filter['options'] ?? []));
+        }
+
+        $values = [];
+
+        foreach ($selected as $filterId => $choices) {
+            $filterId = (int) $filterId;
+
+            if (! isset($allowed[$filterId])) {
+                continue;
+            }
+
+            foreach ((array) $choices as $choice) {
+                $choice = trim((string) $choice);
+
+                if ($choice !== '' && in_array($choice, $allowed[$filterId], true)) {
+                    $values[] = ['filter_id' => $filterId, 'value' => $choice];
+                }
+            }
+        }
+
+        if ($values === []) {
+            return;
+        }
+
+        app(FilterController::class)->setProductValues(
+            $this->moduleRequest(ProductFilterValuesRequest::class, [
+                'product_id' => $listingId,
+                'values' => $values,
+            ])
+        );
     }
 
     public function destroy(string $slug): RedirectResponse

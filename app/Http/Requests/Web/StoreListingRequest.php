@@ -57,6 +57,14 @@ class StoreListingRequest extends FormRequest
             'filter_values' => ['nullable', 'array'],
             'filter_values.*' => ['integer', Rule::exists('filter_values', 'id')],
 
+            // The storefront form posts flat option labels: filters[id] = value
+            // for single-choice filters and filters[id][] = value for checkbox
+            // filters. They are stored in product_filters, the table the shop
+            // sidebar reads.
+            'filters' => ['nullable', 'array'],
+            'filters.*' => ['nullable'],
+            'filters.*.*' => ['nullable', 'string', 'max:255'],
+
             // Store owners (and team members with the listings permission)
             // choose whether the listing belongs to the store or to them.
             'publish_as' => ['nullable', Rule::in(['store', 'personal'])],

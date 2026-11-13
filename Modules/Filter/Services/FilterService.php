@@ -172,8 +172,19 @@ class FilterService
      */
     public function tree(int $categoryId): JsonResponse
     {
+        // Filters are attached to top-level categories through the pivot and
+        // inherited by their descendants, so walk the ancestor chain too.
+        $category = Category::query()->find($categoryId);
+
+        $categoryIds = $category
+            ? collect($category->ancestorChain())->pluck('id')->map(fn ($id) => (int) $id)->all()
+            : [$categoryId];
+
         $filters = $this->model->query()
-            ->where('category_id', $categoryId)
+            ->where(function ($query) use ($categoryId, $categoryIds) {
+                $query->where('category_id', $categoryId)
+                    ->orWhereHas('categories', fn ($q) => $q->whereIn('categories.id', $categoryIds));
+            })
             ->orderBy('sort_order')
             ->orderBy('id')
             ->with(['values'])
@@ -186,6 +197,9 @@ class FilterService
             'required' => (bool) $filter->required,
             'sort_order' => $filter->sort_order,
             'depends_on_filter_id' => $filter->depends_on_filter_id,
+            // Flat option labels let the listing form offer a choice even
+            // when no filter_values rows exist yet.
+            'options' => array_values((array) ($filter->options ?? [])),
             'values' => $filter->values->map(fn (FilterValue $value) => [
                 'id' => $value->id,
                 'title' => $value->title,

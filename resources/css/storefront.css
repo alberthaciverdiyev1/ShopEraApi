@@ -7656,12 +7656,35 @@ a.sf-seller-link {
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    padding: 10px 16px;
+    border: 1.5px solid #dbe3ef;
+    border-radius: 999px;
+    background: #fff;
     color: #1e293b;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
+    transition:
+        border-color 0.15s ease,
+        background 0.15s ease,
+        color 0.15s ease;
 }
 
-.elan-check-pill input {
+.elan-check-pill:hover {
+    border-color: var(--sf-theme);
+}
+
+.elan-check-pill:has(input:checked) {
+    border-color: var(--sf-theme);
+    background: color-mix(in srgb, var(--sf-theme) 8%, #fff);
+    color: var(--sf-theme);
+}
+
+/* The legacy theme hides every checkbox; restore ours inside the pill. */
+.elan-check-pill input[type="checkbox"] {
+    position: static;
+    display: inline-block;
+    visibility: visible;
+    opacity: 1;
     width: 18px;
     height: 18px;
     margin: 0;
