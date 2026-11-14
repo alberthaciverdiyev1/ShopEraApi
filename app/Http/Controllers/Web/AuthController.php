@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Core\Concerns\InteractsWithModuleControllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\LoginRequest;
 use App\Http\Requests\Web\RegisterRequest;
-use App\Core\Concerns\InteractsWithModuleControllers;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Modules\Setting\Http\Controllers\SettingController;
