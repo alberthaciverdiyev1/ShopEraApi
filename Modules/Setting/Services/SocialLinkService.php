@@ -30,7 +30,9 @@ class SocialLinkService
         'whatsapp' => 'fa-brands fa-whatsapp',
         'youtube' => 'fa-brands fa-youtube',
         'tiktok' => 'fa-brands fa-tiktok',
-        'x' => 'fa-brands fa-x-twitter',
+        // The bundled Font Awesome 6.0 build predates the X logo, so the
+        // platform keeps the classic bird the icon set actually ships.
+        'x' => 'fa-brands fa-twitter',
         'linkedin' => 'fa-brands fa-linkedin-in',
     ];
 

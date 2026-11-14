@@ -9,19 +9,25 @@ use Modules\Setting\Services\SocialLinkService;
 class SocialLinkDatabaseSeeder extends Seeder
 {
     /**
-     * The icons the footer ships with. The admin panel can edit the URLs,
-     * reorder, disable or add more networks afterwards.
+     * The networks the footer ships with, each with a placeholder address.
+     * Existing rows are left alone so a deploy never overwrites the URLs the
+     * admin panel already set; only missing networks are filled in.
      */
     public function run(): void
     {
         $links = [
-            ['facebook', 10, 'https://facebook.com/'],
-            ['instagram', 20, 'https://instagram.com/'],
-            ['telegram', 30, 'https://t.me/'],
+            ['facebook', 10, 'https://facebook.com/shopera'],
+            ['instagram', 20, 'https://instagram.com/shopera'],
+            ['telegram', 30, 'https://t.me/shopera'],
+            ['whatsapp', 40, 'https://wa.me/994500000000'],
+            ['youtube', 50, 'https://youtube.com/@shopera'],
+            ['tiktok', 60, 'https://tiktok.com/@shopera'],
+            ['x', 70, 'https://x.com/shopera'],
+            ['linkedin', 80, 'https://linkedin.com/company/shopera'],
         ];
 
         foreach ($links as [$platform, $order, $url]) {
-            SocialLink::updateOrCreate(
+            SocialLink::firstOrCreate(
                 ['platform' => $platform],
                 ['url' => $url, 'sort_order' => $order, 'is_active' => true]
             );

@@ -48,11 +48,29 @@ class SocialLinksTest extends TestCase
     {
         $this->seed(SocialLinkDatabaseSeeder::class);
 
-        $this->assertSame(3, SocialLink::count());
+        $this->assertSame(8, SocialLink::count());
         $this->assertSame(
-            ['facebook', 'instagram', 'telegram'],
+            ['facebook', 'instagram', 'telegram', 'whatsapp', 'youtube', 'tiktok', 'x', 'linkedin'],
             SocialLink::query()->orderBy('sort_order')->pluck('platform')->all(),
         );
-        $this->assertTrue(SocialLink::query()->where('is_active', true)->count() === 3);
+        $this->assertTrue(SocialLink::query()->where('is_active', true)->count() === 8);
+    }
+
+    public function test_reseeding_does_not_overwrite_admin_edited_urls(): void
+    {
+        SocialLink::query()->create([
+            'platform' => 'facebook',
+            'url' => 'https://facebook.com/secilmis-hesab',
+            'sort_order' => 10,
+            'is_active' => true,
+        ]);
+
+        $this->seed(SocialLinkDatabaseSeeder::class);
+
+        $this->assertSame(
+            'https://facebook.com/secilmis-hesab',
+            SocialLink::query()->where('platform', 'facebook')->value('url'),
+        );
+        $this->assertSame(8, SocialLink::count());
     }
 }
