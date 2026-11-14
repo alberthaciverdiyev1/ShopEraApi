@@ -8,6 +8,7 @@ use App\Http\Requests\Web\RegisterRequest;
 use App\Core\Concerns\InteractsWithModuleControllers;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use Modules\Setting\Http\Controllers\SettingController;
 use Modules\User\Http\Controllers\SessionAuthController;
 
 class AuthController extends Controller
@@ -31,6 +32,26 @@ class AuthController extends Controller
 
         return redirect()->intended(route('storefront.home'))
             ->with('status', 'Xoş gəlmisiniz!');
+    }
+
+    /**
+     * Password recovery is handled by our team over WhatsApp instead of an
+     * automated email link.
+     */
+    public function showForgotPassword(): View
+    {
+        app()->setLocale('az');
+
+        $settings = (array) $this->payload(
+            app(SettingController::class)->list($this->moduleHttpRequest())
+        );
+        $settings = (array) ($settings[0] ?? $settings);
+
+        return view('storefront.auth.forgot-password', [
+            'categories' => $this->storefrontCategories(),
+            'whatsapp' => $settings['whatsapp_number'] ?? null,
+            'supportEmail' => $settings['email'] ?? null,
+        ]);
     }
 
     public function showRegister(): View

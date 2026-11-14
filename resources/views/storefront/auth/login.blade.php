@@ -40,6 +40,10 @@
                             </span>
                         </label>
 
+                        <p class="sf-auth-forgot">
+                            <a href="{{ route('storefront.password.request') }}">Şifrəmi unutdum?</a>
+                        </p>
+
                         <label class="sf-auth-remember">
                             <input type="checkbox" name="remember" value="1" @checked(old('remember'))>
                             <span>Məni yadda saxla</span>

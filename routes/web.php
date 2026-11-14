@@ -40,6 +40,10 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('storefront.login.attempt');
     Route::get('/register', [AuthController::class, 'showRegister'])->name('storefront.register');
     Route::post('/register', [AuthController::class, 'register'])->name('storefront.register.store');
+
+    // Password recovery goes through our support team on WhatsApp.
+    Route::get('/sifre-berpasi', [AuthController::class, 'showForgotPassword'])
+        ->name('storefront.password.request');
 });
 
 Route::post('/logout', [AuthController::class, 'logout'])
