@@ -115,6 +115,12 @@ class Product extends Model
         return $this->belongsToMany(Size::class, 'product_size')->withPivot('price', 'wholesale_price', 'discount', 'stock');
     }
 
+    /** Colour × size combinations, each with its own price and stock. */
+    public function variants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
+
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class);

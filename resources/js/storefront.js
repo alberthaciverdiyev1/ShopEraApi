@@ -988,16 +988,24 @@ document.querySelectorAll('[data-sf-fav-toggle]').forEach((btn) => {
     const stockLine = document.querySelector('[data-sf-stock-line]');
 
     let sizePrices = {};
+    let variants = {};
     let generalStock = null;
 
     try {
         const sizePricesNode = document.querySelector('[data-sf-size-prices]');
         sizePrices = JSON.parse(sizePricesNode?.dataset.sfSizePrices || '{}');
+        variants = JSON.parse(sizePricesNode?.dataset.sfVariants || '{}');
         generalStock = sizePricesNode?.dataset.sfGeneralStock ?? null;
         generalStock = generalStock === null ? null : Number(generalStock);
     } catch (error) {
         sizePrices = {};
+        variants = {};
     }
+
+    // Both selections are kept so the colour × size combination can be looked
+    // up; either one alone falls back to the size-level price.
+    let activeColorId = colorOptions[0]?.dataset.colorId ?? null;
+    let activeSizeId = sizeOptions[0]?.dataset.sizeId ?? null;
 
     const money = (value) => `${Number(value).toFixed(2)} ₼`;
 
@@ -1030,15 +1038,23 @@ document.querySelectorAll('[data-sf-fav-toggle]').forEach((btn) => {
         }
     };
 
-    const selectSizePrice = (sizeId) => {
-        const entry = sizePrices[String(sizeId)];
+    const selectVariant = () => {
+        const sizeEntry = activeSizeId !== null ? sizePrices[String(activeSizeId)] : undefined;
+
+        // A colour × size combination wins over the size-level values; a
+        // combination without its own price still supplies the stock.
+        const combination = activeColorId !== null && activeSizeId !== null
+            ? variants[`${activeColorId}:${activeSizeId}`]
+            : undefined;
+
+        const stock = combination?.stock ?? sizeEntry?.stock ?? generalStock;
+        paintStock(stock);
+
+        const entry = combination && combination.price > 0
+            ? combination
+            : (sizeEntry && sizeEntry.price > 0 ? sizeEntry : null);
 
         if (!entry) return;
-
-        // A size without its own stock falls back to the listing's total.
-        paintStock(entry.stock !== null && entry.stock !== undefined ? entry.stock : generalStock);
-
-        if (!(entry.price > 0)) return;
 
         const price = entry.price;
         const hasDiscount = entry.discount > 0 && entry.discount < price;
@@ -1062,6 +1078,9 @@ document.querySelectorAll('[data-sf-fav-toggle]').forEach((btn) => {
                 label.textContent = option.dataset.colorName;
             }
 
+            activeColorId = option.dataset.colorId || null;
+            selectVariant();
+
             document.dispatchEvent(new CustomEvent('sf:variant-change', {
                 detail: { colorId: option.dataset.colorId || null },
             }));
@@ -1082,7 +1101,8 @@ document.querySelectorAll('[data-sf-fav-toggle]').forEach((btn) => {
                 label.textContent = option.dataset.sizeName;
             }
 
-            selectSizePrice(option.dataset.sizeId);
+            activeSizeId = option.dataset.sizeId || null;
+            selectVariant();
 
             document.dispatchEvent(new CustomEvent('sf:variant-change', {
                 detail: { sizeId: option.dataset.sizeId || null },
@@ -1092,7 +1112,7 @@ document.querySelectorAll('[data-sf-fav-toggle]').forEach((btn) => {
 
     // The first size is active on load; show its price.
     if (sizeOptions.length > 0) {
-        selectSizePrice(sizeOptions[0].dataset.sizeId);
+        selectVariant();
     }
 })();
 
@@ -1866,6 +1886,169 @@ document.querySelectorAll('[data-sf-dash-tab]').forEach((trigger) => {
     });
     standard?.addEventListener('change', sync);
     sync();
+})();
+
+/* Colour × size matrix: the table is rebuilt from the checked colours and
+   sizes, keeping every value already typed into it. Prices and discounts are
+   part of the standard-price switch; the per-combination stock always is. */
+(() => {
+    const root = document.querySelector('[data-sf-variant-matrix]');
+    if (!root) return;
+
+    const parse = (value, fallback) => {
+        try {
+            return value ? JSON.parse(value) : fallback;
+        } catch (error) {
+            return fallback;
+        }
+    };
+
+    const colors = parse(root.dataset.sfColors, []);
+    const sizes = parse(root.dataset.sfSizes, []);
+    const store = parse(root.dataset.sfSeed, {});
+    const standard = document.querySelector('[data-sf-standard-price]');
+
+    if (!colors.length || !sizes.length) return;
+
+    const colorChecks = new Map();
+    document.querySelectorAll('[data-sf-color-check]').forEach((input) => {
+        colorChecks.set(String(input.value), input);
+    });
+
+    const sizeChecks = new Map();
+    document.querySelectorAll('[data-sf-size-check]').forEach((input) => {
+        sizeChecks.set(String(input.value), input);
+    });
+
+    const fields = [
+        { key: 'stock', name: 'variant_stocks', placeholder: 'Stok', step: '1', price: false },
+        { key: 'price', name: 'variant_prices', placeholder: 'Qiymət (₼)', step: '0.01', price: true },
+        { key: 'discount', name: 'variant_discounts', placeholder: 'Endirimli (₼)', step: '0.01', price: true },
+    ];
+
+    // Values typed since the last rebuild belong to the store so switching a
+    // colour off and back on does not lose them.
+    const capture = () => {
+        root.querySelectorAll('[data-sf-matrix-input]').forEach((input) => {
+            const key = `${input.dataset.colorId}:${input.dataset.sizeId}`;
+            store[key] = store[key] || {};
+            store[key][input.dataset.field] = input.value;
+        });
+    };
+
+    const applyStandard = () => {
+        const on = Boolean(standard?.checked);
+
+        root.querySelectorAll('[data-sf-matrix-input][data-price-field="1"]').forEach((input) => {
+            input.disabled = on;
+            input.hidden = on;
+        });
+    };
+
+    const cellInput = (colorId, sizeId, field) => {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.min = '0';
+        input.step = field.step;
+        input.placeholder = field.placeholder;
+        input.name = `${field.name}[${colorId}][${sizeId}]`;
+        input.dataset.sfMatrixInput = '1';
+        input.dataset.colorId = colorId;
+        input.dataset.sizeId = sizeId;
+        input.dataset.field = field.key;
+        input.dataset.priceField = field.price ? '1' : '0';
+
+        const value = store[`${colorId}:${sizeId}`]?.[field.key];
+        if (value !== undefined && value !== null) {
+            input.value = String(value);
+        }
+
+        return input;
+    };
+
+    const render = () => {
+        const selectedColors = colors.filter((color) => colorChecks.get(String(color.id))?.checked);
+        const selectedSizes = sizes.filter((size) => sizeChecks.get(String(size.id))?.checked);
+
+        if (!selectedColors.length || !selectedSizes.length) {
+            const empty = document.createElement('p');
+            empty.className = 'elan-matrix-empty';
+            empty.textContent = 'Matris üçün ən azı bir rəng və bir ölçü seçin.';
+            root.replaceChildren(empty);
+            return;
+        }
+
+        const table = document.createElement('table');
+        const thead = document.createElement('thead');
+        const headRow = document.createElement('tr');
+
+        const corner = document.createElement('th');
+        corner.textContent = 'Ölçü';
+        headRow.appendChild(corner);
+
+        selectedColors.forEach((color) => {
+            const th = document.createElement('th');
+            const wrap = document.createElement('span');
+            wrap.className = 'elan-matrix-color';
+
+            const dot = document.createElement('span');
+            dot.className = 'elan-matrix-dot';
+            dot.style.backgroundColor = color.hex || '#94a3b8';
+
+            const name = document.createElement('span');
+            name.textContent = color.name || '';
+
+            wrap.append(dot, name);
+            th.appendChild(wrap);
+            headRow.appendChild(th);
+        });
+
+        thead.appendChild(headRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+
+        selectedSizes.forEach((size) => {
+            const row = document.createElement('tr');
+
+            const head = document.createElement('td');
+            head.className = 'elan-matrix-size';
+            head.textContent = size.name || '';
+            row.appendChild(head);
+
+            selectedColors.forEach((color) => {
+                const cell = document.createElement('td');
+                const wrap = document.createElement('div');
+                wrap.className = 'elan-matrix-cell';
+
+                fields.forEach((field) => {
+                    wrap.appendChild(cellInput(String(color.id), String(size.id), field));
+                });
+
+                cell.appendChild(wrap);
+                row.appendChild(cell);
+            });
+
+            tbody.appendChild(row);
+        });
+
+        table.appendChild(tbody);
+        root.replaceChildren(table);
+        applyStandard();
+    };
+
+    const rebuild = () => {
+        capture();
+        render();
+    };
+
+    colorChecks.forEach((input) => input.addEventListener('change', rebuild));
+    sizeChecks.forEach((input) => input.addEventListener('change', rebuild));
+    standard?.addEventListener('change', () => {
+        applyStandard();
+    });
+
+    render();
 })();
 
 /* Listing form wizard: one section per step with Geri / Növbəti buttons; the

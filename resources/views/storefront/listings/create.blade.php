@@ -27,6 +27,21 @@
     $oldColors = $oldInts('colors');
     $oldSizes = $oldInts('sizes');
 
+    // Seed for the colour × size matrix: the cells the seller already filled
+    // before a validation bounce, keyed "colorId:sizeId".
+    $variantSeed = [];
+    foreach (['price' => 'variant_prices', 'discount' => 'variant_discounts', 'stock' => 'variant_stocks'] as $field => $input) {
+        foreach ((array) old($input, []) as $colorId => $bySize) {
+            foreach ((array) $bySize as $sizeId => $value) {
+                if ($value === null || $value === '') {
+                    continue;
+                }
+
+                $variantSeed[$colorId.':'.$sizeId][$field] = $value;
+            }
+        }
+    }
+
     // The form is split into steps ("next / back"); only the sections that
     // are actually rendered get a step, and the step index is assigned as the
     // sections are written below.
@@ -359,6 +374,19 @@
                                                 </div>
                                             @endforeach
                                         </div>
+                                    </div>
+                                @endif
+
+                                @if (count($colorChoices) && count($sizeChoices))
+                                    <div class="elan-field elan-field--full elan-variant-group">
+                                        <span>Rəng × ölçü matrisi <span class="muted small">(seçilmiş rəng və ölçülər üçün ayrıca qiymət və stok)</span></span>
+                                        <input type="hidden" name="variant_matrix_present" value="1">
+                                        <div class="elan-variant-matrix"
+                                             data-sf-variant-matrix
+                                             data-sf-colors="{{ json_encode($colorChoices) }}"
+                                             data-sf-sizes="{{ json_encode($sizeChoices) }}"
+                                             data-sf-seed="{{ json_encode((object) $variantSeed) }}"></div>
+                                        <span class="elan-hint">Xana boş qalarsa həmin kombinasiya üçün ölçünün ümumi qiyməti və stoku tətbiq olunur.</span>
                                     </div>
                                 @endif
                             </div>

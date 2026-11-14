@@ -121,6 +121,17 @@ class ProductResource extends JsonResource
                 });
             }),
 
+            // Colour × size combinations with their own price and stock. The
+            // per-size block above stays for older clients and size-only views.
+            'variants' => $this->whenLoaded('variants', fn () => $this->variants->map(fn ($variant) => [
+                'color_id' => $variant->color_id,
+                'size_id' => $variant->size_id,
+                'price' => $variant->price,
+                'discount' => $variant->discount,
+                'wholesale_price' => $variant->wholesale_price,
+                'stock' => $variant->stock,
+            ])->values()),
+
             'images' => ProductImageResource::collection($this->whenLoaded('images')),
             'videos' => ProductVideoResource::collection($this->whenLoaded('videos')),
             'category' => new CategoryResource($this->whenLoaded('category')),

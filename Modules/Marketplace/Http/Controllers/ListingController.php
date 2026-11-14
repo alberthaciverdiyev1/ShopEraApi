@@ -154,7 +154,7 @@ class ListingController extends Controller
 
     public function manageShow(string $token)
     {
-        return responseHelper('OK', 200, new ListingResource($this->manageListing($token)->load('images', 'city', 'colors', 'sizes')));
+        return responseHelper('OK', 200, new ListingResource($this->manageListing($token)->load('images', 'city', 'colors', 'sizes', 'variants')));
     }
 
     public function manageUpdate(UpdateListingRequest $request, string $token)

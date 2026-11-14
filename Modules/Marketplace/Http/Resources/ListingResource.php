@@ -38,6 +38,13 @@ class ListingResource extends JsonResource
                 'discount' => $size->pivot?->discount !== null ? (float) $size->pivot->discount : null,
                 'stock' => $size->pivot?->stock !== null ? (int) $size->pivot->stock : null,
             ])),
+            'variants' => $this->whenLoaded('variants', fn () => $this->variants->map(fn ($variant) => [
+                'color_id' => (int) $variant->color_id,
+                'size_id' => (int) $variant->size_id,
+                'price' => $variant->price !== null ? (float) $variant->price : null,
+                'discount' => $variant->discount !== null ? (float) $variant->discount : null,
+                'stock' => $variant->stock !== null ? (int) $variant->stock : null,
+            ])->values()),
             'vendor' => $this->whenLoaded('vendor', fn () => $this->vendor ? [
                 'id' => $this->vendor->id,
                 'name' => $this->vendor->name,

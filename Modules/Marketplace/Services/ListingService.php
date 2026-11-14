@@ -14,6 +14,7 @@ use Modules\Filter\Entities\ProductFilterValue;
 use Modules\Marketplace\Entities\ListingReport;
 use Modules\Marketplace\Entities\Vendor;
 use Modules\Product\Entities\Product;
+use Modules\Product\Services\ProductVariantService;
 use Modules\Setting\Services\SettingService;
 use Modules\Size\Entities\Size;
 use Modules\User\Entities\User;
@@ -89,6 +90,7 @@ class ListingService
             (array) ($data['size_stocks'] ?? []),
             $this->standardPriceFlag($data),
         );
+        $this->syncVariantMatrix($listing, $data);
         $this->storeImages($listing, $request);
         $this->syncFilterValues($listing, $data['filter_values'] ?? []);
 
@@ -138,6 +140,8 @@ class ListingService
                 $this->standardPriceFlag($data),
             );
         }
+
+        $this->syncVariantMatrix($listing, $data);
 
         $this->storeImages($listing, $request);
 
@@ -295,6 +299,36 @@ class ListingService
         }
 
         $listing->sizes()->sync($sync);
+    }
+
+    /**
+     * Persist the colour × size matrix when the client sent one. On update the
+     * matrix is only touched when at least one of its fields is present, so a
+     * partial edit cannot wipe existing combinations.
+     */
+    private function syncVariantMatrix(Product $listing, array $data): void
+    {
+        // The hidden marker lets an emptied matrix clear the saved rows;
+        // without it a partial request must not touch the combinations.
+        $present = array_key_exists('variant_matrix_present', $data)
+            || array_key_exists('variant_prices', $data)
+            || array_key_exists('variant_discounts', $data)
+            || array_key_exists('variant_stocks', $data);
+
+        if (! $present) {
+            return;
+        }
+
+        // With the standard price on, every combination shares the listing
+        // price; only the per-combination stock is kept.
+        $standardPrice = $this->standardPriceFlag($data) === true;
+
+        app(ProductVariantService::class)->syncFromMatrix(
+            $listing,
+            $standardPrice ? [] : (array) ($data['variant_prices'] ?? []),
+            $standardPrice ? [] : (array) ($data['variant_discounts'] ?? []),
+            (array) ($data['variant_stocks'] ?? []),
+        );
     }
 
     /**

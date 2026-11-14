@@ -340,3 +340,159 @@ document.addEventListener('click', (event) => {
     button.querySelector('[data-eye]')?.classList.toggle('hidden', reveal);
     button.querySelector('[data-eye-off]')?.classList.toggle('hidden', !reveal);
 });
+
+/**
+ * Product colour × size matrix: rebuilds the table from the checked colour and
+ * size boxes, keeping whatever was already typed into the visible cells.
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    const root = document.querySelector<HTMLElement>('[data-admin-variant-matrix]');
+    if (!root) return;
+
+    const parse = <T,>(value: string | undefined, fallback: T): T => {
+        try {
+            return value ? (JSON.parse(value) as T) : fallback;
+        } catch (error) {
+            return fallback;
+        }
+    };
+
+    type Choice = { id: number; name: string; hex?: string };
+    type Cell = Partial<Record<'price' | 'discount' | 'stock', string | number>>;
+
+    const colors = parse<Choice[]>(root.dataset.colors, []);
+    const sizes = parse<Choice[]>(root.dataset.sizes, []);
+    const store = parse<Record<string, Cell>>(root.dataset.seed, {});
+
+    if (!colors.length || !sizes.length) return;
+
+    const colorChecks = new Map<string, HTMLInputElement>();
+    document.querySelectorAll<HTMLInputElement>('input[name="colors[]"]').forEach((input) => {
+        colorChecks.set(String(input.value), input);
+    });
+
+    const sizeChecks = new Map<string, HTMLInputElement>();
+    document.querySelectorAll<HTMLInputElement>('input[name="size_ids[]"]').forEach((input) => {
+        sizeChecks.set(String(input.value), input);
+    });
+
+    const fields = [
+        { key: 'price', label: 'Qiymət', step: '0.01', placeholder: '' },
+        { key: 'discount', label: 'Endirim', step: '0.01', placeholder: '' },
+        { key: 'stock', label: 'Stok', step: '1', placeholder: '' },
+    ] as const;
+
+    const capture = () => {
+        root.querySelectorAll<HTMLInputElement>('[data-matrix-input]').forEach((input) => {
+            const key = `${input.dataset.colorId}:${input.dataset.sizeId}`;
+            store[key] = store[key] ?? {};
+            store[key][input.dataset.field as 'price' | 'discount' | 'stock'] = input.value;
+        });
+    };
+
+    const render = () => {
+        const selectedColors = colors.filter((color) => colorChecks.get(String(color.id))?.checked);
+        const selectedSizes = sizes.filter((size) => sizeChecks.get(String(size.id))?.checked);
+
+        if (!selectedColors.length || !selectedSizes.length) {
+            const empty = document.createElement('p');
+            empty.className = 'text-sm text-gray-400';
+            empty.textContent = 'Matris üçün ən azı bir rəng və bir ölçü seçin.';
+            root.replaceChildren(empty);
+            return;
+        }
+
+        const wrap = document.createElement('div');
+        wrap.className = 'overflow-x-auto';
+
+        const table = document.createElement('table');
+        table.className = 'w-full text-sm';
+
+        const thead = document.createElement('thead');
+        const headRow = document.createElement('tr');
+        headRow.className = 'border-b border-gray-100 text-left text-xs uppercase text-gray-400';
+
+        const corner = document.createElement('th');
+        corner.className = 'px-2 py-2';
+        corner.textContent = 'Ölçü';
+        headRow.appendChild(corner);
+
+        selectedColors.forEach((color) => {
+            const th = document.createElement('th');
+            th.className = 'px-2 py-2 whitespace-nowrap';
+
+            const dot = document.createElement('span');
+            dot.className = 'mr-1 inline-block h-3 w-3 rounded-full ring-1 ring-gray-200 align-middle';
+            dot.style.background = color.hex || '#94a3b8';
+
+            const label = document.createElement('span');
+            label.textContent = color.name;
+
+            th.append(dot, label);
+            headRow.appendChild(th);
+        });
+
+        thead.appendChild(headRow);
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+        tbody.className = 'divide-y divide-gray-50';
+
+        selectedSizes.forEach((size) => {
+            const row = document.createElement('tr');
+
+            const head = document.createElement('td');
+            head.className = 'px-2 py-1.5 whitespace-nowrap font-medium text-gray-600';
+            head.textContent = size.name;
+            row.appendChild(head);
+
+            selectedColors.forEach((color) => {
+                const td = document.createElement('td');
+                td.className = 'px-2 py-1.5';
+
+                const column = document.createElement('div');
+                column.className = 'flex min-w-[7rem] flex-col gap-1';
+
+                fields.forEach((field) => {
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.min = '0';
+                    input.step = field.step;
+                    input.placeholder = field.label;
+                    input.name = `variants[${color.id}][${size.id}][${field.key}]`;
+                    input.dataset.matrixInput = '1';
+                    input.dataset.colorId = String(color.id);
+                    input.dataset.sizeId = String(size.id);
+                    input.dataset.field = field.key;
+                    input.className = 'w-full rounded border border-gray-200 px-2 py-1.5 text-sm';
+
+                    const value = store[`${color.id}:${size.id}`]?.[field.key];
+                    if (value !== undefined && value !== null) {
+                        input.value = String(value);
+                    }
+
+                    column.appendChild(input);
+                });
+
+                td.appendChild(column);
+                row.appendChild(td);
+            });
+
+            tbody.appendChild(row);
+        });
+
+        table.appendChild(tbody);
+        wrap.appendChild(table);
+        root.replaceChildren(wrap);
+    };
+
+    const rebuild = () => {
+        capture();
+        render();
+    };
+
+    colorChecks.forEach((input) => input.addEventListener('change', rebuild));
+    sizeChecks.forEach((input) => input.addEventListener('change', rebuild));
+
+    render();
+});

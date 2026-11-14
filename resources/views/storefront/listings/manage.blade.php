@@ -39,6 +39,29 @@
     // No size carries its own price when the standard price is in effect.
     $hasOwnPrice = $currentSizes->contains(fn ($size) => $size['price'] !== null || $size['discount'] !== null);
     $standardOn = (string) old('standard_price', $hasOwnPrice ? '0' : '1') === '1';
+
+    // Colour × size matrix, prefilled from the saved combinations and then
+    // overlaid with what the seller resent after a validation bounce.
+    $variantSeed = [];
+    foreach ((array) ($listing['variants'] ?? []) as $variant) {
+        $key = ($variant['color_id'] ?? '').':'.($variant['size_id'] ?? '');
+        foreach (['price', 'discount', 'stock'] as $field) {
+            if (($variant[$field] ?? null) !== null && $variant[$field] !== '') {
+                $variantSeed[$key][$field] = $variant[$field];
+            }
+        }
+    }
+    foreach (['price' => 'variant_prices', 'discount' => 'variant_discounts', 'stock' => 'variant_stocks'] as $field => $input) {
+        foreach ((array) old($input, []) as $colorId => $bySize) {
+            foreach ((array) $bySize as $sizeId => $value) {
+                if ($value === null || $value === '') {
+                    continue;
+                }
+
+                $variantSeed[$colorId.':'.$sizeId][$field] = $value;
+            }
+        }
+    }
 @endphp
 
 <x-storefront.layouts.app :title="'Elanı idarə et — ShopEra'">
@@ -153,6 +176,19 @@
                                 @endforeach
                             </div>
                             <span class="elan-hint">Standart qiymət aktiv olduqda əsas qiymət bütün rəng və ölçülərə tətbiq olunur.</span>
+                        </div>
+                    @endif
+
+                    @if (count($colorOptions) && count($sizeOptions))
+                        <div class="elan-field elan-field--full elan-variant-group">
+                            <span>Rəng × ölçü matrisi <span class="muted small">(seçilmiş rəng və ölçülər üçün ayrıca qiymət və stok)</span></span>
+                            <input type="hidden" name="variant_matrix_present" value="1">
+                            <div class="elan-variant-matrix"
+                                 data-sf-variant-matrix
+                                 data-sf-colors="{{ json_encode($colorOptions) }}"
+                                 data-sf-sizes="{{ json_encode($sizeOptions) }}"
+                                 data-sf-seed="{{ json_encode((object) $variantSeed) }}"></div>
+                            <span class="elan-hint">Xana boş qalarsa həmin kombinasiya üçün ölçünün ümumi qiyməti və stoku tətbiq olunur.</span>
                         </div>
                     @endif
 

@@ -8001,6 +8001,101 @@ a.sf-seller-link {
     cursor: not-allowed;
 }
 
+/* Colour × size matrix: one column per selected colour, one row per selected
+   size, each crossing holding its own stock, price and discount. Scrolls
+   sideways on narrow screens instead of squeezing the inputs. */
+.elan-variant-matrix {
+    overflow-x: auto;
+    border: 1.5px solid #e6e9f0;
+    border-radius: 14px;
+    background: #fff;
+}
+
+.elan-variant-matrix table {
+    width: 100%;
+    min-width: 520px;
+    border-collapse: collapse;
+}
+
+.elan-variant-matrix th,
+.elan-variant-matrix td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #eef1f6;
+    border-right: 1px solid #eef1f6;
+    text-align: left;
+    vertical-align: top;
+}
+
+.elan-variant-matrix th:last-child,
+.elan-variant-matrix td:last-child {
+    border-right: 0;
+}
+
+.elan-variant-matrix tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.elan-variant-matrix thead th {
+    background: #f8fafc;
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    white-space: nowrap;
+}
+
+.elan-variant-matrix .elan-matrix-color {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.elan-variant-matrix .elan-matrix-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.12);
+}
+
+.elan-variant-matrix .elan-matrix-size {
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+    white-space: nowrap;
+    padding-top: 12px;
+}
+
+.elan-variant-matrix .elan-matrix-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 104px;
+}
+
+.elan-variant-matrix .elan-matrix-cell input {
+    width: 100%;
+    min-width: 0;
+    padding: 6px 8px;
+    font-size: 13px;
+    border-radius: 8px;
+}
+
+.elan-variant-matrix .elan-matrix-cell input[hidden] {
+    display: none;
+}
+
+.elan-variant-matrix .elan-matrix-cell input:disabled {
+    border-color: #eef1f6;
+    background: #f8fafc;
+    color: #94a3b8;
+    cursor: not-allowed;
+}
+
+.elan-variant-matrix .elan-matrix-empty {
+    padding: 14px 16px;
+    font-size: 13px;
+    color: #64748b;
+}
+
 /* The listing form is a wizard: one section at a time, with a compact
    progress rail and Geri / Növbəti buttons pinned to the bottom. */
 .elan-steps--wizard {

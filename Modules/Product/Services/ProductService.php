@@ -579,7 +579,7 @@ class ProductService
     {
         try {
             $product = $this->model->with([
-                'colors', 'sizes', 'images', 'videos', 'category.parent.parent.parent.parent', 'brand', 'city', 'reviews.user', 'user', 'vendor',
+                'colors', 'sizes', 'variants', 'images', 'videos', 'category.parent.parent.parent.parent', 'brand', 'city', 'reviews.user', 'user', 'vendor',
                 'productFilters.filter', 'filterValues.filter', 'filterValues.value',
             ])->publiclyAvailable()->findOrFail($id);
 
@@ -716,7 +716,7 @@ class ProductService
     {
         try {
             $product = $this->model->withTrashed()->with([
-                'colors', 'sizes', 'images', 'videos', 'category', 'brand', 'reviews.user',
+                'colors', 'sizes', 'variants', 'images', 'videos', 'category', 'brand', 'reviews.user',
             ])->findOrFail($id);
 
             $averageRate = $product->reviews()->avg('rate') ?? 0;
@@ -1465,7 +1465,7 @@ class ProductService
     public function adminFindForEdit(int $id): Product
     {
         return $this->model->newQuery()
-            ->with(['images', 'colors', 'sizes', 'videos', 'productFilters', 'category'])
+            ->with(['images', 'colors', 'sizes', 'variants', 'videos', 'productFilters', 'category'])
             ->findOrFail($id);
     }
 

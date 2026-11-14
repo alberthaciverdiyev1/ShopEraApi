@@ -7,7 +7,6 @@ use App\Core\Support\TenantContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 use Modules\Banner\Entities\Banner;
 use Modules\Brand\Entities\Brand;
 use Modules\Category\Entities\Category;
@@ -18,6 +17,7 @@ use Modules\Product\Entities\Product;
 use Modules\Product\Entities\ProductImage;
 use Modules\Product\Entities\ProductVideo;
 use Modules\Product\Services\ProductService;
+use Modules\Product\Services\ProductVariantService;
 use Modules\Size\Entities\Size;
 
 class ProductController extends AdminController
@@ -155,6 +155,14 @@ class ProductController extends AdminController
             'sizes' => ['nullable', 'array'],
             'sizes.*.price' => ['nullable', 'numeric', 'min:0'],
             'sizes.*.discount' => ['nullable', 'numeric', 'min:0'],
+            'variants_present' => ['nullable'],
+            'variants' => ['nullable', 'array'],
+            'variants.*' => ['nullable', 'array'],
+            'variants.*.*' => ['nullable', 'array'],
+            'variants.*.*.price' => ['nullable', 'numeric', 'min:0'],
+            'variants.*.*.discount' => ['nullable', 'numeric', 'min:0'],
+            'variants.*.*.wholesale_price' => ['nullable', 'numeric', 'min:0'],
+            'variants.*.*.stock' => ['nullable', 'integer', 'min:0'],
             'new_images' => ['nullable', 'array'],
             'new_images.*' => ['file', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'],
             'videos' => ['nullable', 'array'],
@@ -187,6 +195,7 @@ class ProductController extends AdminController
 
         $product->colors()->sync(array_map('intval', $request->input('colors', [])));
         $this->syncSizes($product, (array) $request->input('size_ids', []), (array) $request->input('sizes', []));
+        $this->syncVariants($product, $request);
         $this->syncImages($product, $request);
         $this->syncVideos($product, $request);
         $this->syncFilters($product, $request);
@@ -233,6 +242,14 @@ class ProductController extends AdminController
             'sizes' => ['nullable', 'array'],
             'sizes.*.price' => ['nullable', 'numeric', 'min:0'],
             'sizes.*.discount' => ['nullable', 'numeric', 'min:0'],
+            'variants_present' => ['nullable'],
+            'variants' => ['nullable', 'array'],
+            'variants.*' => ['nullable', 'array'],
+            'variants.*.*' => ['nullable', 'array'],
+            'variants.*.*.price' => ['nullable', 'numeric', 'min:0'],
+            'variants.*.*.discount' => ['nullable', 'numeric', 'min:0'],
+            'variants.*.*.wholesale_price' => ['nullable', 'numeric', 'min:0'],
+            'variants.*.*.stock' => ['nullable', 'integer', 'min:0'],
             'new_images' => ['nullable', 'array'],
             'new_images.*' => ['file', 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:5120'],
             'delete_images' => ['nullable', 'array'],
@@ -271,6 +288,7 @@ class ProductController extends AdminController
         $product->colors()->sync(array_map('intval', $request->input('colors', [])));
 
         $this->syncSizes($product, (array) $request->input('size_ids', []), (array) $request->input('sizes', []));
+        $this->syncVariants($product, $request);
         $this->syncImages($product, $request);
         $this->syncVideos($product, $request);
         $this->syncFilters($product, $request);
@@ -489,6 +507,20 @@ class ProductController extends AdminController
                 'is_active' => true,
             ]
         );
+    }
+
+    /**
+     * Persist the colour × size matrix the edit form posts as
+     * `variants[color][size][price|discount|stock]`. The hidden marker lets an
+     * emptied matrix clear the saved combinations.
+     */
+    private function syncVariants(Product $product, Request $request): void
+    {
+        if (! $request->boolean('variants_present')) {
+            return;
+        }
+
+        app(ProductVariantService::class)->syncFromRows($product, (array) $request->input('variants', []));
     }
 
     /**

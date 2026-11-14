@@ -42,6 +42,22 @@
         }
     }
 
+    // Per colour × size combinations, looked up as "colorId:sizeId" once both
+    // a colour and a size are picked on the product page.
+    $variantPrices = [];
+
+    foreach ($product['variants'] ?? [] as $variant) {
+        if (empty($variant['color_id']) || empty($variant['size_id'])) {
+            continue;
+        }
+
+        $variantPrices[$variant['color_id'].':'.$variant['size_id']] = [
+            'price' => isset($variant['price']) ? (float) $variant['price'] : null,
+            'discount' => isset($variant['discount']) ? (float) $variant['discount'] : null,
+            'stock' => isset($variant['stock']) ? (int) $variant['stock'] : null,
+        ];
+    }
+
     $localizedName = function ($name): string {
         if (is_array($name)) {
             return (string) ($name['az'] ?? $name['en'] ?? reset($name));
@@ -166,6 +182,7 @@
     <!-- Size Variant Selector (Trendyol Screenshot 2) -->
     @if (! empty($product['sizes']) && count($product['sizes']) > 0)
         <div class="sf-product-variant-section sf-size-variants" data-sf-size-prices="{{ json_encode($sizePrices) }}"
+             data-sf-variants="{{ json_encode((object) $variantPrices) }}"
              data-sf-general-stock="{{ $generalStock }}">
             <div class="sf-variant-header">
                 <span class="sf-variant-title">Ölçü: <strong data-sf-size-label>{{ $localizedName($product['sizes'][0]['name'] ?? '') }}</strong></span>

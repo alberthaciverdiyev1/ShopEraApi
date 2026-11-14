@@ -88,7 +88,7 @@
                     <div class="flex flex-wrap gap-2">
                         @foreach ($colors as $color)
                             <label class="inline-flex cursor-pointer items-center gap-2 rounded-full border border-gray-200 px-3 py-1.5 text-sm has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50">
-                                <input type="checkbox" name="colors[]" value="{{ $color->id }}" @checked($product->colors->contains($color->id)) class="h-4 w-4 rounded border-gray-300 text-brand-600">
+                                <input type="checkbox" name="colors[]" value="{{ $color->id }}" @checked($product->colors->contains($color->id)) data-admin-color-check class="h-4 w-4 rounded border-gray-300 text-brand-600">
                                 <span class="h-3.5 w-3.5 rounded-full ring-1 ring-gray-200" style="background: {{ $color->hex }}"></span>
                                 {{ $color->name }}
                             </label>
@@ -113,7 +113,7 @@
                                     @php $pivot = $product->sizes->firstWhere('id', $size->id)?->pivot; @endphp
                                     <tr>
                                         <td class="px-2 py-1.5">
-                                            <input type="checkbox" name="size_ids[]" value="{{ $size->id }}" @checked($pivot) class="h-4 w-4 rounded border-gray-300 text-brand-600">
+                                            <input type="checkbox" name="size_ids[]" value="{{ $size->id }}" @checked($pivot) data-admin-size-check class="h-4 w-4 rounded border-gray-300 text-brand-600">
                                         </td>
                                         <td class="px-2 py-1.5">{{ admin_label($size) }}</td>
                                         <td class="px-2 py-1.5">
@@ -128,6 +128,39 @@
                         </table>
                     </div>
                     <p class="mt-2 text-xs text-gray-400">Hər ölçünün öz qiyməti var. Boş buraxılan sahə məhsulun qiymətini götürür.</p>
+                </div>
+
+                <div class="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+                    <p class="mb-1 font-semibold text-gray-700">Rəng × ölçü matrisi</p>
+                    <p class="mb-4 text-xs text-gray-400">Seçilmiş rəng və ölçülərin kəsişməsi üçün ayrıca qiymət, endirim və stok. Boş xana ölçünün dəyərini götürür.</p>
+
+                    @php
+                        $variantSeed = [];
+                        foreach ($product->variants as $variant) {
+                            $key = $variant->color_id.':'.$variant->size_id;
+                            foreach (['price', 'discount', 'stock'] as $field) {
+                                if ($variant->{$field} !== null) {
+                                    $variantSeed[$key][$field] = $variant->{$field};
+                                }
+                            }
+                        }
+                        foreach ((array) old('variants', []) as $colorId => $bySize) {
+                            foreach ((array) $bySize as $sizeId => $cell) {
+                                foreach (['price', 'discount', 'stock'] as $field) {
+                                    $value = $cell[$field] ?? null;
+                                    if ($value !== null && $value !== '') {
+                                        $variantSeed[$colorId.':'.$sizeId][$field] = $value;
+                                    }
+                                }
+                            }
+                        }
+                    @endphp
+
+                    <input type="hidden" name="variants_present" value="1">
+                    <div data-admin-variant-matrix
+                         data-colors="{{ json_encode($colors->map(fn ($color) => ['id' => $color->id, 'name' => admin_label($color), 'hex' => $color->hex])->values()) }}"
+                         data-sizes="{{ json_encode($sizes->map(fn ($size) => ['id' => $size->id, 'name' => admin_label($size)])->values()) }}"
+                         data-seed="{{ json_encode((object) $variantSeed) }}"></div>
                 </div>
             </div>
 
