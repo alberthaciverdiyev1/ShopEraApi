@@ -4,11 +4,13 @@ namespace App\Core\ViewComposers;
 
 use App\Core\Concerns\InteractsWithModuleControllers;
 use Illuminate\View\View;
+use Modules\Setting\Http\Controllers\SocialLinkController;
 use Modules\User\Http\Controllers\FavoritesController;
 
 /**
- * Supplies the header's category menu and wishlist preview. Both come from
- * the module controllers, never from a query written in the view.
+ * Supplies the header's category menu, wishlist preview and footer-style
+ * social icons. All come from the module controllers, never from a query
+ * written in the view.
  */
 class StorefrontHeaderComposer
 {
@@ -29,10 +31,15 @@ class StorefrontHeaderComposer
             );
         }
 
+        $social = (array) $this->payload(
+            app(SocialLinkController::class)->index()
+        );
+
         $view->with([
             'categories' => $this->storefrontCategories(),
             'wishlist' => $wishlist,
             'user' => $user,
+            'socialLinks' => (array) ($social['links'] ?? []),
         ]);
     }
 }

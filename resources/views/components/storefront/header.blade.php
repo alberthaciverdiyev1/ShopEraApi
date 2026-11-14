@@ -83,6 +83,17 @@
                 </ul>
             </nav>
 
+            @if (! empty($socialLinks ?? []))
+                <nav class="header-social" aria-label="Sosial şəbəkələr">
+                    @foreach ($socialLinks as $link)
+                        <a href="{{ $link['url'] }}" aria-label="{{ $link['label'] }}"
+                           target="_blank" rel="noopener noreferrer">
+                            <i class="{{ $link['icon'] }}"></i>
+                        </a>
+                    @endforeach
+                </nav>
+            @endif
+
             <div class="lang">
                 <div class="user">
                     @auth

@@ -4827,6 +4827,12 @@ a.sf-seller-link {
     display: none !important;
 }
 
+/* Social icons ride the dark strip on phones only; on wider screens the
+   strip carries the nav links instead. */
+.header-top-one .header-social {
+    display: none;
+}
+
 .header-top-one .lang {
     justify-self: end;
     align-items: center;
@@ -5518,10 +5524,36 @@ a.sf-seller-link {
     .header-top-one {
         display: flex !important;
         align-items: center !important;
-        justify-content: flex-end;
+        justify-content: space-between;
         gap: 8px;
         min-height: 38px;
         padding: 4px 12px !important;
+    }
+
+    .header-top-one .header-social {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        min-width: 0;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .header-top-one .header-social::-webkit-scrollbar {
+        display: none;
+    }
+
+    .header-top-one .header-social a {
+        flex: 0 0 26px;
+        width: 26px;
+        height: 26px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+        color: #e2e8f0;
+        font-size: 12px;
+        text-decoration: none;
     }
 
     .header-top-one .top-nav-links {
@@ -5530,6 +5562,7 @@ a.sf-seller-link {
 
     .header-top-one .lang {
         justify-self: end;
+        flex-shrink: 0;
         min-width: 0;
         gap: 6px;
     }
