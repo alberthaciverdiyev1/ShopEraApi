@@ -1343,73 +1343,90 @@ if (faq) {
         if (parentLinks[0]) activateParent(parentLinks[0].dataset.catalogParent);
     }
 
-    /* Categories Page: 3-Column Explorer & Mobile 2-Panel Rail */
-    const catExplorer = document.querySelector('[data-sf-page-catalog]');
-    if (catExplorer) {
-        const parentLinks = Array.from(catExplorer.querySelectorAll('[data-cat-parent]'));
-        const childColumns = Array.from(catExplorer.querySelectorAll('[data-cat-children]'));
-        const leafColumns = Array.from(catExplorer.querySelectorAll('[data-cat-leaves]'));
+    /* Categories Page: Exact Mega-Panel Desktop & Rail Mobile */
+    const pageCatalog = document.querySelector('[data-sf-page-catalog]');
+    if (pageCatalog) {
+        const parentLinks = Array.from(pageCatalog.querySelectorAll('[data-catalog-parent]'));
+        const childLinks = Array.from(pageCatalog.querySelectorAll('[data-catalog-child]'));
+
+        const setColumns = (count) => {
+            pageCatalog.classList.remove('columns-1', 'columns-2', 'columns-3');
+            pageCatalog.classList.add(`columns-${Math.min(count, 3)}`);
+        };
 
         const activateChild = (id) => {
-            catExplorer.querySelectorAll('[data-cat-child]').forEach((link) => {
-                link.classList.toggle('is-active', link.dataset.catChild === String(id));
+            const idStr = String(id);
+            childLinks.forEach((link) => {
+                link.classList.toggle('active', link.dataset.catalogChild === idStr);
             });
-
-            leafColumns.forEach((col) => {
-                col.hidden = col.dataset.catLeaves !== String(id);
+            pageCatalog.querySelectorAll('[data-catalog-leaves]').forEach((col) => {
+                col.hidden = col.dataset.catalogLeaves !== idStr;
             });
+            const leavesCol = pageCatalog.querySelector(`[data-catalog-leaves="${idStr}"]`);
+            setColumns(leavesCol ? 3 : 2);
         };
 
         const activateParent = (id) => {
+            const idStr = String(id);
             parentLinks.forEach((link) => {
-                link.classList.toggle('is-active', link.dataset.catParent === String(id));
+                link.classList.toggle('active', link.dataset.catalogParent === idStr);
+            });
+            pageCatalog.querySelectorAll('[data-catalog-children]').forEach((col) => {
+                col.hidden = col.dataset.catalogChildren !== idStr;
+            });
+            pageCatalog.querySelectorAll('[data-catalog-leaves]').forEach((col) => {
+                col.hidden = true;
             });
 
-            childColumns.forEach((col) => {
-                col.hidden = col.dataset.catChildren !== String(id);
-            });
-
-            const activeSubgroup = catExplorer.querySelector(`[data-cat-children="${id}"]`);
-            const firstChild = activeSubgroup?.querySelector('[data-cat-child]');
+            const activeChildCol = pageCatalog.querySelector(`[data-catalog-children="${idStr}"]`);
+            const firstChild = activeChildCol?.querySelector('[data-catalog-child]');
             if (firstChild) {
-                activateChild(firstChild.dataset.catChild);
+                activateChild(firstChild.dataset.catalogChild);
             } else {
-                leafColumns.forEach((col) => { col.hidden = true; });
+                setColumns(1);
             }
         };
 
         parentLinks.forEach((link) => {
-            const id = link.dataset.catParent;
+            const id = link.dataset.catalogParent;
             link.addEventListener('mouseenter', () => activateParent(id));
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                activateParent(id);
-            });
+            link.addEventListener('focus', () => activateParent(id));
         });
 
-        catExplorer.querySelectorAll('[data-cat-child]').forEach((link) => {
-            const id = link.dataset.catChild;
+        childLinks.forEach((link) => {
+            const id = link.dataset.catalogChild;
             link.addEventListener('mouseenter', () => activateChild(id));
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                activateChild(id);
-            });
+            link.addEventListener('focus', () => activateChild(id));
         });
+
+        // Initialize active state
+        const initialActiveParent = parentLinks.find((l) => l.classList.contains('active')) || parentLinks[0];
+        if (initialActiveParent) {
+            activateParent(initialActiveParent.dataset.catalogParent);
+        }
     }
 
-    const mobileCatExplorer = document.querySelector('[data-sf-mobile-cat-explorer]');
-    if (mobileCatExplorer) {
-        const railButtons = Array.from(mobileCatExplorer.querySelectorAll('[data-sf-mobile-cat-btn]'));
-        const contentPanes = Array.from(mobileCatExplorer.querySelectorAll('[data-sf-mobile-cat-pane]'));
+    // Mobile category list (/categories): one category open at a time.
+    const mobileCatList = document.querySelector('[data-sf-mcat]');
+    if (mobileCatList) {
+        const toggles = Array.from(mobileCatList.querySelectorAll('[data-sf-mcat-toggle]'));
 
-        railButtons.forEach((btn) => {
-            btn.addEventListener('click', () => {
-                const id = btn.dataset.sfMobileCatBtn;
+        const close = (toggle) => {
+            const body = toggle.closest('.sf-mcat__item')?.querySelector('.sf-mcat__body');
+            toggle.setAttribute('aria-expanded', 'false');
+            if (body) body.hidden = true;
+        };
 
-                railButtons.forEach((b) => b.classList.toggle('is-active', b === btn));
-                contentPanes.forEach((pane) => {
-                    pane.hidden = pane.dataset.sfMobileCatPane !== id;
+        toggles.forEach((toggle) => {
+            toggle.addEventListener('click', () => {
+                const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+                toggles.forEach((other) => {
+                    if (other !== toggle) close(other);
                 });
+
+                const body = toggle.closest('.sf-mcat__item')?.querySelector('.sf-mcat__body');
+                toggle.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+                if (body) body.hidden = isOpen;
             });
         });
     }
