@@ -32,7 +32,8 @@ class SocialLinkController extends ResourceController
         ['name' => 'platform', 'label' => 'Şəbəkə', 'type' => 'select', 'rules' => ['required'], 'col' => 6, 'options' => SocialLinkService::PLATFORMS],
         ['name' => 'sort_order', 'label' => 'Sıra', 'type' => 'number', 'col' => 3],
         ['name' => 'is_active', 'label' => 'Aktivdir', 'type' => 'checkbox', 'col' => 3],
-        ['name' => 'url', 'label' => 'Link (URL)', 'type' => 'text', 'rules' => ['required', 'max:255'], 'col' => 12],
+        ['name' => 'show_in_header', 'label' => 'Yuxarı qara zolaqda göstər', 'type' => 'checkbox', 'col' => 4],
+        ['name' => 'url', 'label' => 'Link (URL)', 'type' => 'text', 'rules' => ['required', 'max:255'], 'col' => 8],
     ];
 
     protected function columnMaps(): array

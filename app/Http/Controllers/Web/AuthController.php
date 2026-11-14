@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\LoginRequest;
 use App\Http\Requests\Web\RegisterRequest;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 use Modules\Setting\Http\Controllers\SettingController;
 use Modules\User\Http\Controllers\SessionAuthController;
@@ -15,9 +16,17 @@ class AuthController extends Controller
 {
     use InteractsWithModuleControllers;
 
-    public function showLogin(): View
+    public function showLogin(Request $request): View
     {
         app()->setLocale('az');
+
+        // Invitation links send guests here with the page they came from, so
+        // a successful sign-in returns them to it.
+        $redirect = (string) $request->query('redirect', '');
+
+        if ($redirect !== '' && str_starts_with($redirect, '/') && ! str_starts_with($redirect, '//')) {
+            $request->session()->put('url.intended', url($redirect));
+        }
 
         return view('storefront.auth.login', [
             'categories' => $this->storefrontCategories(),

@@ -50,6 +50,10 @@ Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('storefront.logout');
 
+// Invitation links are opened by people who are not signed in yet; the page
+// itself asks them to log in before accepting.
+Route::get('/magaza/devet/{token}', [StoreTeamController::class, 'invitation'])->name('storefront.store.team.invitation');
+
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('storefront.dashboard');
     Route::post('/dashboard/messages', [DashboardMessagesController::class, 'send'])->name('storefront.dashboard.messages.send');
@@ -111,7 +115,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/magaza/komanda/uyeler/{user}', [StoreTeamController::class, 'destroyMember'])
         ->whereNumber('user')
         ->name('storefront.store.team.member.destroy');
-    Route::get('/magaza/devet/{token}', [StoreTeamController::class, 'invitation'])->name('storefront.store.team.invitation');
     Route::post('/magaza/devet/{token}', [StoreTeamController::class, 'accept'])->name('storefront.store.team.accept');
     Route::delete('/magaza/komanda/devet/{token}', [StoreTeamController::class, 'destroyInvitation'])
         ->name('storefront.store.team.invitation.destroy');

@@ -47,7 +47,7 @@
                     <p class="text-muted small">
                         Dəvəti qəbul etmək üçün hesabınıza daxil olun.
                     </p>
-                    <a href="{{ route('storefront.login') }}" class="theme-btn">Daxil ol</a>
+                    <a href="{{ route('storefront.login', ['redirect' => request()->fullUrl()]) }}" class="theme-btn">Daxil ol</a>
                 @endauth
             </div>
         </div>

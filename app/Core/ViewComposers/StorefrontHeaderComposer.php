@@ -35,11 +35,17 @@ class StorefrontHeaderComposer
             app(SocialLinkController::class)->index()
         );
 
+        // The dark strip only carries the networks the admin marked for it.
+        $socialLinks = array_values(array_filter(
+            (array) ($social['links'] ?? []),
+            fn ($link) => ($link['show_in_header'] ?? false) === true
+        ));
+
         $view->with([
             'categories' => $this->storefrontCategories(),
             'wishlist' => $wishlist,
             'user' => $user,
-            'socialLinks' => (array) ($social['links'] ?? []),
+            'socialLinks' => $socialLinks,
         ]);
     }
 }

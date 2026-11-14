@@ -37,11 +37,19 @@
                         $href = '/magaza/'.($vendor['slug'] ?? '');
                     @endphp
                     <a class="sf-store-card" href="{{ $href }}">
-                        <span class="sf-store-card__logo">
-                            @if (! empty($vendor['logo_url']))
-                                <img src="{{ $vendor['logo_url'] }}" alt="{{ $name }}" loading="lazy">
-                            @else
-                                {{ $initial }}
+                        <span class="sf-store-card__cover">
+                            <span class="sf-store-card__logo">
+                                @if (! empty($vendor['logo_url']))
+                                    <img src="{{ $vendor['logo_url'] }}" alt="{{ $name }}" loading="lazy">
+                                @else
+                                    {{ $initial }}
+                                @endif
+                            </span>
+                            @if (! empty($vendor['rating_count']))
+                                <span class="sf-store-card__rating">
+                                    <i class="fa-solid fa-star"></i>
+                                    {{ number_format((float) ($vendor['rating_avg'] ?? 0), 1) }}
+                                </span>
                             @endif
                         </span>
 
@@ -50,15 +58,18 @@
                             @if ($description)
                                 <small>{{ \Illuminate\Support\Str::limit($description, 90) }}</small>
                             @endif
+
                             <span class="sf-store-card__meta">
                                 <span><i class="fa-regular fa-rectangle-list"></i> {{ number_format((int) ($vendor['listings_count'] ?? 0)) }} elan</span>
-                                @if (! empty($vendor['rating_count']))
-                                    <span><i class="fa-solid fa-star"></i> {{ number_format((float) ($vendor['rating_avg'] ?? 0), 1) }}</span>
+                                @if (! empty($vendor['address']))
+                                    <span><i class="fa-regular fa-location-dot"></i> {{ \Illuminate\Support\Str::limit($vendor['address'], 22) }}</span>
                                 @endif
                             </span>
-                        </span>
 
-                        <i class="fa-solid fa-chevron-right sf-store-card__arrow"></i>
+                            <span class="sf-store-card__cta">
+                                Mağazaya bax <i class="fa-solid fa-arrow-right"></i>
+                            </span>
+                        </span>
                     </a>
                 @endforeach
             </div>

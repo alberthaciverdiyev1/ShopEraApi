@@ -105,6 +105,12 @@
                             @endif
                             <span class="top-account-name">{{ $user->name ?? 'Hesabım' }}</span>
                         </a>
+                        <a href="/wishlist" class="top-wishlist-link" aria-label="İstək siyahısı">
+                            <i class="fa-regular fa-heart"></i>
+                            @if (count($wishlist))
+                                <span class="top-wishlist-count">{{ count($wishlist) }}</span>
+                            @endif
+                        </a>
                         <a href="/magaza/panel" class="top-store-link">Mağazam</a>
                     @else
                         <a href="{{ route('storefront.login') }}" class="top-account-link">

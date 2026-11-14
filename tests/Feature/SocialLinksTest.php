@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Modules\Setting\Database\Seeders\SocialLinkDatabaseSeeder;
 use Modules\Setting\Entities\SocialLink;
 use Tests\TestCase;
@@ -42,6 +43,34 @@ class SocialLinksTest extends TestCase
         $html->assertSee('fa-whatsapp');
         $html->assertSee('aria-label="WhatsApp"', false);
         $html->assertDontSee('https://tiktok.com/@gizli');
+    }
+
+    public function test_the_header_strip_only_shows_networks_marked_for_it(): void
+    {
+        SocialLink::query()->create([
+            'platform' => 'facebook',
+            'url' => 'https://facebook.com/shopera',
+            'sort_order' => 10,
+            'is_active' => true,
+            'show_in_header' => true,
+        ]);
+
+        SocialLink::query()->create([
+            'platform' => 'whatsapp',
+            'url' => 'https://wa.me/994500000000',
+            'sort_order' => 20,
+            'is_active' => true,
+            'show_in_header' => false,
+        ]);
+
+        $html = (string) $this->get('/')->getContent();
+        $strip = Str::betweenFirst($html, '<nav class="header-social"', '</nav>');
+
+        $this->assertStringContainsString('fa-facebook-f', $strip);
+        $this->assertStringNotContainsString('fa-whatsapp', $strip);
+
+        // The footer still carries every active network.
+        $this->assertStringContainsString('https://wa.me/994500000000', $html);
     }
 
     public function test_the_seeder_installs_the_default_networks(): void

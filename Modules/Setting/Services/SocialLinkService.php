@@ -48,10 +48,11 @@ class SocialLinkService
                 ->where('is_active', true)
                 ->orderBy('sort_order')
                 ->orderBy('id')
-                ->get(['platform', 'url'])
+                ->get(['platform', 'url', 'show_in_header'])
                 ->map(fn (SocialLink $link) => [
                     'platform' => $link->platform,
                     'url' => $link->url,
+                    'show_in_header' => (bool) $link->show_in_header,
                 ])
                 ->all();
         });
@@ -61,6 +62,7 @@ class SocialLinkService
             'label' => self::PLATFORMS[$row['platform']] ?? ucfirst((string) $row['platform']),
             'icon' => self::ICONS[$row['platform']] ?? 'fa-solid fa-link',
             'url' => (string) $row['url'],
+            'show_in_header' => $row['show_in_header'],
         ], $rows));
     }
 

@@ -156,6 +156,20 @@ class VendorTeamTest extends TestCase
             ->assertSee('İcazə tələb olunur');
     }
 
+    public function test_invitation_page_is_visible_to_a_guest(): void
+    {
+        $owner = $this->user();
+        $vendor = $this->store($owner);
+        $invitation = app(VendorTeamService::class)->invite($vendor, ['stats'], $owner);
+
+        // The link is shared with people who have no account session yet, so
+        // it must render instead of bouncing to the login screen.
+        $this->get('/magaza/devet/'.$invitation->token)
+            ->assertOk()
+            ->assertSee('Dəvəti qəbul etmək üçün hesabınıza daxil olun')
+            ->assertSee('Daxil ol');
+    }
+
     public function test_invited_user_joins_the_store_through_the_link(): void
     {
         $owner = $this->user();
