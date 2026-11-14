@@ -113,6 +113,8 @@ Route::middleware('auth')->group(function () {
         ->name('storefront.store.team.member.destroy');
     Route::get('/magaza/devet/{token}', [StoreTeamController::class, 'invitation'])->name('storefront.store.team.invitation');
     Route::post('/magaza/devet/{token}', [StoreTeamController::class, 'accept'])->name('storefront.store.team.accept');
+    Route::delete('/magaza/komanda/devet/{token}', [StoreTeamController::class, 'destroyInvitation'])
+        ->name('storefront.store.team.invitation.destroy');
 
     Route::get('/magaza/panel', [StorePanelController::class, 'panel'])->name('storefront.store.panel');
     Route::put('/magaza/panel', [StorePanelController::class, 'update'])->name('storefront.store.panel.update');

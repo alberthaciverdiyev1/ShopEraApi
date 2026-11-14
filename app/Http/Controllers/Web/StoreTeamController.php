@@ -28,9 +28,16 @@ class StoreTeamController extends Controller
             return redirect()->route('storefront.store.open');
         }
 
-        // Only the owner manages the team; members see a short explanation.
+        // Only the owner manages the team; members see their own workspace.
         if (empty($vendor['is_owner'])) {
-            return view('storefront.store-panel.team-member', ['vendor' => $vendor]);
+            $definitions = (array) $this->payload(
+                app(VendorTeamController::class)->definitions($this->moduleHttpRequest())
+            );
+
+            return view('storefront.store-panel.team-member', [
+                'vendor' => $vendor,
+                'permissions' => $definitions['permissions'] ?? [],
+            ]);
         }
 
         $team = (array) $this->payload(
@@ -42,6 +49,7 @@ class StoreTeamController extends Controller
             'members' => $team['members'] ?? [],
             'invitations' => $team['invitations'] ?? [],
             'permissions' => $team['permissions'] ?? [],
+            'presets' => $team['presets'] ?? [],
             'invite' => session('invite'),
         ]);
     }
@@ -80,6 +88,13 @@ class StoreTeamController extends Controller
         app(VendorTeamController::class)->destroyMember($this->moduleHttpRequest([], 'DELETE'), $user);
 
         return back()->with('status', 'Üzv mağazadan çıxarıldı.');
+    }
+
+    public function destroyInvitation(string $token): RedirectResponse
+    {
+        app(VendorTeamController::class)->destroyInvitation($this->moduleHttpRequest([], 'DELETE'), $token);
+
+        return back()->with('status', 'Dəvət linki ləğv edildi.');
     }
 
     /** Invitation link landing page. */

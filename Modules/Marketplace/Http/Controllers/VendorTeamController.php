@@ -24,6 +24,16 @@ class VendorTeamController extends Controller
             'members' => $this->service->members($vendor),
             'invitations' => $this->service->invitations($vendor),
             'permissions' => $this->service->permissions(),
+            'presets' => $this->service->presets(),
+        ]);
+    }
+
+    /** The permission catalogue, readable by every team member. */
+    public function definitions()
+    {
+        return responseHelper('OK', 200, [
+            'permissions' => $this->service->permissions(),
+            'presets' => $this->service->presets(),
         ]);
     }
 
@@ -74,6 +84,16 @@ class VendorTeamController extends Controller
         $this->service->removeMember($vendor, $userId);
 
         return responseHelper('Üzv mağazadan çıxarıldı.', 200);
+    }
+
+    /** Disable a pending invitation link. */
+    public function destroyInvitation(Request $request, string $token)
+    {
+        $vendor = $this->ownerVendor($request);
+
+        $this->service->revokeInvitation($vendor, $token);
+
+        return responseHelper('Dəvət linki ləğv edildi.', 200);
     }
 
     /** Details of a pending invitation, for the accept page. */

@@ -63,7 +63,9 @@ Route::prefix('vendor')->controller(VendorController::class)->middleware('auth:s
 // Store team: the owner manages members by invitation link.
 Route::prefix('vendor/team')->controller(VendorTeamController::class)->middleware('auth:sanctum')->group(function () {
     Route::get('/', 'index')->name('vendor.team');
+    Route::get('/definitions', 'definitions')->name('vendor.team.definitions');
     Route::post('/invitations', 'invite')->name('vendor.team.invite');
+    Route::delete('/invitations/{token}', 'destroyInvitation')->name('vendor.team.invitation.destroy');
     Route::put('/members/{user}', 'updateMember')->whereNumber('user')->name('vendor.team.member.update');
     Route::delete('/members/{user}', 'destroyMember')->whereNumber('user')->name('vendor.team.member.destroy');
     Route::post('/invitations/{token}/accept', 'accept')->name('vendor.team.accept');

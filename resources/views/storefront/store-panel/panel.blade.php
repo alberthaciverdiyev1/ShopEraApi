@@ -9,7 +9,12 @@
 
     $storeName = $localized($payload['name'] ?? '');
     $initial = mb_strtoupper(mb_substr($storeName ?: 'M', 0, 1));
-    $canSettings = in_array('settings', $payload['permissions'] ?? ['settings'], true);
+    $isOwner = ! empty($payload['is_owner']);
+    $permissions = $payload['permissions'] ?? [];
+    $can = fn (string $key): bool => in_array($key, $permissions, true);
+    $canSettings = $can('settings');
+    $canListings = $can('listings');
+    $canStats = $can('stats');
 
     $stats = [
         'total' => count($listings),
@@ -43,11 +48,13 @@
                         <i class="fa-solid fa-gauge-high"></i>
                         <span>İcmal</span>
                     </a>
-                    <a href="#listings">
-                        <i class="fa-regular fa-rectangle-list"></i>
-                        <span>Elanlar</span>
-                        <em>{{ number_format($stats['total']) }}</em>
-                    </a>
+                    @if ($canListings)
+                        <a href="#listings">
+                            <i class="fa-regular fa-rectangle-list"></i>
+                            <span>Elanlar</span>
+                            <em>{{ number_format($stats['total']) }}</em>
+                        </a>
+                    @endif
                     @if ($canSettings)
                         <a href="#settings">
                             <i class="fa-solid fa-store"></i>
@@ -56,7 +63,7 @@
                     @endif
                     <a href="/magaza/komanda">
                         <i class="fa-solid fa-users"></i>
-                        <span>Komanda</span>
+                        <span>{{ $isOwner ? 'Komanda' : 'İcazələrim' }}</span>
                     </a>
                     <a href="/magaza/{{ $payload['slug'] ?? '' }}" target="_blank" rel="noopener">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i>
@@ -69,10 +76,12 @@
                         <i class="fa-solid fa-user"></i>
                         <span>Hesabım</span>
                     </a>
-                    <a href="/elan/ver" class="sf-dash__cta">
-                        <i class="fa-solid fa-plus"></i>
-                        <span>Yeni elan</span>
-                    </a>
+                    @if ($canListings)
+                        <a href="/elan/ver" class="sf-dash__cta">
+                            <i class="fa-solid fa-plus"></i>
+                            <span>Yeni elan</span>
+                        </a>
+                    @endif
                 </nav>
             </aside>
 
@@ -84,9 +93,12 @@
                             <span class="text-muted fs-6">— {{ $storeName }}</span>
                         @endif
                     </h2>
-                    <div class="d-flex gap-2">
-                        <a class="sf-btn sf-btn--ghost" href="/magaza/komanda">Komanda</a>
-                        <a class="theme-btn" href="/elan/ver">Yeni elan</a>
+                    <div class="d-flex gap-2 align-items-center flex-wrap">
+                        <span class="sf-badge">{{ $isOwner ? 'Sahib' : 'Komanda üzvü' }}</span>
+                        <a class="sf-btn sf-btn--ghost" href="/magaza/komanda">{{ $isOwner ? 'Komanda' : 'İcazələrim' }}</a>
+                        @if ($canListings)
+                            <a class="theme-btn" href="/elan/ver">Yeni elan</a>
+                        @endif
                     </div>
                 </div>
 
@@ -94,68 +106,82 @@
                     <div class="sf-alert sf-alert--success">{{ session('status') }}</div>
                 @endif
 
-                <div class="sf-store-stats" id="overview">
-                    @foreach ([
-                        'Elanlar' => $stats['total'],
-                        'İrəli çəkilmiş' => $stats['promoted'],
-                        'Premium' => $stats['premium'],
-                        'Baxış' => $stats['views'],
-                        'Əlaqə' => $stats['contacts'],
-                    ] as $label => $value)
-                        <div class="sf-store-stat">
-                            <span>{{ $label }}</span>
-                            <strong>{{ number_format($value) }}</strong>
-                        </div>
-                    @endforeach
-                </div>
+                @if ($canStats)
+                    <div class="sf-store-stats" id="overview">
+                        @foreach ([
+                            'Elanlar' => $stats['total'],
+                            'İrəli çəkilmiş' => $stats['promoted'],
+                            'Premium' => $stats['premium'],
+                            'Baxış' => $stats['views'],
+                            'Əlaqə' => $stats['contacts'],
+                        ] as $label => $value)
+                            <div class="sf-store-stat">
+                                <span>{{ $label }}</span>
+                                <strong>{{ number_format($value) }}</strong>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
 
-                <section class="sf-panel mt-4" id="listings">
-                    <h6 class="fw-bold mb-3">Elanlarım</h6>
-                    @if (count($listings) === 0)
-                        <p class="text-muted mb-0">Hələ elanınız yoxdur.</p>
-                    @else
-                        <div class="sf-product-grid sf-dash-listings">
-                            @foreach ($listings as $listing)
-                                @php
-                                    // Map the listing payload onto the shared product
-                                    // card shape (translatable title, image objects).
-                                    $images = $listing['images'] ?? [];
-                                    $images = $images instanceof \Illuminate\Support\Collection ? $images->all() : (array) $images;
+                @if ($canListings)
+                    <section class="sf-panel mt-4" id="listings">
+                        <h6 class="fw-bold mb-3">Elanlarım</h6>
+                        @if (count($listings) === 0)
+                            <p class="text-muted mb-0">Hələ elanınız yoxdur.</p>
+                        @else
+                            <div class="sf-product-grid sf-dash-listings">
+                                @foreach ($listings as $listing)
+                                    @php
+                                        // Map the listing payload onto the shared product
+                                        // card shape (translatable title, image objects).
+                                        $images = $listing['images'] ?? [];
+                                        $images = $images instanceof \Illuminate\Support\Collection ? $images->all() : (array) $images;
 
-                                    $card = [
-                                        'title' => $localized($listing['title'] ?? ''),
-                                        'slug' => $listing['slug'] ?? null,
-                                        'price' => $listing['price'] ?? 0,
-                                        'city' => $localized($listing['city'] ?? '') ?: null,
-                                        'created_at' => $listing['created_at'] ?? null,
-                                        'is_premium' => $listing['is_premium'] ?? false,
-                                        'is_promoted' => $listing['is_promoted'] ?? false,
-                                        'images' => array_map(
-                                            fn ($path) => ['image_path' => $path],
-                                            $images
-                                        ),
-                                    ];
-                                @endphp
-                                <div class="sf-dash-listing">
-                                    <x-storefront.product-card :product="$card" />
+                                        $card = [
+                                            'title' => $localized($listing['title'] ?? ''),
+                                            'slug' => $listing['slug'] ?? null,
+                                            'price' => $listing['price'] ?? 0,
+                                            'city' => $localized($listing['city'] ?? '') ?: null,
+                                            'created_at' => $listing['created_at'] ?? null,
+                                            'is_premium' => $listing['is_premium'] ?? false,
+                                            'is_promoted' => $listing['is_promoted'] ?? false,
+                                            'images' => array_map(
+                                                fn ($path) => ['image_path' => $path],
+                                                $images
+                                            ),
+                                        ];
+                                    @endphp
+                                    <div class="sf-dash-listing">
+                                        <x-storefront.product-card :product="$card" />
 
-                                    <div class="sf-dash-listing__actions">
-                                        <span>
-                                            <i class="fa-regular fa-eye"></i> {{ number_format((int) ($listing['views'] ?? 0)) }}
-                                            · <i class="fa-solid fa-phone"></i> {{ number_format((int) ($listing['contact_reveals'] ?? 0)) }}
-                                        </span>
-                                        <form action="{{ route('storefront.listings.destroy', $listing['slug'] ?? $listing['id']) }}"
-                                              method="POST" onsubmit="return confirm('Elan silinsin?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="sf-btn sf-btn--ghost sf-btn--sm sf-btn--danger">Sil</button>
-                                        </form>
+                                        <div class="sf-dash-listing__actions">
+                                            <span>
+                                                <i class="fa-regular fa-eye"></i> {{ number_format((int) ($listing['views'] ?? 0)) }}
+                                                · <i class="fa-solid fa-phone"></i> {{ number_format((int) ($listing['contact_reveals'] ?? 0)) }}
+                                            </span>
+                                            <form action="{{ route('storefront.listings.destroy', $listing['slug'] ?? $listing['id']) }}"
+                                                  method="POST" onsubmit="return confirm('Elan silinsin?');">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="sf-btn sf-btn--ghost sf-btn--sm sf-btn--danger">Sil</button>
+                                            </form>
+                                        </div>
                                     </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
-                </section>
+                                @endforeach
+                            </div>
+                        @endif
+                    </section>
+                @endif
+
+                @unless ($canListings)
+                    <div class="sf-panel mt-4">
+                        <h6 class="fw-bold mb-2">Elanlara giriş</h6>
+                        <p class="text-muted small mb-0">
+                            Sizin “Elanları idarə et” icazəniz yoxdur. Mağazanın elanlarını görmək üçün
+                            mağaza sahibindən icazə istəyin.
+                        </p>
+                    </div>
+                @endunless
 
                 @if ($canSettings)
                     <section class="sf-panel mt-4" id="settings">

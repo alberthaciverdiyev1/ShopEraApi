@@ -25,6 +25,23 @@ class VendorTeamService
         'settings' => 'Mağaza məlumatlarını redaktə et',
     ];
 
+    /** One-line explanation shown next to each permission on the team screens. */
+    public const DESCRIPTIONS = [
+        'listings' => 'Mağazanın elanlarını yaratmaq, redaktə etmək və silmək.',
+        'promotions' => 'Elanı irəli çəkmək və premium etmək.',
+        'orders' => 'Daxil olan sifarişlərə baxmaq və onları idarə etmək.',
+        'messages' => 'Alıcıların mesajlarına baxmaq və cavab vermək.',
+        'stats' => 'Baxış, əlaqə və satış statistikasına baxmaq.',
+        'settings' => 'Mağaza adı, loqo, təsvir və əlaqə məlumatlarını redaktə etmək.',
+    ];
+
+    /** Ready-made permission sets the owner can apply with one click. */
+    public const PRESETS = [
+        'manager' => ['label' => 'Ümumi menecer', 'permissions' => ['listings', 'promotions', 'orders', 'messages', 'stats']],
+        'catalog' => ['label' => 'Kataloq mütəxəssisi', 'permissions' => ['listings', 'promotions']],
+        'support' => ['label' => 'Dəstək', 'permissions' => ['messages', 'orders']],
+    ];
+
     private const INVITE_DAYS = 7;
 
     public function permissions(): array
@@ -32,7 +49,27 @@ class VendorTeamService
         $list = [];
 
         foreach (self::PERMISSIONS as $key => $label) {
-            $list[] = ['key' => $key, 'label' => $label];
+            $list[] = [
+                'key' => $key,
+                'label' => $label,
+                'description' => self::DESCRIPTIONS[$key] ?? '',
+            ];
+        }
+
+        return $list;
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    public function presets(): array
+    {
+        $list = [];
+
+        foreach (self::PRESETS as $key => $preset) {
+            $list[] = [
+                'key' => $key,
+                'label' => $preset['label'],
+                'permissions' => $preset['permissions'],
+            ];
         }
 
         return $list;
@@ -139,6 +176,7 @@ class VendorTeamService
                 'avatar' => $member->user->avatar,
                 'is_owner' => false,
                 'permissions' => $member->permissions ?? [],
+                'joined_at' => $member->created_at?->toIso8601String(),
             ];
         }
 
@@ -223,6 +261,15 @@ class VendorTeamService
         VendorMember::query()
             ->where('vendor_id', $vendor->id)
             ->where('user_id', $userId)
+            ->delete();
+    }
+
+    /** Disable a pending invitation link before it is used. */
+    public function revokeInvitation(Vendor $vendor, string $token): void
+    {
+        $vendor->invitations()
+            ->where('token', $token)
+            ->whereNull('accepted_at')
             ->delete();
     }
 

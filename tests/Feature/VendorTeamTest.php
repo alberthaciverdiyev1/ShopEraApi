@@ -122,6 +122,39 @@ class VendorTeamTest extends TestCase
             ->assertSee('Elanları idarə et');
     }
 
+    public function test_owner_can_revoke_a_pending_invitation_link(): void
+    {
+        $owner = $this->user();
+        $vendor = $this->store($owner);
+        $team = app(VendorTeamService::class);
+
+        $invitation = $team->invite($vendor, ['stats'], $owner);
+
+        $this->actingAs($owner)
+            ->delete('/magaza/komanda/devet/'.$invitation->token)
+            ->assertRedirect();
+
+        $this->assertNull($team->findByToken($invitation->token));
+        $this->assertDatabaseCount('vendor_invitations', 0);
+    }
+
+    public function test_store_panel_hides_sections_without_permission(): void
+    {
+        $owner = $this->user();
+        $member = $this->user();
+        $vendor = $this->store($owner);
+        $team = app(VendorTeamService::class);
+
+        $invitation = $team->invite($vendor, ['stats'], $owner);
+        $team->accept($invitation->refresh(), $member);
+
+        $this->actingAs($member)
+            ->get('/magaza/panel')
+            ->assertOk()
+            ->assertDontSee('id="listings"', false)
+            ->assertSee('Elanlara giriş');
+    }
+
     public function test_invited_user_joins_the_store_through_the_link(): void
     {
         $owner = $this->user();
