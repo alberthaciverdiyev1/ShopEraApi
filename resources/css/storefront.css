@@ -576,9 +576,24 @@
 }
 
 .storefront .sf-product-card .best-seller-product-items-two__content {
-    display: block;
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
     margin-top: 0;
     padding: 14px 14px 16px;
+}
+
+/* The title can take one or two lines; the city and date stay pinned to the
+   bottom of every card so they line up across the grid. */
+.storefront .sf-product-card .best-seller-product-items-two__details {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+}
+
+.storefront .sf-product-card .best-seller-product-items-two__details .listing-card-meta {
+    margin-top: auto;
+    padding-top: 6px;
 }
 
 .storefront .sf-product-card .best-seller-product-items-two__details--title {
