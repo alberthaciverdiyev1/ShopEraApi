@@ -5552,6 +5552,12 @@ a.sf-seller-link {
     .sf-mobile-navbar {
         display: block !important;
     }
+
+    /* Keep the hamburger and the search toggle; the account and wishlist
+       links are reachable from the bottom tab bar and the menu drawer. */
+    .sf-mobile-navbar .sf-mobile-navbar__right a.sf-mobile-nav-btn {
+        display: none !important;
+    }
 }
 
 @media (max-width: 479.98px) {
