@@ -19,8 +19,6 @@
 
     $stats = [
         'total' => count($listings),
-        'promoted' => collect($listings)->where('is_promoted', true)->count(),
-        'premium' => collect($listings)->where('is_premium', true)->count(),
         'views' => collect($listings)->sum('views'),
         'contacts' => collect($listings)->sum('contact_reveals'),
     ];
@@ -88,9 +86,6 @@
                         @if ($canSettings)
                             <a href="{{ route('storefront.store.panel', ['tab' => 'settings']) }}"><i class="fa-solid fa-gear"></i> Parametrlər</a>
                         @endif
-                        @if ($canListings)
-                            <a href="/elan/ver"><i class="fa-solid fa-plus"></i> Yeni elan</a>
-                        @endif
                     </div>
                 </div>
             </div>
@@ -145,15 +140,6 @@
                     @endif
                 </div>
 
-                @if (! empty($payload['slug']))
-                    <a class="sf-ig__website" href="/magaza/{{ $payload['slug'] }}" target="_blank" rel="noopener">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-                        </svg>
-                        {{ preg_replace('#^https?://#', '', url('/magaza/'.$payload['slug'])) }}
-                    </a>
-                @endif
             </div>
 
             {{-- Action Buttons Row --}}
@@ -171,72 +157,14 @@
                     </a>
                 @endif
 
-                <a class="sf-ig-btn" href="/magaza/{{ $payload['slug'] ?? '' }}" target="_blank" rel="noopener">
-                    <span>Mağaza</span>
-                </a>
-
-                <div class="sf-ig-dropdown-container">
-                    <button type="button" class="sf-ig-btn sf-ig-btn--icon" id="sfIgActionMoreBtn" aria-label="Menyu">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                    </button>
-                    <div class="sf-ig-dropdown-menu sf-ig-dropdown-menu--right" id="sfIgActionDropdown">
-                        @if ($canListings)
-                            <a href="/elanlarim"><i class="fa-solid fa-rectangle-list"></i> Elanları idarə et</a>
-                        @endif
-                        <a href="/magaza/komanda"><i class="fa-solid fa-users"></i> {{ $isOwner ? 'Komanda idarəetməsi' : 'İcazələrim' }}</a>
-                        @if ($canSettings)
-                            <a href="{{ route('storefront.store.panel', ['tab' => 'settings']) }}"><i class="fa-solid fa-gear"></i> Parametrlər</a>
-                        @endif
-                        @if ($canListings)
-                            <a href="/elan/ver"><i class="fa-solid fa-plus"></i> Yeni elan</a>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
-            {{-- Story Highlights --}}
-            <div class="sf-ig__highlights">
-                @if ($canListings)
-                    <a href="/elan/ver" class="sf-ig__highlight-item">
-                        <div class="sf-ig__highlight-circle sf-ig__highlight-circle--new">
-                            <i class="fa-solid fa-plus"></i>
-                        </div>
-                        <span>Yeni elan</span>
-                    </a>
-                @endif
-                <a href="/magaza/{{ $payload['slug'] ?? '' }}" target="_blank" class="sf-ig__highlight-item">
-                    <div class="sf-ig__highlight-circle">
-                        <i class="fa-solid fa-store"></i>
-                    </div>
-                    <span>Mağaza</span>
-                </a>
-                <a href="/magaza/komanda" class="sf-ig__highlight-item">
-                    <div class="sf-ig__highlight-circle">
-                        <i class="fa-solid fa-users"></i>
-                    </div>
-                    <span>Komanda</span>
-                </a>
-                @if ($canSettings)
-                    <a href="{{ route('storefront.store.panel', ['tab' => 'settings']) }}" class="sf-ig__highlight-item">
-                        <div class="sf-ig__highlight-circle">
-                            <i class="fa-solid fa-gear"></i>
-                        </div>
-                        <span>Tənzimləmə</span>
-                    </a>
-                @endif
-                @if ($canListings)
-                    <a href="/elanlarim" class="sf-ig__highlight-item">
-                        <div class="sf-ig__highlight-circle">
-                            <i class="fa-solid fa-rectangle-list"></i>
-                        </div>
-                        <span>Elanlarım</span>
+                @if (! empty($payload['slug']))
+                    <a class="sf-ig-btn" href="/magaza/{{ $payload['slug'] }}" target="_blank" rel="noopener">
+                        <span>Mağaza</span>
                     </a>
                 @endif
             </div>
 
-            {{-- Tabs Row (4 Icons) --}}
+            {{-- Tabs Row --}}
             <nav class="sf-ig__tabs" aria-label="Bölmələr">
                 @if ($canListings)
                     <a href="{{ route('storefront.store.panel', ['tab' => 'listings']) }}"
@@ -267,13 +195,6 @@
                         </svg>
                     </a>
                 @endif
-                <a href="/magaza/komanda" title="Komanda">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                        <rect x="3" y="2" width="18" height="20" rx="2" ry="2"></rect>
-                    </svg>
-                </a>
             </nav>
 
             {{-- Flash status --}}
@@ -426,7 +347,6 @@
                 });
             }
             setupDropdown('sfIgTopMenuToggle', 'sfIgTopDropdown');
-            setupDropdown('sfIgActionMoreBtn', 'sfIgActionDropdown');
 
             document.addEventListener('click', function () {
                 document.querySelectorAll('.sf-ig-dropdown-menu.is-open').forEach(function (el) {

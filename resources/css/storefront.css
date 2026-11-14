@@ -8087,10 +8087,6 @@ a.sf-seller-link {
     position: relative;
 }
 
-.sf-ig-dropdown-container {
-    position: relative;
-}
-
 .sf-ig-dropdown-menu {
     position: absolute;
     top: calc(100% + 6px);
@@ -8234,21 +8230,6 @@ a.sf-seller-link {
     margin-top: 6px;
 }
 
-.sf-ig__website {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 13.5px;
-    font-weight: 600;
-    color: #00376b;
-    text-decoration: none;
-    margin-top: 8px;
-}
-
-.sf-ig__website:hover {
-    text-decoration: underline;
-}
-
 /* Action Buttons */
 .sf-ig__actions-row {
     display: flex;
@@ -8296,64 +8277,6 @@ a.sf-seller-link {
     flex: 0 0 35px;
     width: 35px;
     padding: 0;
-}
-
-/* Story Highlights */
-.sf-ig__highlights {
-    display: flex;
-    gap: 18px;
-    overflow-x: auto;
-    padding: 6px 24px 18px;
-    scrollbar-width: none;
-}
-
-.sf-ig__highlights::-webkit-scrollbar {
-    display: none;
-}
-
-.sf-ig__highlight-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    text-decoration: none;
-    flex-shrink: 0;
-}
-
-.sf-ig__highlight-item span {
-    font-size: 11.5px;
-    font-weight: 500;
-    color: #262626;
-    max-width: 66px;
-    text-align: center;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.sf-ig__highlight-circle {
-    width: 62px;
-    height: 62px;
-    border-radius: 50%;
-    border: 1px solid #dbdbdb;
-    padding: 3px;
-    background: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    color: #262626;
-    transition: transform 0.15s ease, border-color 0.15s ease;
-}
-
-.sf-ig__highlight-item:hover .sf-ig__highlight-circle {
-    transform: scale(1.05);
-    border-color: #94a3b8;
-}
-
-.sf-ig__highlight-circle--new {
-    border: 1.5px dashed var(--sf-theme);
-    color: var(--sf-theme);
 }
 
 /* Tab Bar */
@@ -8645,16 +8568,6 @@ a.sf-seller-link {
         padding: 0 10px;
     }
 
-    .sf-ig__highlights {
-        padding: 4px 16px 14px;
-        gap: 14px;
-    }
-
-    .sf-ig__highlight-circle {
-        width: 56px;
-        height: 56px;
-        font-size: 18px;
-    }
 }
 
 .elan-hero {
