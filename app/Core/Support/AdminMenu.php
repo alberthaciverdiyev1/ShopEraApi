@@ -200,6 +200,12 @@ class AdminMenu
                     'icon' => 'M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5',
                 ],
                 [
+                    'label' => 'Sosial şəbəkələr',
+                    'route' => 'admin.social-links.index',
+                    'match' => 'admin.social-links.*',
+                    'icon' => 'M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244',
+                ],
+                [
                     'label' => 'Şərtlər və qaydalar',
                     'route' => 'admin.legal-terms.index',
                     'match' => 'admin.legal-terms.*',

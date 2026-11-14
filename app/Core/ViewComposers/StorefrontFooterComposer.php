@@ -5,10 +5,12 @@ namespace App\Core\ViewComposers;
 use App\Core\Concerns\InteractsWithModuleControllers;
 use Illuminate\View\View;
 use Modules\Setting\Http\Controllers\FooterLinkController;
+use Modules\Setting\Http\Controllers\SocialLinkController;
 
 /**
- * Supplies the admin-managed footer columns. The links live in the Setting
- * module and are read through its controller, never queried in the view.
+ * Supplies the admin-managed footer columns and social icons. The links live
+ * in the Setting module and are read through its controllers, never queried
+ * in the view.
  */
 class StorefrontFooterComposer
 {
@@ -20,9 +22,14 @@ class StorefrontFooterComposer
             app(FooterLinkController::class)->index()
         );
 
+        $social = (array) $this->payload(
+            app(SocialLinkController::class)->index()
+        );
+
         $view->with([
             'footerGroups' => (array) ($data['groups'] ?? []),
             'footerSections' => (array) ($data['sections'] ?? []),
+            'socialLinks' => (array) ($social['links'] ?? []),
         ]);
     }
 }

@@ -9,9 +9,20 @@
                 </a>
                 <p>Alqı-satqı elanları, mağazalar və gündəlik fürsətlər bir yerdə.</p>
                 <div class="sf-footer__social">
-                    <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="#" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="#" aria-label="Telegram"><i class="fa-brands fa-telegram"></i></a>
+                    @php $socialLinks = $socialLinks ?? []; @endphp
+                    @if (! empty($socialLinks))
+                        {{-- Icons managed in the admin panel (Parametrlər → Sosial şəbəkələr). --}}
+                        @foreach ($socialLinks as $link)
+                            <a href="{{ $link['url'] }}" aria-label="{{ $link['label'] }}"
+                               target="_blank" rel="noopener noreferrer">
+                                <i class="{{ $link['icon'] }}"></i>
+                            </a>
+                        @endforeach
+                    @else
+                        <a href="https://facebook.com/" aria-label="Facebook" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="https://instagram.com/" aria-label="Instagram" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="https://t.me/" aria-label="Telegram" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-telegram"></i></a>
+                    @endif
                 </div>
             </div>
 

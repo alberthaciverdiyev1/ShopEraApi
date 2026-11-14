@@ -22,6 +22,7 @@ use Modules\RoleAndPermissions\Database\Seeders\PermissionDatabaseSeeder;
 use Modules\RoleAndPermissions\Database\Seeders\RoleDatabaseSeeder;
 use Modules\Setting\Database\Seeders\FooterLinkDatabaseSeeder;
 use Modules\Setting\Database\Seeders\SettingDatabaseSeeder;
+use Modules\Setting\Database\Seeders\SocialLinkDatabaseSeeder;
 use Modules\Setting\Database\Seeders\ThemeColorDatabaseSeeder;
 use Modules\Size\Database\Seeders\SizeDatabaseSeeder;
 use Modules\User\Database\Seeders\UserDatabaseSeeder;
@@ -40,6 +41,7 @@ class DatabaseSeeder extends Seeder
             SettingDatabaseSeeder::class,
             ThemeColorDatabaseSeeder::class,
             FooterLinkDatabaseSeeder::class,
+            SocialLinkDatabaseSeeder::class,
 
             // Accounts first: the product factory picks a random user.
             UserDatabaseSeeder::class,
