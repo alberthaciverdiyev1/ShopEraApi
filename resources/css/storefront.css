@@ -5449,8 +5449,17 @@ a.sf-seller-link {
 }
 
 @media (max-width: 991.98px) {
-    /* The dark top strip stays on phones: the contact number, the main links
-       as a scrollable row and the sign-in pill. */
+    /* The dark top strip stays on phones and sits above the white navbar:
+       contact number, main links as a scrollable row and the sign-in pill. */
+    .header-1 {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .header-1 .header-top-one {
+        order: -1;
+    }
+
     .header-top-one {
         display: grid !important;
         grid-template-columns: minmax(0, 1fr) auto !important;
