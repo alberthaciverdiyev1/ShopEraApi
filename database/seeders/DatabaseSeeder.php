@@ -20,6 +20,7 @@ use Modules\Product\Database\Seeders\ReviewDatabaseSeeder;
 use Modules\PromoCode\Database\Seeders\PromoCodeDatabaseSeeder;
 use Modules\RoleAndPermissions\Database\Seeders\PermissionDatabaseSeeder;
 use Modules\RoleAndPermissions\Database\Seeders\RoleDatabaseSeeder;
+use Modules\Setting\Database\Seeders\FooterLinkDatabaseSeeder;
 use Modules\Setting\Database\Seeders\SettingDatabaseSeeder;
 use Modules\Setting\Database\Seeders\ThemeColorDatabaseSeeder;
 use Modules\Size\Database\Seeders\SizeDatabaseSeeder;
@@ -38,6 +39,7 @@ class DatabaseSeeder extends Seeder
             PermissionDatabaseSeeder::class,
             SettingDatabaseSeeder::class,
             ThemeColorDatabaseSeeder::class,
+            FooterLinkDatabaseSeeder::class,
 
             // Accounts first: the product factory picks a random user.
             UserDatabaseSeeder::class,

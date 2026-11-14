@@ -115,6 +115,7 @@ Route::middleware(['admin.auth'])->group(function () {
     $resource('banners', Admin\BannerController::class);
     $resource('popups', Admin\PopupController::class);
     $resource('faqs', Admin\FaqController::class);
+    $resource('footer-links', Admin\FooterLinkController::class);
     $resource('promocodes', Admin\PromoCodeController::class);
     $resource('contact-messages', Admin\ContactMessageController::class);
 

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Core\Support\TenantContext;
+use App\Core\ViewComposers\StorefrontFooterComposer;
 use App\Core\ViewComposers\StorefrontHeaderComposer;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Filesystem\FilesystemAdapter;
@@ -43,6 +44,8 @@ class AppServiceProvider extends ServiceProvider
             'components.storefront.header',
             'components.storefront.mobile-bottom-nav',
         ], StorefrontHeaderComposer::class);
+
+        View::composer('components.storefront.footer', StorefrontFooterComposer::class);
 
         View::composer('storefront.layout', function ($view) {
             $view->with([

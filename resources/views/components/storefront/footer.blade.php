@@ -15,27 +15,47 @@
                 </div>
             </div>
 
-            <div class="sf-footer__col">
-                <h2>Kataloq</h2>
-                <a href="/shop">Bütün elanlar</a>
-                <a href="/categories">Kateqoriyalar</a>
-                <a href="/blog">Bloq</a>
-            </div>
+            @php
+                $footerGroups = $footerGroups ?? [];
+                $footerSections = $footerSections ?? [];
+            @endphp
 
-            <div class="sf-footer__col">
-                <h2>İnformasiya</h2>
-                <a href="/about">Haqqımızda</a>
-                <a href="/privacy">Məxfilik siyasəti</a>
-                <a href="/terms">İstifadə şərtləri</a>
-                <a href="/faq">Tez-tez verilən suallar</a>
-            </div>
+            @if (! empty($footerGroups))
+                {{-- Links managed in the admin panel (Parametrlər → Footer linkləri). --}}
+                @foreach ($footerSections as $sectionKey => $sectionLabel)
+                    @continue(empty($footerGroups[$sectionKey]))
 
-            <div class="sf-footer__col">
-                <h2>Əlaqə</h2>
-                <a href="tel:+994500000000">+994 50 000 00 00</a>
-                <a href="mailto:info@shopera.az">info@shopera.az</a>
-                <a href="/contact">Əlaqə forması</a>
-            </div>
+                    <div class="sf-footer__col">
+                        <h2>{{ $sectionLabel }}</h2>
+                        @foreach ($footerGroups[$sectionKey] as $link)
+                            <a href="{{ $link['url'] }}">{{ $link['label'] }}</a>
+                        @endforeach
+                    </div>
+                @endforeach
+            @else
+                {{-- Fallback so a fresh install still shows the familiar columns. --}}
+                <div class="sf-footer__col">
+                    <h2>Kataloq</h2>
+                    <a href="/shop">Bütün elanlar</a>
+                    <a href="/categories">Kateqoriyalar</a>
+                    <a href="/blog">Bloq</a>
+                </div>
+
+                <div class="sf-footer__col">
+                    <h2>İnformasiya</h2>
+                    <a href="/about">Haqqımızda</a>
+                    <a href="/privacy">Məxfilik siyasəti</a>
+                    <a href="/terms">İstifadə şərtləri</a>
+                    <a href="/faq">Tez-tez verilən suallar</a>
+                </div>
+
+                <div class="sf-footer__col">
+                    <h2>Əlaqə</h2>
+                    <a href="tel:+994500000000">+994 50 000 00 00</a>
+                    <a href="mailto:info@shopera.az">info@shopera.az</a>
+                    <a href="/contact">Əlaqə forması</a>
+                </div>
+            @endif
         </div>
 
         <div class="sf-footer__bottom">
