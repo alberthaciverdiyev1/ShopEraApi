@@ -23,9 +23,13 @@ class FaqController extends ResourceController
         ['name' => 'title', 'label' => 'Sual', 'type' => 'translatable_text', 'rules' => ['required', 'max:255'], 'col' => 12],
         ['name' => 'description', 'label' => 'Cavab', 'type' => 'translatable_textarea', 'rules' => ['required'], 'col' => 12],
         ['name' => 'type', 'label' => 'Tip', 'type' => 'select', 'col' => 6, 'options' => [
-            'faq' => 'FAQ',
-            'about' => 'Haqqımızda',
-            'main_page' => 'Əsas səhifə',
+            'general' => 'Ümumi',
+            'listings' => 'Elanlar',
+            'stores' => 'Mağazalar',
+            'payments' => 'Ödəniş',
+            'delivery' => 'Çatdırılma',
+            'account' => 'Hesab',
+            'security' => 'Təhlükəsizlik',
         ]],
     ];
 }
