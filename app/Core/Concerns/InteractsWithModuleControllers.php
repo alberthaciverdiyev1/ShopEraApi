@@ -206,6 +206,7 @@ trait InteractsWithModuleControllers
             'brand' => 'brand_ids', 'brands' => 'brand_ids',
             'color' => 'color_ids', 'colors' => 'color_ids',
             'size' => 'size_ids', 'sizes' => 'size_ids',
+            'vendor' => 'vendor_ids', 'vendors' => 'vendor_ids',
         ] as $input => $param) {
             $values = $query[$input] ?? null;
 
@@ -290,6 +291,7 @@ trait InteractsWithModuleControllers
             'brand' => 'brands', 'brands' => 'brands',
             'color' => 'colors', 'colors' => 'colors',
             'size' => 'sizes', 'sizes' => 'sizes',
+            'vendor' => 'vendors', 'vendors' => 'vendors',
         ] as $input => $facet) {
             if (! isset($query[$input])) {
                 continue;
@@ -304,7 +306,13 @@ trait InteractsWithModuleControllers
                     continue;
                 }
 
-                $id = $this->facetIdBySlug($facet, (string) $value, $categoryId);
+                $id = $this->facetIdBySlug(
+                    $facet,
+                    (string) $value,
+                    // Stores are not tied to the current category, so they are
+                    // looked up in the unfiltered list.
+                    $facet === 'vendors' ? null : $categoryId
+                );
 
                 if ($id !== null) {
                     $ids[] = $id;

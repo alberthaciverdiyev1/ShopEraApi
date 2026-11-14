@@ -19,6 +19,7 @@ use Modules\Brand\Http\Transformers\BrandResource;
 use Modules\Category\Entities\Category;
 use Modules\Color\Entities\Color;
 use Modules\Color\Http\Transformers\ColorResource;
+use Modules\Marketplace\Entities\Vendor;
 use Modules\Order\Entities\OrderItem;
 use Modules\Product\Entities\Product;
 use Modules\Product\Entities\ProductImage;
@@ -120,7 +121,9 @@ class ProductService
             $query->where('city_id', $params['city_id']);
         }
 
-        if (! empty($params['vendor_id'])) {
+        if (! empty($params['vendor_ids']) && is_array($params['vendor_ids'])) {
+            $query->whereIn('vendor_id', array_map('intval', $params['vendor_ids']));
+        } elseif (! empty($params['vendor_id'])) {
             $query->where('vendor_id', $params['vendor_id']);
         }
 
@@ -361,12 +364,34 @@ class ProductService
                 ['products_count' => (int) ($sizeCounts[$size->id] ?? 0)]
             ));
 
+        $vendorCounts = $build()
+            ->whereNotNull('vendor_id')
+            ->selectRaw('vendor_id as id, COUNT(*) as total')
+            ->groupBy('vendor_id')
+            ->pluck('total', 'id');
+
+        $vendors = Vendor::query()
+            ->where('status', Vendor::STATUS_ACTIVE)
+            ->whereIn('id', $vendorCounts->keys())
+            // The name is a translation JSON column, so it cannot be ordered
+            // directly on PostgreSQL; its text form is used instead.
+            ->orderByRaw('LOWER(CAST(vendors.name AS TEXT))')
+            ->get()
+            ->map(fn ($vendor) => [
+                'id' => (int) $vendor->id,
+                'name' => $vendor->name,
+                'slug' => $vendor->slug,
+                'products_count' => (int) ($vendorCounts[$vendor->id] ?? 0),
+            ])
+            ->values();
+
         $price = $build()->selectRaw('MIN(price) as min_price, MAX(price) as max_price')->first();
 
         return responseHelper(__('Product filters retrieved successfully.'), 200, [
             'brands' => $brands,
             'colors' => $colors,
             'sizes' => $sizes,
+            'vendors' => $vendors,
             'price' => [
                 'min' => (float) ($price->min_price ?? 0),
                 'max' => (float) ($price->max_price ?? 0),
@@ -437,6 +462,26 @@ class ProductService
                 (new $resource($row))->resolve(),
                 ['products_count' => (int) $row->facet_total]
             ))->values();
+        } elseif ($type === 'vendors') {
+            $counts = $scope()
+                ->whereNotNull('vendor_id')
+                ->selectRaw('vendor_id as id, COUNT(*) as total')
+                ->groupBy('vendor_id');
+
+            $query = Vendor::query()
+                ->where('status', Vendor::STATUS_ACTIVE)
+                ->joinSub($counts, 'facet_counts', 'facet_counts.id', '=', 'vendors.id')
+                ->select('vendors.*', 'facet_counts.total as facet_total');
+
+            $total = (clone $query)->count();
+            $rows = $query->orderByRaw('LOWER(CAST(vendors.name AS TEXT))')->forPage($page, $perPage)->get();
+
+            $items = $rows->map(fn ($vendor) => [
+                'id' => (int) $vendor->id,
+                'name' => $vendor->name,
+                'slug' => $vendor->slug,
+                'products_count' => (int) $vendor->facet_total,
+            ])->values();
         } else {
             return responseHelper(__('Unknown filter facet.'), 422, []);
         }

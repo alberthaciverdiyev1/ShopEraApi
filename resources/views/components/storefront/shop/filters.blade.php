@@ -33,6 +33,7 @@
     $selectedBrands = $values('brands', 'brand');
     $selectedColors = $values('colors', 'color');
     $selectedSizes = $values('sizes', 'size');
+    $selectedVendors = $values('vendors', 'vendor');
     $selectedDynamic = $query['filters'] ?? [];
 
     // Selected values are slugs; ids are still accepted for old links.
@@ -189,6 +190,13 @@
         $chips[] = [
             'label' => $findName($facets['sizes'] ?? [], $sizeSlug) ?? 'Ölçü',
             'url' => $buildUrl([], [], [['sizes', $sizeSlug], ['size', $sizeSlug]]),
+        ];
+    }
+
+    foreach ($selectedVendors as $vendorSlug) {
+        $chips[] = [
+            'label' => $findName($facets['vendors'] ?? [], $vendorSlug) ?? 'Mağaza',
+            'url' => $buildUrl([], [], [['vendors', $vendorSlug], ['vendor', $vendorSlug]]),
         ];
     }
 
@@ -357,6 +365,42 @@
             </details>
         @endif
     @endforeach
+
+    @if (! empty($facets['vendors']))
+        @php
+            $vendorTotal = count($facets['vendors']);
+            $visibleVendors = collect($facets['vendors'])->take(10)
+                ->concat(collect($facets['vendors'])->skip(10)
+                    ->filter(fn ($vendor) => in_array((string) ($vendor['slug'] ?? $vendor['id']), $selectedVendors, true)))
+                ->values();
+            $extraVendors = $vendorTotal - $visibleVendors->count();
+        @endphp
+        <details class="sf-filter-card" open>
+            <summary class="sf-filter-head">
+                <span>Mağazalar</span>
+                <i class="fa-solid fa-chevron-down sf-filter-head__chevron"></i>
+            </summary>
+            <div class="sf-filter-options">
+                @foreach ($visibleVendors as $vendor)
+                    @php $vendorValue = (string) ($vendor['slug'] ?? $vendor['id']); @endphp
+                    <label class="sf-filter-option">
+                        <input type="checkbox" name="vendors[]" value="{{ $vendorValue }}"
+                               @checked(in_array($vendorValue, $selectedVendors, true)) data-sf-auto-submit>
+                        <span class="sf-filter-option__text">{{ $vendor['name'] }}</span>
+                        <span class="sf-filter-option__count">{{ $vendor['products_count'] ?? 0 }}</span>
+                    </label>
+                @endforeach
+            </div>
+            @if ($extraVendors > 0)
+                <button type="button" class="sf-filter-more" data-sf-show-more
+                        data-sf-facet="vendors"
+                        data-sf-page="2"
+                        data-sf-per-page="10"
+                        data-sf-category="{{ $categoryId ?? '' }}"
+                        data-more-label="Daha çox göstər (+{{ $extraVendors }})">Daha çox göstər (+{{ $extraVendors }})</button>
+            @endif
+        </details>
+    @endif
 
     @if (! empty($facets['brands']))
         @php

@@ -532,6 +532,7 @@ const facetOptionInputName = (facet, filterSlug) => {
     if (facet === 'brands') return 'brands[]';
     if (facet === 'colors') return 'colors[]';
     if (facet === 'sizes') return 'sizes[]';
+    if (facet === 'vendors') return 'vendors[]';
 
     return `filters[${filterSlug}][]`;
 };

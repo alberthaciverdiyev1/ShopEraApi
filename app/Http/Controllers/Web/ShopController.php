@@ -21,11 +21,31 @@ class ShopController extends Controller
         $categoryId = (int) ($resolved['category'] ?? 0) ?: null;
         $result = $this->searchProducts($resolved);
 
+        $facets = $this->storefrontFacets($categoryId);
+
+        // A store chosen together with a category may have no products in it,
+        // so it would be missing from the category-scoped list. Its entry is
+        // added back so the sidebar keeps a checkbox the visitor can clear.
+        $pickedVendors = array_map('intval', (array) ($resolved['vendors'] ?? []));
+        if ($pickedVendors !== []) {
+            $knownVendors = array_map(
+                fn ($vendor) => (int) ($vendor['id'] ?? 0),
+                (array) ($facets['vendors'] ?? [])
+            );
+            $allVendors = collect((array) ($this->storefrontFacets(null)['vendors'] ?? []))->keyBy('id');
+
+            foreach ($pickedVendors as $vendorId) {
+                if (! in_array($vendorId, $knownVendors, true) && $allVendors->has($vendorId)) {
+                    $facets['vendors'][] = $allVendors->get($vendorId);
+                }
+            }
+        }
+
         return view('storefront.shop.index', [
             'items' => $result['items'],
             'meta' => $result['meta'],
             'categories' => $this->storefrontCategories(),
-            'facets' => $this->storefrontFacets($categoryId),
+            'facets' => $facets,
             'dynamicFilters' => $this->storefrontCategoryFilters($categoryId),
             'categoryId' => $categoryId,
             'sorts' => $this->storefrontSorts(),
@@ -48,7 +68,7 @@ class ShopController extends Controller
         $page = max(1, (int) $request->query('page', 1));
         $perPage = min(50, max(1, (int) $request->query('per_page', 10)));
 
-        if (in_array($facet, ['brands', 'colors', 'sizes'], true)) {
+        if (in_array($facet, ['brands', 'colors', 'sizes', 'vendors'], true)) {
             $payload = app(ProductController::class)->facetValues($this->moduleHttpRequest([
                 'type' => $facet,
                 'category_ids' => $categoryId ? [$categoryId] : [],

@@ -45,6 +45,7 @@
     $selectedBrands = $values('brands', 'brand');
     $selectedColors = $values('colors', 'color');
     $selectedSizes = $values('sizes', 'size');
+    $selectedVendors = $values('vendors', 'vendor');
     $selectedDynamic = $query['filters'] ?? [];
 
     // Selected values are slugs; ids are still accepted for old links.
@@ -163,6 +164,13 @@
         ];
     }
 
+    foreach ($selectedVendors as $vendorSlug) {
+        $chips[] = [
+            'label' => $findName($facets['vendors'] ?? [], $vendorSlug) ?? 'Mağaza',
+            'url' => $buildUrl([], [], [['vendors', $vendorSlug], ['vendor', $vendorSlug]]),
+        ];
+    }
+
     foreach ($selectedSizes as $sizeSlug) {
         $chips[] = [
             'label' => $findName($facets['sizes'] ?? [], $sizeSlug) ?? 'Ölçü',
@@ -249,6 +257,23 @@
                             @foreach ($facets['brands'] as $item)
                                 @php $facetValue = (string) ($item['slug'] ?? $item['id']); @endphp
                                 <option value="{{ $facetValue }}" @selected(in_array($facetValue, $selectedBrands, true))>
+                                    {{ $item['name'] }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </label>
+                @endif
+
+                {{-- Stores Quick Pill --}}
+                @if (! empty($facets['vendors']))
+                    <label class="trendyol-pill-select {{ ! empty($selectedVendors) ? 'is-active' : '' }}">
+                        <span>Mağaza</span>
+                        <i class="fa-regular fa-chevron-down pill-chevron"></i>
+                        <select data-sf-quick="vendors">
+                            <option value="">Mağaza: Hamısı</option>
+                            @foreach ($facets['vendors'] as $item)
+                                @php $facetValue = (string) ($item['slug'] ?? $item['id']); @endphp
+                                <option value="{{ $facetValue }}" @selected(in_array($facetValue, $selectedVendors, true))>
                                     {{ $item['name'] }}
                                 </option>
                             @endforeach
