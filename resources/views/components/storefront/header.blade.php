@@ -141,15 +141,20 @@
                             <x-storefront.navbar-search />
                         </div>
 
-                        @auth
-                            <a href="/dashboard?tab=messages" class="header-chat-icon" aria-label="Mesajlar">
-                                <i class="fa-regular fa-comment-dots"></i>
-                            </a>
-                        @else
-                            <a href="{{ route('storefront.login') }}" class="header-chat-icon" aria-label="Mesajlar">
-                                <i class="fa-regular fa-comment-dots"></i>
-                            </a>
-                        @endauth
+                        {{-- Support chat is switched off (see live-chat.blade.php), so
+                             its dashboard tab is not rendered either; the icon is
+                             kept here for when the chat comes back. --}}
+                        @if (false)
+                            @auth
+                                <a href="/dashboard?tab=messages" class="header-chat-icon" aria-label="Mesajlar">
+                                    <i class="fa-regular fa-comment-dots"></i>
+                                </a>
+                            @else
+                                <a href="{{ route('storefront.login') }}" class="header-chat-icon" aria-label="Mesajlar">
+                                    <i class="fa-regular fa-comment-dots"></i>
+                                </a>
+                            @endauth
+                        @endif
 
                         <div class="menu-wishlist menu-cart">
                             <div class="cart-box wishlist-box">

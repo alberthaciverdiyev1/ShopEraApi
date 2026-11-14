@@ -87,10 +87,14 @@
                             <i class="fa-regular fa-receipt"></i>
                             <span>Sifarişlərim</span>
                         </a>
-                        <a href="/dashboard?tab=messages" class="trendyol-footer-chip">
-                            <i class="fa-regular fa-comment-dots"></i>
-                            <span>Mesajlar</span>
-                        </a>
+                        {{-- Support chat is switched off (see live-chat.blade.php),
+                             so the Mesajlar chip is hidden until it returns. --}}
+                        @if (false)
+                            <a href="/dashboard?tab=messages" class="trendyol-footer-chip">
+                                <i class="fa-regular fa-comment-dots"></i>
+                                <span>Mesajlar</span>
+                            </a>
+                        @endif
                         <a href="/elanlarim" class="trendyol-footer-chip">
                             <i class="fa-regular fa-rectangle-list"></i>
                             <span>Elanlarım</span>
