@@ -96,6 +96,9 @@ class CategoryService
                         ->publiclyAvailable()
                         ->withAvg('reviews', 'rate')
                         ->withCount('reviews')
+                        // Home sections lead with Premium listings for the whole
+                        // placement; the remaining slots fill with the rest.
+                        ->orderByRaw(Product::HOME_PRIORITY_SQL.' desc')
                         ->orderByDesc('sales_count')
                         ->limit(10);
                 },
@@ -119,11 +122,19 @@ class CategoryService
                     ->with(['colors', 'sizes', 'images', 'category', 'brand'])
                     ->withAvg('reviews', 'rate')
                     ->withCount('reviews')
+                    ->orderByRaw(Product::HOME_PRIORITY_SQL.' desc')
                     ->orderByDesc('sales_count')
                     ->limit(10)
                     ->get();
 
-                $merged = $category->products->merge($childProducts)->unique('id');
+                $merged = $category->products->merge($childProducts)->unique('id')
+                    // The two queries arrive in their own order, so the merged
+                    // row is sorted again: Premium first, then by sales.
+                    ->sortBy([
+                        ['is_premium', 'desc'],
+                        ['sales_count', 'desc'],
+                    ])
+                    ->values();
                 $category->setRelation('products', $merged);
             }
 
