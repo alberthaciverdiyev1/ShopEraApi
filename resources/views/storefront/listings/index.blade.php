@@ -8,6 +8,26 @@
         return (string) ($value ?? '');
     };
     $localeTitle = fn (array $listing) => $localized($listing['title'] ?? '');
+
+    // The storefront card expects product-shaped payloads: images as rows with
+    // an image_path, so the listing payload is reshaped here instead of
+    // copying the card markup.
+    $toCard = function (array $listing) use ($localized, $localeTitle): array {
+        return [
+            'title' => $localeTitle($listing),
+            'slug' => $listing['slug'] ?? '',
+            'price' => $listing['price'] ?? 0,
+            'discount' => $listing['discount'] ?? null,
+            'city' => $localized($listing['city'] ?? ''),
+            'created_at' => $listing['created_at'] ?? null,
+            'is_promoted' => ! empty($listing['is_promoted']),
+            'is_premium' => ! empty($listing['is_premium']),
+            'images' => collect($listing['images'] ?? [])
+                ->map(fn ($image) => is_array($image) ? $image : ['image_path' => $image])
+                ->values()
+                ->all(),
+        ];
+    };
 @endphp
 
 <x-storefront.layouts.app :title="'Elanlarım — ShopEra'">
@@ -27,50 +47,48 @@
             @if (count($listings) === 0)
                 <p class="text-muted">Hələ elanınız yoxdur.</p>
             @else
-                <div class="row g-4">
+                <div class="sf-product-grid">
                     @foreach ($listings as $listing)
                         @php
                             $expired = ($listing['is_active'] ?? true) === false
                                 || (! empty($listing['expires_at']) && \Illuminate\Support\Carbon::parse($listing['expires_at'])->isPast());
-                            $image = $listing['images'][0] ?? $fallback;
                             $listingSlug = $listing['slug'] ?? $listing['id'];
                         @endphp
-                        <div class="col-sm-6 col-lg-3">
-                            <div class="card h-100 border-0 shadow-sm sf-listing-card">
-                                <img src="{{ $image }}" alt="{{ $localeTitle($listing) }}" class="card-img-top sf-listing-card__img">
-                                <div class="card-body d-flex flex-column">
-                                    <p class="fw-semibold mb-1">{{ $localeTitle($listing) }}</p>
-                                    <p class="text-primary fw-bold mb-1">{{ number_format((float) ($listing['price'] ?? 0), 2) }} ₼</p>
-                                    <p class="small text-muted mb-2">
-                                        <i class="fa-regular fa-eye"></i> {{ $listing['views'] ?? 0 }}
-                                        &nbsp;·&nbsp;
-                                        <i class="fa-solid fa-phone"></i> {{ $listing['contact_reveals'] ?? 0 }}
-                                    </p>
-                                    @if (! empty($listing['expires_at']))
-                                        <p class="small mb-2 {{ $expired ? 'text-danger' : 'text-muted' }}">
-                                            {{ $expired ? 'Müddəti bitib' : 'Bitir: '.\Illuminate\Support\Carbon::parse($listing['expires_at'])->format('d.m.Y') }}
-                                        </p>
-                                    @endif
+                        <div class="sf-my-listing">
+                            <x-storefront.product-card :product="$toCard($listing)" />
 
-                                    <div class="d-flex gap-2 mt-auto">
-                                        @if ($expired)
-                                            <form action="{{ route('storefront.listings.renew', $listingSlug) }}" method="POST" class="flex-grow-1">
-                                                @csrf
-                                                <button type="submit" class="sf-btn sf-btn--ghost sf-btn--sm w-100">Yenidən dərc</button>
-                                            </form>
-                                        @else
-                                            <button type="button" class="sf-btn sf-btn--ghost sf-btn--sm flex-grow-1"
-                                                    data-sf-promote-open="{{ $listingSlug }}"
-                                                    data-sf-promote-title="{{ $localeTitle($listing) }}">İrəli çək</button>
-                                        @endif
-                                        <form action="{{ route('storefront.listings.destroy', $listingSlug) }}" method="POST"
-                                              onsubmit="return confirm('Elan silinsin?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="sf-btn sf-btn--ghost sf-btn--sm sf-btn--danger">Sil</button>
-                                        </form>
-                                    </div>
-                                </div>
+                            <div class="sf-my-listing__bar">
+                                <span class="sf-my-listing__stats">
+                                    <i class="fa-regular fa-eye"></i> {{ $listing['views'] ?? 0 }}
+                                    <i class="fa-solid fa-phone"></i> {{ $listing['contact_reveals'] ?? 0 }}
+                                </span>
+
+                                @if ($expired)
+                                    <span class="sf-my-listing__state is-expired">Müddəti bitib</span>
+                                @elseif (! empty($listing['expires_at']))
+                                    <span class="sf-my-listing__state">
+                                        Bitir: {{ \Illuminate\Support\Carbon::parse($listing['expires_at'])->format('d.m.Y') }}
+                                    </span>
+                                @endif
+                            </div>
+
+                            <div class="sf-my-listing__actions">
+                                @if ($expired)
+                                    <form action="{{ route('storefront.listings.renew', $listingSlug) }}" method="POST" class="sf-my-listing__action">
+                                        @csrf
+                                        <button type="submit" class="sf-btn sf-btn--ghost sf-btn--sm w-100">Yenidən dərc</button>
+                                    </form>
+                                @else
+                                    <button type="button" class="sf-btn sf-btn--ghost sf-btn--sm sf-my-listing__action"
+                                            data-sf-promote-open="{{ $listingSlug }}"
+                                            data-sf-promote-title="{{ $localeTitle($listing) }}">İrəli çək</button>
+                                @endif
+                                <form action="{{ route('storefront.listings.destroy', $listingSlug) }}" method="POST"
+                                      onsubmit="return confirm('Elan silinsin?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="sf-btn sf-btn--ghost sf-btn--sm sf-btn--danger">Sil</button>
+                                </form>
                             </div>
                         </div>
                     @endforeach
