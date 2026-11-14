@@ -151,8 +151,9 @@ class VendorTeamTest extends TestCase
         $this->actingAs($member)
             ->get('/magaza/panel')
             ->assertOk()
-            ->assertDontSee('id="listings"', false)
-            ->assertSee('Elanlara giriş');
+            ->assertDontSee('sf-ig__grid', false)
+            ->assertDontSee('Mağaza məlumatları')
+            ->assertSee('İcazə tələb olunur');
     }
 
     public function test_invited_user_joins_the_store_through_the_link(): void

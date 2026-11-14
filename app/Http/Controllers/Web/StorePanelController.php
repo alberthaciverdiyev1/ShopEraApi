@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Web;
 
+use App\Core\Concerns\InteractsWithModuleControllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Web\StoreVendorRequest;
-use App\Core\Concerns\InteractsWithModuleControllers;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Resources\Json\ResourceCollection;
@@ -27,9 +27,26 @@ class StorePanelController extends Controller
 
         $listings = app(ModuleListingController::class)->myListings($this->moduleHttpRequest());
 
+        $permissions = (array) ($vendor['permissions'] ?? []);
+        $hasPermission = fn (string $key): bool => in_array($key, $permissions, true);
+
+        $defaultTab = $hasPermission('listings')
+            ? 'listings'
+            : ($hasPermission('settings') ? 'settings' : 'overview');
+
+        $tab = request()->query('tab', $defaultTab);
+        $tab = in_array($tab, ['overview', 'listings', 'settings'], true) ? $tab : $defaultTab;
+
+        // Members without the matching permission only see the overview.
+        if (($tab === 'listings' && ! $hasPermission('listings'))
+            || ($tab === 'settings' && ! $hasPermission('settings'))) {
+            $tab = 'overview';
+        }
+
         return view('storefront.store-panel.panel', [
             'vendor' => $vendor,
             'payload' => $vendor,
+            'tab' => $tab,
             'listings' => $listings instanceof ResourceCollection ? $listings->resolve() : (array) $this->payload($listings),
         ]);
     }
@@ -73,7 +90,7 @@ class StorePanelController extends Controller
         );
 
         return redirect()
-            ->route('storefront.store.panel')
+            ->route('storefront.store.panel', ['tab' => 'settings'])
             ->with('status', 'Mağaza məlumatları yeniləndi.');
     }
 }
