@@ -71,11 +71,6 @@
 
         {{-- Desktop Top Bar --}}
         <div class="header-top-one">
-            <div class="phone-icon">
-                <i class="icon-telephone"></i>
-                <a href="tel:+994500000000">+994 50 000 00 00</a>
-            </div>
-
             <nav class="top-nav-links" aria-label="Əsas menyu">
                 <ul>
                     @foreach ($navLinks as $link)

@@ -4812,7 +4812,7 @@ a.sf-seller-link {
 
 .header-top-one {
     display: grid !important;
-    grid-template-columns: minmax(140px, auto) minmax(360px, 1fr) minmax(220px, auto) !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
     align-items: center !important;
     gap: 18px;
     min-height: 50px;
@@ -4821,25 +4821,10 @@ a.sf-seller-link {
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+/* The contact number is no longer part of the dark strip; the markup stays
+   for templates that still render it. */
 .header-top-one .phone-icon {
-    width: fit-content;
-    min-height: 34px;
-    padding: 0 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 999px;
-    background: rgba(255, 255, 255, 0.03);
-}
-
-.header-top-one .phone-icon i {
-    color: var(--theme) !important;
-}
-
-.header-top-one .phone-icon a {
-    color: rgba(255, 255, 255, 0.92) !important;
-    font-weight: 600 !important;
-    font-size: 14px !important;
-    text-transform: none !important;
-    letter-spacing: 0 !important;
+    display: none !important;
 }
 
 .header-top-one .lang {
@@ -5518,8 +5503,9 @@ a.sf-seller-link {
 }
 
 @media (max-width: 991.98px) {
-    /* The dark top strip stays on phones and sits above the white navbar:
-       contact number, main links as a scrollable row and the sign-in pill. */
+    /* On phones the dark strip stays above the white navbar but carries only
+       the sign-in pill: the contact number is gone and the main links live in
+       the mobile menu instead. */
     .header-1 {
         display: flex;
         flex-direction: column;
@@ -5530,68 +5516,26 @@ a.sf-seller-link {
     }
 
     .header-top-one {
-        display: grid !important;
-        grid-template-columns: minmax(0, 1fr) auto !important;
+        display: flex !important;
         align-items: center !important;
-        gap: 6px 10px;
-        min-height: 44px;
-        padding: 6px 12px !important;
-    }
-
-    .header-top-one .phone-icon {
-        grid-column: 1;
-        grid-row: 1;
-        min-height: 30px;
-        padding: 0 10px;
-    }
-
-    .header-top-one .phone-icon a {
-        font-size: 12px !important;
+        justify-content: flex-end;
+        gap: 8px;
+        min-height: 38px;
+        padding: 4px 12px !important;
     }
 
     .header-top-one .top-nav-links {
-        display: block !important;
-        grid-column: 1 / -1;
-        grid-row: 2;
-        justify-self: stretch !important;
-        width: 100%;
-        max-width: 100%;
-        min-width: 0;
-        overflow: hidden;
-        padding-top: 6px;
-        border-top: 1px solid rgba(255, 255, 255, 0.07);
-    }
-
-    .header-top-one .top-nav-links ul {
-        display: flex !important;
-        flex-wrap: nowrap;
-        justify-content: flex-start;
-        gap: 18px;
-        margin: 0;
-        padding: 0;
-        overflow-x: auto;
-        scrollbar-width: none;
-    }
-
-    .header-top-one .top-nav-links ul::-webkit-scrollbar {
-        display: none;
-    }
-
-    .header-top-one .top-nav-links a {
-        white-space: nowrap;
-        font-size: 12.5px !important;
+        display: none !important;
     }
 
     .header-top-one .lang {
-        grid-column: 2;
-        grid-row: 1;
         justify-self: end;
         min-width: 0;
         gap: 6px;
     }
 
     .header-top-one .lang .user a {
-        min-height: 30px;
+        min-height: 28px;
         padding: 0 10px;
         font-size: 12.5px !important;
     }
