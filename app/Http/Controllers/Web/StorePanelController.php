@@ -35,10 +35,11 @@ class StorePanelController extends Controller
             : ($hasPermission('settings') ? 'settings' : 'overview');
 
         $tab = request()->query('tab', $defaultTab);
-        $tab = in_array($tab, ['overview', 'listings', 'settings'], true) ? $tab : $defaultTab;
+        $tab = in_array($tab, ['overview', 'listings', 'promoted', 'settings'], true) ? $tab : $defaultTab;
 
         // Members without the matching permission only see the overview.
         if (($tab === 'listings' && ! $hasPermission('listings'))
+            || ($tab === 'promoted' && ! $hasPermission('listings'))
             || ($tab === 'settings' && ! $hasPermission('settings'))) {
             $tab = 'overview';
         }

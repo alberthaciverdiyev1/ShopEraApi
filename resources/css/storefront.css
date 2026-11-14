@@ -8123,7 +8123,7 @@ a.sf-seller-link {
 
 .sf-ig-dropdown-menu a:hover {
     background: #f8fafc;
-    color: #0095f6;
+    color: var(--sf-theme);
 }
 
 /* Header & Avatar */
@@ -8143,11 +8143,11 @@ a.sf-seller-link {
     height: 96px;
     border-radius: 50%;
     padding: 3px;
-    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+    background: linear-gradient(135deg, var(--sf-theme) 0%, color-mix(in srgb, var(--sf-theme) 55%, #22c55e) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(220, 39, 67, 0.2);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
 }
 
 .sf-ig__avatar {
@@ -8281,14 +8281,14 @@ a.sf-seller-link {
 }
 
 .sf-ig-btn--primary {
-    background: #0095f6;
-    border-color: #0095f6;
+    background: var(--sf-theme);
+    border-color: var(--sf-theme);
     color: #fff;
 }
 
 .sf-ig-btn--primary:hover {
-    background: #1877f2;
-    border-color: #1877f2;
+    background: #15803d;
+    border-color: #15803d;
     color: #fff;
 }
 
@@ -8352,8 +8352,8 @@ a.sf-seller-link {
 }
 
 .sf-ig__highlight-circle--new {
-    border: 1.5px dashed #0095f6;
-    color: #0095f6;
+    border: 1.5px dashed var(--sf-theme);
+    color: var(--sf-theme);
 }
 
 /* Tab Bar */
@@ -8382,7 +8382,7 @@ a.sf-seller-link {
 }
 
 .sf-ig__tabs a.is-active {
-    color: #000000;
+    color: var(--sf-theme);
 }
 
 .sf-ig__tabs a.is-active::after {
@@ -8392,7 +8392,7 @@ a.sf-seller-link {
     left: 0;
     right: 0;
     height: 1.5px;
-    background: #000000;
+    background: var(--sf-theme);
 }
 
 /* Square Photo Grid */
