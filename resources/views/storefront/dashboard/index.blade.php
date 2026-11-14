@@ -7,16 +7,9 @@
         ->implode('') ?: 'U';
 
     $tabs = [
-        'dashboard' => ['label' => 'Hesab paneli', 'icon' => 'fa-solid fa-grid-2'],
-        'addresses' => ['label' => 'Ünvanlar', 'icon' => 'fa-solid fa-location-dot'],
-        'settings' => ['label' => 'Parametrlər', 'icon' => 'fa-regular fa-gear'],
-        'logout' => ['label' => 'Çıxış', 'icon' => 'fa-solid fa-sign-out-alt'],
+        'settings' => ['label' => 'Hesab parametrləri', 'icon' => 'fa-regular fa-gear'],
+        'logout' => ['label' => 'Çıxış', 'icon' => 'fa-solid fa-arrow-right-from-bracket'],
     ];
-
-    // Support chat is temporarily disabled on the storefront.
-    if (false) {
-        $tabs['messages'] = ['label' => 'Mesajlar', 'icon' => 'fa-regular fa-comment-dots'];
-    }
 @endphp
 
 <x-storefront.layouts.app :title="'Hesabım — ShopEra'">
@@ -24,31 +17,55 @@
 
     <div class="dashboard-section section-padding fix account-dashboard">
         <div class="container">
-            <div class="row g-4 account-dashboard-grid">
-                <div class="col-xl-3">
-                    <div class="dashboard-navigation-sidebar">
-                        <h3>Naviqasiya</h3>
-                        <div class="nav flex-column nav-pills" role="tablist" aria-orientation="vertical">
+            <div class="sf-acc">
+                <aside class="sf-acc__side">
+                    <div class="sf-acc__card">
+                        <div class="sf-acc__profile">
+                            <div class="sf-acc__avatar">
+                                @if ($user?->avatar)
+                                    <img src="{{ $user->avatar }}" alt="{{ $user->name ?? 'Profil' }}">
+                                @else
+                                    <span>{{ $initials }}</span>
+                                @endif
+                            </div>
+                            <div class="sf-acc__identity">
+                                <strong>{{ trim(($user?->name ?? '').' '.($user?->surname ?? '')) ?: 'Hesabım' }}</strong>
+                                <span>{{ $user?->email ?? $user?->phone ?? 'Müştəri' }}</span>
+                            </div>
+                        </div>
+
+                        <nav class="sf-acc__nav" role="tablist" aria-orientation="vertical">
                             @foreach ($tabs as $key => $item)
-                                <button class="nav-link {{ $tab === $key ? 'active' : '' }}"
-                                        type="button" role="tab"
+                                <button type="button" role="tab"
+                                        class="sf-acc__nav-item {{ $tab === $key ? 'active' : '' }}"
                                         aria-selected="{{ $tab === $key ? 'true' : 'false' }}"
                                         data-sf-dash-tab="{{ $key }}">
-                                    <i class="{{ $item['icon'] }}"></i>{{ $item['label'] }}
+                                    <i class="{{ $item['icon'] }}"></i>
+                                    <span>{{ $item['label'] }}</span>
+                                    <i class="fa-regular fa-chevron-right sf-acc__nav-arrow"></i>
                                 </button>
                             @endforeach
+                        </nav>
 
-                            <a class="nav-link" href="/wishlist">
-                                <i class="fa-light fa-heart"></i>İstək siyahısı
+                        <div class="sf-acc__quick">
+                            <span class="sf-acc__quick-title">Sürətli keçidlər</span>
+                            <a href="{{ route('storefront.orders') }}" class="sf-acc__quick-link">
+                                <i class="fa-solid fa-receipt"></i>
+                                <span>Sifarişlərim</span>
                             </a>
-                            <a class="nav-link" href="/elanlarim">
-                                <i class="fa-solid fa-rectangle-list"></i>Elanlarım
+                            <a href="/wishlist" class="sf-acc__quick-link">
+                                <i class="fa-regular fa-heart"></i>
+                                <span>İstək siyahısı</span>
+                            </a>
+                            <a href="/elanlarim" class="sf-acc__quick-link">
+                                <i class="fa-solid fa-rectangle-list"></i>
+                                <span>Elanlarım</span>
                             </a>
                         </div>
                     </div>
-                </div>
+                </aside>
 
-                <div class="col-xl-9">
+                <div class="sf-acc__main">
                     @if (session('status'))
                         <div class="sf-alert sf-alert--success">{{ session('status') }}</div>
                     @endif
@@ -65,257 +82,23 @@
                         </div>
                     @endif
 
-                    <div class="sf-dash-panes">
-                        {{-- Overview --}}
-                        <section class="sf-dash-pane {{ $tab === 'dashboard' ? 'is-active' : '' }}" data-sf-dash-pane="dashboard">
-                            <div class="dashboard-wrapper">
-                                <div class="dashboard-top">
-                                    <div class="row g-4 align-items-stretch">
-                                        <div class="col-md-6 col-12">
-                                            <div class="dashboard-profile h-100 d-flex flex-column justify-content-center align-items-center">
-                                                <div class="thumb avatar-thumb position-relative">
-                                                    @if ($user?->avatar)
-                                                        <img src="{{ $user->avatar }}" alt="Profil şəkli" class="avatar-img">
-                                                    @else
-                                                        <div class="sf-dash-avatar-placeholder">{{ $initials }}</div>
-                                                    @endif
-                                                    <label class="avatar-camera-btn" title="Şəkli dəyiş" aria-label="Şəkli dəyiş">
-                                                        <i class="fa-solid fa-camera"></i>
-                                                        <input type="file" accept="image/png,image/jpeg,image/jpg,image/webp" class="d-none"
-                                                               onchange="document.getElementById('sf-avatar-input').files = this.files; document.getElementById('sf-avatar-form').submit();">
-                                                    </label>
-                                                </div>
-                                                <div class="dashboard-profile__meta">
-                                                    <h3>{{ $user?->name ?? 'Hesabım' }}</h3>
-                                                    <p>{{ $user?->email ?? $user?->phone ?? 'Müştəri' }}</p>
-                                                    <button type="button" class="sf-link-button" data-sf-dash-tab="settings">Profili redaktə et</button>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-md-6 col-12">
-                                            <div class="dashboard-profile-info h-100 d-flex flex-column justify-content-center">
-                                                <h6>Default ünvan</h6>
-                                                @if ($defaultAddress)
-                                                    <h5>{{ $defaultAddress['full_name'] ?? '' }}</h5>
-                                                    <button type="button" class="address sf-link-button text-start" data-sf-dash-tab="addresses">
-                                                        {{ $defaultAddress['street_building_number'] ?? '' }}@if (! empty($defaultAddress['unit_floor_apartment'])), {{ $defaultAddress['unit_floor_apartment'] }}@endif,
-                                                        {{ $defaultAddress['town_village_district'] ?? '' }}, {{ $defaultAddress['city'] ?? '' }}
-                                                    </button>
-                                                    @if (! empty($defaultAddress['contact_number']))
-                                                        <a href="tel:{{ $defaultAddress['contact_number'] }}" class="phone">{{ $defaultAddress['contact_number'] }}</a>
-                                                    @endif
-                                                    <button type="button" class="edit sf-link-button text-start" data-sf-dash-tab="addresses">Ünvanları idarə et</button>
-                                                @else
-                                                    <p class="text-muted mt-2 mb-3">Hələ ünvan əlavə edilməyib.</p>
-                                                    <button type="button" class="edit sf-link-button text-start" data-sf-dash-tab="addresses">+ Ünvan əlavə et</button>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="order-history">
-                                    <div class="header">
-                                        <h2>Son sifarişlər</h2>
-                                    </div>
-                                    @if (count($recentOrders))
-                                        <div class="sf-table-wrap">
-                                            <table>
-                                                <thead>
-                                                    <tr>
-                                                        <th>Sifariş</th>
-                                                        <th>Tarix</th>
-                                                        <th>Məbləğ</th>
-                                                        <th>Status</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    @foreach ($recentOrders as $order)
-                                                        <tr>
-                                                            <td data-label="Sifariş">#{{ $order['id'] }}</td>
-                                                            <td data-label="Tarix">{{ \Illuminate\Support\Carbon::parse($order['created_at'])->translatedFormat('d M, Y') }}</td>
-                                                            <td data-label="Məbləğ">{{ number_format((float) $order['total_price'], 2) }} ₼</td>
-                                                            <td data-label="Status">
-                                                                <span class="status">{{ $order['latest_status']['status'] ?? 'Yeni' }}</span>
-                                                            </td>
-                                                        </tr>
-                                                    @endforeach
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    @else
-                                        <p class="text-muted mb-0">Hələ sifarişiniz yoxdur.</p>
-                                    @endif
-                                </div>
-                            </div>
-                        </section>
-
-                        {{-- Messages: chat with support (temporarily disabled) --}}
-                        @if (false)
-                        <section class="sf-dash-pane {{ $tab === 'messages' ? 'is-active' : '' }}" data-sf-dash-pane="messages">
-                            <div class="sf-panel">
-                                <h2 class="sf-panel__title">Dəstək ilə yazışma</h2>
-
-                                <div class="sf-support-chat">
-                                    <div class="sf-support-chat__log" data-sf-support-chat-log>
-                                        @forelse ($chatMessages as $message)
-                                            @php $mine = $message['sender_type'] === 'user'; @endphp
-                                            <div class="sf-support-chat__row {{ $mine ? 'is-mine' : '' }}">
-                                                <div class="sf-support-chat__bubble">
-                                                    @if (! empty($message['message']))
-                                                        <p class="sf-support-chat__text">{{ $message['message'] }}</p>
-                                                    @endif
-                                                    @foreach ($message['attachments'] ?? [] as $attachment)
-                                                        <a href="{{ $attachment['url'] }}" target="_blank" rel="noopener">
-                                                            <img src="{{ $attachment['url'] }}" alt="" loading="lazy">
-                                                        </a>
-                                                    @endforeach
-                                                    <div class="sf-support-chat__meta">
-                                                        <time>{{ \Illuminate\Support\Carbon::parse($message['created_at'])->format('d.m H:i') }}</time>
-                                                        @if ($mine)
-                                                            <form action="{{ route('storefront.dashboard.messages.destroy', $message['id']) }}" method="POST"
-                                                                  onsubmit="return confirm('Mesaj silinsin?');">
-                                                                @csrf
-                                                                @method('DELETE')
-                                                                <button type="submit" class="sf-support-chat__delete" aria-label="Mesajı sil">
-                                                                    <i class="fa-regular fa-trash"></i>
-                                                                </button>
-                                                            </form>
-                                                        @endif
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        @empty
-                                            <p class="text-muted mb-0">Hələ mesaj yoxdur. Dəstək komandasına ilk mesajı yazın.</p>
-                                        @endforelse
-                                    </div>
-
-                                    <form action="{{ route('storefront.dashboard.messages.send') }}" method="POST" enctype="multipart/form-data" class="sf-support-chat__form">
-                                        @csrf
-                                        <textarea name="message" rows="2" maxlength="2000" placeholder="Mesajınızı yazın…"></textarea>
-                                        <div class="sf-support-chat__actions">
-                                            <label class="sf-support-chat__attach">
-                                                <input type="file" name="image" accept="image/*">
-                                                <i class="fa-regular fa-image"></i>
-                                                <span>Şəkil</span>
-                                            </label>
-                                            <button type="submit" class="theme-btn">Göndər</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </section>
-                        @endif
-
-                        {{-- Addresses --}}
-                        <section class="sf-dash-pane {{ $tab === 'addresses' ? 'is-active' : '' }}" data-sf-dash-pane="addresses">
-                            <div class="sf-panel">
-                                <h2 class="sf-panel__title">Çatdırılma ünvanları</h2>
-
-                                @if (count($addresses))
-                                    <div class="sf-address-list">
-                                        @foreach ($addresses as $address)
-                                            <article class="sf-address-card {{ ! empty($address['is_default']) ? 'is-default' : '' }}">
-                                                <div class="sf-address-card__body">
-                                                    <h6>
-                                                        {{ $address['full_name'] ?? '' }}
-                                                        @if (! empty($address['is_default']))
-                                                            <span class="sf-address-card__badge">Default</span>
-                                                        @endif
-                                                    </h6>
-                                                    <p>{{ $address['street_building_number'] ?? '' }}@if (! empty($address['unit_floor_apartment'])), {{ $address['unit_floor_apartment'] }}@endif, {{ $address['town_village_district'] ?? '' }}, {{ $address['city'] ?? '' }}</p>
-                                                    @if (! empty($address['contact_number']))
-                                                        <a href="tel:{{ $address['contact_number'] }}">{{ $address['contact_number'] }}</a>
-                                                    @endif
-                                                </div>
-                                                <div class="sf-address-card__actions">
-                                                    @if (empty($address['is_default']))
-                                                        <form action="{{ route('storefront.addresses.update', $address['id']) }}" method="POST">
-                                                            @csrf
-                                                            @method('PUT')
-                                                            <input type="hidden" name="is_default" value="1">
-                                                            <button type="submit" class="sf-btn sf-btn--ghost sf-btn--sm">Default et</button>
-                                                        </form>
-                                                    @endif
-                                                    <form action="{{ route('storefront.addresses.destroy', $address['id']) }}" method="POST"
-                                                          onsubmit="return confirm('Ünvan silinsin?');">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="sf-btn sf-btn--ghost sf-btn--sm sf-btn--danger">Sil</button>
-                                                    </form>
-                                                </div>
-                                            </article>
-                                        @endforeach
-                                    </div>
-                                @endif
-
-                                <form action="{{ route('storefront.addresses.store') }}" method="POST" class="sf-address-form">
-                                    @csrf
-                                    <h5>Yeni ünvan</h5>
-
-                                    <div class="sf-form-row">
-                                        <label>
-                                            <span>Ad və soyad *</span>
-                                            <input type="text" name="full_name" value="{{ old('full_name') }}" required maxlength="255">
-                                        </label>
-                                        <label>
-                                            <span>Əlaqə nömrəsi *</span>
-                                            <input type="text" name="contact_number" value="{{ old('contact_number') }}" required>
-                                        </label>
-                                    </div>
-
-                                    <div class="sf-form-row">
-                                        <label>
-                                            <span>Şəhər *</span>
-                                            <select name="city" required>
-                                                @foreach ($cities as $city)
-                                                    <option value="{{ $city['key'] ?? $city['name'] }}" @selected(old('city') === ($city['key'] ?? $city['name']))>
-                                                        {{ $city['name'] }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </label>
-                                        <label>
-                                            <span>Rayon / qəsəbə *</span>
-                                            <input type="text" name="town_village_district" value="{{ old('town_village_district') }}" required maxlength="255">
-                                        </label>
-                                    </div>
-
-                                    <div class="sf-form-row">
-                                        <label>
-                                            <span>Küçə və bina *</span>
-                                            <input type="text" name="street_building_number" value="{{ old('street_building_number') }}" required maxlength="255">
-                                        </label>
-                                        <label>
-                                            <span>Mənzil / mərtəbə *</span>
-                                            <input type="text" name="unit_floor_apartment" value="{{ old('unit_floor_apartment') }}" required maxlength="255">
-                                        </label>
-                                    </div>
-
-                                    <label class="sf-checkbox">
-                                        <input type="checkbox" name="is_default" value="1">
-                                        <span>Default ünvan kimi istifadə et</span>
-                                    </label>
-
-                                    <button type="submit" class="sf-btn">Ünvanı yadda saxla</button>
-                                </form>
-                            </div>
-                        </section>
-
+                    <div class="sf-acc__panes">
                         {{-- Settings --}}
                         <section class="sf-dash-pane {{ $tab === 'settings' ? 'is-active' : '' }}" data-sf-dash-pane="settings">
-                            <div class="sf-panel">
-                                <h2 class="sf-panel__title">Hesab parametrləri</h2>
+                            <div class="sf-acc__panel">
+                                <header class="sf-acc__panel-head">
+                                    <h2>Hesab parametrləri</h2>
+                                    <p>Profil məlumatlarınızı və şəklinizi buradan yeniləyin.</p>
+                                </header>
                                 @include('storefront.settings._form', ['user' => $user])
                             </div>
                         </section>
 
                         {{-- Logout --}}
                         <section class="sf-dash-pane {{ $tab === 'logout' ? 'is-active' : '' }}" data-sf-dash-pane="logout">
-                            <div class="sf-panel sf-panel--center">
-                                <i class="fa-solid fa-arrow-right-from-bracket sf-panel__icon"></i>
-                                <h2 class="sf-panel__title">Çıxış</h2>
+                            <div class="sf-acc__panel sf-acc__panel--center">
+                                <span class="sf-acc__panel-icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></span>
+                                <h2>Çıxış</h2>
                                 <p>Hesabınızdan çıxmaq istədiyinizə əminsiniz?</p>
                                 <form action="{{ route('storefront.logout') }}" method="POST">
                                     @csrf

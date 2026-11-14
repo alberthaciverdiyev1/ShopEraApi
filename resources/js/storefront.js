@@ -1714,13 +1714,13 @@ document.querySelectorAll('[data-sf-dash-tab]').forEach((trigger) => {
             item.classList.toggle('is-active', item === pane);
         });
 
-        document.querySelectorAll('.dashboard-navigation-sidebar [data-sf-dash-tab]').forEach((button) => {
+        document.querySelectorAll('.sf-acc__side [data-sf-dash-tab]').forEach((button) => {
             const active = button.dataset.sfDashTab === key;
             button.classList.toggle('active', active);
             button.setAttribute('aria-selected', active ? 'true' : 'false');
         });
 
-        history.replaceState(null, '', key === 'dashboard' ? location.pathname : `?tab=${key}`);
+        history.replaceState(null, '', key === 'settings' ? location.pathname : `?tab=${key}`);
     });
 });
 
